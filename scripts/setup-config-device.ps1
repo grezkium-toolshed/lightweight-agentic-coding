@@ -22,6 +22,7 @@ switch ($Profile) {
   '24gb' { $model = 'qwen3.5-27b-q4' }
   '32gb' { $model = 'qwen3.5-35b-a3b-q4' }
   '64gb' { $model = 'qwen3.5-35b-a3b-q4' }
+  '128gb-multi' { $model = 'qwen3.5-35b-a3b-q4' }
   '128gb-qwen122b' { $model = 'qwen3.5-122b-a10b' }
   '128gb-minimax' { $model = 'minimax-m2.5' }
   default { throw "Unsupported profile: $Profile" }

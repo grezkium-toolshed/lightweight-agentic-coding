@@ -17,6 +17,7 @@ We are standardizing our local OpenCode setup around **llama.cpp + Qwen 3.5** to
 - `24gb`: 27B profile
 - `32gb`: 35B-A3B profile
 - `64gb`: 35B-A3B + coder-next
+- `128gb-multi`: 35B-A3B + coder-next + 27B + 9B
 - `128gb-qwen122b`: 122B-focused profile
 - `128gb-minimax`: MiniMax-focused profile
 

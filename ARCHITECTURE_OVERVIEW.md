@@ -19,6 +19,7 @@
 - `24gb`
 - `32gb`
 - `64gb`
+- `128gb-multi`
 - `128gb-qwen122b`
 - `128gb-minimax`
 

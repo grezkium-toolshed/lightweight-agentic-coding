@@ -17,6 +17,7 @@ Public, replicable local AI coding cluster using **OpenCode + llama.cpp** by def
 - `24gb`: Qwen3.5 27B + 9B fallback + embeddings
 - `32gb`: Qwen3.5 35B-A3B + 27B + optional coder-next
 - `64gb`: 35B-A3B + coder-next + 27B + embeddings
+- `128gb-multi`: 35B-A3B + coder-next + 27B + 9B + embeddings (<=115GB effective usage policy)
 - `128gb-qwen122b`: Qwen3.5 122B-focused profile (<=115GB effective usage policy)
 - `128gb-minimax`: MiniMax-focused profile (<=115GB effective usage policy)
 
@@ -34,6 +35,9 @@ Public, replicable local AI coding cluster using **OpenCode + llama.cpp** by def
 
 # 4) Launch OpenCode
 ./scripts/launch-opencode.sh
+
+# Or launch OpenCode Desktop (macOS helper)
+./scripts/launch-opencode-desktop.sh
 ```
 
 Monitor llama-server logs:
@@ -56,6 +60,9 @@ tail -f runtime-config/logs/llama-server.log
 
 # 4) Launch OpenCode
 ./scripts/launch-opencode.ps1
+
+# Or launch OpenCode Desktop
+./scripts/launch-opencode-desktop.ps1
 ```
 
 Monitor llama-server logs:

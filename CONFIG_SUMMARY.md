@@ -19,6 +19,7 @@
 3. Launch:
    - `scripts/launch-llama.*`
    - `scripts/launch-opencode.*`
+   - `scripts/launch-opencode-desktop.*`
 
 ## Ports and Endpoints
 

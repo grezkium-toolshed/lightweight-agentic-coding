@@ -3,4 +3,4 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 "$ROOT/scripts/launch-llama.sh"
-open -a "OpenCode"
+"$ROOT/scripts/launch-opencode-desktop.sh"

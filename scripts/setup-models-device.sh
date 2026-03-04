@@ -7,7 +7,7 @@ AI_MODELS_DIR="${AI_MODELS_DIR:-$AI_CLUSTER_ROOT/models}"
 
 usage() {
   cat << USAGE
-Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-qwen122b|128gb-minimax>
+Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax>
 
 Environment overrides:
   AI_CLUSTER_ROOT  Base repository path (default: script parent)
@@ -67,6 +67,12 @@ case "$PROFILE" in
     MODELS+=("qwen3.5|Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf|unsloth/Qwen3.5-122B-A10B-GGUF|Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf|100")
     MODELS+=("qwen3.5|Qwen3.5-122B-A10B-MXFP4_MOE-00002-of-00003.gguf|unsloth/Qwen3.5-122B-A10B-GGUF|Qwen3.5-122B-A10B-MXFP4_MOE-00002-of-00003.gguf|42000")
     MODELS+=("qwen3.5|Qwen3.5-122B-A10B-MXFP4_MOE-00003-of-00003.gguf|unsloth/Qwen3.5-122B-A10B-GGUF|Qwen3.5-122B-A10B-MXFP4_MOE-00003-of-00003.gguf|15000")
+    MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
+    ;;
+  128gb-multi)
+    MODELS+=("qwen3.5|Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf|unsloth/Qwen3.5-35B-A3B-GGUF|Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf|15000")
+    MODELS+=("qwen3.5|Qwen3.5-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.5-27B-GGUF|Qwen3.5-27B-UD-Q4_K_XL.gguf|12000")
+    MODELS+=("qwen3.5|Qwen3.5-9B-UD-Q4_K_XL.gguf|unsloth/Qwen3.5-9B-GGUF|Qwen3.5-9B-UD-Q4_K_XL.gguf|5000")
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
     ;;
   128gb-minimax)

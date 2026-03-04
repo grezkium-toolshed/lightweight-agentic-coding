@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ $# -ne 2 || "$1" != "--profile" ]]; then
-  echo "Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-qwen122b|128gb-minimax>" >&2
+  echo "Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax>" >&2
   exit 1
 fi
 

@@ -7,7 +7,7 @@ AI_MODELS_DIR="${AI_MODELS_DIR:-$AI_CLUSTER_ROOT/models}"
 OPENCODE_CONFIG_PATH="${OPENCODE_CONFIG_PATH:-$AI_CLUSTER_ROOT/opencode.jsonc}"
 
 usage() {
-  echo "Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-qwen122b|128gb-minimax>"
+  echo "Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax>"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -47,6 +47,7 @@ case "$PROFILE" in
   16gb) default_model="qwen3.5-9b-q4" ;;
   24gb) default_model="qwen3.5-27b-q4" ;;
   32gb|64gb) default_model="qwen3.5-35b-a3b-q4" ;;
+  128gb-multi) default_model="qwen3.5-35b-a3b-q4" ;;
   128gb-qwen122b) default_model="qwen3.5-122b-a10b" ;;
   128gb-minimax) default_model="minimax-m2.5" ;;
   *)

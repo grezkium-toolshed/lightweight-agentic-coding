@@ -7,7 +7,7 @@
 - Decommissioned `oh-my-opencode` from active setup (repo-wide direction).
 - Added canonical root `opencode.jsonc` for OpenCode project configuration.
 - Added profile-based llama.cpp preset system:
-  - `16gb`, `24gb`, `32gb`, `64gb`, `128gb-qwen122b`, `128gb-minimax`
+  - `16gb`, `24gb`, `32gb`, `64gb`, `128gb-multi`, `128gb-qwen122b`, `128gb-minimax`
 - Added cross-platform scripts (`.sh` and `.ps1`) for:
   - model download
   - config generation

@@ -46,7 +46,7 @@ fi
 
 if [[ -n "$profile" ]]; then
   case "$profile" in
-    128gb-qwen122b|128gb-minimax)
+    128gb-multi|128gb-qwen122b|128gb-minimax)
       echo "[ok] 128GB profile selected; keep effective usage <=115GB headroom policy"
       ;;
   esac
