@@ -4,6 +4,7 @@ set -euo pipefail
 AI_CLUSTER_ROOT="${AI_CLUSTER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 AI_MODELS_DIR="${AI_MODELS_DIR:-$AI_CLUSTER_ROOT/models}"
 AI_CLUSTER_PORT="${AI_CLUSTER_PORT:-8080}"
+LOG_FILE="$AI_CLUSTER_ROOT/runtime-config/logs/llama-server.log"
 
 err=0
 
@@ -55,6 +56,12 @@ if curl -sf "http://127.0.0.1:$AI_CLUSTER_PORT/health" >/dev/null 2>&1; then
   echo "[ok] server health endpoint reachable"
 else
   echo "[!!] server is not reachable at http://127.0.0.1:$AI_CLUSTER_PORT/health"
+fi
+
+if [[ -f "$LOG_FILE" ]]; then
+  echo "[ok] launch log file: $LOG_FILE"
+else
+  echo "[!!] launch log file missing: $LOG_FILE"
 fi
 
 if [[ "$err" -ne 0 ]]; then

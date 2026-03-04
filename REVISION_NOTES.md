@@ -18,6 +18,15 @@
 - Standardized default endpoint to `http://127.0.0.1:8080/v1`.
 - Added `.gitignore` rules for local model files and local artifacts.
 - Added `docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md` for org rollout.
+- Removed remaining legacy compatibility wrapper files.
+- Added default cloud provider definitions for Antigravity, z.ai, and OpenRouter free models.
+- Added free-model sync scripts and generated docs integration with kudos to @vava-nessa.
+- Added launch visibility upgrades for llama-server on Unix and Windows:
+  - persistent log file capture
+  - simple log rotation (`.log` + `.log.1`)
+  - tail hints on successful launch
+  - recent log excerpts on startup failure
+  - optional `--show-logs` / `-ShowLogs` and hint suppression flags
 
 ### Policy Updates
 

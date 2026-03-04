@@ -35,8 +35,16 @@ switch ($Profile) {
   }
   '128gb-minimax' {
     $repo = if ($env:MINIMAX_REPO) { $env:MINIMAX_REPO } else { 'unsloth/MiniMax-M2.5-GGUF' }
-    $file = if ($env:MINIMAX_FILE) { $env:MINIMAX_FILE } else { 'MiniMax-M2.5-UD-Q3_K_XL-00001-of-00004.gguf' }
-    $models += @{Dir='minimax'; File=$file; Repo=$repo; Remote=$file; MinMB=20000}
+    $filesRaw = if ($env:MINIMAX_FILES) { $env:MINIMAX_FILES } else { 'MiniMax-M2.5-UD-Q3_K_XL-00001-of-00004.gguf,MiniMax-M2.5-UD-Q3_K_XL-00002-of-00004.gguf,MiniMax-M2.5-UD-Q3_K_XL-00003-of-00004.gguf,MiniMax-M2.5-UD-Q3_K_XL-00004-of-00004.gguf' }
+    $files = $filesRaw -split ','
+    foreach ($file in $files) {
+      $minMb = 1000
+      if ($file -like '*00001-of-00004.gguf') { $minMb = 5 }
+      elseif ($file -like '*00002-of-00004.gguf') { $minMb = 42000 }
+      elseif ($file -like '*00003-of-00004.gguf') { $minMb = 42000 }
+      elseif ($file -like '*00004-of-00004.gguf') { $minMb = 1000 }
+      $models += @{Dir='minimax'; File=$file; Repo=$repo; Remote=$file; MinMB=$minMb}
+    }
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
   }
   default { throw "Unsupported profile: $Profile" }

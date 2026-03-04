@@ -1,19 +1,57 @@
+param(
+  [switch]$ShowLogs,
+  [switch]$NoTailHint
+)
+
 $ErrorActionPreference = 'Stop'
 $Root = if ($env:AI_CLUSTER_ROOT) { $env:AI_CLUSTER_ROOT } else { Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path) }
 $Port = if ($env:AI_CLUSTER_PORT) { $env:AI_CLUSTER_PORT } else { '8080' }
 $Preset = Join-Path $Root 'runtime-config/presets.active.ini'
 $LlamaBin = if ($env:LLAMA_SERVER_BIN) { $env:LLAMA_SERVER_BIN } else { 'llama-server.exe' }
+$LogDir = Join-Path $Root 'runtime-config/logs'
+$LogFile = Join-Path $LogDir 'llama-server.log'
+$TailHint = -not $NoTailHint
 
 if (-not (Test-Path $Preset)) { throw "Missing preset file: $Preset" }
-Start-Process -FilePath $LlamaBin -ArgumentList @('--models-preset', $Preset, '--host', '127.0.0.1', '--port', $Port)
+New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+if (Test-Path $LogFile) {
+  Move-Item -Force $LogFile "$LogFile.1"
+}
+
+$existing = Get-Process -Name 'llama-server' -ErrorAction SilentlyContinue
+if ($existing) {
+  Write-Host "llama-server appears to be already running."
+  Write-Host "Log file: $LogFile"
+  if ($TailHint) {
+    Write-Host "Tail logs: Get-Content `"$LogFile`" -Wait -Tail 50"
+  }
+  exit 0
+}
+
+$llamaCmd = "`"$LlamaBin`" --models-preset `"$Preset`" --host 127.0.0.1 --port $Port >> `"$LogFile`" 2>&1"
+Start-Process -FilePath 'cmd.exe' -ArgumentList @('/c', $llamaCmd) -WindowStyle Hidden | Out-Null
 
 for ($i=0; $i -lt 60; $i++) {
   try {
     Invoke-WebRequest -Uri "http://127.0.0.1:$Port/health" -TimeoutSec 2 | Out-Null
     Write-Host "llama-server ready at http://127.0.0.1:$Port"
+    Write-Host "Log file: $LogFile"
+    if ($TailHint) {
+      Write-Host "Tail logs: Get-Content `"$LogFile`" -Wait -Tail 50"
+    }
+    if ($ShowLogs) {
+      Get-Content $LogFile -Wait -Tail 50
+    }
     exit 0
   } catch {
     Start-Sleep -Seconds 1
   }
 }
-throw 'llama-server failed to start within timeout'
+
+Write-Host 'llama-server failed to start within timeout'
+if (Test-Path $LogFile) {
+  Write-Host 'Recent logs:'
+  Get-Content $LogFile -Tail 40
+  Write-Host "Full log: $LogFile"
+}
+exit 1

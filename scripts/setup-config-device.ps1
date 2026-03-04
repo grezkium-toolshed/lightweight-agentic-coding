@@ -27,7 +27,9 @@ switch ($Profile) {
   default { throw "Unsupported profile: $Profile" }
 }
 
-$obj = Get-Content $ConfigPath -Raw | ConvertFrom-Json
+$raw = Get-Content $ConfigPath -Raw
+$jsonLike = ($raw -split "`n" | Where-Object { -not ($_.TrimStart().StartsWith('//')) }) -join "`n"
+$obj = $jsonLike | ConvertFrom-Json
 $obj.model = "local-cluster/$model"
 $obj.provider.'local-cluster'.options.baseURL = 'http://127.0.0.1:8080/v1'
 $obj | ConvertTo-Json -Depth 10 | Set-Content $ConfigPath

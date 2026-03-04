@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bash Syntax Check
+        run: |
+          bash -n scripts/*.sh
+          bash -n verify-*.sh
+          bash -n runtime-config/launch/*.sh
+          bash -n alternative-config/minimax-arch/runtime-config/launch/*.sh
+
+      - name: JSON Config Parse Check
+        run: |
+          python3 - << 'PY'
+          import json
+          from pathlib import Path
+          files = [
+              Path('opencode.jsonc'),
+              Path('templates/opencode/opencode.example.jsonc'),
+          ]
+          for p in files:
+              raw = p.read_text(encoding='utf-8')
+              cleaned = '\n'.join([ln for ln in raw.splitlines() if not ln.strip().startswith('//')])
+              json.loads(cleaned)
+              print('OK', p)
+          PY
+
+      - name: Docs Presence Check
+        run: ./verify-documentation.sh

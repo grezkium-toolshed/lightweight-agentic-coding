@@ -9,6 +9,7 @@ Public, replicable local AI coding cluster using **OpenCode + llama.cpp** by def
 - Profile-based presets and scripts support macOS/Linux and Windows.
 - Qwen 3.5 models are the default family for non-coder-specialist roles.
 - `qwen3-coder-next` stays as a high-value coding specialist model.
+- Default cloud provider blocks are included for Antigravity, z.ai, and OpenRouter free models.
 
 ## Hardware Profiles
 
@@ -35,6 +36,12 @@ Public, replicable local AI coding cluster using **OpenCode + llama.cpp** by def
 ./scripts/launch-opencode.sh
 ```
 
+Monitor llama-server logs:
+
+```bash
+tail -f runtime-config/logs/llama-server.log
+```
+
 ## Quick Start (Windows PowerShell)
 
 ```powershell
@@ -51,12 +58,50 @@ Public, replicable local AI coding cluster using **OpenCode + llama.cpp** by def
 ./scripts/launch-opencode.ps1
 ```
 
+Monitor llama-server logs:
+
+```powershell
+Get-Content runtime-config/logs/llama-server.log -Wait -Tail 50
+```
+
 ## Standard Environment Variables
 
 - `AI_CLUSTER_ROOT`: repository root
 - `AI_MODELS_DIR`: local model directory (`$AI_CLUSTER_ROOT/models` default)
 - `AI_CLUSTER_PORT`: llama.cpp API port (`8080` default)
 - `LLAMA_SERVER_BIN`: custom llama-server binary path
+
+## Default Cloud Providers
+
+`opencode.jsonc` includes ready-to-use provider blocks for:
+
+- `antigravity`
+- `z-ai`
+- `openrouter` (free model variants)
+
+Local llama.cpp remains the default runtime and default model. Cloud providers are optional and require their own API credentials.
+
+## Free Models Sync (with Kudos)
+
+You can snapshot currently free/available cloud coding models from the community project:
+
+```bash
+./scripts/sync-free-cloud-models.sh
+```
+
+PowerShell:
+
+```powershell
+./scripts/sync-free-cloud-models.ps1
+```
+
+Generated outputs:
+
+- `docs/free-coding-models.json`
+- `docs/FREE_CLOUD_MODELS.md`
+
+Kudos to **@vava-nessa** for the free model index and NIM helper tooling:
+https://github.com/vava-nessa/free-coding-models
 
 ## llama.cpp Presets
 
@@ -79,9 +124,21 @@ PowerShell:
 ./scripts/doctor.ps1
 ```
 
-## Legacy Compatibility
+## Launch Visibility
 
-Old scripts (`setup-models.sh`, `setup-presets.sh`, `setup-opencode-config.sh`, launcher wrappers) still exist for one transition cycle and delegate to new profile scripts.
+`scripts/launch-llama.*` now always writes runtime logs to:
+
+- `runtime-config/logs/llama-server.log`
+
+Log rotation policy:
+
+- previous run is moved to `runtime-config/logs/llama-server.log.1`
+
+Optional flags:
+
+- Unix: `./scripts/launch-llama.sh --show-logs`
+- Windows: `./scripts/launch-llama.ps1 -ShowLogs`
+- Both support disabling hint output (`--no-tail-hint` / `-NoTailHint`)
 
 ## Additional Docs
 
@@ -90,3 +147,4 @@ Old scripts (`setup-models.sh`, `setup-presets.sh`, `setup-opencode-config.sh`, 
 - `CONFIG_SUMMARY.md`
 - `REVISION_NOTES.md`
 - `docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md`
+- `docs/FREE_CLOUD_MODELS.md`

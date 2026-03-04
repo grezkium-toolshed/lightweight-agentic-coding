@@ -13,7 +13,7 @@ Environment overrides:
   AI_CLUSTER_ROOT  Base repository path (default: script parent)
   AI_MODELS_DIR    Models folder (default: \$AI_CLUSTER_ROOT/models)
   MINIMAX_REPO     Hugging Face repo for MiniMax profile
-  MINIMAX_FILE     MiniMax GGUF filename for MiniMax profile
+  MINIMAX_FILES    Comma-separated MiniMax GGUF files for 128gb-minimax
 USAGE
 }
 
@@ -71,8 +71,18 @@ case "$PROFILE" in
     ;;
   128gb-minimax)
     MINIMAX_REPO="${MINIMAX_REPO:-unsloth/MiniMax-M2.5-GGUF}"
-    MINIMAX_FILE="${MINIMAX_FILE:-MiniMax-M2.5-UD-Q3_K_XL-00001-of-00004.gguf}"
-    MODELS+=("minimax|$MINIMAX_FILE|$MINIMAX_REPO|$MINIMAX_FILE|20000")
+    MINIMAX_FILES="${MINIMAX_FILES:-MiniMax-M2.5-UD-Q3_K_XL-00001-of-00004.gguf,MiniMax-M2.5-UD-Q3_K_XL-00002-of-00004.gguf,MiniMax-M2.5-UD-Q3_K_XL-00003-of-00004.gguf,MiniMax-M2.5-UD-Q3_K_XL-00004-of-00004.gguf}"
+    IFS=',' read -r -a MINI_FILES <<< "$MINIMAX_FILES"
+    for mf in "${MINI_FILES[@]}"; do
+      case "$mf" in
+        *00001-of-00004.gguf) min_mb=5 ;;
+        *00002-of-00004.gguf) min_mb=42000 ;;
+        *00003-of-00004.gguf) min_mb=42000 ;;
+        *00004-of-00004.gguf) min_mb=1000 ;;
+        *) min_mb=1000 ;;
+      esac
+      MODELS+=("minimax|$mf|$MINIMAX_REPO|$mf|$min_mb")
+    done
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
     ;;
   *)

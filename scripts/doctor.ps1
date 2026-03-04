@@ -2,6 +2,7 @@ $ErrorActionPreference = 'Continue'
 $Root = if ($env:AI_CLUSTER_ROOT) { $env:AI_CLUSTER_ROOT } else { Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path) }
 $Port = if ($env:AI_CLUSTER_PORT) { $env:AI_CLUSTER_PORT } else { '8080' }
 $err = $false
+$LogFile = Join-Path $Root 'runtime-config/logs/llama-server.log'
 
 $paths = @(
   (Join-Path $Root 'opencode.jsonc'),
@@ -28,6 +29,12 @@ try {
   Write-Host '[ok] server health endpoint reachable'
 } catch {
   Write-Host "[!!] server not reachable at http://127.0.0.1:$Port/health"
+}
+
+if (Test-Path $LogFile) {
+  Write-Host "[ok] launch log file: $LogFile"
+} else {
+  Write-Host "[!!] launch log file missing: $LogFile"
 }
 
 if ($err) { exit 1 }
