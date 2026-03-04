@@ -1,0 +1,5 @@
+{
+  "note": "Archived reference only. Active configuration is now root opencode.jsonc plus scripts/setup-config-device.* with profile 128gb-minimax.",
+  "activePath": "../../../../opencode.jsonc",
+  "profile": "128gb-minimax"
+}

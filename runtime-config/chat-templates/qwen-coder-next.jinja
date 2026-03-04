@@ -1,0 +1,31 @@
+{%- for message in messages %}
+{%- if message.role == 'system' %}
+<|system|>
+{{ message.content }}
+{%- else %}
+<|user|>
+{{ message.content }}
+{%- if message.tool_calls %}
+{%- for tool_call in message.tool_calls %}
+<tool_call>
+<tool={{ tool_call.function.name }}>
+{%- for key, value in tool_call.function.arguments.items() %}
+<parameter={{ key }}>{{ value }}</parameter>
+{%- endfor %}
+</tool>
+</tool_call>
+{%- endfor %}
+{%- endif %}
+{%- elif message.role == 'tool' %}
+<|assistant|>
+<tool_result>
+<tool_name>{{ message.name }}</tool_name>
+<content>
+{{ message.content }}
+</content>
+</tool_result>
+{%- elif message.role == 'assistant' %}
+<|assistant|>
+{{ message.content }}
+{%- endif %}
+{%- endfor %}

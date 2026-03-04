@@ -1,0 +1,27 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Local model artifacts
+models/**/*.gguf
+models/**/.cache/
+models/**/*.lock
+models/**/*.metadata
+models/**/blobs/
+
+# Backups and generated config copies
+backup-configs/
+*.bak
+*.backup.*
+runtime-config/presets.active.ini
+
+# Local tool state
+.sisyphus/
+*.log
+*.tmp
+
+# Python cache
+__pycache__/
+*.pyc

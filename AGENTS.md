@@ -1,56 +1,74 @@
----
-name: AGENTS
-description: Use when documenting agent conventions, build commands, and code style for the AI coding cluster
----
-
-# AGENTS.md
+# AGENTS
 
 ## Overview
-This document defines conventions for using AI agents in the OpenCode coding cluster. It covers build commands, code style guidelines, agent categories, and special considerations for AI-driven workflows.
 
-## Build & Development
-- **Build**: `npm run build`
-- **Lint**: `npm run lint` (ESLint for JS/TS, Prettier for formatting)
-- **Test**: `npm run test` (Jest for unit tests, Playwright for end-to-end)
-- **Verify**: `npm run verify` (lsp_diagnostics + build)
+This repository provides a public, replicable **OpenCode + llama.cpp** local coding cluster.
 
-## Code Style
-- **Config files**: JSON/JSONC/YAML with 2-space indentation
-- **Documentation**: Markdown with PascalCase headings
-- **Naming**: Use `PascalCase` for files, `snake_case` for variables, `camelCase` for functions
-- **Formatting**: Prettier for JS/TS, Black for Python, JSONC for config files
+Runtime defaults:
 
-## Agent Categories
-- **Explore**: For research and discovery tasks
-- **Librarian**: For code and documentation queries
-- **Oracle**: For code analysis and suggestions
-- **Hephaestus**: For code generation and implementation
-- **Metis**: For architectural decisions
-- **Mimus**: For quick checks and simple tasks
-- **Multimodal-Looker**: For analyzing media files
+- llama.cpp `llama-server`
+- OpenCode project config at `opencode.jsonc`
+- profile-based model setup via `scripts/setup-*.sh` and `scripts/setup-*.ps1`
 
-## Special Considerations
-- **No Delegation**: AI agents must execute tasks directly
-- **Single Task Focus**: Only one task per session
-- **Verification Required**: Always run `lsp_diagnostics` and `wc -l` after changes
-- **No Code Writing**: Only documentation, not implementation
-- **Todo Discipline**: Use `todowrite` for multi-step tasks
+## BuildAndDevelopmentCommands
 
-## Testing Strategy
-- **RED**: Confirm baseline failures (e.g., missing sections)
-- **GREEN**: Write minimal documentation to pass tests
-- **REFACTOR**: Close loopholes (e.g., add missing guidelines)
+### Launch
 
-## Quick Reference
-| Section | Purpose |
-|---------|---------|
-| Build | npm scripts for compiling/linting/testing |
-| Style | Formatting rules for code and docs |
-| Agents | Categories and usage guidelines |
-| Testing | TDD workflow for documentation |
+```bash
+./scripts/launch-llama.sh
+./scripts/launch-opencode.sh
+```
 
-## Configuration File Locations
-- **Root config**: `.sisyphus/config.json`
-- **Plan files**: `.sisyphus/plans/` (read-only)
-- **Notepad**: `.sisyphus/notepads/` (append only)
-- **Skill docs**: `skills/` (no subagent edits)
+Windows:
+
+```powershell
+./scripts/launch-llama.ps1
+./scripts/launch-opencode.ps1
+```
+
+### Profile Setup
+
+```bash
+./scripts/setup-models-device.sh --profile 24gb
+./scripts/setup-config-device.sh --profile 24gb
+```
+
+Windows:
+
+```powershell
+./scripts/setup-models-device.ps1 -Profile 24gb
+./scripts/setup-config-device.ps1 -Profile 24gb
+```
+
+## CodeStyleGuidelines
+
+- 2-space indentation, no tabs
+- LF line endings
+- kebab-case or snake_case file names
+- JSONC supports `//` comments
+- INI sections use lowercase and hyphens
+
+## ErrorHandling
+
+Common issues:
+
+- `Connection refused`: start llama-server first
+- `Cannot open file`: verify `AI_MODELS_DIR` and profile model files
+- config parse error: regenerate with `setup-config-device`
+
+## TestingStrategy
+
+Manual validation:
+
+1. `./scripts/doctor.sh`
+2. `curl http://127.0.0.1:8080/health`
+3. `curl http://127.0.0.1:8080/v1/models`
+4. launch OpenCode with root config
+
+## ConfigurationFileLocations
+
+- `opencode.jsonc`: canonical OpenCode config
+- `runtime-config/presets/<profile>.ini`: template presets
+- `runtime-config/presets.active.ini`: active preset
+- `runtime-config/active-profile.txt`: selected profile
+- `scripts/`: setup, switch, launch, and doctor scripts
