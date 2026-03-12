@@ -35,3 +35,12 @@ jobs:
 
       - name: Docs Presence Check
         run: ./verify-documentation.sh
+
+      - name: OpenCode Agent and Skill Presence Check
+        run: |
+          test -f .opencode/agents/architecture-reviewer.md
+          test -f .opencode/agents/release-reviewer.md
+          test -f .opencode/agents/reality-checker.md
+          test -f .opencode/skills/docx-workflow/SKILL.md
+          test -f .opencode/skills/pptx-workflow/SKILL.md
+          test -f .opencode/skills/xlsx-workflow/SKILL.md

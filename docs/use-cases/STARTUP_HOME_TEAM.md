@@ -1,0 +1,16 @@
+# Startup, Home, and Team Use Cases
+
+## Startup founder or early engineer
+- use a 16GB or 24GB profile locally
+- rely on Qwen 3.5 plus free cloud fallback for planning, docs, and coding
+- use office workflows to generate investor notes, planning sheets, and status decks
+
+## Home-lab operator
+- use 32GB, 64GB, or 128GB profiles
+- keep the local runtime as the primary path
+- add hosted or free providers only when the workload clearly benefits
+
+## Team rollout
+- start with shared docs and curated agents
+- keep provider defaults conservative and explain data-sensitivity tradeoffs
+- use local-first by default, then allow hosted-model paths when needed for velocity

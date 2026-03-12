@@ -1,52 +1,40 @@
-# Configuration Summary
+# Config Summary
 
-## Canonical Files
+## Canonical runtime config
 
-- `opencode.jsonc`: project-level OpenCode config
-- `runtime-config/presets/<profile>.ini`: llama.cpp profile templates
-- `runtime-config/presets.active.ini`: generated active llama.cpp preset
-- `runtime-config/active-profile.txt`: selected profile marker
-- `docs/FREE_CLOUD_MODELS.md`: generated free cloud model snapshot
+- `opencode.jsonc`: canonical OpenCode config
+- `runtime-config/presets/<profile>.ini`: profile templates
+- `runtime-config/presets.active.ini`: active llama.cpp preset
+- `runtime-config/active-profile.txt`: selected profile
 
-## Profile Workflow
+## OpenCode config choices
 
-1. Download profile models:
-   - `scripts/setup-models-device.sh --profile <id>`
-   - `scripts/setup-models-device.ps1 -Profile <id>`
-2. Generate active config:
-   - `scripts/setup-config-device.sh --profile <id>`
-   - `scripts/setup-config-device.ps1 -Profile <id>`
-3. Launch:
-   - `scripts/launch-llama.*`
-   - `scripts/launch-opencode.*`
-   - `scripts/launch-opencode-desktop.*`
+`opencode.jsonc` now includes:
+- local llama.cpp provider config
+- free cloud fallback providers
+- explicit compaction settings
+- watcher ignore rules for noisy paths
+- instruction globs for stable repo guidance
+- safer bash permissions
+- built-in access to curated project-local agents and skills
 
-## Ports and Endpoints
+## OpenCode local discovery
 
-- Default port: `8080`
-- Health: `http://127.0.0.1:8080/health`
-- OpenAI-compatible API: `http://127.0.0.1:8080/v1`
+OpenCode automatically discovers:
+- `.opencode/agents/*.md`
+- `.opencode/skills/*/SKILL.md`
 
-## Launch Logs and Monitoring
+This repo uses those directories for the curated agent and skill layer.
 
-- Log file: `runtime-config/logs/llama-server.log`
-- Previous launch log: `runtime-config/logs/llama-server.log.1`
-- Unix tail: `tail -f runtime-config/logs/llama-server.log`
-- Windows tail: `Get-Content runtime-config/logs/llama-server.log -Wait -Tail 50`
+## Logging and monitoring
 
-## Deprecated Runtime Surface
+llama-server launch logs go to:
+- `runtime-config/logs/llama-server.log`
 
-- `oh-my-opencode` plugin and config files are not part of active runtime.
+Monitor with:
+- Unix: `tail -f runtime-config/logs/llama-server.log`
+- Windows: `Get-Content runtime-config/logs/llama-server.log -Wait -Tail 50`
 
-## Cloud Provider Defaults
+## Release posture
 
-`opencode.jsonc` includes optional provider blocks for:
-
-- Antigravity
-- z.ai
-- OpenRouter free models
-
-Refresh free-model visibility with:
-
-- `scripts/sync-free-cloud-models.sh`
-- `scripts/sync-free-cloud-models.ps1`
+This repo is still private by design. Public release should happen only after the release-gate checklist is complete.

@@ -6,7 +6,9 @@ $LogFile = Join-Path $Root 'runtime-config/logs/llama-server.log'
 
 $paths = @(
   (Join-Path $Root 'opencode.jsonc'),
-  (Join-Path $Root 'runtime-config/presets.active.ini')
+  (Join-Path $Root 'runtime-config/presets.active.ini'),
+  (Join-Path $Root '.opencode/agents/architecture-reviewer.md'),
+  (Join-Path $Root '.opencode/skills/docx-workflow/SKILL.md')
 )
 foreach ($p in $paths) {
   if (Test-Path $p) { Write-Host "[ok] $p" } else { Write-Host "[!!] missing: $p"; $err = $true }

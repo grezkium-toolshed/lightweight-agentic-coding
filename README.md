@@ -1,42 +1,49 @@
-# OpenCode Local Cluster vNext
+# Local AI Cluster vNext
 
-Public, replicable local AI coding cluster using **OpenCode + llama.cpp** by default.
+Private, replicable **Local AI Cluster** for agentic work using **llama.cpp + Qwen 3.5** by default, with OpenCode as the strongest local client path.
 
-## What Changed
+This repo is being prepared for a future public release, but it should remain private until the release gates in `docs/release/PRIVATE_UNTIL_RELEASE.md` are complete.
 
-- `oh-my-opencode` is decommissioned from active setup.
-- Root `opencode.jsonc` is now the canonical OpenCode config.
-- Profile-based presets and scripts support macOS/Linux and Windows.
-- Qwen 3.5 models are the default family for non-coder-specialist roles.
-- `qwen3-coder-next` stays as a high-value coding specialist model.
-- Default cloud provider blocks are included for Antigravity, z.ai, and OpenRouter free models.
+## What this repo is for
 
-## Hardware Profiles
+This is a baseline platform for technical users who want a low-friction local AI workstation for:
+- coding and refactoring
+- documentation generation
+- research and synthesis
+- spreadsheets, decks, reports, and office automation
+- startup, home-lab, and team workflows
+
+## Runtime defaults
+
+- llama.cpp `llama-server`
+- OpenCode project config in `opencode.jsonc`
+- Qwen 3.5 profile-based local models
+- free cloud fallback providers for lower-end hardware
+
+## Hardware profiles
 
 - `16gb`: Qwen3.5 9B + embeddings
 - `24gb`: Qwen3.5 27B + 9B fallback + embeddings
 - `32gb`: Qwen3.5 35B-A3B + 27B + optional coder-next
 - `64gb`: 35B-A3B + coder-next + 27B + embeddings
-- `128gb-multi`: 35B-A3B + coder-next + 27B + 9B + embeddings (<=115GB effective usage policy)
-- `128gb-qwen122b`: Qwen3.5 122B-focused profile (<=115GB effective usage policy)
-- `128gb-minimax`: MiniMax-focused profile (<=115GB effective usage policy)
+- `128gb-multi`: 35B-A3B + coder-next + 27B + 9B + embeddings
+- `128gb-qwen122b`: Qwen3.5 122B-focused profile
+- `128gb-minimax`: MiniMax-focused profile
 
-## Quick Start (macOS/Linux)
+The 128GB tiers follow a practical `<=115GB` effective memory usage policy to preserve headroom.
+
+## Quick start (macOS/Linux)
 
 ```bash
-# 1) Download models for your hardware tier
 ./scripts/setup-models-device.sh --profile 24gb
-
-# 2) Generate active preset + OpenCode model selection
 ./scripts/setup-config-device.sh --profile 24gb
-
-# 3) Start llama.cpp server
 ./scripts/launch-llama.sh
-
-# 4) Launch OpenCode
 ./scripts/launch-opencode.sh
+```
 
-# Or launch OpenCode Desktop (macOS helper)
+Desktop helper on macOS:
+
+```bash
 ./scripts/launch-opencode-desktop.sh
 ```
 
@@ -46,51 +53,72 @@ Monitor llama-server logs:
 tail -f runtime-config/logs/llama-server.log
 ```
 
-## Quick Start (Windows PowerShell)
+## Quick start (Windows PowerShell)
 
 ```powershell
-# 1) Download models for your hardware tier
 ./scripts/setup-models-device.ps1 -Profile 24gb
-
-# 2) Generate active preset + OpenCode model selection
 ./scripts/setup-config-device.ps1 -Profile 24gb
-
-# 3) Start llama.cpp server
 ./scripts/launch-llama.ps1
-
-# 4) Launch OpenCode
 ./scripts/launch-opencode.ps1
+```
 
-# Or launch OpenCode Desktop
+Desktop helper:
+
+```powershell
 ./scripts/launch-opencode-desktop.ps1
 ```
 
-Monitor llama-server logs:
+Monitor logs:
 
 ```powershell
 Get-Content runtime-config/logs/llama-server.log -Wait -Tail 50
 ```
 
-## Standard Environment Variables
+## Client paths
 
-- `AI_CLUSTER_ROOT`: repository root
-- `AI_MODELS_DIR`: local model directory (`$AI_CLUSTER_ROOT/models` default)
-- `AI_CLUSTER_PORT`: llama.cpp API port (`8080` default)
-- `LLAMA_SERVER_BIN`: custom llama-server binary path
+### OpenCode
+Best-supported local path. Uses `opencode.jsonc`, `.opencode/agents/`, and `.opencode/skills/`.
 
-## Default Cloud Providers
+### Claude Code
+Supported through `templates/claude-code/` and reuse of curated agent or skill ideas. This repo does not duplicate the runtime stack for Claude Code.
 
-`opencode.jsonc` includes ready-to-use provider blocks for:
+### Codex
+Documented as a pattern reference only for now. It is not a first-class runtime target in this repo.
 
+## Free cloud fallback providers
+
+`opencode.jsonc` includes starter provider blocks for:
 - `antigravity`
 - `z-ai`
-- `openrouter` (free model variants)
+- `nvidia-nim`
+- `openrouter`
 
-Local llama.cpp remains the default runtime and default model. Cloud providers are optional and require their own API credentials.
+Use local Qwen 3.5 when you can. Use cloud fallbacks when hardware, onboarding speed, or trial workflows matter more.
 
-## Free Models Sync (with Kudos)
+## OpenCode-specific additions in this repo
 
-You can snapshot currently free/available cloud coding models from the community project:
+- explicit `compaction.auto`, `compaction.prune`, and reserved token buffer
+- watcher ignore rules for models, logs, and generated runtime state
+- instruction globs for stable repo guidance
+- safer shell permissions than `bash = allow`
+- curated OpenCode subagents in `.opencode/agents/`
+- curated OpenCode skills in `.opencode/skills/`
+
+## Office and workflow skills
+
+This repo includes reusable local skills for:
+- `.docx`
+- `.pptx`
+- `.xlsx`
+- `.pdf`
+- documentation generation
+- research synthesis
+
+These are designed to make the cluster useful for office work immediately, not only coding.
+
+## Syncing free model availability
+
+You can refresh the community-maintained free-model snapshot with:
 
 ```bash
 ./scripts/sync-free-cloud-models.sh
@@ -102,56 +130,20 @@ PowerShell:
 ./scripts/sync-free-cloud-models.ps1
 ```
 
-Generated outputs:
-
+Generated files:
 - `docs/free-coding-models.json`
 - `docs/FREE_CLOUD_MODELS.md`
 
 Kudos to **@vava-nessa** for the free model index and NIM helper tooling:
 https://github.com/vava-nessa/free-coding-models
 
-## llama.cpp Presets
-
-- Preset templates: `runtime-config/presets/<profile>.ini`
-- Active preset: `runtime-config/presets.active.ini`
-- Active profile marker: `runtime-config/active-profile.txt`
-
-The presets use llama.cpp server key names only (`ctx-size`, `batch-size`, `ubatch-size`, `n-gpu-layers`, `flash-attn`, etc).
-
-## Validation
-
-```bash
-./scripts/doctor.sh
-./verify-documentation.sh
-```
-
-PowerShell:
-
-```powershell
-./scripts/doctor.ps1
-```
-
-## Launch Visibility
-
-`scripts/launch-llama.*` now always writes runtime logs to:
-
-- `runtime-config/logs/llama-server.log`
-
-Log rotation policy:
-
-- previous run is moved to `runtime-config/logs/llama-server.log.1`
-
-Optional flags:
-
-- Unix: `./scripts/launch-llama.sh --show-logs`
-- Windows: `./scripts/launch-llama.ps1 -ShowLogs`
-- Both support disabling hint output (`--no-tail-hint` / `-NoTailHint`)
-
-## Additional Docs
+## Important docs
 
 - `ARCHITECTURE_OVERVIEW.md`
 - `MODEL_RECOMMENDATIONS.md`
 - `CONFIG_SUMMARY.md`
 - `REVISION_NOTES.md`
-- `docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md`
-- `docs/FREE_CLOUD_MODELS.md`
+- `docs/providers/README.md`
+- `docs/security/THIRD_PARTY_AGENT_INTAKE.md`
+- `docs/release/PRIVATE_UNTIL_RELEASE.md`
+- `docs/use-cases/STARTUP_HOME_TEAM.md`

@@ -1,0 +1,15 @@
+# Private Until Release
+
+This repo is intentionally being prepared for a future public open-source release, but it should remain private until the release gates below are complete.
+
+## Release gates
+- runtime scripts validated on macOS, Linux, and Windows
+- docs consistent with current files and commands
+- curated agents and skills reviewed for trust and usefulness
+- provider docs refreshed against current APIs
+- no machine-specific assumptions in tracked files
+- no accidental model or cache artifacts in the tree
+- release reviewer pass completed
+
+## Practical rule
+Do not optimize for public polish at the cost of runtime correctness. Public release comes after the system is stable and documented.

@@ -1,1 +1,829 @@
-{}
+{
+  "nvidiaNim": [
+    {
+      "id": "deepseek-ai/deepseek-v3.2",
+      "label": "DeepSeek V3.2",
+      "tier": "S+",
+      "swe": "73.1%",
+      "context": "128k"
+    },
+    {
+      "id": "moonshotai/kimi-k2.5",
+      "label": "Kimi K2.5",
+      "tier": "S+",
+      "swe": "76.8%",
+      "context": "128k"
+    },
+    {
+      "id": "z-ai/glm5",
+      "label": "GLM 5",
+      "tier": "S+",
+      "swe": "77.8%",
+      "context": "128k"
+    },
+    {
+      "id": "z-ai/glm4.7",
+      "label": "GLM 4.7",
+      "tier": "S+",
+      "swe": "73.8%",
+      "context": "200k"
+    },
+    {
+      "id": "moonshotai/kimi-k2-thinking",
+      "label": "Kimi K2 Thinking",
+      "tier": "S+",
+      "swe": "71.3%",
+      "context": "256k"
+    },
+    {
+      "id": "minimaxai/minimax-m2.1",
+      "label": "MiniMax M2.1",
+      "tier": "S+",
+      "swe": "74.0%",
+      "context": "200k"
+    },
+    {
+      "id": "stepfun-ai/step-3.5-flash",
+      "label": "Step 3.5 Flash",
+      "tier": "S+",
+      "swe": "74.4%",
+      "context": "256k"
+    },
+    {
+      "id": "qwen/qwen3-coder-480b-a35b-instruct",
+      "label": "Qwen3 Coder 480B",
+      "tier": "S+",
+      "swe": "70.6%",
+      "context": "256k"
+    },
+    {
+      "id": "qwen/qwen3-235b-a22b",
+      "label": "Qwen3 235B",
+      "tier": "S+",
+      "swe": "70.0%",
+      "context": "128k"
+    },
+    {
+      "id": "mistralai/devstral-2-123b-instruct-2512",
+      "label": "Devstral 2 123B",
+      "tier": "S+",
+      "swe": "72.2%",
+      "context": "256k"
+    },
+    {
+      "id": "deepseek-ai/deepseek-v3.1-terminus",
+      "label": "DeepSeek V3.1 Term",
+      "tier": "S",
+      "swe": "68.4%",
+      "context": "128k"
+    },
+    {
+      "id": "moonshotai/kimi-k2-instruct",
+      "label": "Kimi K2 Instruct",
+      "tier": "S",
+      "swe": "65.8%",
+      "context": "128k"
+    },
+    {
+      "id": "minimaxai/minimax-m2",
+      "label": "MiniMax M2",
+      "tier": "S",
+      "swe": "69.4%",
+      "context": "128k"
+    },
+    {
+      "id": "qwen/qwen3-next-80b-a3b-thinking",
+      "label": "Qwen3 80B Thinking",
+      "tier": "S",
+      "swe": "68.0%",
+      "context": "128k"
+    },
+    {
+      "id": "qwen/qwen3-next-80b-a3b-instruct",
+      "label": "Qwen3 80B Instruct",
+      "tier": "S",
+      "swe": "65.0%",
+      "context": "128k"
+    },
+    {
+      "id": "qwen/qwen3.5-397b-a17b",
+      "label": "Qwen3.5 400B VLM",
+      "tier": "S",
+      "swe": "68.0%",
+      "context": "128k"
+    },
+    {
+      "id": "openai/gpt-oss-120b",
+      "label": "GPT OSS 120B",
+      "tier": "S",
+      "swe": "60.0%",
+      "context": "128k"
+    },
+    {
+      "id": "meta/llama-4-maverick-17b-128e-instruct",
+      "label": "Llama 4 Maverick",
+      "tier": "S",
+      "swe": "62.0%",
+      "context": "1M"
+    },
+    {
+      "id": "deepseek-ai/deepseek-v3.1",
+      "label": "DeepSeek V3.1",
+      "tier": "S",
+      "swe": "62.0%",
+      "context": "128k"
+    },
+    {
+      "id": "nvidia/llama-3.1-nemotron-ultra-253b-v1",
+      "label": "Nemotron Ultra 253B",
+      "tier": "A+",
+      "swe": "56.0%",
+      "context": "128k"
+    },
+    {
+      "id": "mistralai/mistral-large-3-675b-instruct-2512",
+      "label": "Mistral Large 675B",
+      "tier": "A+",
+      "swe": "58.0%",
+      "context": "256k"
+    },
+    {
+      "id": "qwen/qwq-32b",
+      "label": "QwQ 32B",
+      "tier": "A+",
+      "swe": "50.0%",
+      "context": "131k"
+    },
+    {
+      "id": "igenius/colosseum_355b_instruct_16k",
+      "label": "Colosseum 355B",
+      "tier": "A+",
+      "swe": "52.0%",
+      "context": "16k"
+    },
+    {
+      "id": "mistralai/mistral-medium-3-instruct",
+      "label": "Mistral Medium 3",
+      "tier": "A",
+      "swe": "48.0%",
+      "context": "128k"
+    },
+    {
+      "id": "mistralai/magistral-small-2506",
+      "label": "Magistral Small",
+      "tier": "A",
+      "swe": "45.0%",
+      "context": "32k"
+    },
+    {
+      "id": "nvidia/llama-3.3-nemotron-super-49b-v1.5",
+      "label": "Nemotron Super 49B",
+      "tier": "A",
+      "swe": "49.0%",
+      "context": "128k"
+    },
+    {
+      "id": "meta/llama-4-scout-17b-16e-instruct",
+      "label": "Llama 4 Scout",
+      "tier": "A",
+      "swe": "44.0%",
+      "context": "10M"
+    },
+    {
+      "id": "nvidia/nemotron-3-nano-30b-a3b",
+      "label": "Nemotron Nano 30B",
+      "tier": "A",
+      "swe": "43.0%",
+      "context": "128k"
+    },
+    {
+      "id": "deepseek-ai/deepseek-r1-distill-qwen-32b",
+      "label": "R1 Distill 32B",
+      "tier": "A",
+      "swe": "43.9%",
+      "context": "128k"
+    },
+    {
+      "id": "openai/gpt-oss-20b",
+      "label": "GPT OSS 20B",
+      "tier": "A",
+      "swe": "42.0%",
+      "context": "128k"
+    },
+    {
+      "id": "qwen/qwen2.5-coder-32b-instruct",
+      "label": "Qwen2.5 Coder 32B",
+      "tier": "A",
+      "swe": "46.0%",
+      "context": "32k"
+    },
+    {
+      "id": "meta/llama-3.1-405b-instruct",
+      "label": "Llama 3.1 405B",
+      "tier": "A",
+      "swe": "44.0%",
+      "context": "128k"
+    },
+    {
+      "id": "meta/llama-3.3-70b-instruct",
+      "label": "Llama 3.3 70B",
+      "tier": "A-",
+      "swe": "39.5%",
+      "context": "128k"
+    },
+    {
+      "id": "deepseek-ai/deepseek-r1-distill-qwen-14b",
+      "label": "R1 Distill 14B",
+      "tier": "A-",
+      "swe": "37.7%",
+      "context": "64k"
+    },
+    {
+      "id": "bytedance/seed-oss-36b-instruct",
+      "label": "Seed OSS 36B",
+      "tier": "A-",
+      "swe": "38.0%",
+      "context": "32k"
+    },
+    {
+      "id": "stockmark/stockmark-2-100b-instruct",
+      "label": "Stockmark 100B",
+      "tier": "A-",
+      "swe": "36.0%",
+      "context": "32k"
+    },
+    {
+      "id": "mistralai/mixtral-8x22b-instruct-v0.1",
+      "label": "Mixtral 8x22B",
+      "tier": "B+",
+      "swe": "32.0%",
+      "context": "64k"
+    },
+    {
+      "id": "mistralai/ministral-14b-instruct-2512",
+      "label": "Ministral 14B",
+      "tier": "B+",
+      "swe": "34.0%",
+      "context": "32k"
+    },
+    {
+      "id": "ibm/granite-34b-code-instruct",
+      "label": "Granite 34B Code",
+      "tier": "B+",
+      "swe": "30.0%",
+      "context": "32k"
+    },
+    {
+      "id": "deepseek-ai/deepseek-r1-distill-llama-8b",
+      "label": "R1 Distill 8B",
+      "tier": "B",
+      "swe": "28.2%",
+      "context": "32k"
+    },
+    {
+      "id": "deepseek-ai/deepseek-r1-distill-qwen-7b",
+      "label": "R1 Distill 7B",
+      "tier": "B",
+      "swe": "22.6%",
+      "context": "32k"
+    },
+    {
+      "id": "google/gemma-2-9b-it",
+      "label": "Gemma 2 9B",
+      "tier": "C",
+      "swe": "18.0%",
+      "context": "8k"
+    },
+    {
+      "id": "microsoft/phi-3.5-mini-instruct",
+      "label": "Phi 3.5 Mini",
+      "tier": "C",
+      "swe": "12.0%",
+      "context": "128k"
+    },
+    {
+      "id": "microsoft/phi-4-mini-instruct",
+      "label": "Phi 4 Mini",
+      "tier": "C",
+      "swe": "14.0%",
+      "context": "128k"
+    }
+  ],
+  "groq": [
+    {
+      "id": "llama-3.3-70b-versatile",
+      "label": "Llama 3.3 70B",
+      "tier": "A-",
+      "swe": "39.5%",
+      "context": "128k"
+    },
+    {
+      "id": "meta-llama/llama-4-scout-17b-16e-preview",
+      "label": "Llama 4 Scout",
+      "tier": "A",
+      "swe": "44.0%",
+      "context": "10M"
+    },
+    {
+      "id": "meta-llama/llama-4-maverick-17b-128e-preview",
+      "label": "Llama 4 Maverick",
+      "tier": "S",
+      "swe": "62.0%",
+      "context": "1M"
+    },
+    {
+      "id": "deepseek-r1-distill-llama-70b",
+      "label": "R1 Distill 70B",
+      "tier": "A",
+      "swe": "43.9%",
+      "context": "128k"
+    },
+    {
+      "id": "qwen-qwq-32b",
+      "label": "QwQ 32B",
+      "tier": "A+",
+      "swe": "50.0%",
+      "context": "131k"
+    },
+    {
+      "id": "moonshotai/kimi-k2-instruct",
+      "label": "Kimi K2 Instruct",
+      "tier": "S",
+      "swe": "65.8%",
+      "context": "131k"
+    },
+    {
+      "id": "llama-3.1-8b-instant",
+      "label": "Llama 3.1 8B",
+      "tier": "B",
+      "swe": "28.8%",
+      "context": "128k"
+    },
+    {
+      "id": "openai/gpt-oss-120b",
+      "label": "GPT OSS 120B",
+      "tier": "S",
+      "swe": "60.0%",
+      "context": "128k"
+    },
+    {
+      "id": "openai/gpt-oss-20b",
+      "label": "GPT OSS 20B",
+      "tier": "A",
+      "swe": "42.0%",
+      "context": "128k"
+    },
+    {
+      "id": "qwen/qwen3-32b",
+      "label": "Qwen3 32B",
+      "tier": "A+",
+      "swe": "50.0%",
+      "context": "131k"
+    }
+  ],
+  "cerebras": [
+    {
+      "id": "llama3.3-70b",
+      "label": "Llama 3.3 70B",
+      "tier": "A-",
+      "swe": "39.5%",
+      "context": "128k"
+    },
+    {
+      "id": "llama-4-scout-17b-16e-instruct",
+      "label": "Llama 4 Scout",
+      "tier": "A",
+      "swe": "44.0%",
+      "context": "10M"
+    },
+    {
+      "id": "qwen-3-32b",
+      "label": "Qwen3 32B",
+      "tier": "A+",
+      "swe": "50.0%",
+      "context": "128k"
+    },
+    {
+      "id": "gpt-oss-120b",
+      "label": "GPT OSS 120B",
+      "tier": "S",
+      "swe": "60.0%",
+      "context": "128k"
+    },
+    {
+      "id": "qwen-3-235b-a22b-instruct-2507",
+      "label": "Qwen3 235B",
+      "tier": "S+",
+      "swe": "70.0%",
+      "context": "128k"
+    },
+    {
+      "id": "llama3.1-8b",
+      "label": "Llama 3.1 8B",
+      "tier": "B",
+      "swe": "28.8%",
+      "context": "128k"
+    },
+    {
+      "id": "zai-glm-4.7",
+      "label": "GLM 4.7",
+      "tier": "S+",
+      "swe": "73.8%",
+      "context": "200k"
+    }
+  ],
+  "sambanova": [
+    {
+      "id": "MiniMax-M2.5",
+      "label": "MiniMax M2.5",
+      "tier": "S+",
+      "swe": "74.0%",
+      "context": "160k"
+    },
+    {
+      "id": "DeepSeek-R1-0528",
+      "label": "DeepSeek R1 0528",
+      "tier": "S",
+      "swe": "61.0%",
+      "context": "128k"
+    },
+    {
+      "id": "DeepSeek-V3.1",
+      "label": "DeepSeek V3.1",
+      "tier": "S",
+      "swe": "62.0%",
+      "context": "128k"
+    },
+    {
+      "id": "DeepSeek-V3-0324",
+      "label": "DeepSeek V3 0324",
+      "tier": "S",
+      "swe": "62.0%",
+      "context": "128k"
+    },
+    {
+      "id": "DeepSeek-V3.2",
+      "label": "DeepSeek V3.2",
+      "tier": "S+",
+      "swe": "73.1%",
+      "context": "8k"
+    },
+    {
+      "id": "Llama-4-Maverick-17B-128E-Instruct",
+      "label": "Llama 4 Maverick",
+      "tier": "S",
+      "swe": "62.0%",
+      "context": "1M"
+    },
+    {
+      "id": "gpt-oss-120b",
+      "label": "GPT OSS 120B",
+      "tier": "S",
+      "swe": "60.0%",
+      "context": "128k"
+    },
+    {
+      "id": "DeepSeek-V3.1-Terminus",
+      "label": "DeepSeek V3.1 Term",
+      "tier": "S",
+      "swe": "68.4%",
+      "context": "128k"
+    },
+    {
+      "id": "Qwen3-32B",
+      "label": "Qwen3 32B",
+      "tier": "A+",
+      "swe": "50.0%",
+      "context": "128k"
+    },
+    {
+      "id": "DeepSeek-R1-Distill-Llama-70B",
+      "label": "R1 Distill 70B",
+      "tier": "A",
+      "swe": "43.9%",
+      "context": "128k"
+    },
+    {
+      "id": "Meta-Llama-3.3-70B-Instruct",
+      "label": "Llama 3.3 70B",
+      "tier": "A-",
+      "swe": "39.5%",
+      "context": "128k"
+    },
+    {
+      "id": "Meta-Llama-3.1-8B-Instruct",
+      "label": "Llama 3.1 8B",
+      "tier": "B",
+      "swe": "28.8%",
+      "context": "128k"
+    }
+  ],
+  "openrouter": [
+    {
+      "id": "qwen/qwen3-coder:free",
+      "label": "Qwen3 Coder 480B",
+      "tier": "S+",
+      "swe": "70.6%",
+      "context": "262k"
+    },
+    {
+      "id": "z-ai/glm-4.5-air:free",
+      "label": "GLM 4.5 Air",
+      "tier": "S+",
+      "swe": "72.0%",
+      "context": "128k"
+    },
+    {
+      "id": "google/gemma-3-27b-it:free",
+      "label": "Gemma 3 27B",
+      "tier": "B",
+      "swe": "22.0%",
+      "context": "128k"
+    },
+    {
+      "id": "stepfun/step-3.5-flash:free",
+      "label": "Step 3.5 Flash",
+      "tier": "S+",
+      "swe": "74.4%",
+      "context": "256k"
+    },
+    {
+      "id": "qwen/qwen3-next-80b-a3b-instruct:free",
+      "label": "Qwen3 80B Instruct",
+      "tier": "S",
+      "swe": "65.0%",
+      "context": "128k"
+    },
+    {
+      "id": "openai/gpt-oss-120b:free",
+      "label": "GPT OSS 120B",
+      "tier": "S",
+      "swe": "60.0%",
+      "context": "128k"
+    },
+    {
+      "id": "openai/gpt-oss-20b:free",
+      "label": "GPT OSS 20B",
+      "tier": "A",
+      "swe": "42.0%",
+      "context": "128k"
+    },
+    {
+      "id": "nvidia/nemotron-3-nano-30b-a3b:free",
+      "label": "Nemotron Nano 30B",
+      "tier": "A",
+      "swe": "43.0%",
+      "context": "128k"
+    },
+    {
+      "id": "meta-llama/llama-3.3-70b-instruct:free",
+      "label": "Llama 3.3 70B",
+      "tier": "A-",
+      "swe": "39.5%",
+      "context": "128k"
+    },
+    {
+      "id": "mistralai/mistral-small-3.1-24b-instruct:free",
+      "label": "Mistral Small 3.1",
+      "tier": "B+",
+      "swe": "30.0%",
+      "context": "128k"
+    },
+    {
+      "id": "google/gemma-3-12b-it:free",
+      "label": "Gemma 3 12B",
+      "tier": "C",
+      "swe": "15.0%",
+      "context": "128k"
+    }
+  ],
+  "googleai": [
+    {
+      "id": "gemma-3-27b-it",
+      "label": "Gemma 3 27B",
+      "tier": "B",
+      "swe": "22.0%",
+      "context": "128k"
+    },
+    {
+      "id": "gemma-3-12b-it",
+      "label": "Gemma 3 12B",
+      "tier": "C",
+      "swe": "15.0%",
+      "context": "128k"
+    },
+    {
+      "id": "gemma-3-4b-it",
+      "label": "Gemma 3 4B",
+      "tier": "C",
+      "swe": "10.0%",
+      "context": "128k"
+    }
+  ],
+  "zai": [
+    {
+      "id": "zai/glm-5",
+      "label": "GLM-5",
+      "tier": "S+",
+      "swe": "77.8%",
+      "context": "128k"
+    },
+    {
+      "id": "zai/glm-4.7",
+      "label": "GLM-4.7",
+      "tier": "S+",
+      "swe": "73.8%",
+      "context": "200k"
+    },
+    {
+      "id": "zai/glm-4.5",
+      "label": "GLM-4.5",
+      "tier": "S+",
+      "swe": "75.0%",
+      "context": "128k"
+    },
+    {
+      "id": "zai/glm-4.5-air",
+      "label": "GLM-4.5-Air",
+      "tier": "S+",
+      "swe": "72.0%",
+      "context": "128k"
+    },
+    {
+      "id": "zai/glm-4.6",
+      "label": "GLM-4.6",
+      "tier": "S+",
+      "swe": "70.0%",
+      "context": "128k"
+    }
+  ],
+  "siliconflow": [
+    {
+      "id": "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+      "label": "Qwen3 Coder 480B",
+      "tier": "S+",
+      "swe": "70.6%",
+      "context": "256k"
+    },
+    {
+      "id": "deepseek-ai/DeepSeek-V3.2",
+      "label": "DeepSeek V3.2",
+      "tier": "S+",
+      "swe": "73.1%",
+      "context": "128k"
+    },
+    {
+      "id": "Qwen/Qwen3-235B-A22B",
+      "label": "Qwen3 235B",
+      "tier": "S+",
+      "swe": "70.0%",
+      "context": "128k"
+    },
+    {
+      "id": "deepseek-ai/DeepSeek-R1",
+      "label": "DeepSeek R1",
+      "tier": "S",
+      "swe": "61.0%",
+      "context": "128k"
+    },
+    {
+      "id": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+      "label": "Qwen3 Coder 30B",
+      "tier": "A+",
+      "swe": "55.0%",
+      "context": "32k"
+    },
+    {
+      "id": "Qwen/Qwen2.5-Coder-32B-Instruct",
+      "label": "Qwen2.5 Coder 32B",
+      "tier": "A",
+      "swe": "46.0%",
+      "context": "32k"
+    }
+  ],
+  "together": [
+    {
+      "id": "moonshotai/Kimi-K2.5",
+      "label": "Kimi K2.5",
+      "tier": "S+",
+      "swe": "76.8%",
+      "context": "128k"
+    },
+    {
+      "id": "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8",
+      "label": "Qwen3 Coder 480B",
+      "tier": "S+",
+      "swe": "70.6%",
+      "context": "256k"
+    },
+    {
+      "id": "deepseek-ai/DeepSeek-V3.1",
+      "label": "DeepSeek V3.1",
+      "tier": "S",
+      "swe": "62.0%",
+      "context": "128k"
+    },
+    {
+      "id": "deepseek-ai/DeepSeek-R1",
+      "label": "DeepSeek R1",
+      "tier": "S",
+      "swe": "61.0%",
+      "context": "128k"
+    },
+    {
+      "id": "openai/gpt-oss-120b",
+      "label": "GPT OSS 120B",
+      "tier": "S",
+      "swe": "60.0%",
+      "context": "128k"
+    },
+    {
+      "id": "openai/gpt-oss-20b",
+      "label": "GPT OSS 20B",
+      "tier": "A",
+      "swe": "42.0%",
+      "context": "128k"
+    },
+    {
+      "id": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+      "label": "Llama 3.3 70B",
+      "tier": "A-",
+      "swe": "39.5%",
+      "context": "128k"
+    }
+  ],
+  "cloudflare": [
+    {
+      "id": "@cf/openai/gpt-oss-120b",
+      "label": "GPT OSS 120B",
+      "tier": "S",
+      "swe": "60.0%",
+      "context": "128k"
+    },
+    {
+      "id": "@cf/qwen/qwen2.5-coder-32b-instruct",
+      "label": "Qwen2.5 Coder 32B",
+      "tier": "A",
+      "swe": "46.0%",
+      "context": "32k"
+    },
+    {
+      "id": "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
+      "label": "R1 Distill 32B",
+      "tier": "A",
+      "swe": "43.9%",
+      "context": "128k"
+    },
+    {
+      "id": "@cf/openai/gpt-oss-20b",
+      "label": "GPT OSS 20B",
+      "tier": "A",
+      "swe": "42.0%",
+      "context": "128k"
+    },
+    {
+      "id": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+      "label": "Llama 3.3 70B",
+      "tier": "A-",
+      "swe": "39.5%",
+      "context": "128k"
+    },
+    {
+      "id": "@cf/meta/llama-3.1-8b-instruct",
+      "label": "Llama 3.1 8B",
+      "tier": "B",
+      "swe": "28.8%",
+      "context": "128k"
+    }
+  ],
+  "perplexity": [
+    {
+      "id": "sonar-reasoning-pro",
+      "label": "Sonar Reasoning Pro",
+      "tier": "A+",
+      "swe": "50.0%",
+      "context": "128k"
+    },
+    {
+      "id": "sonar-reasoning",
+      "label": "Sonar Reasoning",
+      "tier": "A",
+      "swe": "45.0%",
+      "context": "128k"
+    },
+    {
+      "id": "sonar-pro",
+      "label": "Sonar Pro",
+      "tier": "B+",
+      "swe": "32.0%",
+      "context": "128k"
+    },
+    {
+      "id": "sonar",
+      "label": "Sonar",
+      "tier": "B",
+      "swe": "25.0%",
+      "context": "128k"
+    }
+  ]
+}

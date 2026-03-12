@@ -24,13 +24,19 @@ providers = [
     "googleai", "zai", "siliconflow", "together", "cloudflare", "perplexity"
 ]
 out = {}
+lines = src.splitlines()
 for p in providers:
-    m = re.search(rf"export const {re.escape(p)} = \\[(.*?)\\n\\]", src, re.S)
-    if not m:
+    start = next((i for i, line in enumerate(lines) if re.match(rf"\s*export const {re.escape(p)}\s*=\s*\[", line)), None)
+    if start is None:
         continue
-    body = m.group(1)
+    body_lines = []
+    for line in lines[start + 1:]:
+        if line.strip() == "]":
+            break
+        body_lines.append(line)
+    body = "\n".join(body_lines)
     rows = []
-    for mm in re.finditer(r"\\['([^']+)'\\s*,\\s*'([^']+)'\\s*,\\s*'([^']+)'\\s*,\\s*'([^']+)'\\s*,\\s*'([^']+)'\\]", body):
+    for mm in re.finditer(r"\['([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'\]", body):
         rows.append({
             "id": mm.group(1),
             "label": mm.group(2),

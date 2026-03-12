@@ -1,57 +1,35 @@
 # Model Recommendations
 
-## Default Family
+## Local-first baseline
 
-Use Qwen 3.5 Unsloth GGUF variants as the base model family for local OpenCode clusters.
+Use Qwen 3.5 as the default local family for general agentic work.
 
-## Tier Recommendations
+Recommended profile mapping:
+- `16gb`: Qwen 3.5 9B
+- `24gb`: Qwen 3.5 27B
+- `32gb`: Qwen 3.5 35B-A3B
+- `64gb`: Qwen 3.5 35B-A3B + qwen3-coder-next
+- `128gb-multi`: multiple practical local models
+- `128gb-qwen122b`: Qwen 122B-focused
+- `128gb-minimax`: MiniMax-focused
 
-### 16GB
+## Specialist local model
 
-- Primary: `Qwen3.5-9B-UD-Q4_K_XL.gguf`
-- Keep context conservative for reliability.
+Keep `qwen3-coder-next` as a coding specialist, not the default answer for every task. It belongs in the higher-memory tiers and multi-model setups.
 
-### 24GB
+## When to use free cloud fallbacks
 
-- Primary: `Qwen3.5-27B-UD-Q4_K_XL.gguf`
-- Fallback: 9B
+Use free or trial-backed cloud providers when:
+- hardware is too small for the desired local model
+- onboarding speed matters more than full local execution
+- a team wants to try the workflow before investing in hardware
 
-### 32GB
+Recommended fallback order:
+1. NVIDIA NIM
+2. OpenRouter free models
+3. z.ai
+4. Antigravity
 
-- Primary: `Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf`
-- Utility: 27B
-- Optional coding specialist: `Qwen3-Coder-Next-MXFP4_MOE.gguf`
+## Office and documentation workloads
 
-### 64GB
-
-- Primary: 35B-A3B
-- Specialist coding: qwen3-coder-next
-- Utility: 27B
-
-### 128GB (option A)
-
-- Profile: `128gb-multi`
-- Primary: Qwen3.5-35B-A3B
-- Specialist: qwen3-coder-next
-- Utility set: Qwen3.5-27B + Qwen3.5-9B + embeddings
-- Best for mixed coding/reasoning workloads while staying below the 115GB headroom target.
-
-### 128GB (option B)
-
-- Profile: `128gb-qwen122b`
-- Primary: `Qwen3.5-122B-A10B-MXFP4_MOE-*`
-- Keep effective usage <=115GB.
-
-### 128GB (option C)
-
-- Profile: `128gb-minimax`
-- Primary: MiniMax model
-- Keep effective usage <=115GB.
-
-## Embeddings
-
-- `nomic-embed-text-v1.5.Q4_K_M.gguf`
-
-## Why keep qwen3-coder-next
-
-It remains a strong specialist option for high-value coding tasks where depth and code quality are prioritized over speed.
+For office automation, the model matters less than workflow quality and tool support. Smaller Qwen 3.5 profiles can still be useful if the repo provides strong skills and clear workflow guidance.

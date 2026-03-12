@@ -20,6 +20,8 @@ check_file() {
 
 check_file "$AI_CLUSTER_ROOT/opencode.jsonc"
 check_file "$AI_CLUSTER_ROOT/runtime-config/presets.active.ini"
+check_file "$AI_CLUSTER_ROOT/.opencode/agents/architecture-reviewer.md"
+check_file "$AI_CLUSTER_ROOT/.opencode/skills/docx-workflow/SKILL.md"
 
 if command -v llama-server >/dev/null 2>&1; then
   echo "[ok] llama-server in PATH"
