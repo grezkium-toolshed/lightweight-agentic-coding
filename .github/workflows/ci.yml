@@ -43,3 +43,12 @@ jobs:
           test -f .opencode/skills/docx-workflow/SKILL.md
           test -f .opencode/skills/pptx-workflow/SKILL.md
           test -f .opencode/skills/xlsx-workflow/SKILL.md
+
+      - name: Public Beta Asset Presence Check
+        run: |
+          test -f RELEASE_CHECKLIST.md
+          test -f .github/ISSUE_TEMPLATE/config.yml
+          test -f .github/ISSUE_TEMPLATE/bug_report.md
+          test -f .github/ISSUE_TEMPLATE/docs_mismatch.md
+          test -f .github/ISSUE_TEMPLATE/provider_model_drift.md
+          test -f .github/ISSUE_TEMPLATE/hardware_profile_request.md

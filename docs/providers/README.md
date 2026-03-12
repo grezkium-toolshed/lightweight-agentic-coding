@@ -6,5 +6,6 @@ This Local AI Cluster supports three practical provider modes:
 - hosted-model client path
 
 Read next:
+- `AUTHENTICATION.md`
 - `FREE_CLOUD_FALLBACKS.md`
 - `NVIDIA_NIM.md`

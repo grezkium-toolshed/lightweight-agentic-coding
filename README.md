@@ -1,27 +1,49 @@
-# Local AI Cluster vNext
+# local-ai-cluster
 
-Private, replicable **Local AI Cluster** for agentic work using **llama.cpp + Qwen 3.5** by default, with OpenCode as the strongest local client path.
+Public beta preparation branch for a **Local AI Cluster**: a local-first agentic platform built around **llama.cpp + Qwen 3.5**, with OpenCode as the strongest supported local client path.
 
-This repo is being prepared for a future public release, but it should remain private until the release gates in `docs/release/PRIVATE_UNTIL_RELEASE.md` are complete.
+This repo is not ready for public visibility yet. Use `RELEASE_CHECKLIST.md` and `docs/release/PRIVATE_UNTIL_RELEASE.md` before changing repository visibility.
 
-## What this repo is for
+## What this project is
 
-This is a baseline platform for technical users who want a low-friction local AI workstation for:
+`local-ai-cluster` is a baseline for technical users who want a low-friction agentic workstation for:
 - coding and refactoring
 - documentation generation
 - research and synthesis
 - spreadsheets, decks, reports, and office automation
 - startup, home-lab, and team workflows
 
-## Runtime defaults
+## Stable versus evolving
 
+### Stable enough for public beta
+- llama.cpp-first runtime
+- hardware-tier profile setup
+- OpenCode local configuration and project-local agents or skills
+- free-cloud fallback pattern
+
+### Still evolving
+- provider model lists and free-tier availability
+- curated agent and skill pack breadth
+- hosted-model guidance outside the main OpenCode path
+
+## Choose your starting path
+
+### Lowest friction local path
+Use OpenCode with a `16gb` or `24gb` profile and add free cloud fallback only if needed.
+
+### Stronger local path
+Use `32gb` or `64gb` profile with Qwen 3.5 35B-A3B as the main general model and `qwen3-coder-next` as a specialist.
+
+### Hosted-model path
+Use Claude Code via the templates under `templates/claude-code/` when lower setup friction matters more than local-first execution.
+
+## Runtime defaults
 - llama.cpp `llama-server`
 - OpenCode project config in `opencode.jsonc`
 - Qwen 3.5 profile-based local models
 - free cloud fallback providers for lower-end hardware
 
 ## Hardware profiles
-
 - `16gb`: Qwen3.5 9B + embeddings
 - `24gb`: Qwen3.5 27B + 9B fallback + embeddings
 - `32gb`: Qwen3.5 35B-A3B + 27B + optional coder-next
@@ -95,8 +117,9 @@ Documented as a pattern reference only for now. It is not a first-class runtime 
 
 Use local Qwen 3.5 when you can. Use cloud fallbacks when hardware, onboarding speed, or trial workflows matter more.
 
-## OpenCode-specific additions in this repo
+Authentication expectations are documented in `docs/providers/AUTHENTICATION.md`.
 
+## OpenCode-specific additions in this repo
 - explicit `compaction.auto`, `compaction.prune`, and reserved token buffer
 - watcher ignore rules for models, logs, and generated runtime state
 - instruction globs for stable repo guidance
@@ -116,34 +139,26 @@ This repo includes reusable local skills for:
 
 These are designed to make the cluster useful for office work immediately, not only coding.
 
-## Syncing free model availability
+## Onboarding scenarios
+- `docs/use-cases/ONBOARDING_16GB_24GB.md`
+- `docs/use-cases/ONBOARDING_32GB_PLUS.md`
+- `docs/use-cases/ONBOARDING_CLAUDE_CODE.md`
 
-You can refresh the community-maintained free-model snapshot with:
+## Free model snapshot policy
 
-```bash
-./scripts/sync-free-cloud-models.sh
-```
-
-PowerShell:
-
-```powershell
-./scripts/sync-free-cloud-models.ps1
-```
-
-Generated files:
-- `docs/free-coding-models.json`
-- `docs/FREE_CLOUD_MODELS.md`
+`docs/FREE_CLOUD_MODELS.md` and `docs/free-coding-models.json` stay tracked during beta as a reviewed snapshot of community-maintained free-model availability. Refresh them before each beta cut.
 
 Kudos to **@vava-nessa** for the free model index and NIM helper tooling:
 https://github.com/vava-nessa/free-coding-models
 
 ## Important docs
-
+- `RELEASE_CHECKLIST.md`
 - `ARCHITECTURE_OVERVIEW.md`
 - `MODEL_RECOMMENDATIONS.md`
 - `CONFIG_SUMMARY.md`
 - `REVISION_NOTES.md`
 - `docs/providers/README.md`
+- `docs/providers/AUTHENTICATION.md`
+- `docs/security/TRUST_MODEL.md`
 - `docs/security/THIRD_PARTY_AGENT_INTAKE.md`
-- `docs/release/PRIVATE_UNTIL_RELEASE.md`
-- `docs/use-cases/STARTUP_HOME_TEAM.md`
+- `docs/release/BETA_RELEASE_CRITERIA.md`

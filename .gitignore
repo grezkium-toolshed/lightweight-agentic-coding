@@ -19,6 +19,9 @@ runtime-config/presets.active.ini
 
 # Local tool state
 .sisyphus/
+.opencode/package.json
+.opencode/package-lock.json
+.opencode/node_modules/
 *.log
 *.tmp
 
