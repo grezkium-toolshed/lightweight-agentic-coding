@@ -2,7 +2,7 @@
 
 ## Current direction
 
-The repo is moving from an OpenCode-centric coding cluster toward a broader Local AI Cluster for agentic work.
+The repo is moving from an OpenCode-centric local setup toward a broader Local AI Cluster for agentic work.
 
 ## Notable changes in this pass
 

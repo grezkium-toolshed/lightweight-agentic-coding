@@ -45,7 +45,7 @@ Windows:
 
 ## RepositoryIntent
 
-The repo is broader than a coding cluster. It should support:
+The repo is broader than a coding-focused local setup. It should support:
 - coding and refactoring
 - documentation generation
 - spreadsheets, decks, and office automation

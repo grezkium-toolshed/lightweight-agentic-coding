@@ -4,6 +4,7 @@
 
 This repository is a configuration-first template for OpenCode + llama.cpp.
 Contributions should preserve portability and reproducibility.
+The repo is intentionally private until release gates are complete.
 
 ## Local Checks Before PR
 
@@ -13,7 +14,6 @@ Contributions should preserve portability and reproducibility.
 bash -n scripts/*.sh
 bash -n verify-*.sh
 bash -n runtime-config/launch/*.sh
-bash -n alternative-config/minimax-arch/runtime-config/launch/*.sh
 ```
 
 2. Regenerate profile config and run doctor:
@@ -35,3 +35,4 @@ bash -n alternative-config/minimax-arch/runtime-config/launch/*.sh
 - Keep both Unix (`.sh`) and Windows (`.ps1`) parity when changing workflows.
 - Keep llama.cpp as default runtime path.
 - Prefer additive profile changes over hardcoded machine-specific paths.
+- Keep `.opencode/agents/` and `.opencode/skills/` intentionally small and task-focused.

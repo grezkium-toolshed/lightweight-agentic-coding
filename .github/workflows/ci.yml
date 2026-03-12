@@ -15,7 +15,6 @@ jobs:
           bash -n scripts/*.sh
           bash -n verify-*.sh
           bash -n runtime-config/launch/*.sh
-          bash -n alternative-config/minimax-arch/runtime-config/launch/*.sh
 
       - name: JSON Config Parse Check
         run: |

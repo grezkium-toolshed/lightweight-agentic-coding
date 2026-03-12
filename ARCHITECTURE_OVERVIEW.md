@@ -2,7 +2,7 @@
 
 ## Positioning
 
-This repo is a Local AI Cluster, not only a coding cluster.
+This repo is a Local AI Cluster, not only a coding-focused local setup.
 
 The architecture is deliberately split into four layers:
 - local runtime
