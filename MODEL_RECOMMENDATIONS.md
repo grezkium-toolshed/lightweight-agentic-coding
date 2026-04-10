@@ -33,3 +33,43 @@ Recommended fallback order:
 ## Office and documentation workloads
 
 For office automation, the model matters less than workflow quality and tool support. Smaller Qwen 3.5 profiles can still be useful if the repo provides strong skills and clear workflow guidance.
+
+## Gemma 4 alternative
+
+Gemma 4 is available as an alternative model family with Apache-2.0 licensing, built-in thinking/reasoning mode (`<|think|>`), multimodal support, and MoE efficiency.
+
+### Gemma 4 profile mapping
+
+| Profile | Models |
+|---|---|
+| `gemma-16gb` | Gemma 4 26B-A4B (Q4) + E4B (Q8) fallback |
+| `gemma-24gb` | Gemma 4 31B (Q4) + 26B-A4B (Q4) fallback |
+| `gemma-32gb` | Gemma 4 31B (Q8) + 26B-A4B (Q4) fallback |
+| `gemma-64gb` | Gemma 4 31B (BF16) + 31B (Q8) + 26B-A4B (Q4) |
+
+### Gemma 4 benchmarks
+
+| Variant | MMLU Pro | AIME 2026 | LiveCodeBench v6 | MMMU Pro |
+|---|---|---|---|---|
+| 31B (dense) | 85.2% | 89.2% | 80.0% | 76.9% |
+| 26B-A4B (MoE) | 82.6% | 88.3% | 77.1% | 73.8% |
+
+### When to choose Gemma 4 over Qwen 3.5
+
+- **Apache-2.0 license** — Fully permissive, no commercial restrictions
+- **Thinking mode** — Built-in reasoning with `<|think|>` token control
+- **Multimodal** — Vision support via `--mmproj` clip projector
+- **MoE efficiency** — 26B-A4B activates only 4B params per token
+- **256K context** — Available on 26B-A4B and 31B variants
+
+### Gemma 4 inference defaults
+
+Use these defaults for Gemma 4 (different from Qwen 3.5):
+- `temperature = 1.0`
+- `top_p = 0.95`
+- `top_k = 64`
+- `presence_penalty = 0.0`
+- `repeat_penalty = 1.0`
+- EOS token: `<turn|>`
+
+**Warning:** Do not use CUDA 13.2 runtime with GGUFs — it causes degraded outputs.

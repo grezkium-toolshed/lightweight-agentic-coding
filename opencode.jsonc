@@ -51,6 +51,30 @@
             "context": 2048,
             "output": 512
           }
+        },
+        "gemma-4-26b-a4b-q4": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
+        "gemma-4-31b-q4": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
+        "gemma-4-31b-q8": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
+        "gemma-4-e4b-q8": {
+          "limit": {
+            "context": 131072,
+            "output": 8192
+          }
         }
       },
       "options": {

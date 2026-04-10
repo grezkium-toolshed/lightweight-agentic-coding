@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(unsloth.ai)",
+      "WebSearch"
+    ]
+  },
+  "$version": 3
+}

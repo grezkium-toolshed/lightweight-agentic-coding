@@ -53,6 +53,23 @@ switch ($Profile) {
     }
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
   }
+  'gemma-16gb' {
+    $models += @{Dir='gemma4'; File='gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf'; Repo='unsloth/gemma-4-26B-A4B-IT-GGUF'; Remote='gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf'; MinMB=15000}
+    $models += @{Dir='gemma4'; File='gemma-4-E4B-IT-Q8_0.gguf'; Repo='unsloth/gemma-4-E4B-IT-GGUF'; Remote='gemma-4-E4B-IT-Q8_0.gguf'; MinMB=4000}
+  }
+  'gemma-24gb' {
+    $models += @{Dir='gemma4'; File='gemma-4-31B-IT-UD-Q4_K_XL.gguf'; Repo='unsloth/gemma-4-31B-IT-GGUF'; Remote='gemma-4-31B-IT-UD-Q4_K_XL.gguf'; MinMB=16000}
+    $models += @{Dir='gemma4'; File='gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf'; Repo='unsloth/gemma-4-26B-A4B-IT-GGUF'; Remote='gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf'; MinMB=15000}
+  }
+  'gemma-32gb' {
+    $models += @{Dir='gemma4'; File='gemma-4-31B-IT-Q8_0.gguf'; Repo='unsloth/gemma-4-31B-IT-GGUF'; Remote='gemma-4-31B-IT-Q8_0.gguf'; MinMB=32000}
+    $models += @{Dir='gemma4'; File='gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf'; Repo='unsloth/gemma-4-26B-A4B-IT-GGUF'; Remote='gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf'; MinMB=15000}
+  }
+  'gemma-64gb' {
+    $models += @{Dir='gemma4'; File='gemma-4-31B-IT-BF16.gguf'; Repo='unsloth/gemma-4-31B-IT-GGUF'; Remote='gemma-4-31B-IT-BF16.gguf'; MinMB=60000}
+    $models += @{Dir='gemma4'; File='gemma-4-31B-IT-Q8_0.gguf'; Repo='unsloth/gemma-4-31B-IT-GGUF'; Remote='gemma-4-31B-IT-Q8_0.gguf'; MinMB=32000}
+    $models += @{Dir='gemma4'; File='gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf'; Repo='unsloth/gemma-4-26B-A4B-IT-GGUF'; Remote='gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf'; MinMB=15000}
+  }
   default { throw "Unsupported profile: $Profile" }
 }
 

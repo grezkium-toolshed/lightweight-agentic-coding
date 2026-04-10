@@ -34,6 +34,9 @@ Use OpenCode with a `16gb` or `24gb` profile and add free cloud fallback only if
 ### Stronger local path
 Use `32gb` or `64gb` profile with Qwen 3.5 35B-A3B as the main general model and `qwen3-coder-next` as a specialist.
 
+### Gemma 4 path
+Use Gemma 4 as an alternative model family with Apache-2.0 licensing, thinking mode, and multimodal support. Start with `gemma-24gb` or `gemma-32gb` for the best balance. See `MODEL_RECOMMENDATIONS.md` for benchmarks and guidance.
+
 ### Hosted-model path
 Use Claude Code via the templates under `templates/claude-code/` when lower setup friction matters more than local-first execution.
 
@@ -44,13 +47,17 @@ Use Claude Code via the templates under `templates/claude-code/` when lower setu
 - free cloud fallback providers for lower-end hardware
 
 ## Hardware profiles
-- `16gb`: Qwen3.5 9B + embeddings
-- `24gb`: Qwen3.5 27B + 9B fallback + embeddings
-- `32gb`: Qwen3.5 35B-A3B + 27B + optional coder-next
+- `16gb`: Qwen 3.5 9B + embeddings
+- `24gb`: Qwen 3.5 27B + 9B fallback + embeddings
+- `32gb`: Qwen 3.5 35B-A3B + 27B + optional coder-next
 - `64gb`: 35B-A3B + coder-next + 27B + embeddings
 - `128gb-multi`: 35B-A3B + coder-next + 27B + 9B + embeddings
-- `128gb-qwen122b`: Qwen3.5 122B-focused profile
+- `128gb-qwen122b`: Qwen 3.5 122B-focused profile
 - `128gb-minimax`: MiniMax-focused profile
+- `gemma-16gb`: Gemma 4 26B-A4B (Q4) + E4B (Q8) fallback
+- `gemma-24gb`: Gemma 4 31B (Q4) + 26B-A4B (Q4) fallback
+- `gemma-32gb`: Gemma 4 31B (Q8) + 26B-A4B (Q4) fallback
+- `gemma-64gb`: Gemma 4 31B (BF16) + 31B (Q8) + 26B-A4B (Q4)
 
 The 128GB tiers follow a practical `<=115GB` effective memory usage policy to preserve headroom.
 
@@ -59,6 +66,15 @@ The 128GB tiers follow a practical `<=115GB` effective memory usage policy to pr
 ```bash
 ./scripts/setup-models-device.sh --profile 24gb
 ./scripts/setup-config-device.sh --profile 24gb
+./scripts/launch-llama.sh
+./scripts/launch-opencode.sh
+```
+
+Gemma 4 quick start:
+
+```bash
+./scripts/setup-models-device.sh --profile gemma-24gb
+./scripts/setup-config-device.sh --profile gemma-24gb
 ./scripts/launch-llama.sh
 ./scripts/launch-opencode.sh
 ```
@@ -80,6 +96,15 @@ tail -f runtime-config/logs/llama-server.log
 ```powershell
 ./scripts/setup-models-device.ps1 -Profile 24gb
 ./scripts/setup-config-device.ps1 -Profile 24gb
+./scripts/launch-llama.ps1
+./scripts/launch-opencode.ps1
+```
+
+Gemma 4 quick start:
+
+```powershell
+./scripts/setup-models-device.ps1 -Profile gemma-24gb
+./scripts/setup-config-device.ps1 -Profile gemma-24gb
 ./scripts/launch-llama.ps1
 ./scripts/launch-opencode.ps1
 ```

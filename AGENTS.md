@@ -8,6 +8,7 @@ Runtime defaults:
 - llama.cpp `llama-server`
 - OpenCode project config at `opencode.jsonc`
 - profile-based model setup via `scripts/setup-*.sh` and `scripts/setup-*.ps1`
+- Qwen 3.5 or Gemma 4 model families
 - curated OpenCode agents under `.opencode/agents/`
 - curated OpenCode skills under `.opencode/skills/`
 

@@ -7,7 +7,7 @@ AI_MODELS_DIR="${AI_MODELS_DIR:-$AI_CLUSTER_ROOT/models}"
 
 usage() {
   cat << USAGE
-Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax>
+Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax|gemma-16gb|gemma-24gb|gemma-32gb|gemma-64gb>
 
 Environment overrides:
   AI_CLUSTER_ROOT  Base repository path (default: script parent)
@@ -90,6 +90,23 @@ case "$PROFILE" in
       MODELS+=("minimax|$mf|$MINIMAX_REPO|$mf|$min_mb")
     done
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
+    ;;
+  gemma-16gb)
+    MODELS+=("gemma4|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|unsloth/gemma-4-26B-A4B-IT-GGUF|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|15000")
+    MODELS+=("gemma4|gemma-4-E4B-IT-Q8_0.gguf|unsloth/gemma-4-E4B-IT-GGUF|gemma-4-E4B-IT-Q8_0.gguf|4000")
+    ;;
+  gemma-24gb)
+    MODELS+=("gemma4|gemma-4-31B-IT-UD-Q4_K_XL.gguf|unsloth/gemma-4-31B-IT-GGUF|gemma-4-31B-IT-UD-Q4_K_XL.gguf|16000")
+    MODELS+=("gemma4|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|unsloth/gemma-4-26B-A4B-IT-GGUF|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|15000")
+    ;;
+  gemma-32gb)
+    MODELS+=("gemma4|gemma-4-31B-IT-Q8_0.gguf|unsloth/gemma-4-31B-IT-GGUF|gemma-4-31B-IT-Q8_0.gguf|32000")
+    MODELS+=("gemma4|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|unsloth/gemma-4-26B-A4B-IT-GGUF|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|15000")
+    ;;
+  gemma-64gb)
+    MODELS+=("gemma4|gemma-4-31B-IT-BF16.gguf|unsloth/gemma-4-31B-IT-GGUF|gemma-4-31B-IT-BF16.gguf|60000")
+    MODELS+=("gemma4|gemma-4-31B-IT-Q8_0.gguf|unsloth/gemma-4-31B-IT-GGUF|gemma-4-31B-IT-Q8_0.gguf|32000")
+    MODELS+=("gemma4|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|unsloth/gemma-4-26B-A4B-IT-GGUF|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|15000")
     ;;
   *)
     echo "Unsupported profile: $PROFILE" >&2
