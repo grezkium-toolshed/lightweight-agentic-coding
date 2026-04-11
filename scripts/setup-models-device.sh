@@ -135,20 +135,39 @@ download_one() {
       echo "[skip] $target_file (${size_mb}MB)"
       return
     fi
+    echo "[warn] $target_file too small (${size_mb}MB < ${min_mb}MB), re-downloading"
     rm -f "$target_file"
   fi
 
+  # Fetch expected file size from Hugging Face for validation
+  local expected_bytes
+  expected_bytes="$(curl -sI -L --max-redirs 3 "$url" 2>/dev/null | grep -i 'content-length' | tail -1 | awk '{print $2}' | tr -d '\r')"
+  local expected_mb=0
+  if [[ -n "$expected_bytes" && "$expected_bytes" -gt 0 ]] 2>/dev/null; then
+    expected_mb=$(( expected_bytes / 1048576 ))
+  fi
+
   echo "[get ] $url"
-  curl -L --retry 3 --retry-delay 3 -C - -o "$tmp_file" "$url"
+  if ! curl -fL --retry 3 --retry-delay 3 --retry-max-time 300 -C - -o "$tmp_file" "$url"; then
+    echo "[fail] Download failed: $url" >&2
+    rm -f "$tmp_file"
+    exit 1
+  fi
   mv "$tmp_file" "$target_file"
 
   local new_mb
   new_mb="$(du -m "$target_file" | awk '{print $1}')"
   if [[ "$new_mb" -lt "$min_mb" ]]; then
     echo "Download too small for $filename (${new_mb}MB < ${min_mb}MB)" >&2
+    rm -f "$target_file"
     exit 1
   fi
-  echo "[ ok ] $target_file (${new_mb}MB)"
+  if [[ "$expected_mb" -gt 0 && "$new_mb" -lt $(( expected_mb * 95 / 100 )) ]]; then
+    echo "Download incomplete for $filename (${new_mb}MB vs expected ~${expected_mb}MB)" >&2
+    rm -f "$target_file"
+    exit 1
+  fi
+  echo "[ ok ] $target_file (${new_mb}MB${expected_mb:+ of ~${expected_mb}MB})"
 }
 
 echo "Profile: $PROFILE"

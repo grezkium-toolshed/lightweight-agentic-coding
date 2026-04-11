@@ -84,18 +84,49 @@ foreach ($m in $models) {
       Write-Host "[skip] $targetFile ($mb MB)"
       continue
     }
+    Write-Host "[warn] $targetFile too small ($mb MB < $($m.MinMB) MB), re-downloading"
     Remove-Item $targetFile -Force
   }
 
   $url = "https://huggingface.co/$($m.Repo)/resolve/main/$($m.Remote)"
+
+  # Fetch expected file size from Hugging Face for validation
+  $expectedMB = 0
+  try {
+    $headResp = Invoke-WebRequest -Uri $url -Method Head -UseBasicParsing -MaximumRedirection 3
+    if ($headResp.Headers.'Content-Length') {
+      $expectedBytes = [int64]($headResp.Headers.'Content-Length'[0])
+      $expectedMB = [int]([math]::Round($expectedBytes / 1MB))
+    }
+  } catch {
+    # Non-fatal: continue without expected size check
+  }
+
   Write-Host "[get ] $url"
-  Invoke-WebRequest -Uri $url -OutFile $targetFile
+  try {
+    Invoke-WebRequest -Uri $url -OutFile $targetFile -UseBasicParsing
+  } catch {
+    Write-Host "[fail] Download failed: $url"
+    if (Test-Path $targetFile) { Remove-Item $targetFile -Force }
+    throw
+  }
 
   $newMB = [int]([math]::Round((Get-Item $targetFile).Length / 1MB))
   if ($newMB -lt $m.MinMB) {
-    throw "Download too small for $($m.File): $newMB MB"
+    Write-Error "Download too small for $($m.File): $newMB MB (minimum: $($m.MinMB) MB)"
+    Remove-Item $targetFile -Force
+    throw "Download validation failed"
   }
-  Write-Host "[ ok ] $targetFile ($newMB MB)"
+  if ($expectedMB -gt 0 -and $newMB -lt [int]($expectedMB * 0.95)) {
+    Write-Error "Download incomplete for $($m.File): $newMB MB (expected ~$expectedMB MB)"
+    Remove-Item $targetFile -Force
+    throw "Download validation failed"
+  }
+  if ($expectedMB -gt 0) {
+    Write-Host "[ ok ] $targetFile ($newMB MB of ~$expectedMB MB)"
+  } else {
+    Write-Host "[ ok ] $targetFile ($newMB MB)"
+  }
 }
 
 Write-Host "Done."

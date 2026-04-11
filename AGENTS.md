@@ -62,6 +62,9 @@ The repo is broader than a coding-focused local setup. It should support:
 - INI sections use lowercase and hyphens
 - OpenCode skills must live in `.opencode/skills/<name>/SKILL.md`
 - OpenCode agent markdown should stay narrow and operationally useful
+- Skill authoring guide: `docs/skills/AUTHORING.md`
+- Skill template: `templates/skill/SKILL.md`
+- Agent template: `templates/agent/agent.md`
 
 ## ErrorHandling
 
