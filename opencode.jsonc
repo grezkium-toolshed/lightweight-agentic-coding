@@ -75,6 +75,12 @@
             "context": 131072,
             "output": 8192
           }
+        },
+        "gemma-4-31b-bf16": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
         }
       },
       "options": {

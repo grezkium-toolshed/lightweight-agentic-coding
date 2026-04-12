@@ -18,8 +18,8 @@ fi
 # Extract profiles from bash: case statement entries like "  16gb)" (skip --profile and *)
 sh_profiles="$(grep -E '^[[:space:]]+[a-z0-9-]+\)' "$SH_FILE" | tr -d ' \t)' | grep -vE '^--|^\*$' | sort -u)"
 
-# Extract profiles from PowerShell: switch entries like "  '16gb' {"
-ps1_profiles="$(grep -E "^[[:space:]]+'[a-z0-9-]+'" "$PS1_FILE" | sed "s/^[[:space:]]*'//" | sed "s/'.*//" | sort -u)"
+# Extract profiles from PowerShell: switch entries like "  '16gb' {" (require opening brace)
+ps1_profiles="$(grep -E "^[[:space:]]+'[a-z0-9-]+'\s*\{" "$PS1_FILE" | sed "s/^[[:space:]]*'//" | sed "s/'.*//" | sort -u)"
 
 # Compare
 sh_only="$(comm -23 <(echo "$sh_profiles") <(echo "$ps1_profiles"))"

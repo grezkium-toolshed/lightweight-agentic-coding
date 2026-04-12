@@ -6,8 +6,6 @@ AI_CLUSTER_PORT="${AI_CLUSTER_PORT:-8080}"
 BASE_URL="http://127.0.0.1:$AI_CLUSTER_PORT"
 TIMEOUT="${SMOKE_TIMEOUT:-30}"
 
-err=0
-
 echo "=== Smoke Test ==="
 echo "Server: $BASE_URL"
 echo "Timeout: ${TIMEOUT}s"
@@ -83,7 +81,7 @@ case "$has_content" in
   parse_error)
     echo "[fail] Failed to parse chat completion response"
     echo "  Response: ${chat_resp:0:200}"
-    err=1
+    exit 1
     ;;
 esac
 
@@ -97,8 +95,4 @@ else
 fi
 
 echo ""
-if [[ "$err" -ne 0 ]]; then
-  echo "=== Smoke test FAILED ==="
-  exit 1
-fi
 echo "=== Smoke test PASSED ==="
