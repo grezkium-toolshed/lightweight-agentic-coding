@@ -9,3 +9,4 @@ Read next:
 - `AUTHENTICATION.md`
 - `FREE_CLOUD_FALLBACKS.md`
 - `NVIDIA_NIM.md`
+- `OPENROUTER_FREE.md`

@@ -1,4 +1,4 @@
-# Usage: ./switch-profile.ps1 -Profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax|gemma-16gb|gemma-24gb|gemma-32gb|gemma-64gb>
+# Usage: ./switch-profile.ps1 -Profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax|gemma-16gb|gemma-24gb|gemma-32gb|gemma-64gb|openrouter>
 param(
   [Parameter(Mandatory=$true)][string]$Profile
 )

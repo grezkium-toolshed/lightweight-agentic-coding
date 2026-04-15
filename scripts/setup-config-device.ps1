@@ -29,14 +29,20 @@ switch ($Profile) {
   'gemma-24gb' { $model = 'gemma-4-31b-q4' }
   'gemma-32gb' { $model = 'gemma-4-31b-q8' }
   'gemma-64gb' { $model = 'gemma-4-31b-bf16' }
+  'openrouter' { $model = 'openrouter/qwen/qwen3-coder:480b-free' }
   default { throw "Unsupported profile: $Profile" }
 }
 
 $raw = Get-Content $ConfigPath -Raw
 $jsonLike = ($raw -split "`n" | Where-Object { -not ($_.TrimStart().StartsWith('//')) }) -join "`n"
 $obj = $jsonLike | ConvertFrom-Json
-$obj.model = "local-cluster/$model"
-$obj.provider.'local-cluster'.options.baseURL = 'http://127.0.0.1:8080/v1'
+$obj.model = $model
+if ($Profile -eq 'openrouter') {
+  $obj.provider.openrouter.options.baseURL = 'https://openrouter.ai/api/v1'
+} else {
+  $obj.model = "local-cluster/$model"
+  $obj.provider.'local-cluster'.options.baseURL = 'http://127.0.0.1:8080/v1'
+}
 $obj | ConvertTo-Json -Depth 10 | Set-Content $ConfigPath
 
 Write-Host "Wrote: $Active"

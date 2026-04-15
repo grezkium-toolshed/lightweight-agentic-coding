@@ -251,6 +251,18 @@
             "context": 131072,
             "output": 8192
           }
+        },
+        "openai/gpt-4o-mini:free": {
+          "limit": {
+            "context": 131072,
+            "output": 8192
+          }
+        },
+        "google/gemini-2.0-flash-exp:free": {
+          "limit": {
+            "context": 131072,
+            "output": 8192
+          }
         }
       },
       "options": {

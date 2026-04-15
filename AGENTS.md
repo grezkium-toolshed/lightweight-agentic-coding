@@ -35,6 +35,7 @@ Windows:
 ```bash
 ./scripts/setup-models-device.sh --profile 24gb
 ./scripts/setup-config-device.sh --profile 24gb
+./scripts/setup-config-device.sh --profile openrouter  # cloud-only
 ```
 
 Windows:

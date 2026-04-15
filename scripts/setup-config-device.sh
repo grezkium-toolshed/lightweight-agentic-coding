@@ -7,7 +7,7 @@ AI_MODELS_DIR="${AI_MODELS_DIR:-$AI_CLUSTER_ROOT/models}"
 OPENCODE_CONFIG_PATH="${OPENCODE_CONFIG_PATH:-$AI_CLUSTER_ROOT/opencode.jsonc}"
 
 usage() {
-  echo "Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax|gemma-16gb|gemma-24gb|gemma-32gb|gemma-64gb>"
+  echo "Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax|gemma-16gb|gemma-24gb|gemma-32gb|gemma-64gb|openrouter>"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -54,6 +54,9 @@ case "$PROFILE" in
   gemma-24gb) default_model="gemma-4-31b-q4" ;;
   gemma-32gb) default_model="gemma-4-31b-q8" ;;
   gemma-64gb) default_model="gemma-4-31b-bf16" ;;
+  openrouter)
+    default_model="openrouter/qwen/qwen3-coder:480b-free"
+    ;;
   *)
     echo "Unsupported profile: $PROFILE" >&2
     exit 1
@@ -67,8 +70,11 @@ p=Path(r"$OPENCODE_CONFIG_PATH")
 text=p.read_text()
 clean='\n'.join([line for line in text.splitlines() if not line.strip().startswith('//')])
 obj=json.loads(clean)
-obj['model']=f"local-cluster/$default_model"
-obj['provider']['local-cluster']['options']['baseURL']="http://127.0.0.1:8080/v1"
+obj['model']="$default_model"
+if "$PROFILE" == "openrouter":
+  obj['provider']['openrouter']['options']['baseURL']="https://openrouter.ai/api/v1"
+else:
+  obj['provider']['local-cluster']['options']['baseURL']="http://127.0.0.1:8080/v1"
 p.write_text(json.dumps(obj, indent=2)+"\n")
 PY
 

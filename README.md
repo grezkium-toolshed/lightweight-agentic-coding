@@ -58,6 +58,7 @@ Use Claude Code via the templates under `templates/claude-code/` when lower setu
 - `gemma-24gb`: Gemma 4 31B (Q4) + 26B-A4B (Q4) fallback
 - `gemma-32gb`: Gemma 4 31B (Q8) + 26B-A4B (Q4) fallback
 - `gemma-64gb`: Gemma 4 31B (BF16) + 31B (Q8) + 26B-A4B (Q4)
+- `openrouter`: Cloud-only, zero downloads — uses OpenRouter free tier via `opencode.jsonc`
 
 The 128GB tiers follow a practical `<=115GB` effective memory usage policy to preserve headroom.
 
@@ -76,6 +77,13 @@ Gemma 4 quick start:
 ./scripts/setup-models-device.sh --profile gemma-24gb
 ./scripts/setup-config-device.sh --profile gemma-24gb
 ./scripts/launch-llama.sh
+./scripts/launch-opencode.sh
+```
+
+OpenRouter quick start (cloud-only, no downloads):
+
+```bash
+./scripts/setup-config-device.sh --profile openrouter
 ./scripts/launch-opencode.sh
 ```
 
@@ -106,6 +114,13 @@ Gemma 4 quick start:
 ./scripts/setup-models-device.ps1 -Profile gemma-24gb
 ./scripts/setup-config-device.ps1 -Profile gemma-24gb
 ./scripts/launch-llama.ps1
+./scripts/launch-opencode.ps1
+```
+
+OpenRouter quick start (cloud-only, no downloads):
+
+```powershell
+./scripts/setup-config-device.ps1 -Profile openrouter
 ./scripts/launch-opencode.ps1
 ```
 
@@ -175,6 +190,13 @@ These are designed to make the cluster useful for office work immediately, not o
 
 Kudos to **@vava-nessa** for the free model index and NIM helper tooling:
 https://github.com/vava-nessa/free-coding-models
+
+## Related projects
+
+These external projects are not part of this repo but may be useful depending on your workflow:
+
+- **[get-shit-done](https://github.com/gsd-build/get-shit-done)** — structured Discuss → Plan → Execute → Verify → Ship workflow with context engineering. This repo includes a lightweight adaptation at `.opencode/skills/gsd/SKILL.md`.
+- **[oh-my-opencode-slim](https://github.com/alvinunreal/oh-my-opencode-slim)** — multi-agent orchestration suite with model mixing, auto-delegation, and curated AI workflows. Useful if you want heavier orchestration than this repo provides. Note: requires separate API billing (OpenAI Plus ≠ API credits).
 
 ## Important docs
 - `RELEASE_CHECKLIST.md`
