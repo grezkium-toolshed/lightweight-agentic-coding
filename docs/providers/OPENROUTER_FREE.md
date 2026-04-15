@@ -14,6 +14,9 @@ The `openrouter` provider block in `opencode.jsonc` includes:
 | `openai/gpt-oss-120b:free` | Open-weight large model. Good general-purpose fallback. |
 | `openai/gpt-oss-20b:free` | Smaller, faster variant. Lower quality but very responsive. |
 | `nvidia/nemotron-3-nano-30b-a3b:free` | Nvidia's open model. Decent quality for its size. |
+| `meta-llama/llama-3.3-70b-instruct:free` | Llama 3.3 70B — strong general-purpose model. |
+| `z-ai/glm-4.5-air:free` | GLM 4.5 Air — S+ tier coding model, strong reasoning. |
+| `qwen/qwen3-next-80b-a3b-instruct:free` | Qwen3 Next 80B MoE — next-gen coding and reasoning. |
 
 ## Rate Limits and Caveats
 

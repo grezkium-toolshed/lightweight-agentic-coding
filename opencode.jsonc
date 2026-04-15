@@ -204,6 +204,36 @@
             "context": 128000,
             "output": 8192
           }
+        },
+        "moonshotai/kimi-k2.5": {
+          "limit": {
+            "context": 128000,
+            "output": 12288
+          }
+        },
+        "minimaxai/minimax-m2.1": {
+          "limit": {
+            "context": 200000,
+            "output": 12288
+          }
+        },
+        "deepseek-ai/deepseek-v3.1-terminus": {
+          "limit": {
+            "context": 128000,
+            "output": 12288
+          }
+        },
+        "qwen/qwen3-235b-a22b": {
+          "limit": {
+            "context": 128000,
+            "output": 12288
+          }
+        },
+        "mistralai/devstral-2-123b-instruct-2512": {
+          "limit": {
+            "context": 256000,
+            "output": 16384
+          }
         }
       },
       "options": {
@@ -259,6 +289,24 @@
           }
         },
         "google/gemini-2.0-flash-exp:free": {
+          "limit": {
+            "context": 131072,
+            "output": 8192
+          }
+        },
+        "meta-llama/llama-3.3-70b-instruct:free": {
+          "limit": {
+            "context": 131072,
+            "output": 8192
+          }
+        },
+        "z-ai/glm-4.5-air:free": {
+          "limit": {
+            "context": 131072,
+            "output": 8192
+          }
+        },
+        "qwen/qwen3-next-80b-a3b-instruct:free": {
           "limit": {
             "context": 131072,
             "output": 8192
