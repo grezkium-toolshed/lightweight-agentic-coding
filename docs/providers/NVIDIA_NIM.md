@@ -16,6 +16,11 @@ This repo includes an `nvidia-nim` provider block in `opencode.jsonc` using the 
 - `openai/gpt-oss-120b`
 - `meta/llama-3.3-70b-instruct`
 - `nvidia/nemotron-3-nano-30b-a3b`
+- `moonshotai/kimi-k2.5`
+- `minimaxai/minimax-m2.1`
+- `deepseek-ai/deepseek-v3.1-terminus`
+- `qwen/qwen3-235b-a22b`
+- `mistralai/devstral-2-123b-instruct-2512`
 
 Availability can change. Treat these as starter examples, then refresh against current NIM catalogs and your own account limits.
 
