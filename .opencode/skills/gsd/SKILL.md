@@ -5,6 +5,7 @@ license: MIT
 compatibility: opencode
 metadata:
   audience: maintainers
+  output: execution-plan-and-status
   workflow: planning
 ---
 ## What I do

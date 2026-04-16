@@ -22,6 +22,9 @@ The `openrouter` provider block in `opencode.jsonc` includes:
 | `openai/gpt-4o-mini:free` | GPT-4o Mini — fast general-purpose model. |
 | `google/gemini-2.0-flash-exp:free` | Gemini 2.0 Flash — strong general-purpose with large context. |
 
+Canonical default model ID for the `openrouter` profile is:
+- `qwen/qwen3-coder:480b-free`
+
 ## Rate Limits and Caveats
 
 - **Rate limits apply**: Free models have per-minute and per-day request limits. Heavy usage will hit `429 Too Many Requests`.

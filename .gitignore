@@ -16,6 +16,8 @@ backup-configs/
 *.bak
 *.backup.*
 runtime-config/presets.active.ini
+runtime-config/active-profile.txt
+runtime-config/opencode.active.json
 
 # Local tool state
 .sisyphus/
@@ -23,6 +25,8 @@ runtime-config/presets.active.ini
 .opencode/package.json
 .opencode/package-lock.json
 .opencode/node_modules/
+.claude/
+.qwen/
 *.log
 *.tmp
 

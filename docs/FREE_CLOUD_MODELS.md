@@ -98,7 +98,7 @@ Kudos to **@vava-nessa** for the free model index and NIM helper tooling.
 
 | Model ID | Label | Tier | SWE | Context |
 |---|---|---|---|---|
-| `qwen/qwen3-coder:free` | Qwen3 Coder 480B | S+ | 70.6% | 262k |
+| `qwen/qwen3-coder:480b-free` | Qwen3 Coder 480B | S+ | 70.6% | 262k |
 | `z-ai/glm-4.5-air:free` | GLM 4.5 Air | S+ | 72.0% | 128k |
 | `google/gemma-3-27b-it:free` | Gemma 3 27B | B | 22.0% | 128k |
 | `stepfun/step-3.5-flash:free` | Step 3.5 Flash | S+ | 74.4% | 256k |
@@ -170,4 +170,3 @@ Kudos to **@vava-nessa** for the free model index and NIM helper tooling.
 | `sonar-reasoning` | Sonar Reasoning | A | 45.0% | 128k |
 | `sonar-pro` | Sonar Pro | B+ | 32.0% | 128k |
 | `sonar` | Sonar | B | 25.0% | 128k |
-

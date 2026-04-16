@@ -70,6 +70,11 @@ switch ($Profile) {
     $models += @{Dir='gemma4'; File='gemma-4-31B-IT-Q8_0.gguf'; Repo='unsloth/gemma-4-31B-IT-GGUF'; Remote='gemma-4-31B-IT-Q8_0.gguf'; MinMB=32000}
     $models += @{Dir='gemma4'; File='gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf'; Repo='unsloth/gemma-4-26B-A4B-IT-GGUF'; Remote='gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf'; MinMB=15000}
   }
+  'openrouter' {
+    Write-Host 'Profile: openrouter'
+    Write-Host 'No local model downloads are required for the cloud-only openrouter profile.'
+    exit 0
+  }
   default { throw "Unsupported profile: $Profile" }
 }
 

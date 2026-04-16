@@ -520,7 +520,7 @@
   ],
   "openrouter": [
     {
-      "id": "qwen/qwen3-coder:free",
+      "id": "qwen/qwen3-coder:480b-free",
       "label": "Qwen3 Coder 480B",
       "tier": "S+",
       "swe": "70.6%",

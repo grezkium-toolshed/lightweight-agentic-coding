@@ -3,6 +3,8 @@ set -euo pipefail
 
 AI_CLUSTER_ROOT="${AI_CLUSTER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 AI_CLUSTER_PORT="${AI_CLUSTER_PORT:-8080}"
+PROFILE_MANIFEST_PATH="${PROFILE_MANIFEST_PATH:-$AI_CLUSTER_ROOT/runtime-config/profiles.json}"
+ACTIVE_PROFILE_PATH="${ACTIVE_PROFILE_PATH:-$AI_CLUSTER_ROOT/runtime-config/active-profile.txt}"
 BASE_URL="http://127.0.0.1:$AI_CLUSTER_PORT"
 TIMEOUT="${SMOKE_TIMEOUT:-30}"
 
@@ -10,6 +12,23 @@ echo "=== Smoke Test ==="
 echo "Server: $BASE_URL"
 echo "Timeout: ${TIMEOUT}s"
 echo ""
+
+if [[ -f "$ACTIVE_PROFILE_PATH" && -f "$PROFILE_MANIFEST_PATH" ]]; then
+  active_profile="$(tr -d '\r\n' < "$ACTIVE_PROFILE_PATH")"
+  runtime_mode="$(python3 - << PY
+import json
+from pathlib import Path
+
+manifest = json.loads(Path(r"$PROFILE_MANIFEST_PATH").read_text(encoding="utf-8"))
+profile = manifest["profiles"].get(r"$active_profile", {})
+print(profile.get("runtime_mode", "local"))
+PY
+)"
+  if [[ "$runtime_mode" == "cloud" ]]; then
+    echo "[skip] Active profile '$active_profile' is cloud-only; local llama-server smoke test not required."
+    exit 0
+  fi
+fi
 
 # 1. Check server health
 echo "[1/4] Checking health endpoint..."
@@ -87,8 +106,8 @@ esac
 
 # 4. Report profile info if available
 echo "[4/4] Checking active profile..."
-if [[ -f "$AI_CLUSTER_ROOT/runtime-config/active-profile.txt" ]]; then
-  profile="$(cat "$AI_CLUSTER_ROOT/runtime-config/active-profile.txt")"
+if [[ -f "$ACTIVE_PROFILE_PATH" ]]; then
+  profile="$(cat "$ACTIVE_PROFILE_PATH")"
   echo "[ok]  Active profile: $profile"
 else
   echo "[warn] No active profile found (run setup-config-device.sh first)"

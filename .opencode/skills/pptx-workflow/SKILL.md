@@ -6,6 +6,7 @@ compatibility: opencode
 metadata:
   audience: office
   output: pptx
+  workflow: office-deck-generation
 ---
 ## What I do
 - Create `.pptx` decks from outlines or narrative goals
@@ -27,3 +28,7 @@ Use this for investor decks, internal updates, roadmap reviews, and workshop mat
 - Avoid claiming polished visual design unless a template exists or the deck was reviewed visually.
 - Keep charts/tables simple unless source data is reliable.
 - Treat decks as communication tools, not document dumps.
+
+## Notes
+- Expected output shape: audience-aware slide outline, generated deck updates, and limitations.
+- If a branded template is required, request it before doing detailed visual work.

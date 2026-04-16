@@ -82,15 +82,17 @@ Manual validation:
 1. `./scripts/doctor.sh`
 2. `curl http://127.0.0.1:8080/health`
 3. `curl http://127.0.0.1:8080/v1/models`
-4. launch OpenCode with root config
-5. verify `.opencode/agents` and `.opencode/skills` are recognized when using OpenCode
+4. run `./scripts/setup-config-device.sh --profile <profile>` to generate runtime config
+5. launch OpenCode with generated config
+6. verify `.opencode/agents` and `.opencode/skills` are recognized when using OpenCode
 
 ## ConfigurationFileLocations
 
-- `opencode.jsonc`: canonical OpenCode config
+- `opencode.jsonc`: source template for generated OpenCode config
 - `.opencode/agents/`: curated subagents
 - `.opencode/skills/`: curated skills
 - `runtime-config/presets/<profile>.ini`: template presets
 - `runtime-config/presets.active.ini`: active preset
-- `runtime-config/active-profile.txt`: selected profile
+- `runtime-config/active-profile.txt`: generated selected profile marker
+- `runtime-config/opencode.active.json`: generated OpenCode runtime config
 - `scripts/`: setup, switch, launch, doctor, and sync scripts

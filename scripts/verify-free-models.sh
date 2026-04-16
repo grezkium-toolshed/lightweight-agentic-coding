@@ -52,7 +52,13 @@ check_model() {
   esac
 
   if [[ -z "$api_key" ]]; then
-    echo "  [?] $model_id — no API key set (set ${provider}_API_KEY)"
+    if [[ "$provider" == "openrouter" ]]; then
+      echo "  [?] $model_id — no API key set (set OPENROUTER_API_KEY)"
+    elif [[ "$provider" == "nvidia-nim" ]]; then
+      echo "  [?] $model_id — no API key set (set NVIDIA_API_KEY)"
+    else
+      echo "  [?] $model_id — no API key set"
+    fi
     return
   fi
 

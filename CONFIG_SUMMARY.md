@@ -2,10 +2,12 @@
 
 ## Canonical runtime config
 
-- `opencode.jsonc`: canonical OpenCode config
+- `opencode.jsonc`: source template for OpenCode config in this repo
 - `runtime-config/presets/<profile>.ini`: profile templates
-- `runtime-config/presets.active.ini`: active llama.cpp preset
-- `runtime-config/active-profile.txt`: selected profile
+- `runtime-config/presets.active.ini`: generated active llama.cpp preset
+- `runtime-config/active-profile.txt`: generated selected profile marker
+- `runtime-config/opencode.active.json`: generated OpenCode runtime config
+- `runtime-config/logs/`: generated runtime logs
 
 ## OpenCode config choices
 
@@ -24,7 +26,11 @@ OpenCode automatically discovers:
 - `.opencode/agents/*.md`
 - `.opencode/skills/*/SKILL.md`
 
-This repo uses those directories for the curated agent and skill layer.
+This repo uses those directories as the canonical runtime asset layer.
+
+Maintainer index directories:
+- `agents/`
+- `skills/`
 
 ## Logging and monitoring
 

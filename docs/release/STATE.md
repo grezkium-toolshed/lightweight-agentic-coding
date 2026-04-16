@@ -4,6 +4,8 @@ Track progress toward public beta release. Updated as work progresses.
 
 ## Current Phase: Pre-beta refinement
 
+Release index: `docs/release/README.md`
+
 ### Scope
 - Complete pre-beta quality improvements
 - Validate documented onboarding paths on real hardware
@@ -22,11 +24,11 @@ Track progress toward public beta release. Updated as work progresses.
 - [x] OpenRouter hardware profile added (cloud-only, zero downloads)
 - [x] Skill and agent authoring templates created
 - [x] Smoke test and profile sync scripts added
+- [x] CI workflow added at `.github/workflows/ci.yml`
 
 ### Deferred (post-beta)
 - Performance telemetry
 - Profile composition (mix local + cloud in one profile)
-- CI pipeline
 - Structured feedback loop
 
 ### Next Session

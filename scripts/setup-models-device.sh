@@ -7,7 +7,7 @@ AI_MODELS_DIR="${AI_MODELS_DIR:-$AI_CLUSTER_ROOT/models}"
 
 usage() {
   cat << USAGE
-Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax|gemma-16gb|gemma-24gb|gemma-32gb|gemma-64gb>
+Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax|gemma-16gb|gemma-24gb|gemma-32gb|gemma-64gb|openrouter>
 
 Environment overrides:
   AI_CLUSTER_ROOT  Base repository path (default: script parent)
@@ -107,6 +107,11 @@ case "$PROFILE" in
     MODELS+=("gemma4|gemma-4-31B-IT-BF16.gguf|unsloth/gemma-4-31B-IT-GGUF|gemma-4-31B-IT-BF16.gguf|60000")
     MODELS+=("gemma4|gemma-4-31B-IT-Q8_0.gguf|unsloth/gemma-4-31B-IT-GGUF|gemma-4-31B-IT-Q8_0.gguf|32000")
     MODELS+=("gemma4|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|unsloth/gemma-4-26B-A4B-IT-GGUF|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|15000")
+    ;;
+  openrouter)
+    echo "Profile: openrouter"
+    echo "No local model downloads are required for the cloud-only openrouter profile."
+    exit 0
     ;;
   *)
     echo "Unsupported profile: $PROFILE" >&2

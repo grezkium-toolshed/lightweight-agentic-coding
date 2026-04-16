@@ -3,12 +3,24 @@ $ErrorActionPreference = 'Stop'
 $Root = if ($env:AI_CLUSTER_ROOT) { $env:AI_CLUSTER_ROOT } else { Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path) }
 $Port = if ($env:AI_CLUSTER_PORT) { $env:AI_CLUSTER_PORT } else { 8080 }
 $Timeout = if ($env:SMOKE_TIMEOUT) { [int]$env:SMOKE_TIMEOUT } else { 30 }
+$ManifestPath = Join-Path $Root 'runtime-config/profiles.json'
+$ActiveProfilePath = Join-Path $Root 'runtime-config/active-profile.txt'
 $BaseUrl = "http://127.0.0.1:$Port"
 
 Write-Host "=== Smoke Test ==="
 Write-Host "Server: $BaseUrl"
 Write-Host "Timeout: ${Timeout}s"
 Write-Host ""
+
+if ((Test-Path $ActiveProfilePath) -and (Test-Path $ManifestPath)) {
+  $manifest = Get-Content $ManifestPath -Raw | ConvertFrom-Json
+  $activeProfile = (Get-Content $ActiveProfilePath -Raw).Trim()
+  $profileData = $manifest.profiles.$activeProfile
+  if ($profileData -and $profileData.runtime_mode -eq 'cloud') {
+    Write-Host "[skip] Active profile '$activeProfile' is cloud-only; local llama-server smoke test not required."
+    exit 0
+  }
+}
 
 # 1. Check server health
 Write-Host "[1/4] Checking health endpoint..."
@@ -60,9 +72,8 @@ try {
 
 # 4. Report profile info if available
 Write-Host "[4/4] Checking active profile..."
-$profilePath = Join-Path $Root 'runtime-config/active-profile.txt'
-if (Test-Path $profilePath) {
-  $profile = Get-Content $profilePath
+if (Test-Path $ActiveProfilePath) {
+  $profile = Get-Content $ActiveProfilePath
   Write-Host "[ok]  Active profile: $profile"
 } else {
   Write-Host "[warn] No active profile found (run setup-config-device.ps1 first)"

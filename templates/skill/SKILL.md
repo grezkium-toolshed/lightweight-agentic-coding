@@ -6,6 +6,7 @@ compatibility: opencode
 metadata:
   audience: target-audience
   output: output-type
+  workflow: workflow-type
 ---
 ## What I do
 - Bullet 1: core capability
@@ -29,3 +30,4 @@ Describe the scenarios this skill handles. Be specific — e.g., "monthly budget
 
 ## Notes
 Mention any dependencies, limitations, or edge cases the agent should know about.
+Include the expected output shape when helpful.

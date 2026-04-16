@@ -5,6 +5,8 @@ AI_CLUSTER_ROOT="${AI_CLUSTER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && 
 LLAMA_SERVER_BIN="${LLAMA_SERVER_BIN:-llama-server}"
 AI_CLUSTER_PORT="${AI_CLUSTER_PORT:-8080}"
 PRESET_FILE="${PRESET_FILE:-$AI_CLUSTER_ROOT/runtime-config/presets.active.ini}"
+PROFILE_MANIFEST_PATH="${PROFILE_MANIFEST_PATH:-$AI_CLUSTER_ROOT/runtime-config/profiles.json}"
+ACTIVE_PROFILE_PATH="${ACTIVE_PROFILE_PATH:-$AI_CLUSTER_ROOT/runtime-config/active-profile.txt}"
 LOG_DIR="$AI_CLUSTER_ROOT/runtime-config/logs"
 LOG_FILE="$LOG_DIR/llama-server.log"
 SHOW_LOGS=false
@@ -31,6 +33,30 @@ done
 if [[ ! -f "$PRESET_FILE" ]]; then
   echo "Missing presets file: $PRESET_FILE" >&2
   echo "Run scripts/setup-config-device.sh first." >&2
+  exit 1
+fi
+
+if [[ -f "$ACTIVE_PROFILE_PATH" && -f "$PROFILE_MANIFEST_PATH" ]]; then
+  active_profile="$(cat "$ACTIVE_PROFILE_PATH")"
+  runtime_mode="$(python3 - << PY
+import json
+from pathlib import Path
+
+manifest = json.loads(Path(r"$PROFILE_MANIFEST_PATH").read_text(encoding="utf-8"))
+profile = manifest["profiles"].get(r"$active_profile", {})
+print(profile.get("runtime_mode", "local"))
+PY
+)"
+  if [[ "$runtime_mode" == "cloud" ]]; then
+    echo "Active profile '$active_profile' is cloud-only; no local llama-server launch is required."
+    echo "Use scripts/launch-opencode.sh after setup-config-device."
+    exit 0
+  fi
+fi
+
+if ! command -v screen >/dev/null 2>&1; then
+  echo "Missing required dependency: screen" >&2
+  echo "Install screen or launch llama-server manually with $PRESET_FILE." >&2
   exit 1
 fi
 

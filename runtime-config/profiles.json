@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "profiles": {
+    "16gb": {
+      "label": "16 GB local starter",
+      "preset": "runtime-config/presets/16gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "default_model": "local-cluster/qwen3.5-9b-q4",
+      "small_model": "local-cluster/qwen3.5-9b-q4"
+    },
+    "24gb": {
+      "label": "24 GB local balanced",
+      "preset": "runtime-config/presets/24gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "default_model": "local-cluster/qwen3.5-27b-q4",
+      "small_model": "local-cluster/qwen3.5-9b-q4"
+    },
+    "32gb": {
+      "label": "32 GB local stronger",
+      "preset": "runtime-config/presets/32gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "default_model": "local-cluster/qwen3.5-35b-a3b-q4",
+      "small_model": "local-cluster/qwen3.5-27b-q4"
+    },
+    "64gb": {
+      "label": "64 GB local multi-model",
+      "preset": "runtime-config/presets/64gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "default_model": "local-cluster/qwen3.5-35b-a3b-q4",
+      "small_model": "local-cluster/qwen3.5-27b-q4"
+    },
+    "128gb-multi": {
+      "label": "128 GB multi-model local",
+      "preset": "runtime-config/presets/128gb-multi.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "default_model": "local-cluster/qwen3.5-35b-a3b-q4",
+      "small_model": "local-cluster/qwen3.5-27b-q4"
+    },
+    "128gb-qwen122b": {
+      "label": "128 GB Qwen 122B local",
+      "preset": "runtime-config/presets/128gb-qwen122b.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "default_model": "local-cluster/qwen3.5-122b-a10b",
+      "small_model": "local-cluster/qwen3.5-122b-a10b"
+    },
+    "128gb-minimax": {
+      "label": "128 GB MiniMax local",
+      "preset": "runtime-config/presets/128gb-minimax.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "default_model": "local-cluster/minimax-m2.5",
+      "small_model": "local-cluster/minimax-m2.5"
+    },
+    "gemma-16gb": {
+      "label": "16 GB Gemma local",
+      "preset": "runtime-config/presets/gemma-16gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "default_model": "local-cluster/gemma-4-26b-a4b-q4",
+      "small_model": "local-cluster/gemma-4-e4b-q8"
+    },
+    "gemma-24gb": {
+      "label": "24 GB Gemma local",
+      "preset": "runtime-config/presets/gemma-24gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "default_model": "local-cluster/gemma-4-31b-q4",
+      "small_model": "local-cluster/gemma-4-26b-a4b-q4"
+    },
+    "gemma-32gb": {
+      "label": "32 GB Gemma local",
+      "preset": "runtime-config/presets/gemma-32gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "default_model": "local-cluster/gemma-4-31b-q8",
+      "small_model": "local-cluster/gemma-4-26b-a4b-q4"
+    },
+    "gemma-64gb": {
+      "label": "64 GB Gemma local",
+      "preset": "runtime-config/presets/gemma-64gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "default_model": "local-cluster/gemma-4-31b-bf16",
+      "small_model": "local-cluster/gemma-4-26b-a4b-q4"
+    },
+    "openrouter": {
+      "label": "OpenRouter cloud-only",
+      "preset": "runtime-config/presets/openrouter.ini",
+      "runtime_mode": "cloud",
+      "local_runtime_required": false,
+      "downloads_required": false,
+      "default_model": "openrouter/qwen/qwen3-coder:480b-free",
+      "small_model": "openrouter/openai/gpt-4o-mini:free"
+    }
+  }
+}

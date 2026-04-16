@@ -6,6 +6,7 @@ compatibility: opencode
 metadata:
   audience: office
   output: docx
+  workflow: office-doc-generation
 ---
 ## What I do
 - Draft `.docx` documents from structured requirements

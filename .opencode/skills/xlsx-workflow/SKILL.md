@@ -6,6 +6,7 @@ compatibility: opencode
 metadata:
   audience: office
   output: xlsx
+  workflow: office-spreadsheet-workflow
 ---
 ## What I do
 - Create `.xlsx` workbooks for trackers, models, exports, and summaries
@@ -26,3 +27,7 @@ Use this for financial models, status trackers, planning sheets, imports/exports
 - Do not silently change formulas or references without stating it.
 - Preserve existing sheet names when editing an established workbook unless instructed otherwise.
 - Flag any ambiguity in date formats, currencies, or aggregation logic.
+
+## Notes
+- Expected output shape: workbook updates, formula assumptions, and review flags.
+- Prefer stable workbook structure changes over dense formatting tweaks.

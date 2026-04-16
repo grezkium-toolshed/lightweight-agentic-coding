@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  validate:
+  validate-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,24 +16,17 @@ jobs:
           bash -n verify-*.sh
           bash -n runtime-config/launch/*.sh
 
-      - name: JSON Config Parse Check
-        run: |
-          python3 - << 'PY'
-          import json
-          from pathlib import Path
-          files = [
-              Path('opencode.jsonc'),
-              Path('templates/opencode/opencode.example.jsonc'),
-          ]
-          for p in files:
-              raw = p.read_text(encoding='utf-8')
-              cleaned = '\n'.join([ln for ln in raw.splitlines() if not ln.strip().startswith('//')])
-              json.loads(cleaned)
-              print('OK', p)
-          PY
+      - name: Config Schema Check
+        run: ./scripts/verify-config-schema.sh
 
-      - name: Docs Presence Check
+      - name: Profile and Preset Parity Check
+        run: ./scripts/verify-profiles-sync.sh
+
+      - name: Documentation Consistency Check
         run: ./verify-documentation.sh
+
+      - name: OpenCode Asset Schema Check
+        run: ./scripts/verify-opencode-assets.sh
 
       - name: OpenCode Agent and Skill Presence Check
         run: |
@@ -52,3 +45,39 @@ jobs:
           test -f .github/ISSUE_TEMPLATE/docs_mismatch.md
           test -f .github/ISSUE_TEMPLATE/provider_model_drift.md
           test -f .github/ISSUE_TEMPLATE/hardware_profile_request.md
+
+  validate-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PowerShell Syntax Check
+        shell: pwsh
+        run: |
+          $scripts = Get-ChildItem -Path scripts -Filter *.ps1 -File
+          foreach ($script in $scripts) {
+            $tokens = $null
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile($script.FullName, [ref]$tokens, [ref]$errors)
+            if ($errors.Count -gt 0) {
+              Write-Host "Syntax errors in $($script.FullName):"
+              $errors | ForEach-Object { Write-Host "  $($_.Message)" }
+              exit 1
+            }
+          }
+
+      - name: Config Schema Check
+        shell: bash
+        run: ./scripts/verify-config-schema.sh
+
+      - name: Profile and Preset Parity Check
+        shell: bash
+        run: ./scripts/verify-profiles-sync.sh
+
+      - name: Documentation Consistency Check
+        shell: bash
+        run: ./verify-documentation.sh
+
+      - name: OpenCode Asset Schema Check
+        shell: bash
+        run: ./scripts/verify-opencode-assets.sh

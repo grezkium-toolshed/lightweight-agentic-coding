@@ -30,6 +30,7 @@ compatibility: opencode
 metadata:
   audience: who-uses-this
   output: what-it-produces
+  workflow: how-it-runs
 ---
 ```
 
@@ -39,6 +40,7 @@ metadata:
 - `compatibility`: currently `opencode`
 - `metadata.audience`: category like `office`, `developer`, `research`
 - `metadata.output`: the primary artifact type
+- `metadata.workflow`: concise workflow class (for example `doc-generation`, `research-synthesis`, `analysis-and-review`)
 
 ### Body (Markdown)
 Use the template at `templates/skill/SKILL.md`. Key sections:
@@ -49,7 +51,9 @@ Use the template at `templates/skill/SKILL.md`. Key sections:
 | **When to use me** | Concrete scenarios, not vague descriptions |
 | **Workflow** | Numbered steps the agent follows |
 | **Guardrails** | Constraints and escalation rules |
-| **Notes** | Dependencies, limitations, edge cases |
+| **Notes** | Dependencies, limitations, edge cases, expected output shape |
+
+All five sections above are required. Additional sections are optional when they add value and remain concise.
 
 ## Conventions
 

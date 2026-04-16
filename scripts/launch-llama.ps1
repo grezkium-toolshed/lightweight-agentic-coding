@@ -7,12 +7,27 @@ $ErrorActionPreference = 'Stop'
 $Root = if ($env:AI_CLUSTER_ROOT) { $env:AI_CLUSTER_ROOT } else { Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path) }
 $Port = if ($env:AI_CLUSTER_PORT) { $env:AI_CLUSTER_PORT } else { '8080' }
 $Preset = Join-Path $Root 'runtime-config/presets.active.ini'
+$ManifestPath = Join-Path $Root 'runtime-config/profiles.json'
+$ActiveProfilePath = Join-Path $Root 'runtime-config/active-profile.txt'
 $LlamaBin = if ($env:LLAMA_SERVER_BIN) { $env:LLAMA_SERVER_BIN } else { 'llama-server.exe' }
 $LogDir = Join-Path $Root 'runtime-config/logs'
 $LogFile = Join-Path $LogDir 'llama-server.log'
 $TailHint = -not $NoTailHint
 
 if (-not (Test-Path $Preset)) { throw "Missing preset file: $Preset" }
+if ((Test-Path $ActiveProfilePath) -and (Test-Path $ManifestPath)) {
+  $manifest = Get-Content $ManifestPath -Raw | ConvertFrom-Json
+  $activeProfile = (Get-Content $ActiveProfilePath -Raw).Trim()
+  $profileData = $manifest.profiles.$activeProfile
+  if ($profileData -and $profileData.runtime_mode -eq 'cloud') {
+    Write-Host "Active profile '$activeProfile' is cloud-only; no local llama-server launch is required."
+    Write-Host 'Use scripts/launch-opencode.ps1 after setup-config-device.'
+    exit 0
+  }
+}
+if (-not (Get-Command $LlamaBin -ErrorAction SilentlyContinue)) {
+  throw "llama-server executable not found: $LlamaBin"
+}
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 if (Test-Path $LogFile) {
   Move-Item -Force $LogFile "$LogFile.1"

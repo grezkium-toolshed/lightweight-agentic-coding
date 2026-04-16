@@ -40,7 +40,11 @@ function Check-Model {
   }
 
   if (-not $apiKey) {
-    Write-Host "  [?] $ModelId — no API key set (set ${Provider}_API_KEY)"
+    switch ($Provider) {
+      'openrouter' { Write-Host "  [?] $ModelId — no API key set (set OPENROUTER_API_KEY)" }
+      'nvidia-nim' { Write-Host "  [?] $ModelId — no API key set (set NVIDIA_API_KEY)" }
+      default { Write-Host "  [?] $ModelId — no API key set" }
+    }
     return
   }
 

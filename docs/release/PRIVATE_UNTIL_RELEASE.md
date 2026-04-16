@@ -3,6 +3,7 @@
 This repo is intentionally being prepared for a future public beta release, but it should remain private until the release gates below are complete.
 
 ## Release gates
+- CI workflow (`.github/workflows/ci.yml`) is green for the current branch
 - runtime scripts validated on macOS, Linux, and Windows
 - docs consistent with current files and commands
 - curated agents and skills reviewed for trust and usefulness

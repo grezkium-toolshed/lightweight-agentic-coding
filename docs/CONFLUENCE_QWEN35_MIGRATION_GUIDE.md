@@ -7,7 +7,7 @@ We are broadening our setup from a coding-focused OpenCode cluster into a more g
 ## What Changed
 
 - `oh-my-opencode` is removed from active runtime flow.
-- Root `opencode.jsonc` is now the canonical OpenCode config.
+- Root `opencode.jsonc` is now the source template for generated OpenCode runtime config.
 - We now use profile-based setup scripts for macOS/Linux and Windows.
 - `qwen3-coder-next` remains available as a high-value coding specialist model.
 - Curated OpenCode agents and skills are now part of the repo for review, docs, and office workflows.
@@ -56,8 +56,9 @@ For 128GB environments, defaults are tuned to keep effective usage at or below *
 - Confirm `llama-server` and `opencode` are installed.
 - Confirm selected profile model files exist.
 - Confirm `runtime-config/presets.active.ini` exists.
+- Confirm `runtime-config/opencode.active.json` exists.
 - Confirm health endpoint is reachable.
-- Confirm OpenCode uses root `opencode.jsonc`.
+- Confirm OpenCode uses the generated `runtime-config/opencode.active.json`.
 
 ## Notes for Mixed OS Teams
 

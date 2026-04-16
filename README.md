@@ -42,7 +42,8 @@ Use Claude Code via the templates under `templates/claude-code/` when lower setu
 
 ## Runtime defaults
 - llama.cpp `llama-server`
-- OpenCode project config in `opencode.jsonc`
+- OpenCode source template config in `opencode.jsonc`
+- generated active runtime state under `runtime-config/`
 - Qwen 3.5 profile-based local models
 - free cloud fallback providers for lower-end hardware
 
@@ -139,7 +140,15 @@ Get-Content runtime-config/logs/llama-server.log -Wait -Tail 50
 ## Client paths
 
 ### OpenCode
-Best-supported local path. Uses `opencode.jsonc`, `.opencode/agents/`, and `.opencode/skills/`.
+Best-supported local path.
+
+Runtime asset surface:
+- `.opencode/agents/*.md`
+- `.opencode/skills/*/SKILL.md`
+
+Maintainer index surface:
+- `agents/` (index docs only)
+- `skills/` (index docs only)
 
 ### Claude Code
 Supported through `templates/claude-code/` and reuse of curated agent or skill ideas. This repo does not duplicate the runtime stack for Claude Code.
@@ -156,6 +165,9 @@ Documented as a pattern reference only for now. It is not a first-class runtime 
 - `openrouter`
 
 Use local Qwen 3.5 when you can. Use cloud fallbacks when hardware, onboarding speed, or trial workflows matter more.
+
+OpenRouter profile default model naming is pinned to:
+- `qwen/qwen3-coder:480b-free`
 
 Authentication expectations are documented in `docs/providers/AUTHENTICATION.md`.
 
@@ -209,3 +221,8 @@ These external projects are not part of this repo but may be useful depending on
 - `docs/security/TRUST_MODEL.md`
 - `docs/security/THIRD_PARTY_AGENT_INTAKE.md`
 - `docs/release/BETA_RELEASE_CRITERIA.md`
+- `docs/release/README.md`
+
+## Naming policy
+
+Branding and docs use `local-ai-cluster`. Repository slug and filesystem paths may still use `ai-coding-cluster` during transition. This is expected while pre-release alignment is in progress.
