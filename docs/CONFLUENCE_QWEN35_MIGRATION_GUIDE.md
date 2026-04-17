@@ -2,7 +2,7 @@
 
 ## Why We Are Migrating
 
-We are broadening our setup from a coding-focused OpenCode cluster into a more general **Local AI Cluster** built around **llama.cpp + Qwen 3.5**. This improves portability, reduces configuration drift, supports lower-memory devices, and gives teams a stronger baseline for agentic workflows beyond coding alone.
+We are broadening our setup from a coding-focused OpenCode cluster into a more general **Local AI Cluster** built around **llama.cpp + the Qwen local baseline**. This improves portability, reduces configuration drift, supports lower-memory devices, and gives teams a stronger baseline for agentic workflows beyond coding alone.
 
 ## What Changed
 
@@ -15,13 +15,13 @@ We are broadening our setup from a coding-focused OpenCode cluster into a more g
 
 ## New Hardware Profiles
 
-- `16gb`: 9B profile
-- `24gb`: 27B profile
-- `32gb`: 35B-A3B profile
-- `64gb`: 35B-A3B + coder-next
-- `128gb-multi`: 35B-A3B + coder-next + 27B + 9B
+- `16gb`: small-model Qwen profile
+- `24gb`: balanced Qwen profile
+- `32gb`: Qwen MoE profile
+- `64gb`: Qwen MoE + coder-next
+- `128gb-multi`: Qwen multi-model profile
 - `128gb-qwen122b`: 122B-focused profile
-- `128gb-minimax`: MiniMax-focused profile
+- `128gb-minimax`: MiniMax M2.7 `UD-IQ4_XS` alternative
 
 For 128GB environments, defaults are tuned to keep effective usage at or below **115GB** for stability headroom.
 
@@ -30,19 +30,19 @@ For 128GB environments, defaults are tuned to keep effective usage at or below *
 ### macOS/Linux
 
 ```bash
-./scripts/setup-models-device.sh --profile 24gb
-./scripts/setup-config-device.sh --profile 24gb
-./scripts/launch-llama.sh
-./scripts/launch-opencode.sh
+./bin/lac models sync 24gb
+./bin/lac profile apply 24gb
+./bin/lac runtime start
+./bin/lac client open opencode
 ```
 
 ### Windows PowerShell
 
 ```powershell
-./scripts/setup-models-device.ps1 -Profile 24gb
-./scripts/setup-config-device.ps1 -Profile 24gb
-./scripts/launch-llama.ps1
-./scripts/launch-opencode.ps1
+./bin/lac.ps1 models sync 24gb
+./bin/lac.ps1 profile apply 24gb
+./bin/lac.ps1 runtime start
+./bin/lac.ps1 client open opencode
 ```
 
 ## Rollback Plan
@@ -55,10 +55,10 @@ For 128GB environments, defaults are tuned to keep effective usage at or below *
 
 - Confirm `llama-server` and `opencode` are installed.
 - Confirm selected profile model files exist.
-- Confirm `runtime-config/presets.active.ini` exists.
-- Confirm `runtime-config/opencode.active.json` exists.
+- Confirm `state/runtime/presets.active.ini` exists.
+- Confirm `state/clients/opencode/opencode.json` exists.
 - Confirm health endpoint is reachable.
-- Confirm OpenCode uses the generated `runtime-config/opencode.active.json`.
+- Confirm OpenCode uses the generated `state/clients/opencode/opencode.json`.
 
 ## Notes for Mixed OS Teams
 

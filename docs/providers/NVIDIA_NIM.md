@@ -25,4 +25,4 @@ This repo includes an `nvidia-nim` provider block in `opencode.jsonc` using the 
 Availability can change. Treat these as starter examples, then refresh against current NIM catalogs and your own account limits.
 
 ## Operational note
-Keep local Qwen 3.5 profiles as the default recommendation. NIM is the best fallback when hardware is not enough or a user needs a faster path to adoption.
+Keep local Qwen 3.6 profiles as the default recommendation. NIM is the best fallback when hardware is not enough or a user needs a faster path to adoption.

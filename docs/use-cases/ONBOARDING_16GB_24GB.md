@@ -7,16 +7,16 @@
 
 ## Recommended path
 1. Start with `16gb` or `24gb` profile.
-2. Use local Qwen 3.5 as the default for privacy-sensitive or repeated work.
+2. Use the local Qwen baseline as the default for privacy-sensitive or repeated work.
 3. Add NVIDIA NIM or OpenRouter when you need stronger hosted models or lower local load.
 4. Use the office-oriented skills for docs, spreadsheets, and decks.
 
 ## Good first commands
 ```bash
-./scripts/setup-models-device.sh --profile 24gb
-./scripts/setup-config-device.sh --profile 24gb
-./scripts/launch-llama.sh
-./scripts/launch-opencode.sh
+./bin/lac models sync 24gb
+./bin/lac profile apply 24gb
+./bin/lac runtime start
+./bin/lac client open opencode
 ```
 
 ## What to avoid

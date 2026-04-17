@@ -6,7 +6,7 @@ This repository is a Local AI Cluster:
 - Claude Code is supported here through docs, templates, and reusable workflow patterns
 
 ## Preferred usage model
-- Use local Qwen 3.5 profiles for cost-sensitive and privacy-sensitive work.
+- Use local Qwen 3.6 profiles for cost-sensitive and privacy-sensitive work.
 - Use Anthropic-hosted models when lower operational friction matters more than local execution.
 - Keep agents specialized and short. Prefer a small curated set over broad persona catalogs.
 

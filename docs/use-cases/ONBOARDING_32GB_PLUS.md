@@ -7,7 +7,7 @@
 
 ## Recommended path
 1. Start with `32gb` or `64gb` profile.
-2. Use Qwen 3.5 35B-A3B as the main general model.
+2. Use Qwen 3.6 MoE as the main general model.
 3. Use `qwen3-coder-next` as a specialist for high-value coding work.
 4. Add hosted-model fallbacks only when there is a clear quality or speed benefit.
 
