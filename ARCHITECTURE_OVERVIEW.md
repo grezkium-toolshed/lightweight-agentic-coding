@@ -4,10 +4,11 @@
 
 This repo is a Local AI Cluster, not only a coding-focused local setup.
 
-The architecture is deliberately split into four layers:
+The architecture is deliberately split into five layers:
 - local runtime
-- client integrations
-- curated agents and skills
+- CLI orchestration
+- client adapters
+- curated workflow packs
 - documentation and rollout guidance
 
 ## Local runtime
@@ -15,25 +16,38 @@ The architecture is deliberately split into four layers:
 The runtime stays llama.cpp-first:
 - `llama-server` is the default local API surface
 - profile presets live under `runtime-config/presets/`
-- `runtime-config/presets.active.ini` is generated from the chosen hardware profile
-- Qwen 3.5 is the baseline model family for general work
+- `state/runtime/presets.active.ini` is generated from the chosen hardware profile
+- Qwen 3.6 MoE is the target baseline model family for general work
 - `qwen3-coder-next` remains a specialist model for high-value coding tasks
+
+## CLI orchestration
+
+Version 2 introduces a first-class CLI:
+- `./bin/lac` on Unix-like systems
+- `./bin/lac.ps1` on Windows
+
+This CLI is the supported control plane for:
+- profile selection and generated-state rendering
+- runtime lifecycle operations
+- client adapter rendering
+- doctor and smoke reporting
 
 ## Client integrations
 
 ### OpenCode
-- canonical repo config: `opencode.jsonc`
-- project-local agents: `.opencode/agents/`
-- project-local skills: `.opencode/skills/`
+- canonical repo config template: `opencode.jsonc`
+- rendered config: `state/clients/opencode/opencode.json`
+- runtime assets: `.opencode/agents/` and `.opencode/skills/`
 - best path for local llama.cpp usage and structured agentic workflows
 
 ### Claude Code
 - supported via `templates/claude-code/`
+- rendered reference adapter: `state/clients/claude-code/`
 - positioned as a lower-friction hosted-model path
-- no duplicated runtime launcher stack in this repo
 
 ### Codex
-- treated as a pattern reference rather than a directly integrated client path
+- rendered reference adapter: `state/clients/codex-reference/`
+- treated as a pattern reference rather than a directly integrated runtime path
 
 ## Provider strategy
 
@@ -48,15 +62,17 @@ Included fallback providers in `opencode.jsonc`:
 - NVIDIA NIM
 - OpenRouter free-tier models
 
-## Agent and skill strategy
+## Workflow pack strategy
 
 The repo deliberately avoids a large built-in persona catalog.
 
-Instead it ships:
-- a small curated subagent set for review, docs, and research
-- a small skill set for office workflows and repeatable tasks
+Instead it ships a curated asset catalog plus workflow packs:
+- `coding`
+- `research`
+- `office`
+- `team-rollout`
 
-This keeps the runtime useful without turning the prompt surface into a maintenance burden.
+Pack metadata lives in `catalog/workflow-packs.json`, and individual asset trust/support metadata lives in `catalog/assets.json`.
 
 ## Release posture
 

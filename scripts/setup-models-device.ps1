@@ -12,19 +12,19 @@ $models = @(
 )
 
 switch ($Profile) {
-  '16gb' { $models += @{Dir='qwen3.5'; File='Qwen3.5-9B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.5-9B-GGUF'; Remote='Qwen3.5-9B-UD-Q4_K_XL.gguf'; MinMB=5000} }
+  '16gb' { $models += @{Dir='qwen3'; File='Qwen3-8B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-8B-GGUF'; Remote='Qwen3-8B-UD-Q4_K_XL.gguf'; MinMB=5000} }
   '24gb' {
-    $models += @{Dir='qwen3.5'; File='Qwen3.5-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.5-27B-GGUF'; Remote='Qwen3.5-27B-UD-Q4_K_XL.gguf'; MinMB=12000}
-    $models += @{Dir='qwen3.5'; File='Qwen3.5-9B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.5-9B-GGUF'; Remote='Qwen3.5-9B-UD-Q4_K_XL.gguf'; MinMB=5000}
+    $models += @{Dir='qwen3'; File='Qwen3-14B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-14B-GGUF'; Remote='Qwen3-14B-UD-Q4_K_XL.gguf'; MinMB=9000}
+    $models += @{Dir='qwen3'; File='Qwen3-8B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-8B-GGUF'; Remote='Qwen3-8B-UD-Q4_K_XL.gguf'; MinMB=5000}
   }
   '32gb' {
-    $models += @{Dir='qwen3.5'; File='Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.5-35B-A3B-GGUF'; Remote='Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf'; MinMB=15000}
-    $models += @{Dir='qwen3.5'; File='Qwen3.5-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.5-27B-GGUF'; Remote='Qwen3.5-27B-UD-Q4_K_XL.gguf'; MinMB=12000}
+    $models += @{Dir='qwen3'; File='Qwen3-30B-A3B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-30B-A3B-GGUF'; Remote='Qwen3-30B-A3B-UD-Q4_K_XL.gguf'; MinMB=18000}
+    $models += @{Dir='qwen3'; File='Qwen3-14B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-14B-GGUF'; Remote='Qwen3-14B-UD-Q4_K_XL.gguf'; MinMB=9000}
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
   }
   '64gb' {
-    $models += @{Dir='qwen3.5'; File='Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.5-35B-A3B-GGUF'; Remote='Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf'; MinMB=15000}
-    $models += @{Dir='qwen3.5'; File='Qwen3.5-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.5-27B-GGUF'; Remote='Qwen3.5-27B-UD-Q4_K_XL.gguf'; MinMB=12000}
+    $models += @{Dir='qwen3'; File='Qwen3-30B-A3B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-30B-A3B-GGUF'; Remote='Qwen3-30B-A3B-UD-Q4_K_XL.gguf'; MinMB=18000}
+    $models += @{Dir='qwen3'; File='Qwen3-14B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-14B-GGUF'; Remote='Qwen3-14B-UD-Q4_K_XL.gguf'; MinMB=9000}
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
   }
   '128gb-qwen122b' {
@@ -34,21 +34,20 @@ switch ($Profile) {
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
   }
   '128gb-multi' {
-    $models += @{Dir='qwen3.5'; File='Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.5-35B-A3B-GGUF'; Remote='Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf'; MinMB=15000}
-    $models += @{Dir='qwen3.5'; File='Qwen3.5-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.5-27B-GGUF'; Remote='Qwen3.5-27B-UD-Q4_K_XL.gguf'; MinMB=12000}
-    $models += @{Dir='qwen3.5'; File='Qwen3.5-9B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.5-9B-GGUF'; Remote='Qwen3.5-9B-UD-Q4_K_XL.gguf'; MinMB=5000}
+    $models += @{Dir='qwen3'; File='Qwen3-30B-A3B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-30B-A3B-GGUF'; Remote='Qwen3-30B-A3B-UD-Q4_K_XL.gguf'; MinMB=18000}
+    $models += @{Dir='qwen3'; File='Qwen3-14B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-14B-GGUF'; Remote='Qwen3-14B-UD-Q4_K_XL.gguf'; MinMB=9000}
+    $models += @{Dir='qwen3'; File='Qwen3-8B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-8B-GGUF'; Remote='Qwen3-8B-UD-Q4_K_XL.gguf'; MinMB=5000}
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
   }
   '128gb-minimax' {
-    $repo = if ($env:MINIMAX_REPO) { $env:MINIMAX_REPO } else { 'unsloth/MiniMax-M2.5-GGUF' }
-    $filesRaw = if ($env:MINIMAX_FILES) { $env:MINIMAX_FILES } else { 'MiniMax-M2.5-UD-Q3_K_XL-00001-of-00004.gguf,MiniMax-M2.5-UD-Q3_K_XL-00002-of-00004.gguf,MiniMax-M2.5-UD-Q3_K_XL-00003-of-00004.gguf,MiniMax-M2.5-UD-Q3_K_XL-00004-of-00004.gguf' }
+    $repo = if ($env:MINIMAX_REPO) { $env:MINIMAX_REPO } else { 'unsloth/MiniMax-M2.7-GGUF' }
+    $filesRaw = if ($env:MINIMAX_FILES) { $env:MINIMAX_FILES } else { 'MiniMax-M2.7-UD-IQ4_XS-00001-of-00003.gguf,MiniMax-M2.7-UD-IQ4_XS-00002-of-00003.gguf,MiniMax-M2.7-UD-IQ4_XS-00003-of-00003.gguf' }
     $files = $filesRaw -split ','
     foreach ($file in $files) {
       $minMb = 1000
-      if ($file -like '*00001-of-00004.gguf') { $minMb = 5 }
-      elseif ($file -like '*00002-of-00004.gguf') { $minMb = 42000 }
-      elseif ($file -like '*00003-of-00004.gguf') { $minMb = 42000 }
-      elseif ($file -like '*00004-of-00004.gguf') { $minMb = 1000 }
+      if ($file -like '*00001-of-00003.gguf') { $minMb = 5 }
+      elseif ($file -like '*00002-of-00003.gguf') { $minMb = 30000 }
+      elseif ($file -like '*00003-of-00003.gguf') { $minMb = 30000 }
       $models += @{Dir='minimax'; File=$file; Repo=$repo; Remote=$file; MinMB=$minMb}
     }
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}

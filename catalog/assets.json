@@ -1,0 +1,197 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "agent:architecture-reviewer",
+      "type": "agent",
+      "path": ".opencode/agents/architecture-reviewer.md",
+      "pack": "coding",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "limited",
+        "network": "ask"
+      },
+      "supported_clients": ["opencode", "codex-reference"]
+    },
+    {
+      "id": "agent:documentation-generator",
+      "type": "agent",
+      "path": ".opencode/agents/documentation-generator.md",
+      "pack": "office",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "limited",
+        "network": "ask"
+      },
+      "supported_clients": ["opencode", "claude-code", "codex-reference"]
+    },
+    {
+      "id": "agent:reality-checker",
+      "type": "agent",
+      "path": ".opencode/agents/reality-checker.md",
+      "pack": "team-rollout",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "limited",
+        "network": "ask"
+      },
+      "supported_clients": ["opencode", "codex-reference"]
+    },
+    {
+      "id": "agent:release-reviewer",
+      "type": "agent",
+      "path": ".opencode/agents/release-reviewer.md",
+      "pack": "team-rollout",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "limited",
+        "network": "ask"
+      },
+      "supported_clients": ["opencode", "codex-reference"]
+    },
+    {
+      "id": "agent:research-synthesizer",
+      "type": "agent",
+      "path": ".opencode/agents/research-synthesizer.md",
+      "pack": "research",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "limited",
+        "network": "ask"
+      },
+      "supported_clients": ["opencode", "claude-code", "codex-reference"]
+    },
+    {
+      "id": "skill:documentation-generator",
+      "type": "skill",
+      "path": ".opencode/skills/documentation-generator/SKILL.md",
+      "pack": "office",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "local tooling only",
+        "network": "not required"
+      },
+      "supported_clients": ["opencode", "claude-code", "codex-reference"]
+    },
+    {
+      "id": "skill:docx-workflow",
+      "type": "skill",
+      "path": ".opencode/skills/docx-workflow/SKILL.md",
+      "pack": "office",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "python-docx local usage",
+        "network": "not required"
+      },
+      "supported_clients": ["opencode", "claude-code", "codex-reference"]
+    },
+    {
+      "id": "skill:gsd",
+      "type": "skill",
+      "path": ".opencode/skills/gsd/SKILL.md",
+      "pack": "coding",
+      "trust_level": "reviewed-external",
+      "support_tier": "reference",
+      "source": "adapted-external",
+      "source_ref": "gsd-build/get-shit-done",
+      "review_status": "trimmed-and-reviewed",
+      "permission_notes": {
+        "shell": "follows host tool policy",
+        "network": "not required"
+      },
+      "supported_clients": ["opencode", "claude-code", "codex-reference"]
+    },
+    {
+      "id": "skill:pdf-workflow",
+      "type": "skill",
+      "path": ".opencode/skills/pdf-workflow/SKILL.md",
+      "pack": "office",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "local PDF tooling",
+        "network": "not required"
+      },
+      "supported_clients": ["opencode", "claude-code", "codex-reference"]
+    },
+    {
+      "id": "skill:pptx-workflow",
+      "type": "skill",
+      "path": ".opencode/skills/pptx-workflow/SKILL.md",
+      "pack": "office",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "local pptx tooling",
+        "network": "not required"
+      },
+      "supported_clients": ["opencode", "claude-code", "codex-reference"]
+    },
+    {
+      "id": "skill:research-synthesizer",
+      "type": "skill",
+      "path": ".opencode/skills/research-synthesizer/SKILL.md",
+      "pack": "research",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "local text tooling",
+        "network": "optional"
+      },
+      "supported_clients": ["opencode", "claude-code", "codex-reference"]
+    },
+    {
+      "id": "skill:xlsx-workflow",
+      "type": "skill",
+      "path": ".opencode/skills/xlsx-workflow/SKILL.md",
+      "pack": "office",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "local spreadsheet tooling",
+        "network": "not required"
+      },
+      "supported_clients": ["opencode", "claude-code", "codex-reference"]
+    }
+  ]
+}

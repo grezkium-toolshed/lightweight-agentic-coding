@@ -1,6 +1,6 @@
 # local-ai-cluster
 
-Public beta preparation branch for a **Local AI Cluster**: a local-first agentic platform built around **llama.cpp + Qwen 3.5**, with OpenCode as the strongest supported local client path.
+Public beta preparation branch for a **Local AI Cluster**: a local-first AI workstation built around **llama.cpp + Qwen 3.6 MoE**, with OpenCode as the lead supported local client path and a new v2 CLI contract for setup, rendering, and validation.
 
 This repo is not ready for public visibility yet. Use `RELEASE_CHECKLIST.md` and `docs/release/PRIVATE_UNTIL_RELEASE.md` before changing repository visibility.
 
@@ -28,33 +28,36 @@ This repo is not ready for public visibility yet. Use `RELEASE_CHECKLIST.md` and
 
 ## Choose your starting path
 
-### Lowest friction local path
-Use OpenCode with a `16gb` or `24gb` profile and add free cloud fallback only if needed.
+### Solo coder
+Use `24gb` or `32gb` with the `coding` workflow pack for local-first coding and refactoring.
 
-### Stronger local path
-Use `32gb` or `64gb` profile with Qwen 3.5 35B-A3B as the main general model and `qwen3-coder-next` as a specialist.
+### Research operator
+Use `24gb`, `gemma-24gb`, or `openrouter` with the `research` and `office` packs.
 
-### Gemma 4 path
-Use Gemma 4 as an alternative model family with Apache-2.0 licensing, thinking mode, and multimodal support. Start with `gemma-24gb` or `gemma-32gb` for the best balance. See `MODEL_RECOMMENDATIONS.md` for benchmarks and guidance.
+### Office automation
+Use `16gb`, `24gb`, or `openrouter` with the `office` pack.
 
-### Hosted-model path
-Use Claude Code via the templates under `templates/claude-code/` when lower setup friction matters more than local-first execution.
+### Team pilot
+Use `32gb`, `64gb`, or `openrouter` with the `team-rollout` pack.
+
+Scenario mapping lives in `docs/use-cases/SCENARIO_GUIDE.md` and `catalog/scenarios.json`.
 
 ## Runtime defaults
 - llama.cpp `llama-server`
 - OpenCode source template config in `opencode.jsonc`
-- generated active runtime state under `runtime-config/`
-- Qwen 3.5 profile-based local models
+- generated active runtime state under `state/`
+- Qwen 3.6 MoE profile-based local models
 - free cloud fallback providers for lower-end hardware
+- a first-class repo CLI at `./bin/lac`
 
 ## Hardware profiles
-- `16gb`: Qwen 3.5 9B + embeddings
-- `24gb`: Qwen 3.5 27B + 9B fallback + embeddings
-- `32gb`: Qwen 3.5 35B-A3B + 27B + optional coder-next
-- `64gb`: 35B-A3B + coder-next + 27B + embeddings
-- `128gb-multi`: 35B-A3B + coder-next + 27B + 9B + embeddings
-- `128gb-qwen122b`: Qwen 3.5 122B-focused profile
-- `128gb-minimax`: MiniMax-focused profile
+- `16gb`: Qwen 3.6 small-model local path + embeddings
+- `24gb`: Qwen 3.6 balanced local path + fallback + embeddings
+- `32gb`: Qwen 3.6 MoE local path + fallback + optional coder specialist
+- `64gb`: Qwen 3.6 MoE + coder specialist + fallback + embeddings
+- `128gb-multi`: multi-model Qwen local workstation
+- `128gb-qwen122b`: large-model Qwen-focused profile
+- `128gb-minimax`: MiniMax M2.7 `UD-IQ4_XS` profile for a practical 128GB fit
 - `gemma-16gb`: Gemma 4 26B-A4B (Q4) + E4B (Q8) fallback
 - `gemma-24gb`: Gemma 4 31B (Q4) + 26B-A4B (Q4) fallback
 - `gemma-32gb`: Gemma 4 31B (Q8) + 26B-A4B (Q4) fallback
@@ -66,76 +69,78 @@ The 128GB tiers follow a practical `<=115GB` effective memory usage policy to pr
 ## Quick start (macOS/Linux)
 
 ```bash
-./scripts/setup-models-device.sh --profile 24gb
-./scripts/setup-config-device.sh --profile 24gb
-./scripts/launch-llama.sh
-./scripts/launch-opencode.sh
+./bin/lac models sync 24gb
+./bin/lac profile apply 24gb
+./bin/lac runtime start
+./bin/lac client open opencode
 ```
 
 Gemma 4 quick start:
 
 ```bash
-./scripts/setup-models-device.sh --profile gemma-24gb
-./scripts/setup-config-device.sh --profile gemma-24gb
-./scripts/launch-llama.sh
-./scripts/launch-opencode.sh
+./bin/lac models sync gemma-24gb
+./bin/lac profile apply gemma-24gb
+./bin/lac runtime start
+./bin/lac client open opencode
 ```
 
 OpenRouter quick start (cloud-only, no downloads):
 
 ```bash
-./scripts/setup-config-device.sh --profile openrouter
-./scripts/launch-opencode.sh
+./bin/lac profile apply openrouter
+./bin/lac client open opencode
 ```
 
 Desktop helper on macOS:
 
 ```bash
-./scripts/launch-opencode-desktop.sh
+./bin/lac client open opencode --desktop
 ```
 
 Monitor llama-server logs:
 
 ```bash
-tail -f runtime-config/logs/llama-server.log
+tail -f state/logs/llama-server.log
 ```
 
 ## Quick start (Windows PowerShell)
 
 ```powershell
-./scripts/setup-models-device.ps1 -Profile 24gb
-./scripts/setup-config-device.ps1 -Profile 24gb
-./scripts/launch-llama.ps1
-./scripts/launch-opencode.ps1
+./bin/lac.ps1 models sync 24gb
+./bin/lac.ps1 profile apply 24gb
+./bin/lac.ps1 runtime start
+./bin/lac.ps1 client open opencode
 ```
 
 Gemma 4 quick start:
 
 ```powershell
-./scripts/setup-models-device.ps1 -Profile gemma-24gb
-./scripts/setup-config-device.ps1 -Profile gemma-24gb
-./scripts/launch-llama.ps1
-./scripts/launch-opencode.ps1
+./bin/lac.ps1 models sync gemma-24gb
+./bin/lac.ps1 profile apply gemma-24gb
+./bin/lac.ps1 runtime start
+./bin/lac.ps1 client open opencode
 ```
 
 OpenRouter quick start (cloud-only, no downloads):
 
 ```powershell
-./scripts/setup-config-device.ps1 -Profile openrouter
-./scripts/launch-opencode.ps1
+./bin/lac.ps1 profile apply openrouter
+./bin/lac.ps1 client open opencode
 ```
 
 Desktop helper:
 
 ```powershell
-./scripts/launch-opencode-desktop.ps1
+./bin/lac.ps1 client open opencode --desktop
 ```
 
 Monitor logs:
 
 ```powershell
-Get-Content runtime-config/logs/llama-server.log -Wait -Tail 50
+Get-Content state/logs/llama-server.log -Wait -Tail 50
 ```
+
+Compatibility wrappers under `scripts/` still exist, but `./bin/lac` is the supported v2 interface.
 
 ## Client paths
 
@@ -146,15 +151,19 @@ Runtime asset surface:
 - `.opencode/agents/*.md`
 - `.opencode/skills/*/SKILL.md`
 
+Rendered config and reports:
+- `state/clients/opencode/opencode.json`
+- `state/clients/opencode/manifest.json`
+
 Maintainer index surface:
 - `agents/` (index docs only)
 - `skills/` (index docs only)
 
 ### Claude Code
-Supported through `templates/claude-code/` and reuse of curated agent or skill ideas. This repo does not duplicate the runtime stack for Claude Code.
+Supported through `templates/claude-code/` plus the rendered reference adapter under `state/clients/claude-code/`.
 
 ### Codex
-Documented as a pattern reference only for now. It is not a first-class runtime target in this repo.
+Supported as a reference adapter under `state/clients/codex-reference/`. It is not a first-class runtime target in this repo.
 
 ## Free cloud fallback providers
 
@@ -164,12 +173,18 @@ Documented as a pattern reference only for now. It is not a first-class runtime 
 - `nvidia-nim`
 - `openrouter`
 
-Use local Qwen 3.5 when you can. Use cloud fallbacks when hardware, onboarding speed, or trial workflows matter more.
+Use local Qwen 3.6 when you can. Use cloud fallbacks when hardware, onboarding speed, or trial workflows matter more.
 
 OpenRouter profile default model naming is pinned to:
 - `qwen/qwen3-coder:480b-free`
 
 Authentication expectations are documented in `docs/providers/AUTHENTICATION.md`.
+Freshness metadata for provider guidance lives in `catalog/providers.json`.
+
+Current product direction:
+- Qwen 3.6 MoE is the target default local family.
+- Use Unsloth's published `UD-Q4_K_XL` artifacts as the default quant class when the runtime migration lands.
+- Gemma 4 remains the strongest multilingual alternative, especially for EU-language-heavy workflows.
 
 ## OpenCode-specific additions in this repo
 - explicit `compaction.auto`, `compaction.prune`, and reserved token buffer
@@ -192,6 +207,7 @@ This repo includes reusable local skills for:
 These are designed to make the cluster useful for office work immediately, not only coding.
 
 ## Onboarding scenarios
+- `docs/use-cases/SCENARIO_GUIDE.md`
 - `docs/use-cases/ONBOARDING_16GB_24GB.md`
 - `docs/use-cases/ONBOARDING_32GB_PLUS.md`
 - `docs/use-cases/ONBOARDING_CLAUDE_CODE.md`
@@ -222,6 +238,7 @@ These external projects are not part of this repo but may be useful depending on
 - `docs/security/THIRD_PARTY_AGENT_INTAKE.md`
 - `docs/release/BETA_RELEASE_CRITERIA.md`
 - `docs/release/README.md`
+- `state/README.md`
 
 ## Naming policy
 

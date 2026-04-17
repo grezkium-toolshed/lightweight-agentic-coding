@@ -5,6 +5,13 @@ This Local AI Cluster supports three practical provider modes:
 - local + free cloud fallback
 - hosted-model client path
 
+Provider freshness and risk metadata now live in `catalog/providers.json`.
+
+Local baseline guidance:
+- target default family: Qwen 3.6 MoE
+- target default quant class: Unsloth `UD-Q4_K_XL`
+- multilingual alternative: Gemma 4, especially for EU-language-heavy deployments
+
 Read next:
 - `AUTHENTICATION.md`
 - `FREE_CLOUD_FALLBACKS.md`

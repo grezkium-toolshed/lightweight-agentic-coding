@@ -6,5 +6,5 @@ if [[ $# -ne 2 || "$1" != "--profile" ]]; then
   exit 1
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-"$SCRIPT_DIR/setup-config-device.sh" --profile "$2"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec "$ROOT/bin/lac" profile apply "$2"

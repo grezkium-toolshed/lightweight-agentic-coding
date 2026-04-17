@@ -1,6 +1,7 @@
 # Curated Agents
 
 This repo ships curated agent definitions for OpenCode under `.opencode/agents/`.
+Asset metadata for workflow packs, trust level, and support tier lives in `catalog/assets.json`.
 
 Why both directories exist:
 - `.opencode/agents/` is the runtime-discoverable location OpenCode loads automatically.

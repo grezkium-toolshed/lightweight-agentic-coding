@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "scenarios": [
+    {
+      "id": "solo-coder",
+      "label": "Solo Coder",
+      "description": "Local-first coding and refactoring with a practical hardware profile and light cloud fallback.",
+      "recommended_profiles": ["24gb", "32gb", "openrouter"],
+      "recommended_packs": ["coding"],
+      "client_target": "opencode"
+    },
+    {
+      "id": "research-operator",
+      "label": "Research Operator",
+      "description": "Research, synthesis, and note production with a balanced local model and optional free cloud assist.",
+      "recommended_profiles": ["24gb", "gemma-24gb", "openrouter"],
+      "recommended_packs": ["research", "office"],
+      "client_target": "opencode"
+    },
+    {
+      "id": "office-automation",
+      "label": "Office Automation",
+      "description": "Document, spreadsheet, slide, and PDF workflows with a small curated prompt surface.",
+      "recommended_profiles": ["16gb", "24gb", "openrouter"],
+      "recommended_packs": ["office"],
+      "client_target": "opencode"
+    },
+    {
+      "id": "team-pilot",
+      "label": "Team Pilot",
+      "description": "A reproducible workstation baseline for a small team rollout with review and release guardrails.",
+      "recommended_profiles": ["32gb", "64gb", "openrouter"],
+      "recommended_packs": ["coding", "research", "office", "team-rollout"],
+      "client_target": "opencode"
+    }
+  ]
+}

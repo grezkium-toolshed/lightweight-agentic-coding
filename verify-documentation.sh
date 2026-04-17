@@ -9,6 +9,11 @@ required=(
   MODEL_RECOMMENDATIONS.md
   CONFIG_SUMMARY.md
   REVISION_NOTES.md
+  state/README.md
+  catalog/assets.json
+  catalog/workflow-packs.json
+  catalog/providers.json
+  catalog/scenarios.json
   docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md
   docs/FREE_CLOUD_MODELS.md
   docs/providers/README.md
@@ -17,6 +22,7 @@ required=(
   docs/security/THIRD_PARTY_AGENT_INTAKE.md
   docs/security/AGENCY_AGENTS_REVIEW.md
   docs/security/TRUST_MODEL.md
+  docs/use-cases/SCENARIO_GUIDE.md
   docs/use-cases/STARTUP_HOME_TEAM.md
   docs/use-cases/ONBOARDING_16GB_24GB.md
   docs/use-cases/ONBOARDING_32GB_PLUS.md
@@ -79,8 +85,7 @@ require(
 
 gitignore = (root / ".gitignore").read_text(encoding="utf-8")
 for expected in (
-    "runtime-config/active-profile.txt",
-    "runtime-config/opencode.active.json",
+    "state/**",
     ".claude/",
     ".qwen/",
 ):

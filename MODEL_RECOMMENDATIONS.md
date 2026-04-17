@@ -2,16 +2,31 @@
 
 ## Local-first baseline
 
-Use Qwen 3.5 as the default local family for general agentic work.
+Use Qwen 3.6 MoE as the default local family for general agentic work.
+
+Default quant guidance:
+- prefer Unsloth's published `UD-Q4_K_XL` artifacts for default local runtime presets
+- keep lower-bit dynamic quants as optional footprint-saving alternatives, not the default product recommendation
 
 Recommended profile mapping:
-- `16gb`: Qwen 3.5 9B
-- `24gb`: Qwen 3.5 27B
-- `32gb`: Qwen 3.5 35B-A3B
-- `64gb`: Qwen 3.5 35B-A3B + qwen3-coder-next
+- `16gb`: Qwen 3.6 small model
+- `24gb`: Qwen 3.6 balanced general model
+- `32gb`: Qwen 3.6 MoE
+- `64gb`: Qwen 3.6 MoE + qwen3-coder-next
 - `128gb-multi`: multiple practical local models
 - `128gb-qwen122b`: Qwen 122B-focused
-- `128gb-minimax`: MiniMax-focused
+- `128gb-minimax`: MiniMax M2.7 `UD-IQ4_XS` alternative
+
+## 128GB MiniMax alternative
+
+Use `128gb-minimax` when you specifically want MiniMax M2.7 on a 128 GB machine.
+
+Recommended quant for this repo:
+- `UD-IQ4_XS`
+
+Why this one:
+- Unsloth lists it at about 108 GB, which fits the repo's 128 GB headroom posture much better than `UD-Q4_K_XL`
+- it is the practical compromise when you want stronger quality than very low-bit MiniMax options without exceeding the memory budget
 
 ## Specialist local model
 
@@ -32,7 +47,7 @@ Recommended fallback order:
 
 ## Office and documentation workloads
 
-For office automation, the model matters less than workflow quality and tool support. Smaller Qwen 3.5 profiles can still be useful if the repo provides strong skills and clear workflow guidance.
+For office automation, the model matters less than workflow quality and tool support. Smaller Qwen profiles can still be useful if the repo provides strong skills and clear workflow guidance.
 
 ## Gemma 4 alternative
 
@@ -54,9 +69,10 @@ Gemma 4 is available as an alternative model family with Apache-2.0 licensing, b
 | 31B (dense) | 85.2% | 89.2% | 80.0% | 76.9% |
 | 26B-A4B (MoE) | 82.6% | 88.3% | 77.1% | 73.8% |
 
-### When to choose Gemma 4 over Qwen 3.5
+### When to choose Gemma 4 over Qwen 3.6
 
 - **Apache-2.0 license** — Fully permissive, no commercial restrictions
+- **Multilingual strength** — Strong fit for multilingual workloads, especially EU-language-heavy usage
 - **Thinking mode** — Built-in reasoning with `<|think|>` token control
 - **Multimodal** — Vision support via `--mmproj` clip projector
 - **MoE efficiency** — 26B-A4B activates only 4B params per token
@@ -64,7 +80,7 @@ Gemma 4 is available as an alternative model family with Apache-2.0 licensing, b
 
 ### Gemma 4 inference defaults
 
-Use these defaults for Gemma 4 (different from Qwen 3.5):
+Use these defaults for Gemma 4 (different from the Qwen baseline):
 - `temperature = 1.0`
 - `top_p = 0.95`
 - `top_k = 64`

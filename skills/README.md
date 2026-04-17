@@ -1,6 +1,7 @@
 # Curated Skills
 
 This repo provides project-local OpenCode skills under `.opencode/skills/`.
+Pack metadata and scenario mapping live in `catalog/workflow-packs.json` and `catalog/scenarios.json`.
 
 The `skills/` directory is the maintainers' index; the runtime-discoverable files live in `.opencode/skills/*/SKILL.md`.
 

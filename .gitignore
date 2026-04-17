@@ -15,6 +15,7 @@ models/**/blobs/
 backup-configs/
 *.bak
 *.backup.*
+state/**
 runtime-config/presets.active.ini
 runtime-config/active-profile.txt
 runtime-config/opencode.active.json
@@ -22,6 +23,7 @@ runtime-config/opencode.active.json
 # Local tool state
 .sisyphus/
 .planning/
+.opencode/render-manifest.json
 .opencode/package.json
 .opencode/package-lock.json
 .opencode/node_modules/

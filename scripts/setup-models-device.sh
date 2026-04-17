@@ -47,20 +47,20 @@ MODELS+=("embeddings|nomic-embed-text-v1.5.Q4_K_M.gguf|nomic-ai/nomic-embed-text
 
 case "$PROFILE" in
   16gb)
-    MODELS+=("qwen3.5|Qwen3.5-9B-UD-Q4_K_XL.gguf|unsloth/Qwen3.5-9B-GGUF|Qwen3.5-9B-UD-Q4_K_XL.gguf|5000")
+    MODELS+=("qwen3|Qwen3-8B-UD-Q4_K_XL.gguf|unsloth/Qwen3-8B-GGUF|Qwen3-8B-UD-Q4_K_XL.gguf|5000")
     ;;
   24gb)
-    MODELS+=("qwen3.5|Qwen3.5-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.5-27B-GGUF|Qwen3.5-27B-UD-Q4_K_XL.gguf|12000")
-    MODELS+=("qwen3.5|Qwen3.5-9B-UD-Q4_K_XL.gguf|unsloth/Qwen3.5-9B-GGUF|Qwen3.5-9B-UD-Q4_K_XL.gguf|5000")
+    MODELS+=("qwen3|Qwen3-14B-UD-Q4_K_XL.gguf|unsloth/Qwen3-14B-GGUF|Qwen3-14B-UD-Q4_K_XL.gguf|9000")
+    MODELS+=("qwen3|Qwen3-8B-UD-Q4_K_XL.gguf|unsloth/Qwen3-8B-GGUF|Qwen3-8B-UD-Q4_K_XL.gguf|5000")
     ;;
   32gb)
-    MODELS+=("qwen3.5|Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf|unsloth/Qwen3.5-35B-A3B-GGUF|Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf|15000")
-    MODELS+=("qwen3.5|Qwen3.5-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.5-27B-GGUF|Qwen3.5-27B-UD-Q4_K_XL.gguf|12000")
+    MODELS+=("qwen3|Qwen3-30B-A3B-UD-Q4_K_XL.gguf|unsloth/Qwen3-30B-A3B-GGUF|Qwen3-30B-A3B-UD-Q4_K_XL.gguf|18000")
+    MODELS+=("qwen3|Qwen3-14B-UD-Q4_K_XL.gguf|unsloth/Qwen3-14B-GGUF|Qwen3-14B-UD-Q4_K_XL.gguf|9000")
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
     ;;
   64gb)
-    MODELS+=("qwen3.5|Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf|unsloth/Qwen3.5-35B-A3B-GGUF|Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf|15000")
-    MODELS+=("qwen3.5|Qwen3.5-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.5-27B-GGUF|Qwen3.5-27B-UD-Q4_K_XL.gguf|12000")
+    MODELS+=("qwen3|Qwen3-30B-A3B-UD-Q4_K_XL.gguf|unsloth/Qwen3-30B-A3B-GGUF|Qwen3-30B-A3B-UD-Q4_K_XL.gguf|18000")
+    MODELS+=("qwen3|Qwen3-14B-UD-Q4_K_XL.gguf|unsloth/Qwen3-14B-GGUF|Qwen3-14B-UD-Q4_K_XL.gguf|9000")
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
     ;;
   128gb-qwen122b)
@@ -70,21 +70,20 @@ case "$PROFILE" in
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
     ;;
   128gb-multi)
-    MODELS+=("qwen3.5|Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf|unsloth/Qwen3.5-35B-A3B-GGUF|Qwen3.5-35B-A3B-UD-Q4_K_XL.gguf|15000")
-    MODELS+=("qwen3.5|Qwen3.5-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.5-27B-GGUF|Qwen3.5-27B-UD-Q4_K_XL.gguf|12000")
-    MODELS+=("qwen3.5|Qwen3.5-9B-UD-Q4_K_XL.gguf|unsloth/Qwen3.5-9B-GGUF|Qwen3.5-9B-UD-Q4_K_XL.gguf|5000")
+    MODELS+=("qwen3|Qwen3-30B-A3B-UD-Q4_K_XL.gguf|unsloth/Qwen3-30B-A3B-GGUF|Qwen3-30B-A3B-UD-Q4_K_XL.gguf|18000")
+    MODELS+=("qwen3|Qwen3-14B-UD-Q4_K_XL.gguf|unsloth/Qwen3-14B-GGUF|Qwen3-14B-UD-Q4_K_XL.gguf|9000")
+    MODELS+=("qwen3|Qwen3-8B-UD-Q4_K_XL.gguf|unsloth/Qwen3-8B-GGUF|Qwen3-8B-UD-Q4_K_XL.gguf|5000")
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
     ;;
   128gb-minimax)
-    MINIMAX_REPO="${MINIMAX_REPO:-unsloth/MiniMax-M2.5-GGUF}"
-    MINIMAX_FILES="${MINIMAX_FILES:-MiniMax-M2.5-UD-Q3_K_XL-00001-of-00004.gguf,MiniMax-M2.5-UD-Q3_K_XL-00002-of-00004.gguf,MiniMax-M2.5-UD-Q3_K_XL-00003-of-00004.gguf,MiniMax-M2.5-UD-Q3_K_XL-00004-of-00004.gguf}"
+    MINIMAX_REPO="${MINIMAX_REPO:-unsloth/MiniMax-M2.7-GGUF}"
+    MINIMAX_FILES="${MINIMAX_FILES:-MiniMax-M2.7-UD-IQ4_XS-00001-of-00003.gguf,MiniMax-M2.7-UD-IQ4_XS-00002-of-00003.gguf,MiniMax-M2.7-UD-IQ4_XS-00003-of-00003.gguf}"
     IFS=',' read -r -a MINI_FILES <<< "$MINIMAX_FILES"
     for mf in "${MINI_FILES[@]}"; do
       case "$mf" in
-        *00001-of-00004.gguf) min_mb=5 ;;
-        *00002-of-00004.gguf) min_mb=42000 ;;
-        *00003-of-00004.gguf) min_mb=42000 ;;
-        *00004-of-00004.gguf) min_mb=1000 ;;
+        *00001-of-00003.gguf) min_mb=5 ;;
+        *00002-of-00003.gguf) min_mb=30000 ;;
+        *00003-of-00003.gguf) min_mb=30000 ;;
         *) min_mb=1000 ;;
       esac
       MODELS+=("minimax|$mf|$MINIMAX_REPO|$mf|$min_mb")

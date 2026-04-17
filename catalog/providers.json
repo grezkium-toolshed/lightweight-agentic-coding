@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "local-cluster",
+      "label": "Local llama.cpp Cluster",
+      "env_var": "AI_CLUSTER_LOCAL_RUNTIME",
+      "docs_path": "docs/providers/README.md",
+      "last_verified_at": "2026-04-16",
+      "verification_method": "repo-runtime-contract-review",
+      "risk_level": "low",
+      "models": [
+        {
+          "id": "local-cluster/qwen3.5-27b-q4",
+          "last_verified_at": "2026-04-16",
+          "verification_method": "manifest-and-template-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "local-cluster/gemma-4-31b-q4",
+          "last_verified_at": "2026-04-16",
+          "verification_method": "manifest-and-template-review",
+          "risk_level": "low"
+        }
+      ]
+    },
+    {
+      "id": "antigravity",
+      "label": "Antigravity Cloud",
+      "env_var": "ANTIGRAVITY_API_KEY",
+      "docs_path": "docs/providers/AUTHENTICATION.md",
+      "last_verified_at": "2026-04-16",
+      "verification_method": "documentation-review",
+      "risk_level": "medium",
+      "models": [
+        {
+          "id": "antigravity/qwen3-coder-480b",
+          "last_verified_at": "2026-04-16",
+          "verification_method": "config-review",
+          "risk_level": "medium"
+        }
+      ]
+    },
+    {
+      "id": "z-ai",
+      "label": "Z.AI Cloud",
+      "env_var": "ZAI_API_KEY",
+      "docs_path": "docs/providers/AUTHENTICATION.md",
+      "last_verified_at": "2026-04-16",
+      "verification_method": "documentation-review",
+      "risk_level": "medium",
+      "models": [
+        {
+          "id": "z-ai/zai/glm-5",
+          "last_verified_at": "2026-04-16",
+          "verification_method": "config-review",
+          "risk_level": "medium"
+        }
+      ]
+    },
+    {
+      "id": "nvidia-nim",
+      "label": "NVIDIA NIM",
+      "env_var": "NVIDIA_API_KEY",
+      "docs_path": "docs/providers/NVIDIA_NIM.md",
+      "last_verified_at": "2026-04-16",
+      "verification_method": "documentation-review",
+      "risk_level": "medium",
+      "models": [
+        {
+          "id": "nvidia-nim/qwen/qwen3-coder-480b-a35b-instruct",
+          "last_verified_at": "2026-04-16",
+          "verification_method": "config-review",
+          "risk_level": "medium"
+        }
+      ]
+    },
+    {
+      "id": "openrouter",
+      "label": "OpenRouter Free Tier",
+      "env_var": "OPENROUTER_API_KEY",
+      "docs_path": "docs/providers/OPENROUTER_FREE.md",
+      "last_verified_at": "2026-04-16",
+      "verification_method": "manual-provider-review",
+      "risk_level": "high",
+      "models": [
+        {
+          "id": "openrouter/qwen/qwen3-coder:480b-free",
+          "last_verified_at": "2026-04-16",
+          "verification_method": "repo-default-review",
+          "risk_level": "high"
+        },
+        {
+          "id": "openrouter/openai/gpt-4o-mini:free",
+          "last_verified_at": "2026-04-16",
+          "verification_method": "config-review",
+          "risk_level": "high"
+        }
+      ]
+    }
+  ]
+}

@@ -11,6 +11,7 @@ from pathlib import Path
 
 root = Path(sys.argv[1])
 manifest_path = root / "runtime-config/profiles.json"
+scenario_catalog_path = root / "catalog/scenarios.json"
 setup_models_sh = root / "scripts/setup-models-device.sh"
 setup_models_ps1 = root / "scripts/setup-models-device.ps1"
 readme_path = root / "README.md"
@@ -32,6 +33,8 @@ def require(cond: bool, message: str):
 
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 profiles = manifest["profiles"]
+scenario_catalog = json.loads(scenario_catalog_path.read_text(encoding="utf-8"))
+scenario_ids = {scenario["id"] for scenario in scenario_catalog["scenarios"]}
 manifest_ids = list(profiles.keys())
 manifest_id_set = set(manifest_ids)
 
@@ -52,6 +55,7 @@ require(sh_profiles == manifest_id_set, f"setup-models-device.sh profiles differ
 require(ps1_profiles == manifest_id_set, f"setup-models-device.ps1 profiles differ from runtime-config/profiles.json: {sorted(ps1_profiles ^ manifest_id_set)}")
 
 for profile_id, profile in profiles.items():
+    require(profile["id"] == profile_id, f"{profile_id}: id must match profile key")
     preset_rel = profile["preset"]
     preset_path = root / preset_rel
     require(preset_path.is_file(), f"{profile_id}: missing preset file {preset_rel}")
@@ -69,6 +73,11 @@ for profile_id, profile in profiles.items():
     )
     require("/" in profile["default_model"], f"{profile_id}: default_model must include provider prefix")
     require("/" in profile["small_model"], f"{profile_id}: small_model must include provider prefix")
+    require(profile["verification_tier"], f"{profile_id}: verification_tier is required")
+    require(profile["primary_workload"], f"{profile_id}: primary_workload is required")
+    require(isinstance(profile["supported_clients"], list) and profile["supported_clients"], f"{profile_id}: supported_clients must be a non-empty list")
+    require(isinstance(profile["recommended_for"], list) and profile["recommended_for"], f"{profile_id}: recommended_for must be a non-empty list")
+    require(set(profile["recommended_for"]) <= scenario_ids, f"{profile_id}: recommended_for contains unknown scenarios")
 
 config = load_jsonc(config_path)
 providers = config["provider"]

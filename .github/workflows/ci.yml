@@ -28,6 +28,12 @@ jobs:
       - name: OpenCode Asset Schema Check
         run: ./scripts/verify-opencode-assets.sh
 
+      - name: Provider Catalog Validation
+        run: ./scripts/verify-provider-catalog.sh
+
+      - name: V2 CLI Contract Check
+        run: ./scripts/verify-v2-contract.sh
+
       - name: OpenCode Agent and Skill Presence Check
         run: |
           test -f .opencode/agents/architecture-reviewer.md
@@ -40,6 +46,11 @@ jobs:
       - name: Public Beta Asset Presence Check
         run: |
           test -f RELEASE_CHECKLIST.md
+          test -f state/README.md
+          test -f catalog/assets.json
+          test -f catalog/workflow-packs.json
+          test -f catalog/providers.json
+          test -f catalog/scenarios.json
           test -f .github/ISSUE_TEMPLATE/config.yml
           test -f .github/ISSUE_TEMPLATE/bug_report.md
           test -f .github/ISSUE_TEMPLATE/docs_mismatch.md
@@ -81,3 +92,11 @@ jobs:
       - name: OpenCode Asset Schema Check
         shell: bash
         run: ./scripts/verify-opencode-assets.sh
+
+      - name: Provider Catalog Validation
+        shell: bash
+        run: ./scripts/verify-provider-catalog.sh
+
+      - name: V2 CLI Contract Check
+        shell: bash
+        run: ./scripts/verify-v2-contract.sh
