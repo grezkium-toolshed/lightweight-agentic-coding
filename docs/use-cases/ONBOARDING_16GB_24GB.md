@@ -12,9 +12,16 @@
 4. Use the office-oriented skills for docs, spreadsheets, and decks.
 
 ## Good first commands
+
+Interactive (recommended):
 ```bash
+./bin/lac init
+```
+
+Non-interactive:
+```bash
+./bin/lac init --yes --profile 24gb --cloud openrouter
 ./bin/lac models sync 24gb
-./bin/lac profile apply 24gb
 ./bin/lac runtime start
 ./bin/lac client open opencode
 ```

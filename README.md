@@ -68,6 +68,25 @@ The 128GB tiers follow a practical `<=115GB` effective memory usage policy to pr
 
 ## Quick start (macOS/Linux)
 
+One-command onboarding (recommended):
+
+```bash
+./bin/lac init
+```
+
+`lac init` detects your hardware, recommends a local profile, asks which cloud overlays to enable, and applies the profile. It stops before downloading model weights and prints the exact next commands to run.
+
+Non-interactive / scripted install:
+
+```bash
+./bin/lac init --yes --profile 24gb --cloud openrouter
+./bin/lac models sync 24gb
+./bin/lac runtime start
+./bin/lac client open opencode
+```
+
+Manual four-step flow (legacy):
+
 ```bash
 ./bin/lac models sync 24gb
 ./bin/lac profile apply 24gb
@@ -106,6 +125,21 @@ tail -f state/logs/llama-server.log
 ## Quick start (Windows PowerShell)
 
 ```powershell
+./bin/lac.ps1 init
+```
+
+Non-interactive:
+
+```powershell
+./bin/lac.ps1 init --yes --profile 24gb --cloud openrouter
+./bin/lac.ps1 models sync 24gb
+./bin/lac.ps1 runtime start
+./bin/lac.ps1 client open opencode
+```
+
+Manual flow:
+
+```powershell
 ./bin/lac.ps1 models sync 24gb
 ./bin/lac.ps1 profile apply 24gb
 ./bin/lac.ps1 runtime start
@@ -142,6 +176,20 @@ Get-Content state/logs/llama-server.log -Wait -Tail 50
 
 Compatibility wrappers under `scripts/` still exist, but `./bin/lac` is the supported v2 interface.
 
+## Inspecting the catalog
+
+Discover workflow packs, scenarios, and provider readiness directly from the CLI:
+
+```bash
+./bin/lac pack list
+./bin/lac pack show coding
+./bin/lac scenario list
+./bin/lac provider list
+./bin/lac provider status
+```
+
+All CLI commands accept `--json` for machine-readable output.
+
 ## Client paths
 
 ### OpenCode
@@ -165,15 +213,19 @@ Supported through `templates/claude-code/` plus the rendered reference adapter u
 ### Codex
 Supported as a reference adapter under `state/clients/codex-reference/`. It is not a first-class runtime target in this repo.
 
-## Free cloud fallback providers
+## Cloud overlay providers
 
-`opencode.jsonc` includes starter provider blocks for:
-- `antigravity`
-- `z-ai`
-- `nvidia-nim`
-- `openrouter`
+Local llama.cpp is always the baseline. Cloud providers are an optional overlay — each is gated by its own env var and is inert until you set one.
 
-Use local Qwen 3.6 when you can. Use cloud fallbacks when hardware, onboarding speed, or trial workflows matter more.
+`opencode.jsonc` includes provider blocks for:
+- `openrouter` — free tier, rate-limited (`OPENROUTER_API_KEY`)
+- `opencode-go` — flat subscription, curated models (`OPENCODE_GO_API_KEY`)
+- `opencode-zen` — pay-per-request beta, broader catalog (`OPENCODE_ZEN_API_KEY`)
+- `codex-auth` — reuse ChatGPT subscription via `numman-ali/opencode-openai-codex-auth` (`OPENAI_API_KEY`)
+- `anthropic` — Claude 4.x family, API key only (`ANTHROPIC_API_KEY`); Claude.ai subscription does NOT work
+- `antigravity`, `z-ai`, `nvidia-nim` — additional hosted options
+
+Use local when you can. Use cloud overlays when you want stronger planning models, zero-hardware onboarding, or trial workflows. `lac init` walks you through picking which overlays to enable.
 
 OpenRouter profile default model naming is pinned to:
 - `qwen/qwen3-coder:480b-free`

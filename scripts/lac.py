@@ -2,6 +2,7 @@
 import argparse
 import json
 import os
+import platform
 import shutil
 import signal
 import subprocess
@@ -244,6 +245,56 @@ def render_client(ctx, target):
     }
 
   raise SystemExit(f"Unsupported client target: {target}")
+
+
+def pack_list(ctx):
+  packs = build_pack_summary(ctx)
+  return [
+    {
+      "id": pack["id"],
+      "label": pack["label"],
+      "trust_level": pack["trust_level"],
+      "asset_count": pack["asset_count"],
+      "supported_clients": pack["supported_clients"],
+      "required_tools": pack["required_tools"],
+    }
+    for pack in packs
+  ]
+
+
+def pack_show(ctx, pack_id):
+  for pack in build_pack_summary(ctx):
+    if pack["id"] == pack_id:
+      return pack
+  raise SystemExit(f"Unknown pack: {pack_id}")
+
+
+def scenario_list(ctx):
+  catalog = load_json(ctx.paths["scenario_catalog"])
+  return catalog["scenarios"]
+
+
+def scenario_show(ctx, scenario_id):
+  for scenario in load_json(ctx.paths["scenario_catalog"])["scenarios"]:
+    if scenario["id"] == scenario_id:
+      return scenario
+  raise SystemExit(f"Unknown scenario: {scenario_id}")
+
+
+def provider_list(ctx):
+  return collect_provider_readiness(ctx)
+
+
+def provider_status(ctx):
+  readiness = collect_provider_readiness(ctx)
+  configured = [p for p in readiness if p["configured"]]
+  unconfigured = [p for p in readiness if not p["configured"]]
+  return {
+    "configured_count": len(configured),
+    "unconfigured_count": len(unconfigured),
+    "configured": configured,
+    "unconfigured": unconfigured,
+  }
 
 
 def profile_list(ctx):
@@ -677,9 +728,411 @@ def client_open(ctx, target, desktop=False):
   return {"ok": completed.returncode == 0, "target": target, "desktop": False}
 
 
-def emit(payload, json_mode=False):
+def render_pack_list(packs):
+  for pack in packs:
+    clients = ", ".join(pack["supported_clients"])
+    print(
+      f"{pack['id']}: {pack['label']} | trust {pack['trust_level']} | "
+      f"{pack['asset_count']} assets | clients: {clients}"
+    )
+
+
+def render_pack_show(pack):
+  print(f"{pack['id']}: {pack['label']}")
+  print(f"  trust: {pack['trust_level']}")
+  print(f"  description: {pack['description']}")
+  print(f"  clients: {', '.join(pack['supported_clients'])}")
+  print(f"  tools: {', '.join(pack['required_tools'])}")
+  print(f"  assets ({pack['asset_count']}):")
+  for asset in pack["assets"]:
+    print(
+      f"    - {asset['id']} [{asset['type']}] "
+      f"support={asset['support_tier']} trust={asset['trust_level']}"
+    )
+
+
+def render_scenario_list(scenarios):
+  for scenario in scenarios:
+    profiles = ", ".join(scenario["recommended_profiles"])
+    packs = ", ".join(scenario["recommended_packs"])
+    print(f"{scenario['id']}: {scenario['label']} | profiles: {profiles} | packs: {packs}")
+
+
+def render_scenario_show(scenario):
+  print(f"{scenario['id']}: {scenario['label']}")
+  print(f"  description: {scenario['description']}")
+  print(f"  profiles: {', '.join(scenario['recommended_profiles'])}")
+  print(f"  packs: {', '.join(scenario['recommended_packs'])}")
+  print(f"  client_target: {scenario['client_target']}")
+
+
+def render_provider_list(providers):
+  for provider in providers:
+    flag = "ready" if provider["configured"] else "unset"
+    print(
+      f"{provider['id']}: {provider['label']} | env {provider['env_var']} ({flag}) | "
+      f"risk {provider['risk_level']} | verified {provider['last_verified_at']}"
+    )
+
+
+def render_provider_status(payload):
+  print(
+    f"Providers: {payload['configured_count']} configured, "
+    f"{payload['unconfigured_count']} unconfigured"
+  )
+  if payload["configured"]:
+    print("  configured:")
+    render_provider_list(payload["configured"])
+  if payload["unconfigured"]:
+    print("  unconfigured:")
+    render_provider_list(payload["unconfigured"])
+
+
+def render_doctor_text(report):
+  ok = "ok" if report["ok"] else "FAIL"
+  profile_id = report["active_profile_id"] or "(none)"
+  print(f"Doctor: {ok} | active profile: {profile_id}")
+  print(f"State root: {report['state_root']}")
+
+  failures = report.get("failures", [])
+  if failures:
+    print(f"Failures ({len(failures)}):")
+    for path in failures:
+      print(f"  - {path}")
+
+  missing_sources = [c for c in report["checks"] if c["kind"] == "source" and not c["exists"]]
+  missing_generated = [c for c in report["checks"] if c["kind"] == "generated" and not c["exists"]]
+  if missing_sources:
+    print(f"Missing sources: {len(missing_sources)}")
+  if missing_generated:
+    print(f"Missing generated state: {len(missing_generated)} (run ./bin/lac profile apply <profile>)")
+
+  commands = report["commands"]
+  cmd_line = ", ".join(f"{name}={'yes' if exists else 'no'}" for name, exists in commands.items())
+  print(f"Commands: {cmd_line}")
+
+  runtime = report["runtime"]
+  running = "yes" if runtime.get("running") else "no"
+  health = "yes" if runtime.get("health_reachable") else "no"
+  print(f"Runtime: {runtime['url']} | running={running} | health={health}")
+
+  providers = report["provider_readiness"]
+  configured = sum(1 for p in providers if p["configured"])
+  print(f"Providers: {configured}/{len(providers)} configured")
+
+  assets = report["assets"]
+  print(
+    f"Assets: {assets['catalog_asset_count']} cataloged | "
+    f"{assets['pack_count']} packs | "
+    f"{assets['opencode_agents']} agents | "
+    f"{assets['opencode_skills']} skills"
+  )
+  print("Run with --json for full detail.")
+
+
+def render_smoke_text(report):
+  profile_id = report.get("active_profile_id") or "(none)"
+  if report.get("skipped"):
+    print(f"Smoke: skipped ({report.get('reason')}) | profile: {profile_id}")
+    print("Run with --json for full detail.")
+    return
+  ok = "ok" if report.get("ok") else "FAIL"
+  print(f"Smoke: {ok} | profile: {profile_id}")
+  if "error" in report:
+    print(f"Error: {report['error']}")
+  if "model_count" in report:
+    print(f"Runtime: {report.get('runtime_url')} | models: {report['model_count']}")
+  if "benchmark_ms" in report:
+    print(f"Benchmark: {report['benchmark_ms']} ms")
+  preview = report.get("chat_content_preview")
+  if preview:
+    print(f"Reply preview: {preview}")
+  print("Run with --json for full detail.")
+
+
+RAM_BUCKETS = [
+  (120, ["128gb-multi", "128gb-qwen122b", "128gb-minimax"], "gemma-64gb"),
+  (60, ["64gb"], "gemma-64gb"),
+  (30, ["32gb"], "gemma-32gb"),
+  (22, ["24gb"], "gemma-24gb"),
+  (14, ["16gb"], "gemma-16gb"),
+  (0, ["gemma-16gb"], "gemma-16gb"),
+]
+
+
+FAMILY_DESCRIPTIONS = {
+  "qwen": "Qwen 3.6 — default. Stronger coding and agentic tool-use. Best for most workflows.",
+  "gemma": "Gemma 4 — multilingual leader. Stronger EU-language handling, competitive reasoning.",
+}
+
+
+CLOUD_PROVIDER_HINTS = {
+  "openrouter": "Free tier, rate-limited. Lowest friction. Uses OPENROUTER_API_KEY.",
+  "opencode-go": "$10/mo subscription. Curated model list. Uses OPENCODE_GO_API_KEY.",
+  "opencode-zen": "Pay-per-request (beta). Broader catalog than Go. Uses OPENCODE_ZEN_API_KEY.",
+  "codex-auth": "Reuse ChatGPT Plus/Pro/Team via third-party OAuth helper. Uses OPENAI_API_KEY.",
+  "anthropic": "Claude 4.x family (API key only — subscription does NOT work). Uses ANTHROPIC_API_KEY.",
+  "antigravity": "Hosted fallback for frontier-grade cloud coding. Uses ANTIGRAVITY_API_KEY.",
+  "z-ai": "Z.AI GLM family. Uses ZAI_API_KEY.",
+  "nvidia-nim": "NVIDIA free/trial OpenAI-compatible endpoints. Uses NVIDIA_API_KEY.",
+}
+
+
+def detect_total_ram_gb():
+  try:
+    if sys.platform == "darwin":
+      raw = subprocess.check_output(["sysctl", "-n", "hw.memsize"], stderr=subprocess.DEVNULL)
+      return int(raw.strip()) / (1024 ** 3)
+    if sys.platform.startswith("linux"):
+      meminfo = Path("/proc/meminfo").read_text(encoding="utf-8")
+      for line in meminfo.splitlines():
+        if line.startswith("MemTotal:"):
+          kb = int(line.split()[1])
+          return kb / (1024 ** 2)
+    if os.name == "nt":
+      raw = subprocess.check_output(
+        [
+          "powershell.exe",
+          "-NoProfile",
+          "-Command",
+          "(Get-CimInstance Win32_OperatingSystem).TotalVisibleMemorySize",
+        ],
+        stderr=subprocess.DEVNULL,
+      )
+      kb = int(raw.strip())
+      return kb / (1024 ** 2)
+  except Exception:
+    return None
+  return None
+
+
+def detect_hardware():
+  return {
+    "os": sys.platform,
+    "arch": platform.machine(),
+    "ram_gb": detect_total_ram_gb(),
+  }
+
+
+def _bucket_for_ram(ram_gb):
+  if ram_gb is None:
+    return RAM_BUCKETS[-2]
+  for threshold, qwen_profiles, gemma_profile in RAM_BUCKETS:
+    if ram_gb >= threshold:
+      return (threshold, qwen_profiles, gemma_profile)
+  return RAM_BUCKETS[-1]
+
+
+def recommend_profile(ram_gb, family="qwen"):
+  _, qwen_profiles, gemma_profile = _bucket_for_ram(ram_gb)
+  if family == "gemma":
+    return gemma_profile
+  return qwen_profiles[0]
+
+
+def family_alternatives(ram_gb):
+  _, qwen_profiles, gemma_profile = _bucket_for_ram(ram_gb)
+  return {
+    "qwen": qwen_profiles[0],
+    "gemma": gemma_profile,
+  }
+
+
+def _prompt_yes_no(prompt, default=True):
+  suffix = "[Y/n]" if default else "[y/N]"
+  while True:
+    answer = input(f"{prompt} {suffix} ").strip().lower()
+    if not answer:
+      return default
+    if answer in {"y", "yes"}:
+      return True
+    if answer in {"n", "no"}:
+      return False
+
+
+def _prompt_choice(prompt, choices, default_index=0):
+  while True:
+    print(prompt)
+    for idx, (key, label) in enumerate(choices):
+      marker = "*" if idx == default_index else " "
+      print(f"  {marker} {idx + 1}. {key} — {label}")
+    raw = input(f"Pick [1-{len(choices)}, default {default_index + 1}]: ").strip()
+    if not raw:
+      return choices[default_index][0]
+    try:
+      idx = int(raw) - 1
+    except ValueError:
+      print("Enter a number.")
+      continue
+    if 0 <= idx < len(choices):
+      return choices[idx][0]
+    print("Out of range.")
+
+
+def _prompt_multiselect(prompt, choices, preselected):
+  selected = set(preselected)
+  print(prompt)
+  print("Toggle by number. Blank line to accept.")
+  while True:
+    for idx, (key, label) in enumerate(choices):
+      marker = "[x]" if key in selected else "[ ]"
+      print(f"  {marker} {idx + 1}. {key} — {label}")
+    raw = input(f"Toggle [1-{len(choices)}] or Enter to accept: ").strip()
+    if not raw:
+      return [key for key, _ in choices if key in selected]
+    try:
+      idx = int(raw) - 1
+    except ValueError:
+      print("Enter a number or press Enter to accept.")
+      continue
+    if 0 <= idx < len(choices):
+      key = choices[idx][0]
+      if key in selected:
+        selected.remove(key)
+      else:
+        selected.add(key)
+    else:
+      print("Out of range.")
+
+
+def _parse_cloud_arg(cloud_arg, no_cloud):
+  if no_cloud:
+    return []
+  if not cloud_arg:
+    return []
+  return [item.strip() for item in cloud_arg.split(",") if item.strip()]
+
+
+def _validate_cloud_ids(ctx, cloud_ids):
+  catalog = load_json(ctx.paths["provider_catalog"])
+  known = {p["id"] for p in catalog["providers"] if p["id"] != "local-cluster"}
+  invalid = [cid for cid in cloud_ids if cid not in known]
+  if invalid:
+    raise SystemExit(f"Unknown cloud provider(s): {', '.join(invalid)}. Known: {', '.join(sorted(known))}")
+
+
+def _next_steps(ctx, profile_id, cloud_ids, also_download_profile=None):
+  steps = []
+  for cid in cloud_ids:
+    hint = CLOUD_PROVIDER_HINTS.get(cid, "see docs/providers/AUTHENTICATION.md")
+    steps.append(f"Enable {cid}: {hint}")
+  steps.append(f"Download models: ./bin/lac models sync {profile_id}")
+  if also_download_profile and also_download_profile != profile_id:
+    steps.append(f"Also download alternate family weights: ./bin/lac models sync {also_download_profile}")
+  steps.append("Start runtime: ./bin/lac runtime start")
+  steps.append("Open client: ./bin/lac client open opencode")
+  return steps
+
+
+def init_wizard(ctx, yes=False, profile=None, cloud=None, no_cloud=False, also_download=False):
+  hardware = detect_hardware()
+  ram_gb = hardware["ram_gb"]
+
+  if yes:
+    chosen_profile = profile or recommend_profile(ram_gb)
+    ctx.get_profile(chosen_profile)
+    cloud_ids = _parse_cloud_arg(cloud, no_cloud)
+    if not cloud_ids and not no_cloud and cloud is None:
+      cloud_ids = ["openrouter"]
+    _validate_cloud_ids(ctx, cloud_ids)
+    also_download_profile = None
+  else:
+    ram_label = f"{ram_gb:.1f} GB" if ram_gb is not None else "unknown"
+    print(f"Detected: {hardware['os']} / {hardware['arch']} / RAM {ram_label}")
+    alternates = family_alternatives(ram_gb)
+
+    family_choices = [
+      ("qwen", FAMILY_DESCRIPTIONS["qwen"]),
+      ("gemma", FAMILY_DESCRIPTIONS["gemma"]),
+    ]
+    family = _prompt_choice("Which local model family?", family_choices, default_index=0)
+    recommended = recommend_profile(ram_gb, family=family)
+
+    if profile:
+      ctx.get_profile(profile)
+      chosen_profile = profile
+    else:
+      print(f"Recommended profile for your hardware: {recommended}")
+      if not _prompt_yes_no("Use this profile?", default=True):
+        print("Available profiles:")
+        options = [(pid, ctx.profiles[pid]["label"]) for pid in ctx.profiles]
+        chosen_profile = _prompt_choice("Pick a profile:", options, default_index=list(ctx.profiles).index(recommended))
+      else:
+        chosen_profile = recommended
+
+    also_download_profile = None
+    other_family = "gemma" if family == "qwen" else "qwen"
+    other_profile = alternates[other_family]
+    if other_profile != chosen_profile:
+      if _prompt_yes_no(
+        f"Also download {other_family.capitalize()} weights ({other_profile}) for optional switching?",
+        default=False,
+      ):
+        also_download_profile = other_profile
+
+    cloud_choices = [(cid, CLOUD_PROVIDER_HINTS[cid]) for cid in CLOUD_PROVIDER_HINTS]
+    cloud_ids = _prompt_multiselect(
+      "Which cloud overlays do you want?",
+      cloud_choices,
+      preselected=["openrouter"],
+    )
+
+  summary = profile_apply(ctx, chosen_profile)
+
+  result = {
+    "applied": True,
+    "profile": chosen_profile,
+    "cloud": cloud_ids,
+    "hardware": hardware,
+    "also_download_profile": also_download_profile,
+    "state_root": summary["state_root"],
+    "next_steps": _next_steps(ctx, chosen_profile, cloud_ids, also_download_profile=also_download_profile),
+  }
+  return result
+
+
+def render_init_text(result):
+  print(f"Applied profile: {result['profile']}")
+  if result["cloud"]:
+    print(f"Cloud overlays selected: {', '.join(result['cloud'])}")
+  else:
+    print("Cloud overlays: none (pure local)")
+  print("Next steps:")
+  for step in result["next_steps"]:
+    print(f"  - {step}")
+
+
+def emit(payload, json_mode=False, kind=None):
   if json_mode:
     print(json.dumps(payload, indent=2))
+    return
+
+  if kind == "pack-list":
+    render_pack_list(payload)
+    return
+  if kind == "pack-show":
+    render_pack_show(payload)
+    return
+  if kind == "scenario-list":
+    render_scenario_list(payload)
+    return
+  if kind == "scenario-show":
+    render_scenario_show(payload)
+    return
+  if kind == "provider-list":
+    render_provider_list(payload)
+    return
+  if kind == "provider-status":
+    render_provider_status(payload)
+    return
+  if kind == "doctor":
+    render_doctor_text(payload)
+    return
+  if kind == "smoke":
+    render_smoke_text(payload)
+    return
+  if kind == "init":
+    render_init_text(payload)
     return
 
   if isinstance(payload, list):
@@ -768,6 +1221,36 @@ def build_parser():
   client_open_parser.add_argument("target", choices=["opencode"])
   client_open_parser.add_argument("--desktop", action="store_true")
 
+  pack_parser = subparsers.add_parser("pack")
+  pack_sub = pack_parser.add_subparsers(dest="pack_command", required=True)
+  pack_list_parser = pack_sub.add_parser("list")
+  pack_list_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+  pack_show_parser = pack_sub.add_parser("show")
+  pack_show_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+  pack_show_parser.add_argument("pack_id")
+
+  scenario_parser = subparsers.add_parser("scenario")
+  scenario_sub = scenario_parser.add_subparsers(dest="scenario_command", required=True)
+  scenario_list_parser = scenario_sub.add_parser("list")
+  scenario_list_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+  scenario_show_parser = scenario_sub.add_parser("show")
+  scenario_show_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+  scenario_show_parser.add_argument("scenario_id")
+
+  provider_parser = subparsers.add_parser("provider")
+  provider_sub = provider_parser.add_subparsers(dest="provider_command", required=True)
+  provider_list_parser = provider_sub.add_parser("list")
+  provider_list_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+  provider_status_parser = provider_sub.add_parser("status")
+  provider_status_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+
+  init_parser = subparsers.add_parser("init", help="Interactive onboarding wizard")
+  init_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+  init_parser.add_argument("--yes", action="store_true", help="Non-interactive; accept defaults or flag values")
+  init_parser.add_argument("--profile", help="Profile id to apply (skip recommendation)")
+  init_parser.add_argument("--cloud", help="Comma-separated cloud provider ids to enable (non-interactive)")
+  init_parser.add_argument("--no-cloud", action="store_true", help="Do not enable any cloud overlay")
+
   return parser
 
 
@@ -778,12 +1261,12 @@ def main():
 
   if args.command == "doctor":
     report = doctor(ctx, strict=args.strict, bootstrap_hint=args.bootstrap_hint)
-    emit(report, args.json)
+    emit(report, args.json, kind="doctor")
     raise SystemExit(0 if report["ok"] or not args.strict else 1)
 
   if args.command == "smoke":
     report = smoke(ctx, timeout=args.timeout)
-    emit(report, args.json)
+    emit(report, args.json, kind="smoke")
     raise SystemExit(0 if report.get("ok", False) else 1)
 
   if args.command == "profile":
@@ -816,6 +1299,41 @@ def main():
     if args.client_command == "open":
       emit(client_open(ctx, args.target, desktop=args.desktop), args.json)
       return
+
+  if args.command == "pack":
+    if args.pack_command == "list":
+      emit(pack_list(ctx), args.json, kind="pack-list")
+      return
+    if args.pack_command == "show":
+      emit(pack_show(ctx, args.pack_id), args.json, kind="pack-show")
+      return
+
+  if args.command == "scenario":
+    if args.scenario_command == "list":
+      emit(scenario_list(ctx), args.json, kind="scenario-list")
+      return
+    if args.scenario_command == "show":
+      emit(scenario_show(ctx, args.scenario_id), args.json, kind="scenario-show")
+      return
+
+  if args.command == "provider":
+    if args.provider_command == "list":
+      emit(provider_list(ctx), args.json, kind="provider-list")
+      return
+    if args.provider_command == "status":
+      emit(provider_status(ctx), args.json, kind="provider-status")
+      return
+
+  if args.command == "init":
+    result = init_wizard(
+      ctx,
+      yes=args.yes,
+      profile=args.profile,
+      cloud=args.cloud,
+      no_cloud=args.no_cloud,
+    )
+    emit(result, args.json, kind="init")
+    return
 
   parser.error("Unknown command")
 

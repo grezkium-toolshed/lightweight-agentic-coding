@@ -11,7 +11,21 @@
 3. Use `qwen3-coder-next` as a specialist for high-value coding work.
 4. Add hosted-model fallbacks only when there is a clear quality or speed benefit.
 
+## Good first commands
+
+Interactive:
+```bash
+./bin/lac init
+```
+
+Non-interactive:
+```bash
+./bin/lac init --yes --profile 32gb
+./bin/lac models sync 32gb
+./bin/lac runtime start
+```
+
 ## Good first checks
-- `./scripts/doctor.sh`
+- `./bin/lac doctor`
 - `curl http://127.0.0.1:8080/health`
 - `curl http://127.0.0.1:8080/v1/models`

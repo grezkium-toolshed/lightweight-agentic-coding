@@ -19,6 +19,9 @@ required=(
   docs/providers/README.md
   docs/providers/AUTHENTICATION.md
   docs/providers/NVIDIA_NIM.md
+  docs/providers/OPENCODE_ZEN_GO.md
+  docs/providers/CODEX_AUTH.md
+  docs/providers/ANTHROPIC_API.md
   docs/security/THIRD_PARTY_AGENT_INTAKE.md
   docs/security/AGENCY_AGENTS_REVIEW.md
   docs/security/TRUST_MODEL.md

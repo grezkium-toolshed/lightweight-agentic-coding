@@ -51,16 +51,16 @@ This CLI is the supported control plane for:
 
 ## Provider strategy
 
-Three usage modes are supported:
-- fully local
-- local plus free cloud fallback
-- hosted-model path
+The default posture is **local always included, cloud as an optional overlay**. Every profile applies a local llama.cpp layer; cloud providers are separate, each gated by its own env var and inert until configured. `lac init` is the on-ramp.
 
-Included fallback providers in `opencode.jsonc`:
-- Antigravity
-- z.ai
-- NVIDIA NIM
-- OpenRouter free-tier models
+Supported cloud overlays in `opencode.jsonc`:
+- OpenRouter free tier
+- OpenCode Go (flat subscription) and OpenCode Zen (pay-per-request)
+- Codex via ChatGPT subscription (third-party OAuth helper)
+- Anthropic API (API-key only; Claude.ai subscription does not apply)
+- Antigravity, z.ai, NVIDIA NIM
+
+There is no dedicated "hybrid profile" tier — hybridness comes from enabling overlays on top of any local profile.
 
 ## Workflow pack strategy
 

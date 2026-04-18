@@ -25,13 +25,19 @@
 ## CLI contract
 
 The supported v2 interface is:
+- `./bin/lac init` (interactive onboarding; `--yes --profile <id> [--cloud <ids>] [--no-cloud]` for non-interactive)
 - `./bin/lac profile list`
 - `./bin/lac profile apply <profile>`
 - `./bin/lac models sync <profile>`
 - `./bin/lac runtime start|status|stop`
 - `./bin/lac client render <target>`
+- `./bin/lac pack list|show <pack>`
+- `./bin/lac scenario list|show <scenario>`
+- `./bin/lac provider list|status`
 - `./bin/lac doctor`
 - `./bin/lac smoke`
+
+All commands accept a global `--json` flag for machine-readable output. Without it, `doctor` and `smoke` print a compact human-readable summary; the JSON written to `state/reports/*.json` is identical either way.
 
 The legacy `scripts/*.sh` and `scripts/*.ps1` commands remain as thin compatibility wrappers.
 

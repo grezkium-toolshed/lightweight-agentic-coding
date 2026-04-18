@@ -318,6 +318,115 @@
         "timeout": 600000,
         "chunkTimeout": 30000
       }
+    },
+    "opencode-zen": {
+      "name": "OpenCode Zen",
+      "npm": "@ai-sdk/openai-compatible",
+      "models": {
+        "glm-4.7": {
+          "limit": {
+            "context": 200000,
+            "output": 12288
+          }
+        },
+        "claude-sonnet-4-6": {
+          "limit": {
+            "context": 200000,
+            "output": 12288
+          }
+        },
+        "gpt-5-codex": {
+          "limit": {
+            "context": 200000,
+            "output": 12288
+          }
+        }
+      },
+      "options": {
+        "baseURL": "https://api.opencode.ai/zen/v1",
+        "timeout": 600000,
+        "chunkTimeout": 30000
+      }
+    },
+    "opencode-go": {
+      "name": "OpenCode Go",
+      "npm": "@ai-sdk/openai-compatible",
+      "models": {
+        "glm-4.7": {
+          "limit": {
+            "context": 200000,
+            "output": 12288
+          }
+        },
+        "gpt-oss-120b": {
+          "limit": {
+            "context": 131072,
+            "output": 12288
+          }
+        },
+        "qwen3-coder": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        }
+      },
+      "options": {
+        "baseURL": "https://api.opencode.ai/go/v1",
+        "timeout": 600000,
+        "chunkTimeout": 30000
+      }
+    },
+    "codex-auth": {
+      "name": "Codex (ChatGPT Subscription)",
+      "npm": "@ai-sdk/openai-compatible",
+      "models": {
+        "gpt-5-codex": {
+          "limit": {
+            "context": 200000,
+            "output": 16384
+          }
+        },
+        "gpt-5": {
+          "limit": {
+            "context": 200000,
+            "output": 16384
+          }
+        }
+      },
+      "options": {
+        "baseURL": "https://api.openai.com/v1",
+        "timeout": 600000,
+        "chunkTimeout": 30000
+      }
+    },
+    "anthropic": {
+      "name": "Anthropic API",
+      "npm": "@ai-sdk/anthropic",
+      "models": {
+        "claude-opus-4-7": {
+          "limit": {
+            "context": 200000,
+            "output": 16384
+          }
+        },
+        "claude-sonnet-4-6": {
+          "limit": {
+            "context": 200000,
+            "output": 16384
+          }
+        },
+        "claude-haiku-4-5-20251001": {
+          "limit": {
+            "context": 200000,
+            "output": 16384
+          }
+        }
+      },
+      "options": {
+        "timeout": 600000,
+        "chunkTimeout": 30000
+      }
     }
   },
   "compaction": {
