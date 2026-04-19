@@ -7,6 +7,8 @@ This Local AI Cluster supports three practical provider modes:
 
 Provider freshness and risk metadata now live in `catalog/providers.json`.
 
+Run `./bin/lac provider verify --all` for a live reachability probe — each configured provider gets a real HTTP request to its baseURL and reports `ok`, `skipped`, or `error`. Pass `--refresh-catalog` to bump `last_verified_at` on success.
+
 Local baseline guidance:
 - target default family: Qwen 3.6 MoE
 - target default quant class: Unsloth `UD-Q4_K_XL`

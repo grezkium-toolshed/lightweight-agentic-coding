@@ -34,6 +34,7 @@ The supported v2 interface is:
 - `./bin/lac pack list|show <pack>`
 - `./bin/lac scenario list|show <scenario>`
 - `./bin/lac provider list|status`
+- `./bin/lac provider verify <id> [--timeout N] [--refresh-catalog]` (or `--all` to sweep every catalog provider; hits each provider's baseURL and reports `ok` / `skipped` / `error`)
 - `./bin/lac doctor`
 - `./bin/lac smoke`
 

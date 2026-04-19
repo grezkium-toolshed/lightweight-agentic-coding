@@ -29,7 +29,18 @@ AI_CLUSTER_STATE_ROOT="$INIT_STATE_1" python3 "$ROOT/scripts/lac.py" init --yes 
 INIT_STATE_2="$TMP_DIR/init-cloud-state"
 AI_CLUSTER_STATE_ROOT="$INIT_STATE_2" python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --cloud openrouter,anthropic --json > "$TMP_DIR/init-cloud.json"
 
-python3 - <<'PY' "$ROOT" "$STATE_ROOT" "$TMP_DIR"
+unset OPENROUTER_API_KEY ANTHROPIC_API_KEY OPENCODE_GO_API_KEY OPENCODE_ZEN_API_KEY OPENAI_API_KEY ANTIGRAVITY_API_KEY ZAI_API_KEY NVIDIA_API_KEY NVIDIA_NIM_API_KEY 2>/dev/null || true
+python3 "$ROOT/scripts/lac.py" provider verify openrouter --json > "$TMP_DIR/verify-openrouter.json"
+set +e
+python3 "$ROOT/scripts/lac.py" provider verify --all --json > "$TMP_DIR/verify-all.json"
+VERIFY_ALL_EXIT=$?
+set -e
+set +e
+python3 "$ROOT/scripts/lac.py" provider verify bogus-id > "$TMP_DIR/verify-bogus.out" 2>&1
+VERIFY_BOGUS_EXIT=$?
+set -e
+
+python3 - <<'PY' "$ROOT" "$STATE_ROOT" "$TMP_DIR" "$VERIFY_ALL_EXIT" "$VERIFY_BOGUS_EXIT"
 import json
 import sys
 from pathlib import Path
@@ -37,6 +48,8 @@ from pathlib import Path
 root = Path(sys.argv[1])
 state_root = Path(sys.argv[2])
 tmp_dir = Path(sys.argv[3])
+verify_all_exit = int(sys.argv[4])
+verify_bogus_exit = int(sys.argv[5])
 
 profile_24 = json.loads((tmp_dir / "profile-24gb.json").read_text(encoding="utf-8"))
 doctor_24 = json.loads((tmp_dir / "doctor-24gb.json").read_text(encoding="utf-8"))
@@ -100,6 +113,24 @@ expected_paths = [
 
 for path in expected_paths:
     assert path.is_file(), f"missing generated file: {path}"
+
+verify_openrouter = json.loads((tmp_dir / "verify-openrouter.json").read_text(encoding="utf-8"))
+assert verify_openrouter["id"] == "openrouter"
+assert verify_openrouter["status"] == "skipped"
+assert verify_openrouter["configured"] is False
+assert verify_openrouter["endpoint"].startswith("https://openrouter.ai/")
+
+verify_all = json.loads((tmp_dir / "verify-all.json").read_text(encoding="utf-8"))
+assert "results" in verify_all and "summary" in verify_all
+assert len(verify_all["results"]) == len(provider_list)
+for record in verify_all["results"]:
+    assert set(record.keys()) >= {"id", "status", "configured", "endpoint", "verified_at"}
+    assert record["status"] in ("ok", "skipped", "error")
+# local-cluster may fail if llama-server isn't running; every cloud provider
+# without a key must skip, so there should be at least (total - 1) skips.
+assert verify_all["summary"]["skipped"] >= len(verify_all["results"]) - 1
+
+assert verify_bogus_exit != 0, "verify bogus-id must exit non-zero"
 
 print("[ok] v2 CLI contract checks")
 PY

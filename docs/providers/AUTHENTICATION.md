@@ -2,6 +2,17 @@
 
 These providers are optional. Local llama.cpp remains the default path.
 
+## Verifying credentials
+
+Once you have exported an env var, confirm it actually reaches the provider:
+
+```bash
+./bin/lac provider verify openrouter
+./bin/lac provider verify --all
+```
+
+The probe sends a real request to each provider's baseURL with your key. Results report as `ok`, `skipped` (env var unset), or `error` with a reason. Secrets are never written to logs or JSON output — only the env var name and a boolean `configured` flag appear.
+
 ## Antigravity
 - recommended repo env var convention: `ANTIGRAVITY_API_KEY`
 - endpoint in repo config: `https://api.antigravity.ai/v1`

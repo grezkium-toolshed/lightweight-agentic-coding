@@ -297,6 +297,166 @@ def provider_status(ctx):
   }
 
 
+PROVIDER_VERIFICATION = {
+  "local-cluster": {
+    "endpoint": f"http://{HOST}:{PORT}/health",
+    "auth": "none",
+    "always_probe": True,
+  },
+  "openrouter": {"path": "/models", "auth": "bearer"},
+  "opencode-go": {"path": "/models", "auth": "bearer"},
+  "opencode-zen": {"path": "/models", "auth": "bearer"},
+  "codex-auth": {"path": "/models", "auth": "bearer"},
+  "nvidia-nim": {"path": "/models", "auth": "bearer"},
+  "antigravity": {"path": "/models", "auth": "bearer"},
+  "z-ai": {"path": "/models", "auth": "bearer"},
+  "anthropic": {
+    "endpoint": "https://api.anthropic.com/v1/models",
+    "auth": "x-api-key",
+  },
+}
+
+
+def _opencode_base_urls(ctx):
+  template = load_jsonc(ctx.paths["opencode_template"])
+  providers = template.get("provider", {})
+  urls = {}
+  for pid, block in providers.items():
+    base = block.get("options", {}).get("baseURL")
+    if base:
+      urls[pid] = base.rstrip("/")
+  return urls
+
+
+def _resolve_verify_endpoint(ctx, provider_id, rule):
+  if "endpoint" in rule:
+    return rule["endpoint"]
+  urls = _opencode_base_urls(ctx)
+  base = urls.get(provider_id)
+  if not base:
+    raise SystemExit(
+      f"No baseURL found for provider '{provider_id}' in opencode.jsonc"
+    )
+  return base + rule.get("path", "/models")
+
+
+def _get_provider_entry(ctx, provider_id):
+  catalog = load_json(ctx.paths["provider_catalog"])
+  for entry in catalog["providers"]:
+    if entry["id"] == provider_id:
+      return entry
+  raise SystemExit(f"Unknown provider: {provider_id}")
+
+
+def verify_provider(ctx, provider_id, timeout=5):
+  entry = _get_provider_entry(ctx, provider_id)
+  env_var = entry["env_var"]
+  env_value = os.environ.get(env_var, "")
+  configured = bool(env_value)
+
+  rule = PROVIDER_VERIFICATION.get(provider_id)
+  if rule is None:
+    return {
+      "id": provider_id,
+      "env_var": env_var,
+      "configured": configured,
+      "endpoint": None,
+      "status": "skipped",
+      "http_code": None,
+      "latency_ms": None,
+      "reason": "no verification rule registered",
+      "verified_at": utc_now(),
+    }
+
+  endpoint = _resolve_verify_endpoint(ctx, provider_id, rule)
+  always = rule.get("always_probe", False)
+
+  if not configured and not always:
+    return {
+      "id": provider_id,
+      "env_var": env_var,
+      "configured": False,
+      "endpoint": endpoint,
+      "status": "skipped",
+      "http_code": None,
+      "latency_ms": None,
+      "reason": f"env {env_var} not set",
+      "verified_at": utc_now(),
+    }
+
+  headers = {}
+  auth = rule["auth"]
+  if auth == "bearer" and env_value:
+    headers["Authorization"] = f"Bearer {env_value}"
+  elif auth == "x-api-key" and env_value:
+    headers["x-api-key"] = env_value
+    headers["anthropic-version"] = "2023-06-01"
+
+  request = urllib.request.Request(endpoint, headers=headers, method="GET")
+  started = time.monotonic()
+  status = "error"
+  http_code = None
+  reason = None
+  try:
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+      http_code = response.status
+      response.read()
+    status = "ok" if 200 <= (http_code or 0) < 300 else "error"
+    if status == "error":
+      reason = f"unexpected http {http_code}"
+  except urllib.error.HTTPError as exc:
+    http_code = exc.code
+    reason = f"http {exc.code} {exc.reason}"
+  except urllib.error.URLError as exc:
+    reason = f"unreachable: {exc.reason}"
+  except TimeoutError:
+    reason = f"timeout after {timeout}s"
+  except Exception as exc:
+    reason = f"{type(exc).__name__}: {exc}"
+
+  latency_ms = int((time.monotonic() - started) * 1000)
+
+  return {
+    "id": provider_id,
+    "env_var": env_var,
+    "configured": configured,
+    "endpoint": endpoint,
+    "status": status,
+    "http_code": http_code,
+    "latency_ms": latency_ms,
+    "reason": reason,
+    "verified_at": utc_now(),
+  }
+
+
+def verify_all_providers(ctx, timeout=5):
+  catalog = load_json(ctx.paths["provider_catalog"])
+  results = [verify_provider(ctx, p["id"], timeout=timeout) for p in catalog["providers"]]
+  summary = {
+    "ok": sum(1 for r in results if r["status"] == "ok"),
+    "skipped": sum(1 for r in results if r["status"] == "skipped"),
+    "error": sum(1 for r in results if r["status"] == "error"),
+    "total": len(results),
+  }
+  return {"results": results, "summary": summary}
+
+
+def refresh_provider_catalog(ctx, results):
+  catalog_path = ctx.paths["provider_catalog"]
+  catalog = load_json(catalog_path)
+  today = datetime.now(timezone.utc).date().isoformat()
+  by_id = {r["id"]: r for r in results}
+  updated = []
+  for entry in catalog["providers"]:
+    result = by_id.get(entry["id"])
+    if result and result["status"] == "ok":
+      entry["last_verified_at"] = today
+      entry["verification_method"] = "cli-reachability-probe"
+      updated.append(entry["id"])
+  write_json(catalog_path, catalog)
+  return updated
+
+
 def profile_list(ctx):
   rows = []
   for profile_id, profile in ctx.profiles.items():
@@ -788,6 +948,27 @@ def render_provider_status(payload):
     render_provider_list(payload["unconfigured"])
 
 
+def _render_verify_row(record):
+  status = record["status"]
+  latency = f"{record['latency_ms']}ms" if record["latency_ms"] is not None else ""
+  detail = record.get("reason") or record.get("endpoint") or ""
+  print(f"{record['id']:<18}| {status:<6}| {latency:<10}| {detail}")
+
+
+def render_provider_verify_single(record):
+  _render_verify_row(record)
+
+
+def render_provider_verify_all(payload):
+  for record in payload["results"]:
+    _render_verify_row(record)
+  summary = payload["summary"]
+  print(
+    f"Summary: {summary['ok']} ok, {summary['skipped']} skipped, "
+    f"{summary['error']} error"
+  )
+
+
 def render_doctor_text(report):
   ok = "ok" if report["ok"] else "FAIL"
   profile_id = report["active_profile_id"] or "(none)"
@@ -1125,6 +1306,12 @@ def emit(payload, json_mode=False, kind=None):
   if kind == "provider-status":
     render_provider_status(payload)
     return
+  if kind == "provider-verify":
+    render_provider_verify_single(payload)
+    return
+  if kind == "provider-verify-all":
+    render_provider_verify_all(payload)
+    return
   if kind == "doctor":
     render_doctor_text(payload)
     return
@@ -1243,6 +1430,23 @@ def build_parser():
   provider_list_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
   provider_status_parser = provider_sub.add_parser("status")
   provider_status_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+  provider_verify_parser = provider_sub.add_parser("verify")
+  provider_verify_parser.add_argument(
+    "provider_id", nargs="?", help="Provider id (omit with --all)"
+  )
+  provider_verify_parser.add_argument(
+    "--all", action="store_true", dest="all_providers", help="Verify every catalog provider"
+  )
+  provider_verify_parser.add_argument(
+    "--timeout", type=int, default=5, help="Per-request timeout in seconds"
+  )
+  provider_verify_parser.add_argument(
+    "--refresh-catalog",
+    action="store_true",
+    dest="refresh_catalog",
+    help="Update last_verified_at in catalog/providers.json on success",
+  )
+  provider_verify_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
 
   init_parser = subparsers.add_parser("init", help="Interactive onboarding wizard")
   init_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
@@ -1323,6 +1527,22 @@ def main():
     if args.provider_command == "status":
       emit(provider_status(ctx), args.json, kind="provider-status")
       return
+    if args.provider_command == "verify":
+      if args.all_providers and args.provider_id:
+        parser.error("provider verify: pass either <provider_id> or --all, not both")
+      if not args.all_providers and not args.provider_id:
+        parser.error("provider verify: pass a provider_id or --all")
+      if args.all_providers:
+        payload = verify_all_providers(ctx, timeout=args.timeout)
+        if args.refresh_catalog:
+          refresh_provider_catalog(ctx, payload["results"])
+        emit(payload, args.json, kind="provider-verify-all")
+        raise SystemExit(1 if payload["summary"]["error"] else 0)
+      record = verify_provider(ctx, args.provider_id, timeout=args.timeout)
+      if args.refresh_catalog:
+        refresh_provider_catalog(ctx, [record])
+      emit(record, args.json, kind="provider-verify")
+      raise SystemExit(1 if record["status"] == "error" else 0)
 
   if args.command == "init":
     result = init_wizard(
