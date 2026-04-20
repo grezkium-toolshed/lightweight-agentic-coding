@@ -12,7 +12,7 @@ Release index: `docs/release/README.md`
 - Finalize provider and model recommendations before public visibility
 
 ### Open Questions
-- [ ] Free model availability on OpenRouter — verify before each beta cut (see `docs/providers/OPENROUTER_FREE.md`)
+- [ ] Free model availability on OpenRouter — structural review 2026-04-20; run `./bin/lac provider verify openrouter` with a real key for live probe before beta cut (see `docs/providers/OPENROUTER_FREE.md`)
 - [ ] Live validation on all documented hardware tiers (16gb, 24gb, 32gb, 64gb, gemma-*)
 - [ ] Repo naming and public framing aligned with `local-ai-cluster`
 

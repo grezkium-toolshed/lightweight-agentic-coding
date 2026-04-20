@@ -1,4 +1,10 @@
 {
+  "_meta": {
+    "snapshot_date": "2026-04-20",
+    "source_url": "https://raw.githubusercontent.com/vava-nessa/free-coding-models/main/sources.js",
+    "verification_method": "structural-review",
+    "live_probe_command": "./bin/lac provider verify --all"
+  },
   "nvidiaNim": [
     {
       "id": "deepseek-ai/deepseek-v3.2",

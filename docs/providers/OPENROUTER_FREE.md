@@ -2,7 +2,7 @@
 
 OpenRouter provides a `:free` suffix on select models that require no API credits. These are useful for zero-cost experimentation and for low-end hardware that can't run local models.
 
-**Last verified:** 2026-04-13 — run `./scripts/verify-free-models.sh` to re-check.
+**Last verified:** 2026-04-20 (structural review; re-run `./scripts/verify-free-models.sh` or `./bin/lac provider verify openrouter` with a real `OPENROUTER_API_KEY` for a live probe).
 
 ## Current Free Models in This Repo
 
