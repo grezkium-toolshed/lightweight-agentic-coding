@@ -33,5 +33,5 @@ Use this checklist before changing the repo visibility or publishing release not
 - [ ] Third-party agent and skill guidance matches the current trust model.
 - [ ] `SECURITY.md` contains a real public reporting path or explicitly requires GitHub private vulnerability reporting.
 - [ ] No model binaries or machine-specific files are tracked.
-- [ ] CI passes on the release branch.
+- [ ] Linux CI passes on the release branch.
 - [ ] No stale docs or deleted-path references remain in the tree.

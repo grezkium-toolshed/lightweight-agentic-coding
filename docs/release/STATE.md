@@ -27,6 +27,7 @@ Release index: `docs/release/README.md`
 - [x] CI workflow added at `.github/workflows/ci.yml`
 
 ### Deferred (post-beta)
+- Windows CI lane restoration; for now, validate Windows via local/manual checks until native PowerShell verification coverage exists
 - Performance telemetry
 - Profile composition (mix local + cloud in one profile)
 - Structured feedback loop

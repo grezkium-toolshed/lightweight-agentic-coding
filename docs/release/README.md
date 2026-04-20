@@ -12,7 +12,7 @@ This folder tracks release-readiness guidance for the public beta.
 ## Current release posture
 
 - The repository remains private until release gates are complete.
-- CI exists at `.github/workflows/ci.yml` and is part of pre-release validation.
+- CI exists at `.github/workflows/ci.yml`, is Linux-based for now, and remains part of pre-release validation.
 - Runtime and docs validation must stay aligned with the current scripts and profile contracts.
 
 ## Naming and path policy
