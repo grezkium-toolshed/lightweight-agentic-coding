@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import copy
 import json
 import os
 import platform
@@ -60,13 +61,13 @@ def read_text(path):
   return path.read_text(encoding="utf-8")
 
 
-def request_json(url, method="GET", payload=None, timeout=5):
-  headers = {}
+def request_json(url, method="GET", payload=None, timeout=5, headers=None):
+  request_headers = dict(headers or {})
   data = None
   if payload is not None:
-    headers["Content-Type"] = "application/json"
+    request_headers["Content-Type"] = "application/json"
     data = json.dumps(payload).encode("utf-8")
-  request = urllib.request.Request(url, data=data, headers=headers, method=method)
+  request = urllib.request.Request(url, data=data, headers=request_headers, method=method)
   with urllib.request.urlopen(request, timeout=timeout) as response:
     raw = response.read().decode("utf-8")
   return json.loads(raw), raw
@@ -91,6 +92,270 @@ def _strip_global_json_flag(argv):
       continue
     filtered.append(arg)
   return filtered, json_mode
+
+
+def _openrouter_is_free_model(model):
+  pricing = model.get("pricing")
+  if isinstance(pricing, dict):
+    price_fields = [
+      "prompt",
+      "completion",
+      "request",
+      "image",
+      "web_search",
+      "internal_reasoning",
+      "input_cache_read",
+      "input_cache_write",
+    ]
+    seen_any = False
+    for field in price_fields:
+      if field not in pricing:
+        continue
+      seen_any = True
+      value = pricing[field]
+      try:
+        if float(value) != 0.0:
+          return False
+      except (TypeError, ValueError):
+        return False
+    if seen_any:
+      return True
+  model_id = str(model.get("id", ""))
+  return model_id.endswith(":free")
+
+
+def parse_openrouter_models_response(body):
+  if isinstance(body, str):
+    payload = json.loads(body)
+  elif isinstance(body, dict):
+    payload = body
+  else:
+    raise SystemExit("OpenRouter models response must be JSON text or a decoded object.")
+
+  data = payload.get("data", [])
+  if not isinstance(data, list):
+    raise SystemExit("OpenRouter models response missing data array.")
+  return [model for model in data if isinstance(model, dict) and _openrouter_is_free_model(model)]
+
+
+def _catalog_model_short_id(provider_id, model_id):
+  prefix = f"{provider_id}/"
+  if model_id.startswith(prefix):
+    return model_id[len(prefix):]
+  return model_id
+
+
+def _catalog_model_matches_selector(provider_id, model, selector):
+  model_id = str(model.get("id", ""))
+  short_id = _catalog_model_short_id(provider_id, model_id)
+  return selector in {model_id, short_id}
+
+
+def _resolve_catalog_selector(ctx, selector):
+  if not isinstance(selector, str) or not selector.startswith("@catalog:"):
+    return selector
+
+  spec = selector[len("@catalog:"):]
+  prefer = []
+  if "/prefer=" in spec:
+    provider_id, prefer_raw = spec.split("/prefer=", 1)
+    prefer = [item.strip() for item in prefer_raw.split(",") if item.strip()]
+  else:
+    provider_id = spec
+
+  provider = _get_provider_entry(ctx, provider_id)
+  models = provider.get("models", [])
+  if not models:
+    raise SystemExit(f"Catalog provider '{provider_id}' has no stored models for selector '{selector}'.")
+
+  if prefer:
+    for preferred in prefer:
+      for model in models:
+        if _catalog_model_matches_selector(provider_id, model, preferred):
+          return model["id"]
+    raise SystemExit(
+      f"No preferred model matched selector '{selector}'. Available: "
+      f"{', '.join(model['id'] for model in models)}"
+    )
+
+  return models[0]["id"]
+
+
+def _build_opencode_model_entry(template_models, provider_id, model):
+  short_id = _catalog_model_short_id(provider_id, model["id"])
+  existing = template_models.get(short_id, {}) if isinstance(template_models, dict) else {}
+  limit = dict(existing.get("limit", {}))
+  context_length = model.get("context_length")
+  if context_length is None:
+    context_length = model.get("top_provider", {}).get("context_length")
+  if context_length is not None:
+    limit["context"] = context_length
+  if "output" not in limit:
+    output = None
+    top_provider = model.get("top_provider")
+    if isinstance(top_provider, dict):
+      output = top_provider.get("max_completion_tokens")
+    if output is None:
+      output = 8192
+    limit["output"] = output
+
+  entry = {"limit": limit}
+  for field in ("name", "description", "supported_parameters"):
+    if field in model:
+      entry[field] = model[field]
+  if "pricing" in model:
+    entry["pricing"] = model["pricing"]
+  if "top_provider" in model:
+    entry["top_provider"] = model["top_provider"]
+  return short_id, entry
+
+
+def _normalize_openrouter_catalog_models(models, verified_at, risk_level):
+  catalog_models = []
+  for model in models:
+    model_id = str(model.get("id", "")).strip()
+    if not model_id:
+      continue
+    entry = {
+      "id": f"openrouter/{model_id}",
+      "last_verified_at": verified_at,
+      "verification_method": "live-openrouter-models-probe",
+      "risk_level": risk_level,
+    }
+    for field in ("name", "description", "pricing", "top_provider", "supported_parameters"):
+      if field in model:
+        entry[field] = model[field]
+    context_length = model.get("context_length")
+    if context_length is None:
+      top_provider = model.get("top_provider")
+      if isinstance(top_provider, dict):
+        context_length = top_provider.get("context_length")
+    if context_length is not None:
+      entry["context_length"] = context_length
+    catalog_models.append(entry)
+  catalog_models.sort(key=lambda item: item["id"])
+  return catalog_models
+
+
+def _inject_provider_catalog_models(template, provider_id, models):
+  providers = template.get("provider", {})
+  provider_block = providers.get(provider_id)
+  if not provider_block or not models:
+    return
+
+  template_models = provider_block.get("models", {})
+  generated_models = {}
+  for model in models:
+    short_id, entry = _build_opencode_model_entry(template_models, provider_id, model)
+    generated_models[short_id] = entry
+  provider_block["models"] = generated_models
+
+
+def _openrouter_catalog_models(ctx):
+  provider = _get_provider_entry(ctx, "openrouter")
+  return provider.get("models", [])
+
+
+def _fetch_openrouter_free_models(ctx, timeout=5):
+  provider = _get_provider_entry(ctx, "openrouter")
+  env_value = os.environ.get(provider["env_var"], "")
+  if not env_value:
+    raise SystemExit(f"env {provider['env_var']} not set")
+
+  endpoint = _resolve_verify_endpoint(ctx, "openrouter", PROVIDER_VERIFICATION["openrouter"])
+  headers = {"Authorization": f"Bearer {env_value}"}
+  body, raw = request_json(endpoint, timeout=timeout, headers=headers)
+  return parse_openrouter_models_response(body if isinstance(body, dict) else raw)
+
+
+def _verify_provider_record(ctx, provider_id, timeout=5, include_internal=False):
+  entry = _get_provider_entry(ctx, provider_id)
+  env_var = entry["env_var"]
+  env_value = os.environ.get(env_var, "")
+  configured = bool(env_value)
+
+  rule = PROVIDER_VERIFICATION.get(provider_id)
+  if rule is None:
+    return {
+      "id": provider_id,
+      "env_var": env_var,
+      "configured": configured,
+      "endpoint": None,
+      "status": "skipped",
+      "http_code": None,
+      "latency_ms": None,
+      "reason": "no verification rule registered",
+      "verified_at": utc_now(),
+    }
+
+  endpoint = _resolve_verify_endpoint(ctx, provider_id, rule)
+  always = rule.get("always_probe", False)
+
+  if not configured and not always:
+    return {
+      "id": provider_id,
+      "env_var": env_var,
+      "configured": False,
+      "endpoint": endpoint,
+      "status": "skipped",
+      "http_code": None,
+      "latency_ms": None,
+      "reason": f"env {env_var} not set",
+      "verified_at": utc_now(),
+    }
+
+  headers = {}
+  auth = rule["auth"]
+  if auth == "bearer" and env_value:
+    headers["Authorization"] = f"Bearer {env_value}"
+  elif auth == "x-api-key" and env_value:
+    headers["x-api-key"] = env_value
+    headers["anthropic-version"] = "2023-06-01"
+
+  request = urllib.request.Request(endpoint, headers=headers, method="GET")
+  started = time.monotonic()
+  status = "error"
+  http_code = None
+  reason = None
+  raw_body = ""
+  try:
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+      http_code = response.status
+      raw_body = response.read().decode("utf-8")
+    status = "ok" if 200 <= (http_code or 0) < 300 else "error"
+    if status == "error":
+      reason = f"unexpected http {http_code}"
+  except urllib.error.HTTPError as exc:
+    http_code = exc.code
+    reason = f"http {exc.code} {exc.reason}"
+  except urllib.error.URLError as exc:
+    reason = f"unreachable: {exc.reason}"
+  except TimeoutError:
+    reason = f"timeout after {timeout}s"
+  except Exception as exc:
+    reason = f"{type(exc).__name__}: {exc}"
+
+  latency_ms = int((time.monotonic() - started) * 1000)
+  record = {
+    "id": provider_id,
+    "env_var": env_var,
+    "configured": configured,
+    "endpoint": endpoint,
+    "status": status,
+    "http_code": http_code,
+    "latency_ms": latency_ms,
+    "reason": reason,
+    "verified_at": utc_now(),
+  }
+
+  if include_internal and status == "ok" and provider_id == "openrouter":
+    record["parsed_models"] = _normalize_openrouter_catalog_models(
+      parse_openrouter_models_response(raw_body),
+      verified_at=datetime.now(timezone.utc).date().isoformat(),
+      risk_level=entry["risk_level"],
+    )
+
+  return record
 
 
 class Context:
@@ -136,9 +401,10 @@ class Context:
 
 
 def render_opencode_config(ctx, profile_id, profile):
-  template = load_jsonc(ctx.paths["opencode_template"])
-  template["model"] = profile["default_model"]
-  template["small_model"] = profile["small_model"]
+  template = copy.deepcopy(load_jsonc(ctx.paths["opencode_template"]))
+  template["model"] = _resolve_catalog_selector(ctx, profile["default_model"])
+  template["small_model"] = _resolve_catalog_selector(ctx, profile["small_model"])
+  _inject_provider_catalog_models(template, "openrouter", _openrouter_catalog_models(ctx))
   write_json(ctx.paths["opencode_config"], template)
   return ctx.paths["opencode_config"]
 
@@ -296,6 +562,11 @@ def provider_list(ctx):
   return collect_provider_readiness(ctx)
 
 
+def provider_models(ctx, provider_id):
+  entry = _get_provider_entry(ctx, provider_id)
+  return entry.get("models", [])
+
+
 def provider_status(ctx):
   readiness = collect_provider_readiness(ctx)
   configured = [p for p in readiness if p["configured"]]
@@ -360,89 +631,13 @@ def _get_provider_entry(ctx, provider_id):
 
 
 def verify_provider(ctx, provider_id, timeout=5):
-  entry = _get_provider_entry(ctx, provider_id)
-  env_var = entry["env_var"]
-  env_value = os.environ.get(env_var, "")
-  configured = bool(env_value)
-
-  rule = PROVIDER_VERIFICATION.get(provider_id)
-  if rule is None:
-    return {
-      "id": provider_id,
-      "env_var": env_var,
-      "configured": configured,
-      "endpoint": None,
-      "status": "skipped",
-      "http_code": None,
-      "latency_ms": None,
-      "reason": "no verification rule registered",
-      "verified_at": utc_now(),
-    }
-
-  endpoint = _resolve_verify_endpoint(ctx, provider_id, rule)
-  always = rule.get("always_probe", False)
-
-  if not configured and not always:
-    return {
-      "id": provider_id,
-      "env_var": env_var,
-      "configured": False,
-      "endpoint": endpoint,
-      "status": "skipped",
-      "http_code": None,
-      "latency_ms": None,
-      "reason": f"env {env_var} not set",
-      "verified_at": utc_now(),
-    }
-
-  headers = {}
-  auth = rule["auth"]
-  if auth == "bearer" and env_value:
-    headers["Authorization"] = f"Bearer {env_value}"
-  elif auth == "x-api-key" and env_value:
-    headers["x-api-key"] = env_value
-    headers["anthropic-version"] = "2023-06-01"
-
-  request = urllib.request.Request(endpoint, headers=headers, method="GET")
-  started = time.monotonic()
-  status = "error"
-  http_code = None
-  reason = None
-  try:
-    with urllib.request.urlopen(request, timeout=timeout) as response:
-      http_code = response.status
-      response.read()
-    status = "ok" if 200 <= (http_code or 0) < 300 else "error"
-    if status == "error":
-      reason = f"unexpected http {http_code}"
-  except urllib.error.HTTPError as exc:
-    http_code = exc.code
-    reason = f"http {exc.code} {exc.reason}"
-  except urllib.error.URLError as exc:
-    reason = f"unreachable: {exc.reason}"
-  except TimeoutError:
-    reason = f"timeout after {timeout}s"
-  except Exception as exc:
-    reason = f"{type(exc).__name__}: {exc}"
-
-  latency_ms = int((time.monotonic() - started) * 1000)
-
-  return {
-    "id": provider_id,
-    "env_var": env_var,
-    "configured": configured,
-    "endpoint": endpoint,
-    "status": status,
-    "http_code": http_code,
-    "latency_ms": latency_ms,
-    "reason": reason,
-    "verified_at": utc_now(),
-  }
+  record = _verify_provider_record(ctx, provider_id, timeout=timeout, include_internal=False)
+  return record
 
 
 def verify_all_providers(ctx, timeout=5):
   catalog = load_json(ctx.paths["provider_catalog"])
-  results = [verify_provider(ctx, p["id"], timeout=timeout) for p in catalog["providers"]]
+  results = [_verify_provider_record(ctx, p["id"], timeout=timeout, include_internal=False) for p in catalog["providers"]]
   summary = {
     "ok": sum(1 for r in results if r["status"] == "ok"),
     "skipped": sum(1 for r in results if r["status"] == "skipped"),
@@ -463,6 +658,9 @@ def refresh_provider_catalog(ctx, results):
     if result and result["status"] == "ok":
       entry["last_verified_at"] = today
       entry["verification_method"] = "cli-reachability-probe"
+      parsed_models = result.get("parsed_models")
+      if parsed_models is not None:
+        entry["models"] = parsed_models
       updated.append(entry["id"])
   write_json(catalog_path, catalog)
   return updated
@@ -959,6 +1157,17 @@ def render_provider_list(providers):
     )
 
 
+def render_provider_models(provider_id, models):
+  if not models:
+    print(f"{provider_id}: no catalog models recorded")
+    return
+  for model in models:
+    short_id = _catalog_model_short_id(provider_id, model["id"])
+    context = model.get("context_length")
+    context_label = str(context) if context is not None else "?"
+    print(f"{short_id}: context {context_label} | verified {model['last_verified_at']}")
+
+
 def render_provider_status(payload):
   print(
     f"Providers: {payload['configured_count']} configured, "
@@ -1327,6 +1536,9 @@ def emit(payload, json_mode=False, kind=None):
   if kind == "provider-list":
     render_provider_list(payload)
     return
+  if kind == "provider-models":
+    render_provider_models(payload["provider_id"], payload["models"])
+    return
   if kind == "provider-status":
     render_provider_status(payload)
     return
@@ -1452,6 +1664,9 @@ def build_parser():
   provider_sub = provider_parser.add_subparsers(dest="provider_command", required=True)
   provider_list_parser = provider_sub.add_parser("list")
   provider_list_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+  provider_models_parser = provider_sub.add_parser("models")
+  provider_models_parser.add_argument("provider_id")
+  provider_models_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
   provider_status_parser = provider_sub.add_parser("status")
   provider_status_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
   provider_verify_parser = provider_sub.add_parser("verify")
@@ -1550,6 +1765,13 @@ def main():
     if args.provider_command == "list":
       emit(provider_list(ctx), args.json, kind="provider-list")
       return
+    if args.provider_command == "models":
+      payload = {
+        "provider_id": args.provider_id,
+        "models": provider_models(ctx, args.provider_id),
+      }
+      emit(payload if not args.json else payload["models"], args.json, kind="provider-models")
+      return
     if args.provider_command == "status":
       emit(provider_status(ctx), args.json, kind="provider-status")
       return
@@ -1559,14 +1781,33 @@ def main():
       if not args.all_providers and not args.provider_id:
         parser.error("provider verify: pass a provider_id or --all")
       if args.all_providers:
-        payload = verify_all_providers(ctx, timeout=args.timeout)
+        payload = {
+          "results": [
+            _verify_provider_record(ctx, p["id"], timeout=args.timeout, include_internal=args.refresh_catalog)
+            for p in load_json(ctx.paths["provider_catalog"])["providers"]
+          ]
+        }
+        payload["summary"] = {
+          "ok": sum(1 for r in payload["results"] if r["status"] == "ok"),
+          "skipped": sum(1 for r in payload["results"] if r["status"] == "skipped"),
+          "error": sum(1 for r in payload["results"] if r["status"] == "error"),
+          "total": len(payload["results"]),
+        }
         if args.refresh_catalog:
           refresh_provider_catalog(ctx, payload["results"])
+          for record in payload["results"]:
+            record.pop("parsed_models", None)
         emit(payload, args.json, kind="provider-verify-all")
         raise SystemExit(1 if payload["summary"]["error"] else 0)
-      record = verify_provider(ctx, args.provider_id, timeout=args.timeout)
+      record = _verify_provider_record(
+        ctx,
+        args.provider_id,
+        timeout=args.timeout,
+        include_internal=args.refresh_catalog,
+      )
       if args.refresh_catalog:
         refresh_provider_catalog(ctx, [record])
+        record.pop("parsed_models", None)
       emit(record, args.json, kind="provider-verify")
       raise SystemExit(1 if record["status"] == "error" else 0)
 

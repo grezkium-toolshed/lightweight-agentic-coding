@@ -2,28 +2,16 @@
 
 OpenRouter provides a `:free` suffix on select models that require no API credits. These are useful for zero-cost experimentation and for low-end hardware that can't run local models.
 
-**Last verified:** 2026-04-20 (structural review; re-run `./scripts/verify-free-models.sh` or `./bin/lac provider verify openrouter` with a real `OPENROUTER_API_KEY` for a live probe).
+**Last verified:** 2026-04-21 (structural review; use `./bin/lac provider models openrouter` for the live list and `./bin/lac provider verify openrouter --refresh-catalog` for a live refresh).
 
-## Current Free Models in This Repo
+## Live Model List
 
-The `openrouter` provider block in `opencode.jsonc` includes:
+OpenRouter free models are refreshed into `catalog/providers.json` from the live `/models` response. The repo still keeps starter defaults in `opencode.jsonc` so a clean clone can render a working config before the first refresh.
 
-| Model ID | Notes |
-|----------|-------|
-| `qwen/qwen3-coder:480b-free` | Strong coding model, 480B MoE. Good for code review and refactoring. |
-| `mistralai/devstral-2-free` | Efficient instruction-following model. Good for general tasks. |
-| `stepfun/step-3.5-flash:free` | Fast response times, reasonable quality. Good for quick Q&A. |
-| `openai/gpt-oss-120b:free` | Open-weight large model. Good general-purpose fallback. |
-| `openai/gpt-oss-20b:free` | Smaller, faster variant. Lower quality but very responsive. |
-| `nvidia/nemotron-3-nano-30b-a3b:free` | Nvidia's open model. Decent quality for its size. |
-| `meta-llama/llama-3.3-70b-instruct:free` | Llama 3.3 70B — strong general-purpose model. |
-| `z-ai/glm-4.5-air:free` | GLM 4.5 Air — S+ tier coding model, strong reasoning. |
-| `qwen/qwen3-next-80b-a3b-instruct:free` | Qwen3 Next 80B MoE — next-gen coding and reasoning. |
-| `openai/gpt-4o-mini:free` | GPT-4o Mini — fast general-purpose model. |
-| `google/gemini-2.0-flash-exp:free` | Gemini 2.0 Flash — strong general-purpose with large context. |
-
-Canonical default model ID for the `openrouter` profile is:
-- `qwen/qwen3-coder:480b-free`
+Use these commands:
+- `./bin/lac provider models openrouter` to print the current live model list
+- `./bin/lac provider list` to inspect provider freshness and readiness
+- `./bin/lac provider verify openrouter --refresh-catalog` to probe the endpoint with your key and store the refreshed catalog
 
 ## Rate Limits and Caveats
 
@@ -34,18 +22,8 @@ Canonical default model ID for the `openrouter` profile is:
 
 ## Refresh Guidance
 
-Before each public beta cut:
-1. Run `./scripts/verify-free-models.sh` (requires `OPENROUTER_API_KEY` and/or `NVIDIA_API_KEY`) to check all configured models
-2. Remove any `[!!] REMOVED` models from `opencode.jsonc`
-3. Visit https://openrouter.ai/models?pricing=free to verify current availability
-4. Update this doc if rate limits or caveats have changed
-5. Update `docs/FREE_CLOUD_MODELS.md` and `docs/free-coding-models.json` to match
-
-## Default Profile Risk
-
-The `openrouter` hardware profile sets `qwen/qwen3-coder:480b-free` as the default model. This is the single most user-visible failure point — if OpenRouter removes this model, the entire profile stops working at startup.
-
-If `verify-free-models.sh` reports this model as `[!!] REMOVED`:
-- Update the `openrouter` profile in `scripts/setup-config-device.sh` and `.ps1` to use the next highest-tier free model (e.g., `z-ai/glm-4.5-air:free`)
-- Update `runtime-config/presets/openrouter.ini` if needed
-- Re-run verification to confirm the replacement works
+When the live list or risk posture changes:
+1. Run `./bin/lac provider verify openrouter --refresh-catalog`
+2. Re-run `./bin/lac provider models openrouter` and confirm the refreshed list looks sane
+3. Update this doc only if the refresh command, caveats, or fallback posture changes
+4. Keep `docs/FREE_CLOUD_MODELS.md` and `docs/free-coding-models.json` focused on the live command path rather than a frozen table

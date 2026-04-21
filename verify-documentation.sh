@@ -2,7 +2,6 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CANON_OPENROUTER_MODEL="qwen/qwen3-coder:480b-free"
 required=(
   README.md
   ARCHITECTURE_OVERVIEW.md
@@ -45,14 +44,12 @@ for f in "${required[@]}"; do
   fi
 done
 
-python3 - <<'PY' "$ROOT" "$CANON_OPENROUTER_MODEL"
+python3 - <<'PY' "$ROOT"
 import json
-import re
 import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
-canonical_model = sys.argv[2]
 
 
 def load_jsonc(path: Path):
@@ -70,20 +67,31 @@ def require(cond: bool, msg: str):
 
 opencode = load_jsonc(root / "opencode.jsonc")
 openrouter_models = opencode["provider"]["openrouter"]["models"]
-require(canonical_model in openrouter_models, f"opencode.jsonc openrouter models must include '{canonical_model}'")
+require(isinstance(openrouter_models, dict) and openrouter_models, "opencode.jsonc openrouter models must keep starter defaults")
 
 openrouter_doc = (root / "docs/providers/OPENROUTER_FREE.md").read_text(encoding="utf-8")
-require(canonical_model in openrouter_doc, f"docs/providers/OPENROUTER_FREE.md must reference '{canonical_model}'")
+require("./bin/lac provider models openrouter" in openrouter_doc, "docs/providers/OPENROUTER_FREE.md must point to the provider models command")
+require("./bin/lac provider verify openrouter --refresh-catalog" in openrouter_doc, "docs/providers/OPENROUTER_FREE.md must document the refresh command")
 require("Last verified:" in openrouter_doc, "docs/providers/OPENROUTER_FREE.md must include a 'Last verified:' line")
 
 free_models_doc = (root / "docs/FREE_CLOUD_MODELS.md").read_text(encoding="utf-8")
 require("qwen/qwen3-coder:free" not in free_models_doc, "docs/FREE_CLOUD_MODELS.md still contains stale model id 'qwen/qwen3-coder:free'")
-require(canonical_model in free_models_doc, f"docs/FREE_CLOUD_MODELS.md must include canonical model '{canonical_model}'")
+require("./bin/lac provider models openrouter" in free_models_doc, "docs/FREE_CLOUD_MODELS.md must point to the provider models command")
+
+free_models_json = json.loads((root / "docs/free-coding-models.json").read_text(encoding="utf-8"))
+openrouter_entry = free_models_json["openrouter"]
+require(isinstance(openrouter_entry, dict), "docs/free-coding-models.json openrouter entry must be metadata, not a frozen array")
+require(openrouter_entry.get("live") is True, "docs/free-coding-models.json openrouter entry must mark live catalog usage")
+require(openrouter_entry.get("list_command") == "./bin/lac provider models openrouter", "docs/free-coding-models.json must point to the provider models command")
 
 release_state = (root / "docs/release/STATE.md").read_text(encoding="utf-8")
 require(
     "- CI pipeline" not in release_state,
     "docs/release/STATE.md still marks CI pipeline as deferred, but CI exists",
+)
+require(
+    "Free model availability on OpenRouter" not in release_state.split("### Open Questions", 1)[1].split("### Completed", 1)[0],
+    "docs/release/STATE.md must not keep OpenRouter free-model availability under Open Questions",
 )
 
 gitignore = (root / ".gitignore").read_text(encoding="utf-8")

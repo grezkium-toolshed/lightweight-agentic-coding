@@ -16,6 +16,7 @@ python3 "$ROOT/scripts/lac.py" client render codex-reference --json > "$TMP_DIR/
 python3 "$ROOT/scripts/lac.py" doctor --bootstrap-hint --json > "$TMP_DIR/doctor-24gb.json"
 python3 "$ROOT/scripts/lac.py" --json provider list > "$TMP_DIR/provider-list-top.json"
 python3 "$ROOT/scripts/lac.py" provider list --json > "$TMP_DIR/provider-list-sub.json"
+python3 "$ROOT/scripts/lac.py" provider models openrouter --json > "$TMP_DIR/provider-models-openrouter.json"
 python3 "$ROOT/scripts/lac.py" provider status --json > "$TMP_DIR/provider-status-24gb.json"
 
 python3 "$ROOT/scripts/lac.py" profile apply openrouter --json > "$TMP_DIR/profile-openrouter.json"
@@ -65,6 +66,7 @@ opencode_config = json.loads((tmp_dir / "opencode-24gb.json").read_text(encoding
 opencode_manifest = json.loads((root / ".opencode/render-manifest.json").read_text(encoding="utf-8"))
 provider_list_top = json.loads((tmp_dir / "provider-list-top.json").read_text(encoding="utf-8"))
 provider_list_sub = json.loads((tmp_dir / "provider-list-sub.json").read_text(encoding="utf-8"))
+provider_models_openrouter = json.loads((tmp_dir / "provider-models-openrouter.json").read_text(encoding="utf-8"))
 provider_list_24 = provider_list_top
 provider_list_openrouter = json.loads((tmp_dir / "provider-list-openrouter.json").read_text(encoding="utf-8"))
 
@@ -73,6 +75,8 @@ assert opencode_config["model"] == "local-cluster/qwen3-14b-q4"
 assert opencode_manifest["target"] == "opencode"
 assert doctor_24["assets"]["pack_count"] >= 4
 assert provider_list_top == provider_list_sub
+assert isinstance(provider_models_openrouter, list) and provider_models_openrouter, "provider models openrouter must be non-empty"
+assert all(model["id"].startswith("openrouter/") for model in provider_models_openrouter)
 assert any(provider["id"] == "local-cluster" and provider["configured"] is True for provider in provider_list_24)
 assert any(provider["id"] == "local-cluster" and provider["configured"] is True for provider in doctor_24["provider_readiness"])
 assert smoke_openrouter["skipped"] is True

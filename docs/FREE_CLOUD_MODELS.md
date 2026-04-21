@@ -98,19 +98,11 @@ Kudos to **@vava-nessa** for the free model index and NIM helper tooling.
 
 ## openrouter
 
-| Model ID | Label | Tier | SWE | Context |
-|---|---|---|---|---|
-| `qwen/qwen3-coder:480b-free` | Qwen3 Coder 480B | S+ | 70.6% | 262k |
-| `z-ai/glm-4.5-air:free` | GLM 4.5 Air | S+ | 72.0% | 128k |
-| `google/gemma-3-27b-it:free` | Gemma 3 27B | B | 22.0% | 128k |
-| `stepfun/step-3.5-flash:free` | Step 3.5 Flash | S+ | 74.4% | 256k |
-| `qwen/qwen3-next-80b-a3b-instruct:free` | Qwen3 80B Instruct | S | 65.0% | 128k |
-| `openai/gpt-oss-120b:free` | GPT OSS 120B | S | 60.0% | 128k |
-| `openai/gpt-oss-20b:free` | GPT OSS 20B | A | 42.0% | 128k |
-| `nvidia/nemotron-3-nano-30b-a3b:free` | Nemotron Nano 30B | A | 43.0% | 128k |
-| `meta-llama/llama-3.3-70b-instruct:free` | Llama 3.3 70B | A- | 39.5% | 128k |
-| `mistralai/mistral-small-3.1-24b-instruct:free` | Mistral Small 3.1 | B+ | 30.0% | 128k |
-| `google/gemma-3-12b-it:free` | Gemma 3 12B | C | 15.0% | 128k |
+OpenRouter free models are refreshed from the live catalog path and intentionally omitted from this static snapshot table.
+
+- Use `./bin/lac provider verify openrouter --refresh-catalog` to refresh the catalog from the endpoint.
+- Use `./bin/lac provider models openrouter` to list the currently stored live set.
+- The repo still keeps starter defaults in `opencode.jsonc` for clean-clone rendering, but this page should not mirror them as a frozen table.
 
 ## googleai
 

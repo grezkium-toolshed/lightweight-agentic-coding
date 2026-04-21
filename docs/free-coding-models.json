@@ -524,85 +524,13 @@
       "context": "128k"
     }
   ],
-  "openrouter": [
-    {
-      "id": "qwen/qwen3-coder:480b-free",
-      "label": "Qwen3 Coder 480B",
-      "tier": "S+",
-      "swe": "70.6%",
-      "context": "262k"
-    },
-    {
-      "id": "z-ai/glm-4.5-air:free",
-      "label": "GLM 4.5 Air",
-      "tier": "S+",
-      "swe": "72.0%",
-      "context": "128k"
-    },
-    {
-      "id": "google/gemma-3-27b-it:free",
-      "label": "Gemma 3 27B",
-      "tier": "B",
-      "swe": "22.0%",
-      "context": "128k"
-    },
-    {
-      "id": "stepfun/step-3.5-flash:free",
-      "label": "Step 3.5 Flash",
-      "tier": "S+",
-      "swe": "74.4%",
-      "context": "256k"
-    },
-    {
-      "id": "qwen/qwen3-next-80b-a3b-instruct:free",
-      "label": "Qwen3 80B Instruct",
-      "tier": "S",
-      "swe": "65.0%",
-      "context": "128k"
-    },
-    {
-      "id": "openai/gpt-oss-120b:free",
-      "label": "GPT OSS 120B",
-      "tier": "S",
-      "swe": "60.0%",
-      "context": "128k"
-    },
-    {
-      "id": "openai/gpt-oss-20b:free",
-      "label": "GPT OSS 20B",
-      "tier": "A",
-      "swe": "42.0%",
-      "context": "128k"
-    },
-    {
-      "id": "nvidia/nemotron-3-nano-30b-a3b:free",
-      "label": "Nemotron Nano 30B",
-      "tier": "A",
-      "swe": "43.0%",
-      "context": "128k"
-    },
-    {
-      "id": "meta-llama/llama-3.3-70b-instruct:free",
-      "label": "Llama 3.3 70B",
-      "tier": "A-",
-      "swe": "39.5%",
-      "context": "128k"
-    },
-    {
-      "id": "mistralai/mistral-small-3.1-24b-instruct:free",
-      "label": "Mistral Small 3.1",
-      "tier": "B+",
-      "swe": "30.0%",
-      "context": "128k"
-    },
-    {
-      "id": "google/gemma-3-12b-it:free",
-      "label": "Gemma 3 12B",
-      "tier": "C",
-      "swe": "15.0%",
-      "context": "128k"
-    }
-  ],
+  "openrouter": {
+    "source": "catalog/providers.json",
+    "live": true,
+    "list_command": "./bin/lac provider models openrouter",
+    "verify_command": "./bin/lac provider verify openrouter --refresh-catalog",
+    "note": "OpenRouter free models are refreshed live and intentionally omitted from this static snapshot; starter defaults remain in opencode.jsonc until refresh."
+  },
   "googleai": [
     {
       "id": "gemma-3-27b-it",

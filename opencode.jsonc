@@ -242,9 +242,13 @@
         "chunkTimeout": 30000
       }
     },
+    // OpenRouter prefers live catalog data after `./bin/lac provider verify openrouter --refresh-catalog`.
+    // These starter defaults keep clean-clone rendering usable before the first refresh.
+    // Keep this block aligned with catalog/providers.json and `./bin/lac provider models openrouter`.
     "openrouter": {
       "name": "OpenRouter Free Tier",
       "npm": "@ai-sdk/openai-compatible",
+      // Starter defaults are replaced by catalog-backed entries after refresh.
       "models": {
         "qwen/qwen3-coder:480b-free": {
           "limit": {
