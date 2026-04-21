@@ -14,8 +14,14 @@ python3 "$ROOT/scripts/lac.py" client render opencode --json > "$TMP_DIR/render-
 python3 "$ROOT/scripts/lac.py" client render claude-code --json > "$TMP_DIR/render-claude.json"
 python3 "$ROOT/scripts/lac.py" client render codex-reference --json > "$TMP_DIR/render-codex.json"
 python3 "$ROOT/scripts/lac.py" doctor --bootstrap-hint --json > "$TMP_DIR/doctor-24gb.json"
+python3 "$ROOT/scripts/lac.py" --json provider list > "$TMP_DIR/provider-list-top.json"
+python3 "$ROOT/scripts/lac.py" provider list --json > "$TMP_DIR/provider-list-sub.json"
+python3 "$ROOT/scripts/lac.py" provider status --json > "$TMP_DIR/provider-status-24gb.json"
 
 python3 "$ROOT/scripts/lac.py" profile apply openrouter --json > "$TMP_DIR/profile-openrouter.json"
+python3 "$ROOT/scripts/lac.py" doctor --bootstrap-hint --json > "$TMP_DIR/doctor-openrouter.json"
+python3 "$ROOT/scripts/lac.py" provider list --json > "$TMP_DIR/provider-list-openrouter.json"
+python3 "$ROOT/scripts/lac.py" provider status --json > "$TMP_DIR/provider-status-openrouter.json"
 python3 "$ROOT/scripts/lac.py" smoke --json > "$TMP_DIR/smoke-openrouter.json"
 
 python3 "$ROOT/scripts/lac.py" pack list --json > "$TMP_DIR/pack-list.json"
@@ -53,14 +59,22 @@ verify_bogus_exit = int(sys.argv[5])
 
 profile_24 = json.loads((tmp_dir / "profile-24gb.json").read_text(encoding="utf-8"))
 doctor_24 = json.loads((tmp_dir / "doctor-24gb.json").read_text(encoding="utf-8"))
+doctor_openrouter = json.loads((tmp_dir / "doctor-openrouter.json").read_text(encoding="utf-8"))
 smoke_openrouter = json.loads((tmp_dir / "smoke-openrouter.json").read_text(encoding="utf-8"))
 opencode_config = json.loads((tmp_dir / "opencode-24gb.json").read_text(encoding="utf-8"))
 opencode_manifest = json.loads((root / ".opencode/render-manifest.json").read_text(encoding="utf-8"))
+provider_list_top = json.loads((tmp_dir / "provider-list-top.json").read_text(encoding="utf-8"))
+provider_list_sub = json.loads((tmp_dir / "provider-list-sub.json").read_text(encoding="utf-8"))
+provider_list_24 = provider_list_top
+provider_list_openrouter = json.loads((tmp_dir / "provider-list-openrouter.json").read_text(encoding="utf-8"))
 
 assert profile_24["profile_id"] == "24gb"
 assert opencode_config["model"] == "local-cluster/qwen3-14b-q4"
 assert opencode_manifest["target"] == "opencode"
 assert doctor_24["assets"]["pack_count"] >= 4
+assert provider_list_top == provider_list_sub
+assert any(provider["id"] == "local-cluster" and provider["configured"] is True for provider in provider_list_24)
+assert any(provider["id"] == "local-cluster" and provider["configured"] is True for provider in doctor_24["provider_readiness"])
 assert smoke_openrouter["skipped"] is True
 assert smoke_openrouter["reason"] == "cloud-profile"
 
@@ -102,6 +116,11 @@ assert init_cloud["applied"] is True
 assert init_cloud["cloud"] == ["openrouter", "anthropic"]
 assert any("OPENROUTER_API_KEY" in step for step in init_cloud["next_steps"])
 assert any("ANTHROPIC_API_KEY" in step for step in init_cloud["next_steps"])
+
+assert any(provider["id"] == "local-cluster" and provider["configured"] is False for provider in provider_list_openrouter)
+assert any(provider["id"] == "local-cluster" and provider["configured"] is False for provider in doctor_openrouter["provider_readiness"])
+provider_status_openrouter = json.loads((tmp_dir / "provider-status-openrouter.json").read_text(encoding="utf-8"))
+assert provider_status_openrouter["configured_count"] + provider_status_openrouter["unconfigured_count"] == len(provider_list_openrouter)
 
 expected_paths = [
     state_root / "active/profile.txt",

@@ -4,14 +4,14 @@ These providers are optional. Local llama.cpp remains the default path.
 
 ## Verifying credentials
 
-Once you have exported an env var, confirm it actually reaches the provider:
+Use `provider verify` to confirm both provider auth and local-cluster readiness:
 
 ```bash
 ./bin/lac provider verify openrouter
 ./bin/lac provider verify --all
 ```
 
-The probe sends a real request to each provider's baseURL with your key. Results report as `ok`, `skipped` (env var unset), or `error` with a reason. Secrets are never written to logs or JSON output — only the env var name and a boolean `configured` flag appear.
+The probe sends a real request to each provider's baseURL with your key. `--all` also probes the local health endpoint, so it can report `error` until `./bin/lac runtime start` has been run. Results report as `ok`, `skipped` (env var unset), or `error` with a reason. Secrets are never written to logs or JSON output — only the env var name and a boolean `configured` flag appear.
 
 ## Antigravity
 - recommended repo env var convention: `ANTIGRAVITY_API_KEY`
@@ -66,7 +66,7 @@ The probe sends a real request to each provider's baseURL with your key. Results
 - details: `ANTHROPIC_API.md`
 
 ## Important notes
-- These environment variable names are repo conventions for documentation and shell setup. If you use a different secret-loading method, keep the docs and your local environment consistent.
+- These environment variable names are repo conventions for documentation and shell setup. Local-cluster readiness is profile/runtime based, so use the selected profile plus `./bin/lac runtime start` rather than treating env vars as a readiness step.
 - Model availability and quota policies change frequently.
 - Treat the provider blocks in `opencode.jsonc` as verified starter examples, not permanent guarantees.
 - Refresh `docs/FREE_CLOUD_MODELS.md` when preparing a new public beta cut.

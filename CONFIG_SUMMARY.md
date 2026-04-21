@@ -34,11 +34,11 @@ The supported v2 interface is:
 - `./bin/lac pack list|show <pack>`
 - `./bin/lac scenario list|show <scenario>`
 - `./bin/lac provider list|status`
-- `./bin/lac provider verify <id> [--timeout N] [--refresh-catalog]` (or `--all` to sweep every catalog provider; hits each provider's baseURL and reports `ok` / `skipped` / `error`)
+- `./bin/lac provider verify <id> [--timeout N] [--refresh-catalog]` (or `--all` to sweep every catalog provider; hits each provider's baseURL and reports `ok` / `skipped` / `error`, plus the local health endpoint)
 - `./bin/lac doctor`
 - `./bin/lac smoke`
 
-All commands accept a global `--json` flag for machine-readable output. Without it, `doctor` and `smoke` print a compact human-readable summary; the JSON written to `state/reports/*.json` is identical either way.
+The global `--json` flag is supported repo-wide for machine-readable output. Without it, `doctor` and `smoke` print a compact human-readable summary; the JSON written to `state/reports/*.json` is identical either way.
 
 The legacy `scripts/*.sh` and `scripts/*.ps1` commands remain as thin compatibility wrappers.
 

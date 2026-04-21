@@ -82,6 +82,17 @@ def is_pid_running(pid):
   return True
 
 
+def _strip_global_json_flag(argv):
+  json_mode = False
+  filtered = []
+  for arg in argv:
+    if arg == "--json":
+      json_mode = True
+      continue
+    filtered.append(arg)
+  return filtered, json_mode
+
+
 class Context:
   def __init__(self):
     self.root = ROOT
@@ -496,17 +507,23 @@ def profile_apply(ctx, profile_id, render_target="opencode"):
   return summary
 
 
+def _provider_configured(ctx, provider):
+  if provider["id"] == "local-cluster":
+    profile = ctx.active_profile()
+    return bool(profile and profile.get("runtime_mode") == "local")
+  return bool(os.environ.get(provider["env_var"]))
+
+
 def collect_provider_readiness(ctx):
   catalog = load_json(ctx.paths["provider_catalog"])
   results = []
   for provider in catalog["providers"]:
-    env_var = provider["env_var"]
     results.append(
       {
         "id": provider["id"],
         "label": provider["label"],
-        "env_var": env_var,
-        "configured": bool(os.environ.get(env_var)),
+        "env_var": provider["env_var"],
+        "configured": _provider_configured(ctx, provider),
         "risk_level": provider["risk_level"],
         "last_verified_at": provider["last_verified_at"],
       }
@@ -928,6 +945,13 @@ def render_scenario_show(scenario):
 
 def render_provider_list(providers):
   for provider in providers:
+    if provider["id"] == "local-cluster":
+      readiness = "local profile active" if provider["configured"] else "local profile inactive"
+      print(
+        f"{provider['id']}: {provider['label']} | {readiness} | "
+        f"risk {provider['risk_level']} | verified {provider['last_verified_at']}"
+      )
+      continue
     flag = "ready" if provider["configured"] else "unset"
     print(
       f"{provider['id']}: {provider['label']} | env {provider['env_var']} ({flag}) | "
@@ -1460,7 +1484,9 @@ def build_parser():
 
 def main():
   parser = build_parser()
-  args = parser.parse_args()
+  argv, json_mode = _strip_global_json_flag(sys.argv[1:])
+  args = parser.parse_args(argv)
+  args.json = bool(getattr(args, "json", False) or json_mode)
   ctx = Context()
 
   if args.command == "doctor":
