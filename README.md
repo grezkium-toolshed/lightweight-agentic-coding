@@ -151,11 +151,21 @@ Desktop helper on macOS:
 ./bin/lac client open opencode --desktop
 ```
 
+The desktop helper uses the generated `state/clients/opencode/opencode.json`, so it works for local-only, hybrid, and cloud-only profiles. If OpenCode Desktop is already running, quit and relaunch it after changing profiles so the generated config is loaded.
+
 Monitor llama-server logs:
 
 ```bash
 tail -f state/logs/llama-server.log
 ```
+
+Troubleshoot runtime startup in the foreground:
+
+```bash
+./bin/lac runtime start --foreground
+```
+
+Foreground mode keeps `llama-server` attached to the terminal, so model-load errors and server logs are visible immediately. Normal `runtime start` runs in the background and writes to `state/logs/llama-server.log`; `runtime start --show-logs` starts in the background and then follows that log file.
 
 ## Quick start (Windows PowerShell)
 
@@ -203,11 +213,21 @@ Desktop helper:
 ./bin/lac.ps1 client open opencode --desktop
 ```
 
+Desktop auto-launch is implemented for macOS. On Windows, use the generated config path from `./bin/lac.ps1 profile apply <profile>` with the OpenCode app's normal workspace/config flow.
+
 Monitor logs:
 
 ```powershell
 Get-Content state/logs/llama-server.log -Wait -Tail 50
 ```
+
+Troubleshoot runtime startup in the foreground:
+
+```powershell
+./bin/lac.ps1 runtime start --foreground
+```
+
+Foreground mode keeps `llama-server` attached to the terminal. The compatibility wrapper also supports `./scripts/launch-llama.ps1 -Foreground`.
 
 Compatibility wrappers under `scripts/` still exist, but `./bin/lac` is the supported v2 interface.
 

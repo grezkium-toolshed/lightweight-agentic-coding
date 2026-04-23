@@ -53,7 +53,14 @@ is_macos() {
 
 should_stage_mlx() {
   case "${AI_INCLUDE_MLX:-auto}" in
-    1|true|yes) return 0 ;;
+    1|true|yes)
+      if is_macos; then
+        return 0
+      else
+        echo "MLX is only supported on macOS. Ignoring AI_INCLUDE_MLX=${AI_INCLUDE_MLX}." >&2
+        return 1
+      fi
+      ;;
     0|false|no) return 1 ;;
     auto) is_macos ;;
     *)
@@ -63,7 +70,7 @@ should_stage_mlx() {
   esac
 }
 
-add_qwen36_mlx() {
+add_mlx() {
   local repo="$1"
   MLX_MODELS+=("$repo")
 }
@@ -71,24 +78,24 @@ add_qwen36_mlx() {
 case "$PROFILE" in
   16gb)
     MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q3_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q3_K_XL.gguf|14000")
-    add_qwen36_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
+    add_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
     ;;
   24gb)
     MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q4_K_XL.gguf|17000")
     MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q3_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q3_K_XL.gguf|14000")
-    add_qwen36_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
+    add_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
     ;;
   32gb)
     MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q4_K_XL.gguf|17000")
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
-    add_qwen36_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
+    add_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
     ;;
   64gb)
     MODELS+=("qwen3.6|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|unsloth/Qwen3.6-35B-A3B-GGUF|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|38000")
     MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q4_K_XL.gguf|17000")
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
-    add_qwen36_mlx "unsloth/Qwen3.6-35B-A3B-MLX-8bit"
-    add_qwen36_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
+    add_mlx "unsloth/Qwen3.6-35B-A3B-MLX-8bit"
+    add_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
     ;;
   128gb-qwen122b)
     MODELS+=("qwen3.5|Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf|unsloth/Qwen3.5-122B-A10B-GGUF|Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf|100")
@@ -101,8 +108,8 @@ case "$PROFILE" in
     MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q4_K_XL.gguf|17000")
     MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q3_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q3_K_XL.gguf|14000")
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
-    add_qwen36_mlx "unsloth/Qwen3.6-35B-A3B-MLX-8bit"
-    add_qwen36_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
+    add_mlx "unsloth/Qwen3.6-35B-A3B-MLX-8bit"
+    add_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
     ;;
   128gb-minimax)
     MINIMAX_REPO="${MINIMAX_REPO:-unsloth/MiniMax-M2.7-GGUF}"
@@ -122,19 +129,26 @@ case "$PROFILE" in
   gemma-16gb)
     MODELS+=("gemma4|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|unsloth/gemma-4-26B-A4B-IT-GGUF|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|15000")
     MODELS+=("gemma4|gemma-4-E4B-IT-Q8_0.gguf|unsloth/gemma-4-E4B-IT-GGUF|gemma-4-E4B-IT-Q8_0.gguf|4000")
+    add_mlx "unsloth/gemma-4-31b-it-UD-MLX-4bit"
     ;;
   gemma-24gb)
     MODELS+=("gemma4|gemma-4-31B-IT-UD-Q4_K_XL.gguf|unsloth/gemma-4-31B-IT-GGUF|gemma-4-31B-IT-UD-Q4_K_XL.gguf|16000")
     MODELS+=("gemma4|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|unsloth/gemma-4-26B-A4B-IT-GGUF|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|15000")
+    add_mlx "unsloth/gemma-4-31b-it-UD-MLX-4bit"
+    add_mlx "unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit"
     ;;
   gemma-32gb)
     MODELS+=("gemma4|gemma-4-31B-IT-Q8_0.gguf|unsloth/gemma-4-31B-IT-GGUF|gemma-4-31B-IT-Q8_0.gguf|32000")
     MODELS+=("gemma4|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|unsloth/gemma-4-26B-A4B-IT-GGUF|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|15000")
+    add_mlx "unsloth/gemma-4-31b-it-UD-MLX-4bit"
+    add_mlx "unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit"
     ;;
   gemma-64gb)
     MODELS+=("gemma4|gemma-4-31B-IT-BF16.gguf|unsloth/gemma-4-31B-IT-GGUF|gemma-4-31B-IT-BF16.gguf|60000")
     MODELS+=("gemma4|gemma-4-31B-IT-Q8_0.gguf|unsloth/gemma-4-31B-IT-GGUF|gemma-4-31B-IT-Q8_0.gguf|32000")
     MODELS+=("gemma4|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|unsloth/gemma-4-26B-A4B-IT-GGUF|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|15000")
+    add_mlx "unsloth/gemma-4-31b-it-UD-MLX-4bit"
+    add_mlx "unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit"
     ;;
   openrouter)
     echo "Profile: openrouter"

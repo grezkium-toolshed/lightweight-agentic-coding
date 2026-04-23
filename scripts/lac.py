@@ -19,6 +19,20 @@ ROOT = Path(__file__).resolve().parent.parent
 STATE_ROOT = Path(os.environ.get("AI_CLUSTER_STATE_ROOT", ROOT / "state"))
 PORT = int(os.environ.get("AI_CLUSTER_PORT", "8080"))
 HOST = os.environ.get("AI_CLUSTER_HOST", "127.0.0.1")
+OMLX_PORT = int(os.environ.get("AI_OMLX_PORT", os.environ.get("OMLX_PORT", "8000")))
+LOCAL_MLX_MODEL_IDS = {
+  # Qwen 3.6 MLX quants (Unsloth)
+  "qwen3.6-27b-q3": "Qwen3.6-27B-UD-MLX-6bit",
+  "qwen3.6-27b-q4": "Qwen3.6-27B-UD-MLX-6bit",
+  "qwen3.6-35b-a3b-q8": "Qwen3.6-35B-A3B-MLX-8bit",
+  # Gemma 4 MLX Dynamic quants (Unsloth)
+  # Dense 31B: 4bit (matches Qwen dense pattern)
+  "gemma-4-31b-q4": "gemma-4-31b-it-UD-MLX-4bit",
+  "gemma-4-31b-q8": "gemma-4-31b-it-UD-MLX-4bit",
+  "gemma-4-31b-bf16": "gemma-4-31b-it-UD-MLX-4bit",
+  # MoE 26B-A4B: 8bit (matches Qwen MoE pattern)
+  "gemma-4-26b-a4b-q4": "gemma-4-26b-a4b-it-UD-MLX-8bit",
+}
 
 
 def utc_now():
@@ -55,6 +69,67 @@ def as_runtime_path(path):
 
 def command_exists(name):
   return shutil.which(name) is not None
+
+
+def _normalize_local_runtime(value):
+  normalized = (value or "").strip().lower()
+  if normalized in {"", "auto"}:
+    return "auto"
+  if normalized in {"omlx", "mlx"}:
+    return "omlx"
+  if normalized in {"llama", "llama.cpp", "llamacpp", "llama-server"}:
+    return "llama.cpp"
+  raise SystemExit(f"Unsupported AI_LOCAL_RUNTIME: {value}. Use auto, omlx, or llama.cpp.")
+
+
+def _local_model_name(selector):
+  if not selector.startswith("local-cluster/"):
+    return ""
+  return selector.split("/", 1)[1]
+
+
+def _profile_supports_omlx(profile, verbose=False):
+  if not profile or profile.get("runtime_mode") != "local":
+    if verbose:
+      print(f"[omlx] Profile '{profile.get('id', '?')}' rejected: not a local runtime profile")
+    return False
+  model_ids = {
+    _local_model_name(profile.get("default_model", "")),
+    _local_model_name(profile.get("small_model", "")),
+  }
+  unsupported = [mid for mid in model_ids if mid and mid not in LOCAL_MLX_MODEL_IDS]
+  if unsupported:
+    if verbose:
+      print(f"[omlx] Profile '{profile.get('id')}' rejected: no MLX model ID mapped for {', '.join(unsupported)}")
+    return False
+  return bool(model_ids)
+
+
+def selected_local_runtime(profile=None, verbose=False):
+  requested = _normalize_local_runtime(os.environ.get("AI_LOCAL_RUNTIME", "auto"))
+  if requested != "auto":
+    if requested == "omlx" and sys.platform != "darwin":
+      if verbose:
+        print(f"[runtime] oMLX is only supported on macOS. Ignoring AI_LOCAL_RUNTIME=omlx.")
+    else:
+      if verbose:
+        print(f"[runtime] Using requested runtime: {requested}")
+      return requested
+  if sys.platform == "darwin" and _profile_supports_omlx(profile, verbose=verbose):
+    if verbose:
+      print(f"[runtime] Auto-selected oMLX runtime (macOS + MLX models detected)")
+    return "omlx"
+  if verbose:
+    print(f"[runtime] Using default runtime: llama.cpp")
+  return "llama.cpp"
+
+
+def local_runtime_port(runtime):
+  return OMLX_PORT if runtime == "omlx" else PORT
+
+
+def local_runtime_base_url(runtime):
+  return f"http://{HOST}:{local_runtime_port(runtime)}"
 
 
 def read_text(path):
@@ -376,6 +451,9 @@ class Context:
       "llama_pid": self.state_root / "runtime/llama-server.pid",
       "llama_state": self.state_root / "runtime/llama-server.json",
       "llama_log": self.state_root / "logs/llama-server.log",
+      "omlx_pid": self.state_root / "runtime/omlx.pid",
+      "omlx_state": self.state_root / "runtime/omlx.json",
+      "omlx_log": self.state_root / "logs/omlx.log",
       "doctor_report": self.state_root / "reports/doctor.json",
       "smoke_report": self.state_root / "reports/smoke.json",
     }
@@ -402,15 +480,32 @@ class Context:
 
 def render_opencode_config(ctx, profile_id, profile):
   template = copy.deepcopy(load_jsonc(ctx.paths["opencode_template"]))
-  template["model"] = _resolve_catalog_selector(ctx, profile["default_model"])
-  template["small_model"] = _resolve_catalog_selector(ctx, profile["small_model"])
+  runtime = selected_local_runtime(profile, verbose=True)
+  default_model = _resolve_catalog_selector(ctx, profile["default_model"])
+  small_model = _resolve_catalog_selector(ctx, profile["small_model"])
+  if runtime == "omlx":
+    print(f"[config] Rendering OpenCode config for oMLX runtime (port {local_runtime_port(runtime)})")
+    provider = template["provider"]["local-cluster"]
+    provider["name"] = "Local oMLX Cluster"
+    provider["options"]["baseURL"] = f"{local_runtime_base_url(runtime)}/v1"
+    mapped_models = {}
+    for model_id, mlx_id in LOCAL_MLX_MODEL_IDS.items():
+      if model_id in provider["models"]:
+        mapped_models[mlx_id] = provider["models"][model_id]
+    provider["models"] = mapped_models
+    if default_model.startswith("local-cluster/"):
+      default_model = f"local-cluster/{LOCAL_MLX_MODEL_IDS.get(_local_model_name(default_model), _local_model_name(default_model))}"
+    if small_model.startswith("local-cluster/"):
+      small_model = f"local-cluster/{LOCAL_MLX_MODEL_IDS.get(_local_model_name(small_model), _local_model_name(small_model))}"
+  template["model"] = default_model
+  template["small_model"] = small_model
   _inject_provider_catalog_models(template, "openrouter", _openrouter_catalog_models(ctx))
   write_json(ctx.paths["opencode_config"], template)
   return ctx.paths["opencode_config"]
 
 
 def render_preset(ctx, profile):
-  models_dir = Path(os.environ.get("AI_MODELS_DIR", ctx.root / "models"))
+  models_dir = Path(os.environ.get("AI_MODELS_DIR", str(ctx.root / "models")))
   preset_path = ctx.root / profile["preset"]
   if not preset_path.is_file():
     raise SystemExit(f"Preset template missing: {preset_path}")
@@ -730,35 +825,51 @@ def collect_provider_readiness(ctx):
 
 
 def collect_runtime_status(ctx):
-  runtime = {
+  profile = ctx.active_profile()
+  runtime = selected_local_runtime(profile)
+  port = local_runtime_port(runtime)
+  health_path = "/v1/models" if runtime == "omlx" else "/health"
+
+  # Runtime-aware state paths
+  if runtime == "omlx":
+    pid_path = ctx.paths["omlx_pid"]
+    state_path = ctx.paths["omlx_state"]
+    log_path = ctx.paths["omlx_log"]
+  else:
+    pid_path = ctx.paths["llama_pid"]
+    state_path = ctx.paths["llama_state"]
+    log_path = ctx.paths["llama_log"]
+
+  runtime_info = {
+    "runtime": runtime,
     "host": HOST,
-    "port": PORT,
-    "url": f"http://{HOST}:{PORT}",
-    "log_path": str(ctx.paths["llama_log"]),
-    "pid_path": str(ctx.paths["llama_pid"]),
+    "port": port,
+    "url": f"http://{HOST}:{port}",
+    "log_path": str(log_path),
+    "pid_path": str(pid_path),
     "running": False,
     "health_reachable": False,
   }
 
-  if ctx.paths["llama_pid"].is_file():
+  if pid_path.is_file():
     try:
-      pid = int(ctx.paths["llama_pid"].read_text(encoding="utf-8").strip())
+      pid = int(pid_path.read_text(encoding="utf-8").strip())
     except ValueError:
       pid = 0
-    runtime["pid"] = pid
-    runtime["running"] = is_pid_running(pid)
+    runtime_info["pid"] = pid
+    runtime_info["running"] = is_pid_running(pid)
 
-  if ctx.paths["llama_state"].is_file():
-    runtime["launch"] = load_json(ctx.paths["llama_state"])
+  if state_path.is_file():
+    runtime_info["launch"] = load_json(state_path)
 
   try:
-    health, _ = request_json(f"http://{HOST}:{PORT}/health", timeout=2)
-    runtime["health_reachable"] = True
-    runtime["health"] = health
+    health, _ = request_json(f"http://{HOST}:{port}{health_path}", timeout=2)
+    runtime_info["health_reachable"] = True
+    runtime_info["health"] = health
   except Exception:
-    runtime["health_reachable"] = False
+    runtime_info["health_reachable"] = False
 
-  return runtime
+  return runtime_info
 
 
 def doctor(ctx, strict=False, bootstrap_hint=False):
@@ -803,6 +914,7 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
   commands = {
     "opencode": command_exists("opencode"),
     "llama-server": command_exists("llama-server"),
+    "omlx": command_exists("omlx"),
     "python3": command_exists("python3") or command_exists("python"),
   }
 
@@ -837,8 +949,10 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
   if strict:
     if active_profile and active_profile["runtime_mode"] != "cloud" and not runtime_status["health_reachable"]:
       failures.append("runtime health endpoint")
+    required_runtime = runtime_status.get("runtime", "llama.cpp")
+    required_commands = {"opencode", "omlx" if required_runtime == "omlx" else "llama-server"}
     for name, exists in commands.items():
-      if name in {"opencode", "llama-server"} and not exists:
+      if name in required_commands and not exists:
         failures.append(name)
 
   report["ok"] = not failures
@@ -850,12 +964,15 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
 def smoke(ctx, timeout):
   profile = ctx.active_profile()
   profile_id = ctx.active_profile_id()
+  runtime = selected_local_runtime(profile)
+  base_url = local_runtime_base_url(runtime)
   report = {
     "generated_at": utc_now(),
     "active_profile_id": profile_id,
     "profile": profile,
     "timeout_seconds": timeout,
-    "runtime_url": f"http://{HOST}:{PORT}",
+    "runtime": runtime,
+    "runtime_url": base_url,
     "client_assets": {
       "agents": len(list((ctx.root / ".opencode/agents").glob("*.md"))),
       "skills": len(list((ctx.root / ".opencode/skills").glob("*/SKILL.md"))),
@@ -870,16 +987,18 @@ def smoke(ctx, timeout):
     return report
 
   started = time.time()
-  try:
-    health, _ = request_json(f"http://{HOST}:{PORT}/health", timeout=timeout)
-  except Exception as exc:
-    report["ok"] = False
-    report["error"] = f"health request failed: {exc}"
-    write_json(ctx.paths["smoke_report"], report)
-    return report
+  health = {}
+  if runtime != "omlx":
+    try:
+      health, _ = request_json(f"{base_url}/health", timeout=timeout)
+    except Exception as exc:
+      report["ok"] = False
+      report["error"] = f"health request failed: {exc}"
+      write_json(ctx.paths["smoke_report"], report)
+      return report
 
   try:
-    models, _ = request_json(f"http://{HOST}:{PORT}/v1/models", timeout=timeout)
+    models, _ = request_json(f"{base_url}/v1/models", timeout=timeout)
   except Exception as exc:
     report["ok"] = False
     report["error"] = f"models request failed: {exc}"
@@ -887,14 +1006,14 @@ def smoke(ctx, timeout):
     return report
 
   chat_payload = {
-    "model": "default",
+    "model": load_json(ctx.paths["opencode_config"]).get("model", "local-cluster/default").split("/", 1)[1],
     "messages": [{"role": "user", "content": "Say hello in one word."}],
     "max_tokens": 16,
     "temperature": 0.1,
   }
   try:
     chat, _ = request_json(
-      f"http://{HOST}:{PORT}/v1/chat/completions",
+      f"{base_url}/v1/chat/completions",
       method="POST",
       payload=chat_payload,
       timeout=timeout,
@@ -924,12 +1043,12 @@ def smoke(ctx, timeout):
   return report
 
 
-def write_runtime_state(ctx, payload):
-  write_json(ctx.paths["llama_state"], payload)
-  write_text(ctx.paths["llama_pid"], f"{payload['pid']}\n")
+def write_runtime_state(state_path, pid_path, payload):
+  write_json(state_path, payload)
+  write_text(pid_path, f"{payload['pid']}\n")
 
 
-def runtime_start(ctx, show_logs=False, tail_hint=True):
+def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
   profile = ctx.active_profile()
   profile_id = ctx.active_profile_id()
   if profile and profile["runtime_mode"] == "cloud":
@@ -943,16 +1062,28 @@ def runtime_start(ctx, show_logs=False, tail_hint=True):
   if not preset.is_file():
     raise SystemExit(f"Missing preset file: {preset}\nRun ./bin/lac profile apply <profile> first.")
 
+  runtime = selected_local_runtime(profile, verbose=True)
+  port = local_runtime_port(runtime)
+  base_url = local_runtime_base_url(runtime)
   status = collect_runtime_status(ctx)
   if status["running"] and status["health_reachable"]:
     return {
       "ok": True,
       "running": True,
-      "message": f"llama-server already running at http://{HOST}:{PORT}",
-      "log_path": str(ctx.paths["llama_log"]),
+      "message": f"{runtime} already running at {base_url}",
+      "log_path": status.get("log_path"),
     }
 
-  log_path = ctx.paths["llama_log"]
+  # Runtime-aware state paths
+  if runtime == "omlx":
+    pid_path = ctx.paths["omlx_pid"]
+    state_path = ctx.paths["omlx_state"]
+    log_path = ctx.paths["omlx_log"]
+  else:
+    pid_path = ctx.paths["llama_pid"]
+    state_path = ctx.paths["llama_state"]
+    log_path = ctx.paths["llama_log"]
+
   log_path.parent.mkdir(parents=True, exist_ok=True)
   if log_path.exists():
     backup = log_path.with_suffix(log_path.suffix + ".1")
@@ -960,15 +1091,59 @@ def runtime_start(ctx, show_logs=False, tail_hint=True):
       backup.unlink()
     log_path.replace(backup)
 
-  command = [
-    os.environ.get("LLAMA_SERVER_BIN", "llama-server"),
-    "--models-preset",
-    str(preset),
-    "--port",
-    str(PORT),
-    "--host",
-    HOST,
-  ]
+  env = os.environ.copy()
+  if runtime == "omlx":
+    if not command_exists(os.environ.get("OMLX_BIN", "omlx")):
+      raise SystemExit("oMLX runtime selected but `omlx` is not in PATH. Install with Homebrew or set AI_LOCAL_RUNTIME=llama.cpp.")
+    models_dir = Path(os.environ.get("AI_MODELS_DIR", str(ctx.root / "models"))) / "mlx"
+    env["OMLX_MODEL_DIR"] = str(models_dir)
+    env["OMLX_HOST"] = HOST
+    env["OMLX_PORT"] = str(port)
+    command = [os.environ.get("OMLX_BIN", "omlx"), "serve", "--model-dir", str(models_dir)]
+    ready_url = f"{base_url}/v1/models"
+  else:
+    command = [
+      os.environ.get("LLAMA_SERVER_BIN", "llama-server"),
+      "--models-preset",
+      str(preset),
+      "--port",
+      str(port),
+      "--host",
+      HOST,
+    ]
+    ready_url = f"{base_url}/health"
+
+  def _write_runtime_state(payload):
+    write_json(state_path, payload)
+    write_text(pid_path, f"{payload['pid']}\n")
+
+  if foreground:
+    started_at = utc_now()
+    process = subprocess.Popen(command, env=env)
+    payload = {
+      "started_at": started_at,
+      "ready_at": None,
+      "launch_latency_ms": None,
+      "pid": process.pid,
+      "port": port,
+      "host": HOST,
+      "log_path": str(log_path),
+      "profile_id": profile_id,
+      "runtime": runtime,
+      "foreground": True,
+    }
+    _write_runtime_state(payload)
+    try:
+      exit_code = process.wait()
+    finally:
+      pid_path.unlink(missing_ok=True)
+    return {
+      "ok": exit_code == 0,
+      "running": False,
+      "foreground": True,
+      "exit_code": exit_code,
+      "message": f"{runtime} exited with code {exit_code}",
+    }
 
   started_at = utc_now()
   flags = 0
@@ -983,6 +1158,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True):
     command,
     stdout=log_handle,
     stderr=subprocess.STDOUT,
+    env=env,
     creationflags=flags,
     **kwargs,
   )
@@ -993,7 +1169,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True):
     if process.poll() is not None:
       break
     try:
-      request_json(f"http://{HOST}:{PORT}/health", timeout=2)
+      request_json(ready_url, timeout=2)
       ready = True
       break
     except Exception:
@@ -1004,7 +1180,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True):
     recent = ""
     if log_path.exists():
       recent = "\n".join(log_path.read_text(encoding="utf-8").splitlines()[-20:])
-    raise SystemExit(f"llama-server failed to start.\nRecent logs:\n{recent}")
+    raise SystemExit(f"{runtime} failed to start.\nRecent logs:\n{recent}")
 
   ready_at = utc_now()
   payload = {
@@ -1012,18 +1188,19 @@ def runtime_start(ctx, show_logs=False, tail_hint=True):
     "ready_at": ready_at,
     "launch_latency_ms": int((datetime.fromisoformat(ready_at.replace("Z", "+00:00")) - datetime.fromisoformat(started_at.replace("Z", "+00:00"))).total_seconds() * 1000),
     "pid": process.pid,
-    "port": PORT,
+    "port": port,
     "host": HOST,
     "log_path": str(log_path),
     "profile_id": profile_id,
+    "runtime": runtime,
   }
-  write_runtime_state(ctx, payload)
+  _write_runtime_state(payload)
   log_handle.close()
 
   result = {
     "ok": True,
     "running": True,
-    "url": f"http://{HOST}:{PORT}",
+    "url": base_url,
     "log_path": str(log_path),
     "launch_latency_ms": payload["launch_latency_ms"],
   }
@@ -1090,11 +1267,30 @@ def client_open(ctx, target, desktop=False):
 
   if desktop:
     app_name = os.environ.get("OPENCODE_DESKTOP_APP", "OpenCode")
-    if sys.platform == "darwin" and command_exists("open"):
-      result = subprocess.run(["open", "-a", app_name], env=env, check=False)
-      if result.returncode != 0:
-        raise SystemExit(f"Failed to launch {app_name}. Set OPENCODE_DESKTOP_APP if the app name differs.")
-      return {"ok": True, "target": target, "desktop": True, "message": f"Launched {app_name} desktop."}
+    if sys.platform == "darwin":
+      candidates = [
+        Path("/Applications") / f"{app_name}.app" / "Contents/MacOS" / app_name,
+        Path.home() / "Applications" / f"{app_name}.app" / "Contents/MacOS" / app_name,
+      ]
+      for executable in candidates:
+        if executable.is_file():
+          subprocess.Popen([str(executable)], env=env, start_new_session=True)
+          return {
+            "ok": True,
+            "target": target,
+            "desktop": True,
+            "message": f"Launched {app_name} desktop with generated config: {config_path}",
+          }
+      if command_exists("open"):
+        result = subprocess.run(["open", "-a", app_name], env=env, check=False)
+        if result.returncode != 0:
+          raise SystemExit(f"Failed to launch {app_name}. Set OPENCODE_DESKTOP_APP if the app name differs.")
+        return {
+          "ok": True,
+          "target": target,
+          "desktop": True,
+          "message": f"Launched {app_name} desktop. If it was already running, restart it so OPENCODE_CONFIG is picked up: {config_path}",
+        }
     raise SystemExit("Desktop auto-launch is only implemented for macOS.")
 
   if not command_exists("opencode"):
@@ -1627,6 +1823,7 @@ def build_parser():
   runtime_sub = runtime_parser.add_subparsers(dest="runtime_command", required=True)
   runtime_start_parser = runtime_sub.add_parser("start")
   runtime_start_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+  runtime_start_parser.add_argument("--foreground", action="store_true", help="Run llama-server attached to this terminal for visible logs")
   runtime_start_parser.add_argument("--show-logs", action="store_true")
   runtime_start_parser.add_argument("--no-tail-hint", action="store_true")
   runtime_status_parser = runtime_sub.add_parser("status")
@@ -1728,7 +1925,15 @@ def main():
 
   if args.command == "runtime":
     if args.runtime_command == "start":
-      emit(runtime_start(ctx, show_logs=args.show_logs, tail_hint=not args.no_tail_hint), args.json)
+      emit(
+        runtime_start(
+          ctx,
+          show_logs=args.show_logs,
+          tail_hint=not args.no_tail_hint,
+          foreground=args.foreground,
+        ),
+        args.json,
+      )
       return
     if args.runtime_command == "status":
       emit(runtime_status(ctx), args.json)
@@ -1781,17 +1986,16 @@ def main():
       if not args.all_providers and not args.provider_id:
         parser.error("provider verify: pass a provider_id or --all")
       if args.all_providers:
-        payload = {
-          "results": [
-            _verify_provider_record(ctx, p["id"], timeout=args.timeout, include_internal=args.refresh_catalog)
-            for p in load_json(ctx.paths["provider_catalog"])["providers"]
-          ]
-        }
+        results = [
+          _verify_provider_record(ctx, p["id"], timeout=args.timeout, include_internal=args.refresh_catalog)
+          for p in load_json(ctx.paths["provider_catalog"])["providers"]
+        ]
+        payload = {"results": results}
         payload["summary"] = {
-          "ok": sum(1 for r in payload["results"] if r["status"] == "ok"),
-          "skipped": sum(1 for r in payload["results"] if r["status"] == "skipped"),
-          "error": sum(1 for r in payload["results"] if r["status"] == "error"),
-          "total": len(payload["results"]),
+          "ok": sum(1 for r in results if r["status"] == "ok"),
+          "skipped": sum(1 for r in results if r["status"] == "skipped"),
+          "error": sum(1 for r in results if r["status"] == "error"),
+          "total": len(results),
         }
         if args.refresh_catalog:
           refresh_provider_catalog(ctx, payload["results"])

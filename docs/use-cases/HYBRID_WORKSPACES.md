@@ -78,6 +78,14 @@ Use overlays when local execution remains the baseline:
 
 In OpenCode, use `/models` to switch between local IDs such as `local-cluster/qwen3.6-27b-q4`, subscription IDs such as `opencode-go/qwen3.6-plus`, and OpenRouter IDs such as `openrouter/qwen/qwen3-coder:480b-free`.
 
+For OpenCode Desktop on macOS, use the same generated config:
+
+```bash
+./bin/lac client open opencode --desktop
+```
+
+This supports hybrid profiles and cloud-only profiles such as `opencode-go`. If the desktop app is already running, quit and relaunch it after switching profiles.
+
 ## What To Keep Per Workspace
 
 Keep these local to each project workspace:
@@ -113,6 +121,14 @@ For local profiles, also verify the runtime:
 ./bin/lac runtime start
 ./bin/lac smoke
 ```
+
+When diagnosing model-load or runtime startup issues, run the server in the foreground:
+
+```bash
+./bin/lac runtime start --foreground
+```
+
+This keeps llama.cpp logs in the terminal instead of only writing them to `state/logs/llama-server.log`. The repo currently stages MLX model artifacts on macOS, but it does not yet launch an MLX serving runtime; if MLX serving becomes first-class, it should use the same foreground/background logging pattern.
 
 ## Open Questions
 
