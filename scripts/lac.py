@@ -71,6 +71,10 @@ def command_exists(name):
   return shutil.which(name) is not None
 
 
+def log_info(message):
+  print(message, file=sys.stderr)
+
+
 def _normalize_local_runtime(value):
   normalized = (value or "").strip().lower()
   if normalized in {"", "auto"}:
@@ -91,7 +95,7 @@ def _local_model_name(selector):
 def _profile_supports_omlx(profile, verbose=False):
   if not profile or profile.get("runtime_mode") != "local":
     if verbose:
-      print(f"[omlx] Profile '{profile.get('id', '?')}' rejected: not a local runtime profile")
+      log_info(f"[omlx] Profile '{profile.get('id', '?')}' rejected: not a local runtime profile")
     return False
   model_ids = {
     _local_model_name(profile.get("default_model", "")),
@@ -100,7 +104,7 @@ def _profile_supports_omlx(profile, verbose=False):
   unsupported = [mid for mid in model_ids if mid and mid not in LOCAL_MLX_MODEL_IDS]
   if unsupported:
     if verbose:
-      print(f"[omlx] Profile '{profile.get('id')}' rejected: no MLX model ID mapped for {', '.join(unsupported)}")
+      log_info(f"[omlx] Profile '{profile.get('id')}' rejected: no MLX model ID mapped for {', '.join(unsupported)}")
     return False
   return bool(model_ids)
 
@@ -110,18 +114,41 @@ def selected_local_runtime(profile=None, verbose=False):
   if requested != "auto":
     if requested == "omlx" and sys.platform != "darwin":
       if verbose:
-        print(f"[runtime] oMLX is only supported on macOS. Ignoring AI_LOCAL_RUNTIME=omlx.")
+        log_info(f"[runtime] oMLX is only supported on macOS. Ignoring AI_LOCAL_RUNTIME=omlx.")
     else:
       if verbose:
-        print(f"[runtime] Using requested runtime: {requested}")
+        log_info(f"[runtime] Using requested runtime: {requested}")
       return requested
   if sys.platform == "darwin" and _profile_supports_omlx(profile, verbose=verbose):
-    if verbose:
-      print(f"[runtime] Auto-selected oMLX runtime (macOS + MLX models detected)")
-    return "omlx"
+    omlx_bin = os.environ.get("OMLX_BIN", "omlx")
+    if not command_exists(omlx_bin):
+      if verbose:
+        log_info(f"[runtime] oMLX auto-selection skipped: `{omlx_bin}` is not in PATH")
+    else:
+      if verbose:
+        log_info(f"[runtime] Auto-selected oMLX runtime (macOS + MLX models detected)")
+      return "omlx"
+  elif verbose and sys.platform == "darwin":
+    log_info("[runtime] oMLX auto-selection skipped: profile is not eligible")
   if verbose:
-    print(f"[runtime] Using default runtime: llama.cpp")
+    log_info(f"[runtime] Using default runtime: llama.cpp")
   return "llama.cpp"
+
+
+def runtime_paths(ctx, runtime):
+  if runtime == "omlx":
+    return {
+      "pid": ctx.paths["omlx_pid"],
+      "state": ctx.paths["omlx_state"],
+      "log": ctx.paths["omlx_log"],
+      "label": "oMLX",
+    }
+  return {
+    "pid": ctx.paths["llama_pid"],
+    "state": ctx.paths["llama_state"],
+    "log": ctx.paths["llama_log"],
+    "label": "llama.cpp",
+  }
 
 
 def local_runtime_port(runtime):
@@ -484,7 +511,7 @@ def render_opencode_config(ctx, profile_id, profile):
   default_model = _resolve_catalog_selector(ctx, profile["default_model"])
   small_model = _resolve_catalog_selector(ctx, profile["small_model"])
   if runtime == "omlx":
-    print(f"[config] Rendering OpenCode config for oMLX runtime (port {local_runtime_port(runtime)})")
+    log_info(f"[config] Rendering OpenCode config for oMLX runtime (port {local_runtime_port(runtime)})")
     provider = template["provider"]["local-cluster"]
     provider["name"] = "Local oMLX Cluster"
     provider["options"]["baseURL"] = f"{local_runtime_base_url(runtime)}/v1"
@@ -830,15 +857,10 @@ def collect_runtime_status(ctx):
   port = local_runtime_port(runtime)
   health_path = "/v1/models" if runtime == "omlx" else "/health"
 
-  # Runtime-aware state paths
-  if runtime == "omlx":
-    pid_path = ctx.paths["omlx_pid"]
-    state_path = ctx.paths["omlx_state"]
-    log_path = ctx.paths["omlx_log"]
-  else:
-    pid_path = ctx.paths["llama_pid"]
-    state_path = ctx.paths["llama_state"]
-    log_path = ctx.paths["llama_log"]
+  paths = runtime_paths(ctx, runtime)
+  pid_path = paths["pid"]
+  state_path = paths["state"]
+  log_path = paths["log"]
 
   runtime_info = {
     "runtime": runtime,
@@ -1074,15 +1096,10 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
       "log_path": status.get("log_path"),
     }
 
-  # Runtime-aware state paths
-  if runtime == "omlx":
-    pid_path = ctx.paths["omlx_pid"]
-    state_path = ctx.paths["omlx_state"]
-    log_path = ctx.paths["omlx_log"]
-  else:
-    pid_path = ctx.paths["llama_pid"]
-    state_path = ctx.paths["llama_state"]
-    log_path = ctx.paths["llama_log"]
+  paths = runtime_paths(ctx, runtime)
+  pid_path = paths["pid"]
+  state_path = paths["state"]
+  log_path = paths["log"]
 
   log_path.parent.mkdir(parents=True, exist_ok=True)
   if log_path.exists():
@@ -1213,12 +1230,16 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
 
 
 def runtime_stop(ctx):
-  if not ctx.paths["llama_pid"].is_file():
-    return {"ok": True, "running": False, "message": "No pid file found."}
-  pid = int(ctx.paths["llama_pid"].read_text(encoding="utf-8").strip())
+  runtime = selected_local_runtime(ctx.active_profile())
+  paths = runtime_paths(ctx, runtime)
+  pid_path = paths["pid"]
+  label = paths["label"]
+  if not pid_path.is_file():
+    return {"ok": True, "running": False, "message": f"No {label} pid file found."}
+  pid = int(pid_path.read_text(encoding="utf-8").strip())
   if not is_pid_running(pid):
-    ctx.paths["llama_pid"].unlink(missing_ok=True)
-    return {"ok": True, "running": False, "message": "Process was not running."}
+    pid_path.unlink(missing_ok=True)
+    return {"ok": True, "running": False, "message": f"{label} process was not running."}
 
   sig = signal.SIGTERM if os.name != "nt" else signal.SIGTERM
   os.kill(pid, sig)
@@ -1228,8 +1249,8 @@ def runtime_stop(ctx):
       break
   if is_pid_running(pid):
     os.kill(pid, signal.SIGKILL if os.name != "nt" else signal.SIGTERM)
-  ctx.paths["llama_pid"].unlink(missing_ok=True)
-  return {"ok": True, "running": False, "message": f"Stopped pid {pid}."}
+  pid_path.unlink(missing_ok=True)
+  return {"ok": True, "running": False, "message": f"Stopped {label} pid {pid}."}
 
 
 def runtime_status(ctx):

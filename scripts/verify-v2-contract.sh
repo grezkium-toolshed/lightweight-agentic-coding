@@ -10,6 +10,13 @@ export AI_CLUSTER_STATE_ROOT="$STATE_ROOT"
 
 python3 "$ROOT/scripts/lac.py" profile apply 24gb --json > "$TMP_DIR/profile-24gb.json"
 cp "$STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-24gb.json"
+OMLX_CHECK=0
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  OMLX_CHECK=1
+  OMLX_STATE_ROOT="$TMP_DIR/omlx-state"
+  AI_CLUSTER_STATE_ROOT="$OMLX_STATE_ROOT" AI_LOCAL_RUNTIME=omlx python3 "$ROOT/scripts/lac.py" profile apply 24gb --json > "$TMP_DIR/profile-24gb-omlx.json"
+  cp "$OMLX_STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-24gb-omlx.json"
+fi
 python3 "$ROOT/scripts/lac.py" client render opencode --json > "$TMP_DIR/render-opencode.json"
 python3 "$ROOT/scripts/lac.py" client render claude-code --json > "$TMP_DIR/render-claude.json"
 python3 "$ROOT/scripts/lac.py" client render codex-reference --json > "$TMP_DIR/render-codex.json"
@@ -49,7 +56,7 @@ python3 "$ROOT/scripts/lac.py" provider verify bogus-id > "$TMP_DIR/verify-bogus
 VERIFY_BOGUS_EXIT=$?
 set -e
 
-python3 - <<'PY' "$ROOT" "$STATE_ROOT" "$TMP_DIR" "$VERIFY_ALL_EXIT" "$VERIFY_BOGUS_EXIT"
+python3 - <<'PY' "$ROOT" "$STATE_ROOT" "$TMP_DIR" "$VERIFY_ALL_EXIT" "$VERIFY_BOGUS_EXIT" "$OMLX_CHECK"
 import json
 import sys
 from pathlib import Path
@@ -59,6 +66,7 @@ state_root = Path(sys.argv[2])
 tmp_dir = Path(sys.argv[3])
 verify_all_exit = int(sys.argv[4])
 verify_bogus_exit = int(sys.argv[5])
+omlx_check = sys.argv[6] == "1"
 
 profile_24 = json.loads((tmp_dir / "profile-24gb.json").read_text(encoding="utf-8"))
 doctor_24 = json.loads((tmp_dir / "doctor-24gb.json").read_text(encoding="utf-8"))
@@ -74,6 +82,13 @@ provider_list_openrouter = json.loads((tmp_dir / "provider-list-openrouter.json"
 
 assert profile_24["profile_id"] == "24gb"
 assert opencode_config["model"] == "local-cluster/qwen3.6-27b-q4"
+assert opencode_config["provider"]["local-cluster"]["options"]["baseURL"] == "http://127.0.0.1:8080/v1"
+if omlx_check:
+    profile_24_omlx = json.loads((tmp_dir / "profile-24gb-omlx.json").read_text(encoding="utf-8"))
+    opencode_config_omlx = json.loads((tmp_dir / "opencode-24gb-omlx.json").read_text(encoding="utf-8"))
+    assert profile_24_omlx["profile_id"] == "24gb"
+    assert opencode_config_omlx["model"] == "local-cluster/Qwen3.6-27B-UD-MLX-6bit"
+    assert opencode_config_omlx["provider"]["local-cluster"]["options"]["baseURL"] == "http://127.0.0.1:8000/v1"
 assert opencode_manifest["target"] == "opencode"
 assert doctor_24["assets"]["pack_count"] >= 4
 assert provider_list_top == provider_list_sub

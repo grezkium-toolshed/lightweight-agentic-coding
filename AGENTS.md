@@ -7,8 +7,8 @@ This repository provides a private, replicable **Local AI Cluster**.
 Runtime defaults:
 - llama.cpp `llama-server`
 - OpenCode project config at `opencode.jsonc`
-- profile-based model setup via `scripts/setup-*.sh` and `scripts/setup-*.ps1`
-- Qwen 3.5 or Gemma 4 model families
+- profile-based model setup via `./bin/lac`
+- Qwen 3.6 or Gemma 4 model families
 - curated OpenCode agents under `.opencode/agents/`
 - curated OpenCode skills under `.opencode/skills/`
 
@@ -19,30 +19,32 @@ This repo is intentionally private until the release gates in `docs/release/PRIV
 ### Launch
 
 ```bash
-./scripts/launch-llama.sh
-./scripts/launch-opencode.sh
+./bin/lac runtime start
+./bin/lac client open opencode
 ```
 
 Windows:
 
 ```powershell
-./scripts/launch-llama.ps1
-./scripts/launch-opencode.ps1
+./bin/lac.ps1 runtime start
+./bin/lac.ps1 client open opencode
 ```
+
+Compatibility wrappers remain under `scripts/` for existing workflows.
 
 ### Profile Setup
 
 ```bash
-./scripts/setup-models-device.sh --profile 24gb
-./scripts/setup-config-device.sh --profile 24gb
-./scripts/setup-config-device.sh --profile openrouter  # cloud-only
+./bin/lac models sync 24gb
+./bin/lac profile apply 24gb
+./bin/lac profile apply openrouter  # cloud-only
 ```
 
 Windows:
 
 ```powershell
-./scripts/setup-models-device.ps1 -Profile 24gb
-./scripts/setup-config-device.ps1 -Profile 24gb
+./bin/lac.ps1 models sync 24gb
+./bin/lac.ps1 profile apply 24gb
 ```
 
 ## RepositoryIntent
@@ -82,7 +84,7 @@ Manual validation:
 1. `./scripts/doctor.sh`
 2. `curl http://127.0.0.1:8080/health`
 3. `curl http://127.0.0.1:8080/v1/models`
-4. run `./scripts/setup-config-device.sh --profile <profile>` to generate runtime config
+4. run `./bin/lac profile apply <profile>` to generate runtime config
 5. launch OpenCode with generated config
 6. verify `.opencode/agents` and `.opencode/skills` are recognized when using OpenCode
 
@@ -92,7 +94,7 @@ Manual validation:
 - `.opencode/agents/`: curated subagents
 - `.opencode/skills/`: curated skills
 - `runtime-config/presets/<profile>.ini`: template presets
-- `runtime-config/presets.active.ini`: active preset
-- `runtime-config/active-profile.txt`: generated selected profile marker
-- `runtime-config/opencode.active.json`: generated OpenCode runtime config
+- `state/runtime/presets.active.ini`: generated active preset
+- `state/active/profile.txt`: generated selected profile marker
+- `state/clients/opencode/opencode.json`: generated OpenCode runtime config
 - `scripts/`: setup, switch, launch, doctor, and sync scripts
