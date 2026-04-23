@@ -1,7 +1,7 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "local-cluster/qwen3.5-35b-a3b-q4",
-  "small_model": "local-cluster/qwen3.5-9b-q4",
+  "model": "local-cluster/qwen3.6-35b-a3b-q8",
+  "small_model": "local-cluster/qwen3.6-27b-q4",
   "plugin": [
     "opencode-antigravity-auth"
   ],
@@ -10,9 +10,9 @@
       "name": "Local llama.cpp Cluster",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
-        "qwen3.5-9b-q4": { "limit": { "context": 65536, "output": 8192 } },
-        "qwen3.5-27b-q4": { "limit": { "context": 131072, "output": 12288 } },
-        "qwen3.5-35b-a3b-q4": { "limit": { "context": 262144, "output": 16384 } },
+        "qwen3.6-27b-q3": { "limit": { "context": 65536, "output": 8192 } },
+        "qwen3.6-27b-q4": { "limit": { "context": 131072, "output": 12288 } },
+        "qwen3.6-35b-a3b-q8": { "limit": { "context": 262144, "output": 16384 } },
         "qwen3.5-122b-a10b": { "limit": { "context": 131072, "output": 12288 } },
         "qwen3-coder-next-80b": { "limit": { "context": 262144, "output": 16384 } },
         "minimax-m2.5": { "limit": { "context": 131072, "output": 12288 } },

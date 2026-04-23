@@ -26,6 +26,7 @@ required=(
   docs/security/TRUST_MODEL.md
   docs/use-cases/SCENARIO_GUIDE.md
   docs/use-cases/STARTUP_HOME_TEAM.md
+  docs/use-cases/HYBRID_WORKSPACES.md
   docs/use-cases/ONBOARDING_16GB_24GB.md
   docs/use-cases/ONBOARDING_32GB_PLUS.md
   docs/use-cases/ONBOARDING_CLAUDE_CODE.md

@@ -25,5 +25,6 @@ Version 2 starts from jobs-to-be-done first, then maps you to a profile, provide
 - Recommended profiles: `32gb`, `64gb`, `openrouter`
 - Recommended packs: `coding`, `research`, `office`, `team-rollout`
 - Best client target: OpenCode
+- Hybrid and multi-workspace guidance: `docs/use-cases/HYBRID_WORKSPACES.md`
 
 The canonical machine-readable mapping lives in `catalog/scenarios.json`.

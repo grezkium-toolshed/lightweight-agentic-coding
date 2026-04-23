@@ -1281,8 +1281,8 @@ FAMILY_DESCRIPTIONS = {
 
 
 CLOUD_PROVIDER_HINTS = {
-  "openrouter": "Free tier, rate-limited. Lowest friction. Uses OPENROUTER_API_KEY.",
-  "opencode-go": "$10/mo subscription. Curated model list. Uses OPENCODE_GO_API_KEY.",
+  "opencode-go": "$10/mo subscription. Curated model list. Recommended hosted overlay. Uses OPENCODE_GO_API_KEY.",
+  "openrouter": "Free tier, rate-limited. Good trial fallback. Uses OPENROUTER_API_KEY.",
   "opencode-zen": "Pay-per-request (beta). Broader catalog than Go. Uses OPENCODE_ZEN_API_KEY.",
   "codex-auth": "Reuse ChatGPT Plus/Pro/Team via third-party OAuth helper. Uses OPENAI_API_KEY.",
   "anthropic": "Claude 4.x family (API key only — subscription does NOT work). Uses ANTHROPIC_API_KEY.",
@@ -1447,7 +1447,7 @@ def init_wizard(ctx, yes=False, profile=None, cloud=None, no_cloud=False, also_d
     ctx.get_profile(chosen_profile)
     cloud_ids = _parse_cloud_arg(cloud, no_cloud)
     if not cloud_ids and not no_cloud and cloud is None:
-      cloud_ids = ["openrouter"]
+      cloud_ids = ["opencode-go", "openrouter"]
     _validate_cloud_ids(ctx, cloud_ids)
     also_download_profile = None
   else:
@@ -1486,9 +1486,9 @@ def init_wizard(ctx, yes=False, profile=None, cloud=None, no_cloud=False, also_d
 
     cloud_choices = [(cid, CLOUD_PROVIDER_HINTS[cid]) for cid in CLOUD_PROVIDER_HINTS]
     cloud_ids = _prompt_multiselect(
-      "Which cloud overlays do you want?",
+      "Which hosted model overlays do you want in addition to local models?",
       cloud_choices,
-      preselected=["openrouter"],
+      preselected=["opencode-go", "openrouter"],
     )
 
   summary = profile_apply(ctx, chosen_profile)

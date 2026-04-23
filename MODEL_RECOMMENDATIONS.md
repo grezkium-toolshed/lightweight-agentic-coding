@@ -2,17 +2,20 @@
 
 ## Local-first baseline
 
-Use Qwen 3.6 MoE as the default local family for general agentic work.
+Use Qwen 3.6 as the default local family for general agentic work.
 
 Default quant guidance:
-- prefer Unsloth's published `UD-Q4_K_XL` artifacts for default local runtime presets
-- keep lower-bit dynamic quants as optional footprint-saving alternatives, not the default product recommendation
+- prefer Unsloth's published `UD-Q8_K_XL` GGUF artifact for Qwen 3.6 35B-A3B where hardware allows
+- use dense Qwen 3.6 27B for lower-footprint quantized defaults; it is less sensitive to quantization than 35B-A3B
+- stage Unsloth MLX artifacts on macOS when a Hugging Face CLI is available: 27B `UD-MLX-6bit` and 35B-A3B `MLX-8bit` are the preferred defaults
+- use lower-bit MLX variants only for constrained unified-memory budgets
+- keep low-bit 35B-A3B dynamic quants as optional footprint-saving alternatives, not the default product recommendation
 
 Recommended profile mapping:
-- `16gb`: Qwen 3.6 small model
-- `24gb`: Qwen 3.6 balanced general model
-- `32gb`: Qwen 3.6 MoE
-- `64gb`: Qwen 3.6 MoE + qwen3-coder-next
+- `16gb`: Qwen 3.6 27B `UD-Q3_K_XL`
+- `24gb`: Qwen 3.6 27B `UD-Q4_K_XL`
+- `32gb`: Qwen 3.6 27B `UD-Q4_K_XL` + qwen3-coder-next
+- `64gb`: Qwen 3.6 35B-A3B `UD-Q8_K_XL` + qwen3-coder-next
 - `128gb-multi`: multiple practical local models
 - `128gb-qwen122b`: Qwen 122B-focused
 - `128gb-minimax`: MiniMax M2.7 `UD-IQ4_XS` alternative

@@ -13,8 +13,8 @@
       "primary_workload": "starter",
       "recommended_for": ["office-automation", "solo-coder"],
       "supported_clients": ["opencode", "claude-code", "codex-reference"],
-      "default_model": "local-cluster/qwen3-8b-q4",
-      "small_model": "local-cluster/qwen3-8b-q4"
+      "default_model": "local-cluster/qwen3.6-27b-q3",
+      "small_model": "local-cluster/qwen3.6-27b-q3"
     },
     "24gb": {
       "id": "24gb",
@@ -28,13 +28,13 @@
       "primary_workload": "generalist",
       "recommended_for": ["solo-coder", "research-operator", "office-automation"],
       "supported_clients": ["opencode", "claude-code", "codex-reference"],
-      "default_model": "local-cluster/qwen3-14b-q4",
-      "small_model": "local-cluster/qwen3-8b-q4"
+      "default_model": "local-cluster/qwen3.6-27b-q4",
+      "small_model": "local-cluster/qwen3.6-27b-q3"
     },
     "32gb": {
       "id": "32gb",
       "label": "32 GB local stronger",
-      "description": "Stronger coding-oriented local profile with a specialist coder fallback.",
+      "description": "Stronger local profile that keeps Qwen 3.6 dense 27B as the default and avoids low-bit 35B-A3B.",
       "preset": "runtime-config/presets/32gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -43,8 +43,8 @@
       "primary_workload": "coding",
       "recommended_for": ["solo-coder", "team-pilot"],
       "supported_clients": ["opencode", "claude-code", "codex-reference"],
-      "default_model": "local-cluster/qwen3-30b-a3b-q4",
-      "small_model": "local-cluster/qwen3-14b-q4"
+      "default_model": "local-cluster/qwen3.6-27b-q4",
+      "small_model": "local-cluster/qwen3.6-27b-q4"
     },
     "64gb": {
       "id": "64gb",
@@ -58,8 +58,8 @@
       "primary_workload": "multi-model",
       "recommended_for": ["solo-coder", "team-pilot"],
       "supported_clients": ["opencode", "claude-code", "codex-reference"],
-      "default_model": "local-cluster/qwen3-30b-a3b-q4",
-      "small_model": "local-cluster/qwen3-14b-q4"
+      "default_model": "local-cluster/qwen3.6-35b-a3b-q8",
+      "small_model": "local-cluster/qwen3.6-27b-q4"
     },
     "128gb-multi": {
       "id": "128gb-multi",
@@ -73,8 +73,8 @@
       "primary_workload": "multi-model",
       "recommended_for": ["team-pilot"],
       "supported_clients": ["opencode", "claude-code", "codex-reference"],
-      "default_model": "local-cluster/qwen3-30b-a3b-q4",
-      "small_model": "local-cluster/qwen3-14b-q4"
+      "default_model": "local-cluster/qwen3.6-35b-a3b-q8",
+      "small_model": "local-cluster/qwen3.6-27b-q4"
     },
     "128gb-qwen122b": {
       "id": "128gb-qwen122b",
@@ -180,6 +180,21 @@
       "supported_clients": ["opencode", "claude-code", "codex-reference"],
       "default_model": "openrouter/qwen/qwen3-coder:480b-free",
       "small_model": "openrouter/openai/gpt-4o-mini:free"
+    },
+    "opencode-go": {
+      "id": "opencode-go",
+      "label": "OpenCode Go cloud-only",
+      "description": "Cloud-only zero-download profile for the OpenCode Go subscription catalog.",
+      "preset": "runtime-config/presets/openrouter.ini",
+      "runtime_mode": "cloud",
+      "local_runtime_required": false,
+      "downloads_required": false,
+      "verification_tier": "verified",
+      "primary_workload": "go-subscription",
+      "recommended_for": ["solo-coder", "research-operator", "office-automation", "team-pilot"],
+      "supported_clients": ["opencode", "claude-code", "codex-reference"],
+      "default_model": "opencode-go/qwen3.6-plus",
+      "small_model": "opencode-go/qwen3.5-plus"
     }
   }
 }

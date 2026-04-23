@@ -10,22 +10,43 @@ New-Item -ItemType Directory -Force -Path $ModelsDir | Out-Null
 $models = @(
   @{Dir='embeddings'; File='nomic-embed-text-v1.5.Q4_K_M.gguf'; Repo='nomic-ai/nomic-embed-text-v1.5-GGUF'; Remote='nomic-embed-text-v1.5.Q4_K_M.gguf'; MinMB=60}
 )
+$mlxModels = @()
+
+function Should-StageMlx {
+  $value = if ($env:AI_INCLUDE_MLX) { $env:AI_INCLUDE_MLX.ToLowerInvariant() } else { 'auto' }
+  switch ($value) {
+    { $_ -in @('1', 'true', 'yes') } { return $true }
+    { $_ -in @('0', 'false', 'no') } { return $false }
+    'auto' { return $IsMacOS }
+    default { throw "Unsupported AI_INCLUDE_MLX value: $($env:AI_INCLUDE_MLX)" }
+  }
+}
+
+function Add-Qwen36Mlx([string]$Repo) {
+  $script:mlxModels += $Repo
+}
 
 switch ($Profile) {
-  '16gb' { $models += @{Dir='qwen3'; File='Qwen3-8B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-8B-GGUF'; Remote='Qwen3-8B-UD-Q4_K_XL.gguf'; MinMB=5000} }
+  '16gb' {
+    $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q3_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q3_K_XL.gguf'; MinMB=14000}
+    Add-Qwen36Mlx 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
+  }
   '24gb' {
-    $models += @{Dir='qwen3'; File='Qwen3-14B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-14B-GGUF'; Remote='Qwen3-14B-UD-Q4_K_XL.gguf'; MinMB=9000}
-    $models += @{Dir='qwen3'; File='Qwen3-8B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-8B-GGUF'; Remote='Qwen3-8B-UD-Q4_K_XL.gguf'; MinMB=5000}
+    $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q4_K_XL.gguf'; MinMB=17000}
+    $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q3_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q3_K_XL.gguf'; MinMB=14000}
+    Add-Qwen36Mlx 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
   }
   '32gb' {
-    $models += @{Dir='qwen3'; File='Qwen3-30B-A3B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-30B-A3B-GGUF'; Remote='Qwen3-30B-A3B-UD-Q4_K_XL.gguf'; MinMB=18000}
-    $models += @{Dir='qwen3'; File='Qwen3-14B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-14B-GGUF'; Remote='Qwen3-14B-UD-Q4_K_XL.gguf'; MinMB=9000}
+    $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q4_K_XL.gguf'; MinMB=17000}
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
+    Add-Qwen36Mlx 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
   }
   '64gb' {
-    $models += @{Dir='qwen3'; File='Qwen3-30B-A3B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-30B-A3B-GGUF'; Remote='Qwen3-30B-A3B-UD-Q4_K_XL.gguf'; MinMB=18000}
-    $models += @{Dir='qwen3'; File='Qwen3-14B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-14B-GGUF'; Remote='Qwen3-14B-UD-Q4_K_XL.gguf'; MinMB=9000}
+    $models += @{Dir='qwen3.6'; File='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; Repo='unsloth/Qwen3.6-35B-A3B-GGUF'; Remote='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; MinMB=38000}
+    $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q4_K_XL.gguf'; MinMB=17000}
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
+    Add-Qwen36Mlx 'unsloth/Qwen3.6-35B-A3B-MLX-8bit'
+    Add-Qwen36Mlx 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
   }
   '128gb-qwen122b' {
     $models += @{Dir='qwen3.5'; File='Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf'; Repo='unsloth/Qwen3.5-122B-A10B-GGUF'; Remote='Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf'; MinMB=100}
@@ -34,10 +55,12 @@ switch ($Profile) {
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
   }
   '128gb-multi' {
-    $models += @{Dir='qwen3'; File='Qwen3-30B-A3B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-30B-A3B-GGUF'; Remote='Qwen3-30B-A3B-UD-Q4_K_XL.gguf'; MinMB=18000}
-    $models += @{Dir='qwen3'; File='Qwen3-14B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-14B-GGUF'; Remote='Qwen3-14B-UD-Q4_K_XL.gguf'; MinMB=9000}
-    $models += @{Dir='qwen3'; File='Qwen3-8B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3-8B-GGUF'; Remote='Qwen3-8B-UD-Q4_K_XL.gguf'; MinMB=5000}
+    $models += @{Dir='qwen3.6'; File='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; Repo='unsloth/Qwen3.6-35B-A3B-GGUF'; Remote='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; MinMB=38000}
+    $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q4_K_XL.gguf'; MinMB=17000}
+    $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q3_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q3_K_XL.gguf'; MinMB=14000}
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
+    Add-Qwen36Mlx 'unsloth/Qwen3.6-35B-A3B-MLX-8bit'
+    Add-Qwen36Mlx 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
   }
   '128gb-minimax' {
     $repo = if ($env:MINIMAX_REPO) { $env:MINIMAX_REPO } else { 'unsloth/MiniMax-M2.7-GGUF' }
@@ -72,6 +95,11 @@ switch ($Profile) {
   'openrouter' {
     Write-Host 'Profile: openrouter'
     Write-Host 'No local model downloads are required for the cloud-only openrouter profile.'
+    exit 0
+  }
+  'opencode-go' {
+    Write-Host 'Profile: opencode-go'
+    Write-Host 'No local model downloads are required for the cloud-only opencode-go profile.'
     exit 0
   }
   default { throw "Unsupported profile: $Profile" }
@@ -130,6 +158,41 @@ foreach ($m in $models) {
     Write-Host "[ ok ] $targetFile ($newMB MB of ~$expectedMB MB)"
   } else {
     Write-Host "[ ok ] $targetFile ($newMB MB)"
+  }
+}
+
+function Download-MlxRepo([string]$Repo) {
+  $repoName = ($Repo -split '/', 2)[1]
+  $targetDir = Join-Path (Join-Path $ModelsDir 'mlx') $repoName
+
+  if (Test-Path $targetDir) {
+    Write-Host "[skip] $targetDir"
+    return
+  }
+
+  $hf = Get-Command hf -ErrorAction SilentlyContinue
+  if ($hf) {
+    Write-Host "[mlx ] $Repo -> $targetDir"
+    & $hf.Source download $Repo --local-dir $targetDir
+    if ($LASTEXITCODE -ne 0) { throw "MLX download failed: $Repo" }
+    return
+  }
+
+  $huggingFaceCli = Get-Command huggingface-cli -ErrorAction SilentlyContinue
+  if ($huggingFaceCli) {
+    Write-Host "[mlx ] $Repo -> $targetDir"
+    & $huggingFaceCli.Source download $Repo --local-dir $targetDir
+    if ($LASTEXITCODE -ne 0) { throw "MLX download failed: $Repo" }
+    return
+  }
+
+  Write-Warning "Skipping MLX repo ${Repo}: install the Hugging Face CLI ('hf' or 'huggingface-cli') to stage macOS MLX weights."
+}
+
+if ((Should-StageMlx) -and $mlxModels.Count -gt 0) {
+  Write-Host 'MLX staging: enabled for macOS'
+  foreach ($repo in $mlxModels) {
+    Download-MlxRepo $repo
   }
 }
 

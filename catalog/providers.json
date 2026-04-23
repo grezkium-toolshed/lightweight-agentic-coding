@@ -120,14 +120,80 @@
       "label": "OpenCode Go",
       "env_var": "OPENCODE_GO_API_KEY",
       "docs_path": "docs/providers/OPENCODE_ZEN_GO.md",
-      "last_verified_at": "2026-04-18",
-      "verification_method": "documentation-review",
+      "last_verified_at": "2026-04-23",
+      "verification_method": "official-docs-review",
       "risk_level": "low",
       "models": [
         {
-          "id": "opencode-go/glm-4.7",
-          "last_verified_at": "2026-04-18",
-          "verification_method": "vendor-docs-review",
+          "id": "opencode-go/glm-5.1",
+          "last_verified_at": "2026-04-23",
+          "verification_method": "official-docs-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/glm-5",
+          "last_verified_at": "2026-04-23",
+          "verification_method": "official-docs-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/kimi-k2.6",
+          "last_verified_at": "2026-04-23",
+          "verification_method": "official-docs-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/kimi-k2.5",
+          "last_verified_at": "2026-04-23",
+          "verification_method": "official-docs-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/mimo-v2.5-pro",
+          "last_verified_at": "2026-04-23",
+          "verification_method": "official-docs-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/mimo-v2.5",
+          "last_verified_at": "2026-04-23",
+          "verification_method": "official-docs-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/mimo-v2-pro",
+          "last_verified_at": "2026-04-23",
+          "verification_method": "official-docs-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/mimo-v2-omni",
+          "last_verified_at": "2026-04-23",
+          "verification_method": "official-docs-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/qwen3.6-plus",
+          "last_verified_at": "2026-04-23",
+          "verification_method": "official-docs-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/qwen3.5-plus",
+          "last_verified_at": "2026-04-23",
+          "verification_method": "official-docs-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/minimax-m2.7",
+          "last_verified_at": "2026-04-23",
+          "verification_method": "official-docs-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/minimax-m2.5",
+          "last_verified_at": "2026-04-23",
+          "verification_method": "official-docs-review",
           "risk_level": "low"
         }
       ]

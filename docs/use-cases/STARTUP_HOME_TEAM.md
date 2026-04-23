@@ -17,3 +17,4 @@ For the scenario-first v2 guide, start with `docs/use-cases/SCENARIO_GUIDE.md`.
 - keep provider defaults conservative and explain data-sensitivity tradeoffs
 - use local-first by default, then allow hosted-model paths when needed for velocity
 - consider Gemma 4 when multilingual support across European languages is a primary requirement
+- use `docs/use-cases/HYBRID_WORKSPACES.md` for local-plus-hosted and multi-workspace rollout patterns

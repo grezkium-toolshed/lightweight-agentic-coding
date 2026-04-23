@@ -35,6 +35,8 @@ INIT_STATE_1="$TMP_DIR/init-no-cloud-state"
 AI_CLUSTER_STATE_ROOT="$INIT_STATE_1" python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --no-cloud --json > "$TMP_DIR/init-no-cloud.json"
 INIT_STATE_2="$TMP_DIR/init-cloud-state"
 AI_CLUSTER_STATE_ROOT="$INIT_STATE_2" python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --cloud openrouter,anthropic --json > "$TMP_DIR/init-cloud.json"
+INIT_STATE_3="$TMP_DIR/init-default-cloud-state"
+AI_CLUSTER_STATE_ROOT="$INIT_STATE_3" python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --json > "$TMP_DIR/init-default-cloud.json"
 
 unset OPENROUTER_API_KEY ANTHROPIC_API_KEY OPENCODE_GO_API_KEY OPENCODE_ZEN_API_KEY OPENAI_API_KEY ANTIGRAVITY_API_KEY ZAI_API_KEY NVIDIA_API_KEY NVIDIA_NIM_API_KEY 2>/dev/null || true
 python3 "$ROOT/scripts/lac.py" provider verify openrouter --json > "$TMP_DIR/verify-openrouter.json"
@@ -71,7 +73,7 @@ provider_list_24 = provider_list_top
 provider_list_openrouter = json.loads((tmp_dir / "provider-list-openrouter.json").read_text(encoding="utf-8"))
 
 assert profile_24["profile_id"] == "24gb"
-assert opencode_config["model"] == "local-cluster/qwen3-14b-q4"
+assert opencode_config["model"] == "local-cluster/qwen3.6-27b-q4"
 assert opencode_manifest["target"] == "opencode"
 assert doctor_24["assets"]["pack_count"] >= 4
 assert provider_list_top == provider_list_sub
@@ -120,6 +122,12 @@ assert init_cloud["applied"] is True
 assert init_cloud["cloud"] == ["openrouter", "anthropic"]
 assert any("OPENROUTER_API_KEY" in step for step in init_cloud["next_steps"])
 assert any("ANTHROPIC_API_KEY" in step for step in init_cloud["next_steps"])
+
+init_default_cloud = json.loads((tmp_dir / "init-default-cloud.json").read_text(encoding="utf-8"))
+assert init_default_cloud["applied"] is True
+assert init_default_cloud["cloud"] == ["opencode-go", "openrouter"]
+assert any("OPENCODE_GO_API_KEY" in step for step in init_default_cloud["next_steps"])
+assert any("OPENROUTER_API_KEY" in step for step in init_default_cloud["next_steps"])
 
 assert any(provider["id"] == "local-cluster" and provider["configured"] is False for provider in provider_list_openrouter)
 assert any(provider["id"] == "local-cluster" and provider["configured"] is False for provider in doctor_openrouter["provider_readiness"])

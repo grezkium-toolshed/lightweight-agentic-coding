@@ -44,11 +44,12 @@ ps1_text = setup_models_ps1.read_text(encoding="utf-8")
 sh_profiles = set(
     match.group(1)
     for match in re.finditer(r"(?m)^[ \t]*([a-z0-9-]+)\)", sh_text)
-    if match.group(1) not in {"--profile", "*"}
+    if match.group(1) not in {"--profile", "*", "auto"}
 )
 ps1_profiles = set(
     match.group(1)
     for match in re.finditer(r"(?m)^[ \t]*'([a-z0-9-]+)'\s*\{", ps1_text)
+    if match.group(1) != "auto"
 )
 
 require(sh_profiles == manifest_id_set, f"setup-models-device.sh profiles differ from runtime-config/profiles.json: {sorted(sh_profiles ^ manifest_id_set)}")

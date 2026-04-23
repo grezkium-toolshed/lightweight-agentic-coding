@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This repository is a **Local AI Cluster**: a local-first agentic workstation built around **llama.cpp** and **Qwen 3.5**, with **OpenCode** as the primary supported client. It is designed for technical users who want a low-friction setup for:
+This repository is a **Local AI Cluster**: a local-first agentic workstation built around **llama.cpp** and **Qwen 3.6**, with **OpenCode** as the primary supported client. It is designed for technical users who want a low-friction setup for:
 
 - Coding and refactoring
 - Documentation generation
@@ -66,11 +66,11 @@ Get-Content runtime-config/logs/llama-server.log -Wait -Tail 50
 
 | Profile | Models |
 |---|---|
-| `16gb` | Qwen 3.5 9B + embeddings |
-| `24gb` | Qwen 3.5 27B + 9B fallback + embeddings |
-| `32gb` | Qwen 3.5 35B-A3B + 27B + optional coder-next |
-| `64gb` | 35B-A3B + coder-next + 27B + embeddings |
-| `128gb-multi` | 35B-A3B + coder-next + 27B + 9B + embeddings |
+| `16gb` | Qwen 3.6 27B `UD-Q3_K_XL` + embeddings |
+| `24gb` | Qwen 3.6 27B `UD-Q4_K_XL` + `UD-Q3_K_XL` fallback + embeddings |
+| `32gb` | Qwen 3.6 27B `UD-Q4_K_XL` + optional coder-next |
+| `64gb` | Qwen 3.6 35B-A3B `UD-Q8_K_XL` + coder-next + 27B + embeddings |
+| `128gb-multi` | Qwen 3.6 35B-A3B `UD-Q8_K_XL` + coder-next + 27B `UD-Q4_K_XL` + 27B `UD-Q3_K_XL` + embeddings |
 | `128gb-qwen122b` | Qwen 3.5 122B-focused |
 | `128gb-minimax` | MiniMax-focused |
 | `gemma-16gb` | Gemma 4 26B-A4B (Q4) + E4B (Q8) fallback |
@@ -120,6 +120,6 @@ Recommended cloud fallback order: NVIDIA NIM → OpenRouter → z.ai → Antigra
 
 Gemma 4 provides an Apache-2.0 licensed alternative with thinking mode (`<|think|>`), multimodal support, and MoE efficiency.
 
-- **Inference defaults** (different from Qwen 3.5): `temp=1.0`, `top_p=0.95`, `top_k=64`, no repeat/presence penalties
+- **Inference defaults** (different from the Qwen baseline): `temp=1.0`, `top_p=0.95`, `top_k=64`, no repeat/presence penalties
 - **EOS token**: `<turn|>`
 - **Warning**: Do not use CUDA 13.2 runtime with GGUFs — causes degraded outputs

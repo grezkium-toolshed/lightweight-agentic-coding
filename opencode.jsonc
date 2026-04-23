@@ -1,7 +1,7 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "local-cluster/qwen3-14b-q4",
-  "small_model": "local-cluster/qwen3-8b-q4",
+  "model": "local-cluster/qwen3.6-27b-q4",
+  "small_model": "local-cluster/qwen3.6-27b-q3",
   "plugin": [
     "opencode-antigravity-auth"
   ],
@@ -10,19 +10,19 @@
       "name": "Local llama.cpp Cluster",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
-        "qwen3-8b-q4": {
+        "qwen3.6-27b-q3": {
           "limit": {
             "context": 65536,
             "output": 8192
           }
         },
-        "qwen3-14b-q4": {
+        "qwen3.6-27b-q4": {
           "limit": {
             "context": 131072,
             "output": 12288
           }
         },
-        "qwen3-30b-a3b-q4": {
+        "qwen3.6-35b-a3b-q8": {
           "limit": {
             "context": 262144,
             "output": 16384
@@ -356,27 +356,81 @@
       "name": "OpenCode Go",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
-        "glm-4.7": {
+        "glm-5.1": {
           "limit": {
             "context": 200000,
             "output": 12288
           }
         },
-        "gpt-oss-120b": {
+        "glm-5": {
+          "limit": {
+            "context": 200000,
+            "output": 12288
+          }
+        },
+        "kimi-k2.6": {
           "limit": {
             "context": 131072,
             "output": 12288
           }
         },
-        "qwen3-coder": {
+        "kimi-k2.5": {
+          "limit": {
+            "context": 131072,
+            "output": 12288
+          }
+        },
+        "mimo-v2.5-pro": {
+          "limit": {
+            "context": 131072,
+            "output": 12288
+          }
+        },
+        "mimo-v2.5": {
+          "limit": {
+            "context": 131072,
+            "output": 12288
+          }
+        },
+        "mimo-v2-pro": {
+          "limit": {
+            "context": 131072,
+            "output": 12288
+          }
+        },
+        "mimo-v2-omni": {
+          "limit": {
+            "context": 131072,
+            "output": 12288
+          }
+        },
+        "qwen3.6-plus": {
           "limit": {
             "context": 262144,
             "output": 16384
           }
+        },
+        "qwen3.5-plus": {
+          "limit": {
+            "context": 131072,
+            "output": 12288
+          }
+        },
+        "minimax-m2.7": {
+          "limit": {
+            "context": 131072,
+            "output": 12288
+          }
+        },
+        "minimax-m2.5": {
+          "limit": {
+            "context": 131072,
+            "output": 12288
+          }
         }
       },
       "options": {
-        "baseURL": "https://api.opencode.ai/go/v1",
+        "baseURL": "https://opencode.ai/zen/go/v1",
         "timeout": 600000,
         "chunkTimeout": 30000
       }

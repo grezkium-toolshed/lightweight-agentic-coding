@@ -1,6 +1,6 @@
 # local-ai-cluster
 
-Public beta preparation branch for a **Local AI Cluster**: a local-first AI workstation built around **llama.cpp + Qwen 3.6 MoE**, with OpenCode as the lead supported local client path and a new v2 CLI contract for setup, rendering, and validation.
+Public beta preparation branch for a **Local AI Cluster**: a local-first AI workstation built around **llama.cpp + Qwen 3.6**, with OpenCode as the lead supported local client path and a new v2 CLI contract for setup, rendering, and validation.
 
 This repo is not ready for public visibility yet. Use `RELEASE_CHECKLIST.md` and `docs/release/PRIVATE_UNTIL_RELEASE.md` before changing repository visibility.
 
@@ -41,20 +41,21 @@ Use `16gb`, `24gb`, or `openrouter` with the `office` pack.
 Use `32gb`, `64gb`, or `openrouter` with the `team-rollout` pack.
 
 Scenario mapping lives in `docs/use-cases/SCENARIO_GUIDE.md` and `catalog/scenarios.json`.
+Hybrid local-plus-cloud and multi-workspace rollout notes live in `docs/use-cases/HYBRID_WORKSPACES.md`.
 
 ## Runtime defaults
 - llama.cpp `llama-server`
 - OpenCode source template config in `opencode.jsonc`
 - generated active runtime state under `state/`
-- Qwen 3.6 MoE profile-based local models
+- Qwen 3.6 profile-based local models, staged as GGUF for llama.cpp and with optional MLX artifacts on macOS
 - free cloud fallback providers for lower-end hardware
 - a first-class repo CLI at `./bin/lac`
 
 ## Hardware profiles
-- `16gb`: Qwen 3.6 small-model local path + embeddings
-- `24gb`: Qwen 3.6 balanced local path + fallback + embeddings
-- `32gb`: Qwen 3.6 MoE local path + fallback + optional coder specialist
-- `64gb`: Qwen 3.6 MoE + coder specialist + fallback + embeddings
+- `16gb`: Qwen 3.6 27B `UD-Q3_K_XL` starter + embeddings
+- `24gb`: Qwen 3.6 27B `UD-Q4_K_XL` + `UD-Q3_K_XL` fallback + embeddings
+- `32gb`: Qwen 3.6 27B `UD-Q4_K_XL` + optional coder specialist
+- `64gb`: Qwen 3.6 35B-A3B `UD-Q8_K_XL` + 27B fallback + coder specialist + embeddings
 - `128gb-multi`: multi-model Qwen local workstation
 - `128gb-qwen122b`: large-model Qwen-focused profile
 - `128gb-minimax`: MiniMax M2.7 `UD-IQ4_XS` profile for a practical 128GB fit
@@ -63,6 +64,7 @@ Scenario mapping lives in `docs/use-cases/SCENARIO_GUIDE.md` and `catalog/scenar
 - `gemma-32gb`: Gemma 4 31B (Q8) + 26B-A4B (Q4) fallback
 - `gemma-64gb`: Gemma 4 31B (BF16) + 31B (Q8) + 26B-A4B (Q4)
 - `openrouter`: Cloud-only, zero downloads — uses OpenRouter free tier via `opencode.jsonc`
+- `opencode-go`: Cloud-only, zero downloads — uses OpenCode Go subscription models via `opencode.jsonc`
 
 The 128GB tiers follow a practical `<=115GB` effective memory usage policy to preserve headroom.
 
@@ -74,13 +76,26 @@ One-command onboarding (recommended):
 ./bin/lac init
 ```
 
-`lac init` detects your hardware, recommends a local profile, asks which cloud overlays to enable, and applies the profile. It stops before downloading model weights and prints the exact next commands to run.
+`lac init` detects your hardware, recommends a local profile, asks which hosted model overlays to enable, and applies the profile. The recommended hybrid path is local Qwen/Gemma plus both OpenCode Go and OpenRouter: Go for reliable subscription capacity, OpenRouter for free/trial fallback. It stops before downloading model weights and prints the exact next commands to run.
 
 Non-interactive / scripted install:
 
 ```bash
 ./bin/lac init --yes --profile 24gb --cloud openrouter
 ./bin/lac models sync 24gb
+./bin/lac runtime start
+./bin/lac client open opencode
+```
+
+Recommended hybrid install with OpenCode Go and OpenRouter:
+
+```bash
+export OPENCODE_GO_API_KEY=...
+export OPENROUTER_API_KEY=...
+./bin/lac init --yes --profile 32gb --cloud opencode-go,openrouter
+./bin/lac models sync 32gb
+./bin/lac provider verify opencode-go
+./bin/lac provider verify openrouter
 ./bin/lac runtime start
 ./bin/lac client open opencode
 ```
@@ -93,6 +108,8 @@ Manual four-step flow (legacy):
 ./bin/lac runtime start
 ./bin/lac client open opencode
 ```
+
+On macOS, `models sync` also attempts to stage the recommended Unsloth MLX repos under `models/mlx/` when `hf` or `huggingface-cli` is installed. The default MLX choices are 27B `UD-MLX-6bit` and 35B-A3B `MLX-8bit`; use lower MLX quants only when unified-memory budget is tight. Set `AI_INCLUDE_MLX=0` to skip MLX staging or `AI_INCLUDE_MLX=1` to force it; non-macOS sync remains GGUF-first by default.
 
 Gemma 4 quick start:
 
@@ -107,6 +124,24 @@ OpenRouter quick start (cloud-only, no downloads):
 
 ```bash
 ./bin/lac profile apply openrouter
+./bin/lac client open opencode
+```
+
+OpenCode Go subscription overlay:
+
+```bash
+export OPENCODE_GO_API_KEY=...
+./bin/lac init --yes --profile 24gb --cloud opencode-go
+./bin/lac provider verify opencode-go
+./bin/lac client open opencode
+```
+
+OpenCode Go cloud-only profile:
+
+```bash
+export OPENCODE_GO_API_KEY=...
+./bin/lac profile apply opencode-go
+./bin/lac provider verify opencode-go
 ./bin/lac client open opencode
 ```
 
@@ -219,13 +254,13 @@ Local llama.cpp is always the baseline. Cloud providers are an optional overlay 
 
 `opencode.jsonc` includes provider blocks for:
 - `openrouter` — free tier, rate-limited (`OPENROUTER_API_KEY`)
-- `opencode-go` — flat subscription, curated models (`OPENCODE_GO_API_KEY`)
+- `opencode-go` — flat subscription, curated models including Qwen3.6 Plus (`OPENCODE_GO_API_KEY`)
 - `opencode-zen` — pay-per-request beta, broader catalog (`OPENCODE_ZEN_API_KEY`)
 - `codex-auth` — reuse ChatGPT subscription via `numman-ali/opencode-openai-codex-auth` (`OPENAI_API_KEY`)
 - `anthropic` — Claude 4.x family, API key only (`ANTHROPIC_API_KEY`); Claude.ai subscription does NOT work
 - `antigravity`, `z-ai`, `nvidia-nim` — additional hosted options
 
-Use local when you can. Use cloud overlays when you want stronger planning models, zero-hardware onboarding, or trial workflows. `lac init` walks you through picking which overlays to enable.
+Use local models for private, repeated, or offline work. Use OpenCode Go for reliable subscription capacity, and OpenRouter for free/trial fallback or broad hosted-model experiments. `lac init` walks you through picking local and hosted model layers together.
 
 OpenRouter profile default model naming is pinned to:
 - `qwen/qwen3-coder:480b-free`
@@ -234,8 +269,8 @@ Authentication expectations are documented in `docs/providers/AUTHENTICATION.md`
 Freshness metadata for provider guidance lives in `catalog/providers.json`.
 
 Current product direction:
-- Qwen 3.6 MoE is the target default local family.
-- Use Unsloth's published `UD-Q4_K_XL` artifacts as the default quant class when the runtime migration lands.
+- Qwen 3.6 is the target default local family.
+- Prefer Qwen 3.6 35B-A3B at `UD-Q8_K_XL` where hardware allows; use dense 27B as the lower-footprint quantized default.
 - Gemma 4 remains the strongest multilingual alternative, especially for EU-language-heavy workflows.
 
 ## OpenCode-specific additions in this repo

@@ -7,11 +7,12 @@ AI_MODELS_DIR="${AI_MODELS_DIR:-$AI_CLUSTER_ROOT/models}"
 
 usage() {
   cat << USAGE
-Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax|gemma-16gb|gemma-24gb|gemma-32gb|gemma-64gb|openrouter>
+Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax|gemma-16gb|gemma-24gb|gemma-32gb|gemma-64gb|openrouter|opencode-go>
 
 Environment overrides:
   AI_CLUSTER_ROOT  Base repository path (default: script parent)
   AI_MODELS_DIR    Models folder (default: \$AI_CLUSTER_ROOT/models)
+  AI_INCLUDE_MLX   On macOS, also stage Qwen 3.6 MLX repos when a Hugging Face CLI is installed (default: auto)
   MINIMAX_REPO     Hugging Face repo for MiniMax profile
   MINIMAX_FILES    Comma-separated MiniMax GGUF files for 128gb-minimax
 USAGE
@@ -43,25 +44,51 @@ fi
 mkdir -p "$AI_MODELS_DIR"
 
 declare -a MODELS
+declare -a MLX_MODELS
 MODELS+=("embeddings|nomic-embed-text-v1.5.Q4_K_M.gguf|nomic-ai/nomic-embed-text-v1.5-GGUF|nomic-embed-text-v1.5.Q4_K_M.gguf|60")
+
+is_macos() {
+  [[ "$(uname -s)" == "Darwin" ]]
+}
+
+should_stage_mlx() {
+  case "${AI_INCLUDE_MLX:-auto}" in
+    1|true|yes) return 0 ;;
+    0|false|no) return 1 ;;
+    auto) is_macos ;;
+    *)
+      echo "Unsupported AI_INCLUDE_MLX value: ${AI_INCLUDE_MLX}" >&2
+      exit 1
+      ;;
+  esac
+}
+
+add_qwen36_mlx() {
+  local repo="$1"
+  MLX_MODELS+=("$repo")
+}
 
 case "$PROFILE" in
   16gb)
-    MODELS+=("qwen3|Qwen3-8B-UD-Q4_K_XL.gguf|unsloth/Qwen3-8B-GGUF|Qwen3-8B-UD-Q4_K_XL.gguf|5000")
+    MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q3_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q3_K_XL.gguf|14000")
+    add_qwen36_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
     ;;
   24gb)
-    MODELS+=("qwen3|Qwen3-14B-UD-Q4_K_XL.gguf|unsloth/Qwen3-14B-GGUF|Qwen3-14B-UD-Q4_K_XL.gguf|9000")
-    MODELS+=("qwen3|Qwen3-8B-UD-Q4_K_XL.gguf|unsloth/Qwen3-8B-GGUF|Qwen3-8B-UD-Q4_K_XL.gguf|5000")
+    MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q4_K_XL.gguf|17000")
+    MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q3_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q3_K_XL.gguf|14000")
+    add_qwen36_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
     ;;
   32gb)
-    MODELS+=("qwen3|Qwen3-30B-A3B-UD-Q4_K_XL.gguf|unsloth/Qwen3-30B-A3B-GGUF|Qwen3-30B-A3B-UD-Q4_K_XL.gguf|18000")
-    MODELS+=("qwen3|Qwen3-14B-UD-Q4_K_XL.gguf|unsloth/Qwen3-14B-GGUF|Qwen3-14B-UD-Q4_K_XL.gguf|9000")
+    MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q4_K_XL.gguf|17000")
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
+    add_qwen36_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
     ;;
   64gb)
-    MODELS+=("qwen3|Qwen3-30B-A3B-UD-Q4_K_XL.gguf|unsloth/Qwen3-30B-A3B-GGUF|Qwen3-30B-A3B-UD-Q4_K_XL.gguf|18000")
-    MODELS+=("qwen3|Qwen3-14B-UD-Q4_K_XL.gguf|unsloth/Qwen3-14B-GGUF|Qwen3-14B-UD-Q4_K_XL.gguf|9000")
+    MODELS+=("qwen3.6|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|unsloth/Qwen3.6-35B-A3B-GGUF|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|38000")
+    MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q4_K_XL.gguf|17000")
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
+    add_qwen36_mlx "unsloth/Qwen3.6-35B-A3B-MLX-8bit"
+    add_qwen36_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
     ;;
   128gb-qwen122b)
     MODELS+=("qwen3.5|Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf|unsloth/Qwen3.5-122B-A10B-GGUF|Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf|100")
@@ -70,10 +97,12 @@ case "$PROFILE" in
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
     ;;
   128gb-multi)
-    MODELS+=("qwen3|Qwen3-30B-A3B-UD-Q4_K_XL.gguf|unsloth/Qwen3-30B-A3B-GGUF|Qwen3-30B-A3B-UD-Q4_K_XL.gguf|18000")
-    MODELS+=("qwen3|Qwen3-14B-UD-Q4_K_XL.gguf|unsloth/Qwen3-14B-GGUF|Qwen3-14B-UD-Q4_K_XL.gguf|9000")
-    MODELS+=("qwen3|Qwen3-8B-UD-Q4_K_XL.gguf|unsloth/Qwen3-8B-GGUF|Qwen3-8B-UD-Q4_K_XL.gguf|5000")
+    MODELS+=("qwen3.6|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|unsloth/Qwen3.6-35B-A3B-GGUF|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|38000")
+    MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q4_K_XL.gguf|17000")
+    MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q3_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q3_K_XL.gguf|14000")
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
+    add_qwen36_mlx "unsloth/Qwen3.6-35B-A3B-MLX-8bit"
+    add_qwen36_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
     ;;
   128gb-minimax)
     MINIMAX_REPO="${MINIMAX_REPO:-unsloth/MiniMax-M2.7-GGUF}"
@@ -110,6 +139,11 @@ case "$PROFILE" in
   openrouter)
     echo "Profile: openrouter"
     echo "No local model downloads are required for the cloud-only openrouter profile."
+    exit 0
+    ;;
+  opencode-go)
+    echo "Profile: opencode-go"
+    echo "No local model downloads are required for the cloud-only opencode-go profile."
     exit 0
     ;;
   *)
@@ -174,12 +208,45 @@ download_one() {
   echo "[ ok ] $target_file (${new_mb}MB${expected_mb:+ of ~${expected_mb}MB})"
 }
 
+download_mlx_repo() {
+  local repo="$1"
+  local target_dir="$AI_MODELS_DIR/mlx/${repo#*/}"
+
+  if [[ -d "$target_dir" ]]; then
+    echo "[skip] $target_dir"
+    return
+  fi
+
+  if command -v hf >/dev/null 2>&1; then
+    echo "[mlx ] $repo -> $target_dir"
+    hf download "$repo" --local-dir "$target_dir"
+    return
+  fi
+
+  if command -v huggingface-cli >/dev/null 2>&1; then
+    echo "[mlx ] $repo -> $target_dir"
+    huggingface-cli download "$repo" --local-dir "$target_dir"
+    return
+  fi
+
+  echo "[warn] Skipping MLX repo $repo: install the Hugging Face CLI ('hf' or 'huggingface-cli') to stage macOS MLX weights." >&2
+}
+
 echo "Profile: $PROFILE"
 echo "Models dir: $AI_MODELS_DIR"
+if should_stage_mlx && [[ "${#MLX_MODELS[@]}" -gt 0 ]]; then
+  echo "MLX staging: enabled for macOS"
+fi
 
 for item in "${MODELS[@]}"; do
   IFS='|' read -r subdir filename repo remote min_mb <<< "$item"
   download_one "$subdir" "$filename" "$repo" "$remote" "$min_mb"
 done
+
+if should_stage_mlx; then
+  for repo in "${MLX_MODELS[@]}"; do
+    download_mlx_repo "$repo"
+  done
+fi
 
 echo "Done."
