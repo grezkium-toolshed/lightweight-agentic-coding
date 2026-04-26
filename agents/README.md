@@ -1,5 +1,7 @@
 # Curated Agents
 
+> **DO NOT add agents here.** This directory is a human-facing index only. Add new agents to `.opencode/agents/` for runtime discovery.
+
 This repo ships curated agent definitions for OpenCode under `.opencode/agents/`.
 Asset metadata for workflow packs, trust level, and support tier lives in `catalog/assets.json`.
 

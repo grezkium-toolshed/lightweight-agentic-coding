@@ -1,5 +1,7 @@
 # Curated Skills
 
+> **DO NOT add skills here.** This directory is a maintainers' index only. Add new skills to `.opencode/skills/<name>/SKILL.md` for runtime discovery.
+
 This repo provides project-local OpenCode skills under `.opencode/skills/`.
 Pack metadata and scenario mapping live in `catalog/workflow-packs.json` and `catalog/scenarios.json`.
 

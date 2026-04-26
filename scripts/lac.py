@@ -15,6 +15,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
+VERSION = "0.1.0"
+
 ROOT = Path(__file__).resolve().parent.parent
 STATE_ROOT = Path(os.environ.get("AI_CLUSTER_STATE_ROOT", ROOT / "state"))
 PORT = int(os.environ.get("AI_CLUSTER_PORT", "8080"))
@@ -1200,8 +1202,10 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
     command = [os.environ.get("OMLX_BIN", "omlx"), "serve", "--model-dir", str(models_dir)]
     ready_url = f"{base_url}/v1/models"
   else:
+    env["LLAMA_ARG_JINJA"] = "true"
     command = [
       os.environ.get("LLAMA_SERVER_BIN", "llama-server"),
+      "--jinja",
       "--models-preset",
       str(preset),
       "--port",
@@ -1217,6 +1221,28 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
 
   if foreground:
     started_at = utc_now()
+
+    def _foreground_cleanup(signum=None, frame=None):
+      if signum is not None:
+        log_info(f"\n[{runtime}] Received signal {signum}, shutting down...")
+      try:
+        process.terminate()
+        process.wait(timeout=5)
+      except (subprocess.TimeoutExpired, OSError):
+        try:
+          process.kill()
+          process.wait(timeout=3)
+        except Exception:
+          pass
+      pid_path.unlink(missing_ok=True)
+      if signum is not None:
+        raise SystemExit(128 + signum)
+
+    original_sigint = signal.getsignal(signal.SIGINT)
+    original_sigterm = signal.getsignal(signal.SIGTERM)
+    signal.signal(signal.SIGINT, _foreground_cleanup)
+    signal.signal(signal.SIGTERM, _foreground_cleanup)
+
     process = subprocess.Popen(command, env=env)
     payload = {
       "started_at": started_at,
@@ -1234,6 +1260,8 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
     try:
       exit_code = process.wait()
     finally:
+      signal.signal(signal.SIGINT, original_sigint)
+      signal.signal(signal.SIGTERM, original_sigterm)
       pid_path.unlink(missing_ok=True)
     return {
       "ok": exit_code == 0,
@@ -2127,6 +2155,7 @@ def emit(payload, json_mode=False, kind=None):
 
 def build_parser():
   parser = argparse.ArgumentParser(prog="lac", description="Local AI Cluster 2.0 CLI")
+  parser.add_argument("--version", action="version", version=f"lac {VERSION}")
   parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
   subparsers = parser.add_subparsers(dest="command", required=True)
 

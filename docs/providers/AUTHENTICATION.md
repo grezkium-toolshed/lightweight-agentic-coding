@@ -18,6 +18,7 @@ The probe sends a real request to each provider's baseURL with your key. `--all`
 - endpoint in repo config: `https://api.antigravity.ai/v1`
 - prerequisite: an account with API access to the referenced models
 - recommended usage: frontier-grade cloud fallback when local hardware is not enough
+- plugin: `opencode-antigravity-auth` must be installed via npm before using this provider. Add it to the `plugin` array in your config and run `npm install opencode-antigravity-auth`. Without this plugin, the antigravity provider block will fail to initialize.
 
 ## z.ai
 - recommended repo env var convention: `ZAI_API_KEY`
