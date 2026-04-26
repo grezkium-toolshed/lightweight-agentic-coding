@@ -21,6 +21,44 @@ Recommended profile mapping:
 - `128gb-qwen122b`: Qwen 122B-focused
 - `128gb-minimax`: MiniMax M2.7 `UD-IQ4_XS` alternative
 
+## Preset Settings Rationale
+
+The `.ini` presets are part of the recommendation, not incidental config. They combine Unsloth's published model guidance with repo-specific defaults for OpenCode, local agent workflows, and memory headroom:
+
+- Source templates live in `runtime-config/presets/<profile>.ini`.
+- The active runtime file is rendered to `state/runtime/presets.active.ini`.
+- The important knobs are `ctx-size`, `fit-ctx`, `temp`, `top-p`, `top-k`, `min-p`, `presence-penalty`, `repeat-penalty`, cache type, batch sizes, and chat template.
+- Unsloth model docs: [Qwen3.5](https://unsloth.ai/docs/models/qwen3.5) and [Gemma 4](https://unsloth.ai/docs/models/gemma-4).
+
+### Qwen baseline
+
+Qwen3.5 and Qwen 3.6 are treated as the default local coding/general families. For Qwen3.5 small non-thinking mode, Unsloth's general baseline is `temp=0.7`, `top_p=0.8`, `top_k=20`, `min_p=0.0`, `presence_penalty=1.5`, and repeat penalty disabled or `1.0`. The `macos-16gb` Qwen3.5 9B preset follows that shape directly.
+
+The Qwen 3.6 profiles use the same family guidance but are tuned more conservatively for repeatable coding and agent loops:
+
+- 27B Q3/Q4 profiles use `top-p=0.9`, `top-k=40`, modest presence penalties, and `repeat-penalty=1.05`.
+- 35B-A3B Q8 profiles keep a slightly higher `temp/top-p` while preserving repeat control.
+- Context is selected by hardware tier; the repo does not blindly max every model's theoretical context.
+
+### Gemma baseline
+
+Gemma 4 profiles keep the Unsloth-style Gemma defaults: `temperature=1.0`, `top_p=0.95`, `top_k=64`, `min_p=0.0`, `presence_penalty=0.0`, and `repeat_penalty=1.0`. The Gemma profiles use the Gemma chat template and treat 32K as the practical starting point on small macOS hardware, with larger contexts reserved for higher-memory profiles.
+
+### Main shipped settings
+
+| Profile / model | Artifact family | Context | temp / top-p / top-k | Penalties | Source / rationale |
+|---|---|---:|---|---|---|
+| `macos-16gb` / Qwen3.5 9B Q4 | `Q4_K_M` | 32K | `0.7 / 0.8 / 20` | presence `1.5`, repeat `1.0` | Unsloth Qwen small non-thinking baseline; 32K keeps 16GB macOS headroom. |
+| `macos-16gb` / Gemma 4 E4B Q8 | `Q8_0` | 32K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Unsloth Gemma defaults; lighter alternate for local multilingual and office work. |
+| `16gb` / Qwen 3.6 27B Q3 | `UD-Q3_K_XL` | 64K | `0.6 / 0.9 / 40` | presence `0.2`, repeat `1.05` | Repo coding/agent tuning for constrained non-Mac 16GB experiments. |
+| `24gb` / Qwen 3.6 27B Q4 | `UD-Q4_K_XL` | 128K | `0.7 / 0.9 / 40` | presence `0.4`, repeat `1.05` | Balanced Qwen default with stronger repeat control for agent loops. |
+| `32gb` / Qwen 3.6 27B Q4 | `UD-Q4_K_XL` | 128K | `0.6 / 0.9 / 40` | presence `0.2`, repeat `1.05` | More conservative coding profile, paired with coder specialist. |
+| `64gb` / Qwen 3.6 35B-A3B Q8 | `UD-Q8_K_XL` | 256K | `0.7 / 0.92 / 40` | presence `0.5`, repeat `1.05` | Higher-headroom Qwen default while retaining repeat control. |
+| `64gb` / Qwen 3.6 27B Q4 fallback | `UD-Q4_K_XL` | 128K | `0.6 / 0.9 / 40` | presence `0.2`, repeat `1.05` | Stable fallback when the 35B-A3B path is too heavy. |
+| `gemma-16gb` / Gemma 4 E4B Q8 fallback | `Q8_0` | 128K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Gemma default settings with smaller fallback model. |
+| `gemma-24gb+` / Gemma 4 26B/31B | `UD-Q4_K_XL`, `Q8_0`, or `BF16` | 256K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Unsloth Gemma defaults; profile chooses quant/context by hardware tier. |
+| `32gb+` / Qwen3 Coder Next | `MXFP4_MOE` | 64K-256K | `0.2 / 0.9 / 32` | presence `0.0`, repeat `1.02` | Low-temperature coding specialist, not the default general model. |
+
 ## 128GB MiniMax alternative
 
 Use `128gb-minimax` when you specifically want MiniMax M2.7 on a 128 GB machine.

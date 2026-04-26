@@ -72,6 +72,73 @@ def command_exists(name):
   return shutil.which(name) is not None
 
 
+def _host_install_platform():
+  if sys.platform == "darwin":
+    return "macos"
+  if sys.platform.startswith("win"):
+    return "windows"
+  return "linux"
+
+
+def _install_hint(tool_id, env_var=None):
+  platform_id = _host_install_platform()
+  hints = {
+    "python": {
+      "summary": "Install Python 3 and make sure python3, python, or py is on PATH.",
+      "macos": ["brew install python"],
+      "linux": ["sudo apt install python3"],
+      "windows": ["winget install Python.Python.3.12"],
+      "docs": "https://www.python.org/downloads/",
+    },
+    "opencode": {
+      "summary": "Install the OpenCode CLI, then restart your shell so opencode is on PATH.",
+      "macos": ["curl -fsSL https://opencode.ai/install | bash", "npm install -g opencode-ai"],
+      "linux": ["curl -fsSL https://opencode.ai/install | bash", "npm install -g opencode-ai"],
+      "windows": ["npm install -g opencode-ai"],
+      "docs": "https://opencode.ai/docs",
+    },
+    "llama-server": {
+      "summary": "Install llama.cpp and make sure the llama-server binary is on PATH.",
+      "macos": ["brew install llama.cpp"],
+      "linux": [
+        "git clone https://github.com/ggml-org/llama.cpp",
+        "cmake -B llama.cpp/build -S llama.cpp -DLLAMA_CURL=ON",
+        "cmake --build llama.cpp/build --config Release -j",
+      ],
+      "windows": ["Download a llama.cpp release and add the folder containing llama-server.exe to PATH."],
+      "docs": "https://github.com/ggml-org/llama.cpp",
+    },
+    "omlx": {
+      "summary": "Install oMLX only on Apple Silicon macOS when you want MLX serving.",
+      "macos": ["brew tap jundot/omlx https://github.com/jundot/omlx", "brew install omlx"],
+      "linux": ["oMLX is macOS/Apple Silicon only; use llama.cpp on Linux."],
+      "windows": ["oMLX is macOS/Apple Silicon only; use llama.cpp on Windows."],
+      "docs": "https://github.com/jundot/omlx",
+    },
+    "hf": {
+      "summary": "Install the Hugging Face CLI if you want authenticated model downloads or MLX repo staging.",
+      "macos": ["python3 -m pip install --user 'huggingface_hub[cli]'"],
+      "linux": ["python3 -m pip install --user 'huggingface_hub[cli]'"],
+      "windows": ["py -3 -m pip install --user \"huggingface_hub[cli]\""],
+      "docs": "https://huggingface.co/docs/huggingface_hub/guides/cli",
+    },
+  }
+  if env_var:
+    return {
+      "summary": f"Set {env_var} in your shell before running init/provider verification.",
+      "commands": [f"export {env_var}=..."] if platform_id != "windows" else [f"$env:{env_var} = \"...\""],
+      "docs": "docs/providers/AUTHENTICATION.md",
+    }
+  hint = hints.get(tool_id)
+  if not hint:
+    return None
+  return {
+    "summary": hint["summary"],
+    "commands": hint.get(platform_id, []),
+    "docs": hint.get("docs"),
+  }
+
+
 def log_info(message):
   print(message, file=sys.stderr)
 
@@ -946,6 +1013,15 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
 
   active_profile_id = ctx.active_profile_id()
   active_profile = ctx.active_profile()
+  required_command_names = {"opencode", "python3"}
+  if active_profile and active_profile.get("runtime_mode") != "cloud":
+    runtime = selected_local_runtime(active_profile)
+    required_command_names.add("omlx" if runtime == "omlx" else "llama-server")
+  command_install_hints = {
+    name: _install_hint("python" if name == "python3" else name)
+    for name, exists in commands.items()
+    if name in required_command_names and not exists
+  }
   runtime_status = collect_runtime_status(ctx)
   asset_catalog = load_asset_catalog(ctx)
   workflow_catalog = load_workflow_catalog(ctx)
@@ -957,6 +1033,7 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
     "active_profile_id": active_profile_id,
     "active_profile": active_profile,
     "commands": commands,
+    "command_install_hints": command_install_hints,
     "provider_readiness": collect_provider_readiness(ctx),
     "runtime": runtime_status,
     "assets": {
@@ -1445,6 +1522,13 @@ def render_doctor_text(report):
   commands = report["commands"]
   cmd_line = ", ".join(f"{name}={'yes' if exists else 'no'}" for name, exists in commands.items())
   print(f"Commands: {cmd_line}")
+  command_hints = report.get("command_install_hints", {})
+  if command_hints:
+    print("Missing command install notes:")
+    for name, hint in command_hints.items():
+      print(f"  - {name}: {hint['summary']}")
+      for command in hint.get("commands", []):
+        print(f"    install: {command}")
 
   runtime = report["runtime"]
   running = "yes" if runtime.get("running") else "no"
@@ -1680,7 +1764,7 @@ def _init_recommendation(profile_id, profile, hardware):
   }
 
 
-def _status_item(item_id, label, ready, detail, command=None, optional=False):
+def _status_item(item_id, label, ready, detail, command=None, optional=False, install_hint=None):
   item = {
     "id": item_id,
     "label": label,
@@ -1689,6 +1773,8 @@ def _status_item(item_id, label, ready, detail, command=None, optional=False):
   }
   if command:
     item["command"] = command
+  if install_hint and item["status"] != "ready":
+    item["install_hint"] = install_hint
   return item
 
 
@@ -1709,6 +1795,7 @@ def _init_prerequisites(ctx, profile, cloud_ids):
       command_exists("python3") or command_exists("python"),
       "Required to run the lac CLI.",
       command="python3 --version",
+      install_hint=_install_hint("python"),
     ),
     _status_item(
       "opencode",
@@ -1716,6 +1803,7 @@ def _init_prerequisites(ctx, profile, cloud_ids):
       command_exists("opencode"),
       "Required for `./bin/lac client open opencode`.",
       command="opencode --version",
+      install_hint=_install_hint("opencode"),
     ),
   ]
 
@@ -1729,6 +1817,7 @@ def _init_prerequisites(ctx, profile, cloud_ids):
         command_exists(runtime_command),
         f"Required to start the selected local runtime ({runtime}).",
         command=f"{runtime_command} --help",
+        install_hint=_install_hint(runtime_command),
       )
     )
 
@@ -1736,13 +1825,15 @@ def _init_prerequisites(ctx, profile, cloud_ids):
   for provider_id in _init_required_provider_ids(ctx, profile, cloud_ids):
     provider = provider_catalog[provider_id]
     env_var = provider["env_var"]
+    env_command = f"$env:{env_var} = \"...\"" if _host_install_platform() == "windows" else f"export {env_var}=..."
     required.append(
       _status_item(
         f"{provider_id}-api-key",
         f"{provider['label']} API key",
         bool(os.environ.get(env_var)),
         f"Set {env_var} to use {provider_id}.",
-        command=f"export {env_var}=...",
+        command=env_command,
+        install_hint=_install_hint(f"{provider_id}-api-key", env_var=env_var),
       )
     )
 
@@ -1754,6 +1845,7 @@ def _init_prerequisites(ctx, profile, cloud_ids):
       "Optional helper for `./bin/lac models sync`.",
       command="hf --version",
       optional=True,
+      install_hint=_install_hint("hf"),
     ),
     _status_item(
       "omlx",
@@ -1762,6 +1854,7 @@ def _init_prerequisites(ctx, profile, cloud_ids):
       "Optional macOS MLX runtime when compatible models are selected.",
       command="omlx --help",
       optional=True,
+      install_hint=_install_hint("omlx"),
     ),
   ]
 
@@ -1919,6 +2012,11 @@ def _render_init_section(title, items):
     print(f"  - {marker}: {item['label']} — {item['detail']}")
     if item.get("command") and item["status"] == "blocked":
       print(f"    next: {item['command']}")
+    install_hint = item.get("install_hint")
+    if install_hint and item["status"] != "ready":
+      print(f"    note: {install_hint['summary']}")
+      for command in install_hint.get("commands", []):
+        print(f"    install: {command}")
 
 
 def render_init_text(result):

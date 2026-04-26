@@ -71,7 +71,21 @@ Use JSON when scripting:
 
 The 128GB tiers follow a practical `<=115GB` effective memory posture to preserve operating-system and context headroom.
 
+## Preset Settings
+
+Profiles are not just model names. Each local profile also has a llama.cpp preset with baseline runtime and sampling settings:
+
+- `runtime-config/presets/<profile>.ini` is the source template for that profile.
+- `state/runtime/presets.active.ini` is the rendered active preset after `./bin/lac init` or `./bin/lac profile apply <profile>`.
+- The preset controls `ctx-size`, `fit-ctx`, `temp`, `top-p`, `top-k`, `min-p`, penalties, batch sizes, cache types, GPU layer offload, and chat template selection.
+
+These defaults are based on Unsloth model guidance for Qwen and Gemma, then adjusted conservatively for local OpenCode use, operating-system headroom, and long-context stability. They are meant to be good starting points, not hidden magic. If a model is too slow or memory pressure is high, inspect the active preset first and reduce `ctx-size`, `fit-ctx`, batch size, or the selected profile.
+
+For the deeper rationale and the current table of shipped settings, see `MODEL_RECOMMENDATIONS.md`.
+
 ## Prerequisites
+
+`lac init` and `lac doctor` check prerequisites and print install notes for anything missing. They do not install system tools automatically. `lac models sync <profile>` downloads model weights after the runtime tools are installed.
 
 Required for local profiles:
 
@@ -85,6 +99,31 @@ Recommended:
 - `hf` or `huggingface-cli` for Hugging Face model downloads
 - Git
 - curl
+
+Install commands and notes:
+
+| Prerequisite | macOS | Linux | Windows |
+|---|---|---|---|
+| Python 3 | `brew install python` | `sudo apt install python3` | `winget install Python.Python.3.12` |
+| OpenCode CLI | `curl -fsSL https://opencode.ai/install \| bash` or `npm install -g opencode-ai` | `curl -fsSL https://opencode.ai/install \| bash` or `npm install -g opencode-ai` | `npm install -g opencode-ai` |
+| llama.cpp `llama-server` | `brew install llama.cpp` | Build llama.cpp from source and add `llama-server` to `PATH`. | Download a llama.cpp release and add the folder containing `llama-server.exe` to `PATH`. |
+| Hugging Face CLI | `python3 -m pip install --user 'huggingface_hub[cli]'` | `python3 -m pip install --user 'huggingface_hub[cli]'` | `py -3 -m pip install --user "huggingface_hub[cli]"` |
+| oMLX, optional macOS MLX serving | `brew tap jundot/omlx https://github.com/jundot/omlx` then `brew install omlx` | Not supported; use llama.cpp. | Not supported; use llama.cpp. |
+
+Linux llama.cpp source build reference:
+
+```bash
+git clone https://github.com/ggml-org/llama.cpp
+cmake -B llama.cpp/build -S llama.cpp -DLLAMA_CURL=ON
+cmake --build llama.cpp/build --config Release -j
+```
+
+After installing a prerequisite, restart your shell and rerun:
+
+```bash
+./bin/lac init --yes --profile <profile>
+./bin/lac doctor
+```
 
 Optional hosted-provider environment variables:
 

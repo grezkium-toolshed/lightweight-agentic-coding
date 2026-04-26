@@ -163,6 +163,9 @@ assert init_cloud["status"] in ("ready", "blocked")
 assert any("OPENROUTER_API_KEY" in step for step in init_cloud["next_steps"])
 assert any("ANTHROPIC_API_KEY" in step for step in init_cloud["next_steps"])
 assert any(item["id"] == "openrouter-api-key" for item in init_cloud["prerequisites"]["required"])
+openrouter_key_check = next(item for item in init_cloud["prerequisites"]["required"] if item["id"] == "openrouter-api-key")
+assert "install_hint" in openrouter_key_check
+assert any("OPENROUTER_API_KEY" in command for command in openrouter_key_check["install_hint"]["commands"])
 
 init_default_cloud = json.loads((tmp_dir / "init-default-cloud.json").read_text(encoding="utf-8"))
 assert init_default_cloud["applied"] is True
