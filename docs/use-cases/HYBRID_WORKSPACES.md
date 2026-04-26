@@ -43,6 +43,7 @@ Suggested defaults:
 
 | Machine class | Local profile | Hosted overlay |
 |---|---|---|
+| MacBook Air-class 16 GB | `macos-16gb` | `opencode-go`, `openrouter` |
 | 16-24 GB | `24gb` or `16gb` | `opencode-go`, `openrouter` |
 | 32 GB | `32gb` | `opencode-go`, `openrouter` |
 | 64 GB+ | `64gb` | `opencode-go`, `openrouter`, optional `anthropic` |
@@ -128,7 +129,7 @@ When diagnosing model-load or runtime startup issues, run the server in the fore
 ./bin/lac runtime start --foreground
 ```
 
-This keeps llama.cpp logs in the terminal instead of only writing them to `state/logs/llama-server.log`. The repo currently stages MLX model artifacts on macOS, but it does not yet launch an MLX serving runtime; if MLX serving becomes first-class, it should use the same foreground/background logging pattern.
+This keeps runtime logs in the terminal instead of only writing them to `state/logs/`. llama.cpp remains the default local runtime. On macOS, `AI_LOCAL_RUNTIME=omlx` selects the oMLX OpenAI-compatible serving path when the active profile has compatible MLX mappings; `AI_LOCAL_RUNTIME=mlx` is accepted as an alias for oMLX. If a profile includes a model without a supported MLX mapping, the CLI falls back to llama.cpp.
 
 ## Open Questions
 

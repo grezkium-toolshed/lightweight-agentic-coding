@@ -22,31 +22,36 @@ function Should-StageMlx {
   }
 }
 
-function Add-Qwen36Mlx([string]$Repo) {
+function Add-MlxModel([string]$Repo) {
   $script:mlxModels += $Repo
 }
 
 switch ($Profile) {
   '16gb' {
     $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q3_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q3_K_XL.gguf'; MinMB=14000}
-    Add-Qwen36Mlx 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
+    Add-MlxModel 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
+  }
+  'macos-16gb' {
+    $models += @{Dir='qwen3.5'; File='Qwen3.5-9B-Q4_K_M.gguf'; Repo='unsloth/Qwen3.5-9B-GGUF'; Remote='Qwen3.5-9B-Q4_K_M.gguf'; MinMB=5000}
+    $models += @{Dir='gemma4'; File='gemma-4-E4B-IT-Q8_0.gguf'; Repo='unsloth/gemma-4-E4B-IT-GGUF'; Remote='gemma-4-E4B-IT-Q8_0.gguf'; MinMB=4000}
+    Add-MlxModel 'unsloth/gemma-4-E4B-it-MLX-8bit'
   }
   '24gb' {
     $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q4_K_XL.gguf'; MinMB=17000}
     $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q3_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q3_K_XL.gguf'; MinMB=14000}
-    Add-Qwen36Mlx 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
+    Add-MlxModel 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
   }
   '32gb' {
     $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q4_K_XL.gguf'; MinMB=17000}
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
-    Add-Qwen36Mlx 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
+    Add-MlxModel 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
   }
   '64gb' {
     $models += @{Dir='qwen3.6'; File='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; Repo='unsloth/Qwen3.6-35B-A3B-GGUF'; Remote='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; MinMB=38000}
     $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q4_K_XL.gguf'; MinMB=17000}
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
-    Add-Qwen36Mlx 'unsloth/Qwen3.6-35B-A3B-MLX-8bit'
-    Add-Qwen36Mlx 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
+    Add-MlxModel 'unsloth/Qwen3.6-35B-A3B-MLX-8bit'
+    Add-MlxModel 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
   }
   '128gb-qwen122b' {
     $models += @{Dir='qwen3.5'; File='Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf'; Repo='unsloth/Qwen3.5-122B-A10B-GGUF'; Remote='Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf'; MinMB=100}
@@ -59,8 +64,8 @@ switch ($Profile) {
     $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q4_K_XL.gguf'; MinMB=17000}
     $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q3_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q3_K_XL.gguf'; MinMB=14000}
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
-    Add-Qwen36Mlx 'unsloth/Qwen3.6-35B-A3B-MLX-8bit'
-    Add-Qwen36Mlx 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
+    Add-MlxModel 'unsloth/Qwen3.6-35B-A3B-MLX-8bit'
+    Add-MlxModel 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
   }
   '128gb-minimax' {
     $repo = if ($env:MINIMAX_REPO) { $env:MINIMAX_REPO } else { 'unsloth/MiniMax-M2.7-GGUF' }
@@ -78,6 +83,8 @@ switch ($Profile) {
   'gemma-16gb' {
     $models += @{Dir='gemma4'; File='gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf'; Repo='unsloth/gemma-4-26B-A4B-IT-GGUF'; Remote='gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf'; MinMB=15000}
     $models += @{Dir='gemma4'; File='gemma-4-E4B-IT-Q8_0.gguf'; Repo='unsloth/gemma-4-E4B-IT-GGUF'; Remote='gemma-4-E4B-IT-Q8_0.gguf'; MinMB=4000}
+    Add-MlxModel 'unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit'
+    Add-MlxModel 'unsloth/gemma-4-E4B-it-MLX-8bit'
   }
   'gemma-24gb' {
     $models += @{Dir='gemma4'; File='gemma-4-31B-IT-UD-Q4_K_XL.gguf'; Repo='unsloth/gemma-4-31B-IT-GGUF'; Remote='gemma-4-31B-IT-UD-Q4_K_XL.gguf'; MinMB=16000}

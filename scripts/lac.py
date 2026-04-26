@@ -30,6 +30,7 @@ LOCAL_MLX_MODEL_IDS = {
   "gemma-4-31b-q4": "gemma-4-31b-it-UD-MLX-4bit",
   "gemma-4-31b-q8": "gemma-4-31b-it-UD-MLX-4bit",
   "gemma-4-31b-bf16": "gemma-4-31b-it-UD-MLX-4bit",
+  "gemma-4-e4b-q8": "gemma-4-E4B-it-MLX-8bit",
   # MoE 26B-A4B: 8bit (matches Qwen MoE pattern)
   "gemma-4-26b-a4b-q4": "gemma-4-26b-a4b-it-UD-MLX-8bit",
 }
@@ -115,11 +116,14 @@ def selected_local_runtime(profile=None, verbose=False):
     if requested == "omlx" and sys.platform != "darwin":
       if verbose:
         log_info(f"[runtime] oMLX is only supported on macOS. Ignoring AI_LOCAL_RUNTIME=omlx.")
+    elif requested == "omlx" and not _profile_supports_omlx(profile, verbose=verbose):
+      if verbose:
+        log_info("[runtime] Requested oMLX runtime is not compatible with this profile. Falling back to llama.cpp.")
     else:
       if verbose:
         log_info(f"[runtime] Using requested runtime: {requested}")
       return requested
-  if sys.platform == "darwin" and _profile_supports_omlx(profile, verbose=verbose):
+  if sys.platform == "darwin" and _profile_supports_omlx(profile, verbose=False):
     omlx_bin = os.environ.get("OMLX_BIN", "omlx")
     if not command_exists(omlx_bin):
       if verbose:
@@ -505,9 +509,9 @@ class Context:
     return self.profiles.get(profile_id)
 
 
-def render_opencode_config(ctx, profile_id, profile):
+def render_opencode_config(ctx, profile_id, profile, verbose_runtime=True):
   template = copy.deepcopy(load_jsonc(ctx.paths["opencode_template"]))
-  runtime = selected_local_runtime(profile, verbose=True)
+  runtime = selected_local_runtime(profile, verbose=verbose_runtime)
   default_model = _resolve_catalog_selector(ctx, profile["default_model"])
   small_model = _resolve_catalog_selector(ctx, profile["small_model"])
   if runtime == "omlx":
@@ -805,10 +809,10 @@ def profile_list(ctx):
   return rows
 
 
-def profile_apply(ctx, profile_id, render_target="opencode"):
+def profile_apply(ctx, profile_id, render_target="opencode", verbose_runtime=True):
   profile = ctx.get_profile(profile_id)
   render_preset(ctx, profile)
-  render_opencode_config(ctx, profile_id, profile)
+  render_opencode_config(ctx, profile_id, profile, verbose_runtime=verbose_runtime)
   write_text(ctx.paths["active_profile"], f"{profile_id}\n")
   summary = {
     "applied_at": utc_now(),
@@ -1642,15 +1646,187 @@ def _validate_cloud_ids(ctx, cloud_ids):
     raise SystemExit(f"Unknown cloud provider(s): {', '.join(invalid)}. Known: {', '.join(sorted(known))}")
 
 
+def _provider_id_from_model(model_selector):
+  if not isinstance(model_selector, str) or "/" not in model_selector:
+    return ""
+  return model_selector.split("/", 1)[0]
+
+
+def _profile_provider_ids(profile):
+  provider_ids = []
+  for field in ("default_model", "small_model"):
+    provider_id = _provider_id_from_model(profile.get(field, ""))
+    if provider_id and provider_id not in provider_ids:
+      provider_ids.append(provider_id)
+  return provider_ids
+
+
+def _init_recommendation(profile_id, profile, hardware):
+  ram_gb = hardware.get("ram_gb")
+  alternatives = family_alternatives(ram_gb)
+  recommended_profile = recommend_profile(ram_gb)
+  if profile["runtime_mode"] == "cloud":
+    recommended_path = "cloud-only zero-download profile"
+  else:
+    recommended_path = "local-first with optional OpenCode Go and OpenRouter overlays"
+  return {
+    "selected_profile": profile_id,
+    "selected_label": profile["label"],
+    "selected_runtime_mode": profile["runtime_mode"],
+    "hardware_recommended_profile": recommended_profile,
+    "family_alternatives": alternatives,
+    "default_cloud_overlays": ["opencode-go", "openrouter"],
+    "recommended_path": recommended_path,
+  }
+
+
+def _status_item(item_id, label, ready, detail, command=None, optional=False):
+  item = {
+    "id": item_id,
+    "label": label,
+    "status": "ready" if ready else ("optional" if optional else "blocked"),
+    "detail": detail,
+  }
+  if command:
+    item["command"] = command
+  return item
+
+
+def _init_required_provider_ids(ctx, profile, cloud_ids):
+  required = []
+  known_cloud = {p["id"] for p in load_json(ctx.paths["provider_catalog"])["providers"] if p["id"] != "local-cluster"}
+  for provider_id in _profile_provider_ids(profile) + list(cloud_ids):
+    if provider_id in known_cloud and provider_id not in required:
+      required.append(provider_id)
+  return required
+
+
+def _init_prerequisites(ctx, profile, cloud_ids):
+  required = [
+    _status_item(
+      "python",
+      "Python 3",
+      command_exists("python3") or command_exists("python"),
+      "Required to run the lac CLI.",
+      command="python3 --version",
+    ),
+    _status_item(
+      "opencode",
+      "OpenCode CLI",
+      command_exists("opencode"),
+      "Required for `./bin/lac client open opencode`.",
+      command="opencode --version",
+    ),
+  ]
+
+  if profile.get("local_runtime_required"):
+    runtime = selected_local_runtime(profile)
+    runtime_command = "omlx" if runtime == "omlx" else "llama-server"
+    required.append(
+      _status_item(
+        runtime_command,
+        "Local runtime",
+        command_exists(runtime_command),
+        f"Required to start the selected local runtime ({runtime}).",
+        command=f"{runtime_command} --help",
+      )
+    )
+
+  provider_catalog = {p["id"]: p for p in load_json(ctx.paths["provider_catalog"])["providers"]}
+  for provider_id in _init_required_provider_ids(ctx, profile, cloud_ids):
+    provider = provider_catalog[provider_id]
+    env_var = provider["env_var"]
+    required.append(
+      _status_item(
+        f"{provider_id}-api-key",
+        f"{provider['label']} API key",
+        bool(os.environ.get(env_var)),
+        f"Set {env_var} to use {provider_id}.",
+        command=f"export {env_var}=...",
+      )
+    )
+
+  optional = [
+    _status_item(
+      "hf",
+      "Hugging Face CLI",
+      command_exists("hf") or command_exists("huggingface-cli"),
+      "Optional helper for `./bin/lac models sync`.",
+      command="hf --version",
+      optional=True,
+    ),
+    _status_item(
+      "omlx",
+      "oMLX",
+      command_exists("omlx"),
+      "Optional macOS MLX runtime when compatible models are selected.",
+      command="omlx --help",
+      optional=True,
+    ),
+  ]
+
+  return {"required": required, "optional": optional}
+
+
+def _init_readiness(prerequisites, profile):
+  required = prerequisites["required"]
+  blocked = [item for item in required if item["status"] == "blocked"]
+  ready = [item for item in required if item["status"] == "ready"]
+  readiness = [
+    {
+      "id": "config-rendered",
+      "label": "Runtime config rendered",
+      "status": "ready",
+      "detail": "Generated state and client config are in place.",
+    },
+    {
+      "id": "required-prerequisites",
+      "label": "Required prerequisites",
+      "status": "ready" if not blocked else "blocked",
+      "detail": f"{len(ready)}/{len(required)} required checks are ready.",
+    },
+  ]
+  if profile.get("downloads_required"):
+    readiness.append(
+      {
+        "id": "model-downloads",
+        "label": "Model weights",
+        "status": "blocked",
+        "detail": "Run the model sync command before starting the local runtime.",
+      }
+    )
+  else:
+    readiness.append(
+      {
+        "id": "model-downloads",
+        "label": "Model weights",
+        "status": "ready",
+        "detail": "Selected profile does not require local model downloads.",
+      }
+    )
+  return readiness
+
+
+def _init_status(readiness):
+  return "blocked" if any(item["status"] == "blocked" for item in readiness) else "ready"
+
+
 def _next_steps(ctx, profile_id, cloud_ids, also_download_profile=None):
+  profile = ctx.get_profile(profile_id)
   steps = []
   for cid in cloud_ids:
     hint = CLOUD_PROVIDER_HINTS.get(cid, "see docs/providers/AUTHENTICATION.md")
     steps.append(f"Enable {cid}: {hint}")
-  steps.append(f"Download models: ./bin/lac models sync {profile_id}")
-  if also_download_profile and also_download_profile != profile_id:
-    steps.append(f"Also download alternate family weights: ./bin/lac models sync {also_download_profile}")
-  steps.append("Start runtime: ./bin/lac runtime start")
+  if profile.get("downloads_required"):
+    steps.append(f"Download models: ./bin/lac models sync {profile_id}")
+    if also_download_profile and also_download_profile != profile_id:
+      steps.append(f"Also download alternate family weights: ./bin/lac models sync {also_download_profile}")
+  if profile.get("local_runtime_required"):
+    steps.append("Start runtime: ./bin/lac runtime start")
+  else:
+    required_providers = _init_required_provider_ids(ctx, profile, cloud_ids)
+    for provider_id in required_providers:
+      steps.append(f"Verify {provider_id}: ./bin/lac provider verify {provider_id}")
   steps.append("Open client: ./bin/lac client open opencode")
   return steps
 
@@ -1708,13 +1884,23 @@ def init_wizard(ctx, yes=False, profile=None, cloud=None, no_cloud=False, also_d
       preselected=["opencode-go", "openrouter"],
     )
 
-  summary = profile_apply(ctx, chosen_profile)
+  summary = profile_apply(ctx, chosen_profile, verbose_runtime=False)
+  chosen_profile_record = ctx.get_profile(chosen_profile)
+  prerequisites = _init_prerequisites(ctx, chosen_profile_record, cloud_ids)
+  readiness = _init_readiness(prerequisites, chosen_profile_record)
+  generated = dict(summary["generated"])
+  generated["client_manifest"] = summary["render"]["manifest_path"]
 
   result = {
     "applied": True,
+    "status": _init_status(readiness),
     "profile": chosen_profile,
     "cloud": cloud_ids,
     "hardware": hardware,
+    "recommendation": _init_recommendation(chosen_profile, chosen_profile_record, hardware),
+    "prerequisites": prerequisites,
+    "readiness": readiness,
+    "generated": generated,
     "also_download_profile": also_download_profile,
     "state_root": summary["state_root"],
     "next_steps": _next_steps(ctx, chosen_profile, cloud_ids, also_download_profile=also_download_profile),
@@ -1722,12 +1908,42 @@ def init_wizard(ctx, yes=False, profile=None, cloud=None, no_cloud=False, also_d
   return result
 
 
+def _render_init_section(title, items):
+  print(title)
+  for item in items:
+    marker = {
+      "ready": "ready",
+      "blocked": "blocked",
+      "optional": "optional",
+    }.get(item["status"], item["status"])
+    print(f"  - {marker}: {item['label']} — {item['detail']}")
+    if item.get("command") and item["status"] == "blocked":
+      print(f"    next: {item['command']}")
+
+
 def render_init_text(result):
-  print(f"Applied profile: {result['profile']}")
+  hardware = result["hardware"]
+  ram_label = f"{hardware['ram_gb']:.1f} GB" if hardware.get("ram_gb") is not None else "unknown"
+  recommendation = result["recommendation"]
+  print("Local AI Cluster init")
+  print(f"Status: {result['status']}")
+  print(f"Detected: {hardware['os']} / {hardware['arch']} / RAM {ram_label}")
+  print(f"Selected profile: {result['profile']} ({recommendation['selected_label']})")
+  print(f"Recommended path: {recommendation['recommended_path']}")
   if result["cloud"]:
     print(f"Cloud overlays selected: {', '.join(result['cloud'])}")
+  elif recommendation["selected_runtime_mode"] == "cloud":
+    print("Cloud overlays: none added (selected profile is already cloud-only)")
   else:
     print("Cloud overlays: none (pure local)")
+  print("Generated:")
+  for label, path in result["generated"].items():
+    print(f"  - {label}: {path}")
+  _render_init_section("Readiness:", result["readiness"])
+  _render_init_section("Required checks:", result["prerequisites"]["required"])
+  optional_blocked = [item for item in result["prerequisites"]["optional"] if item["status"] != "ready"]
+  if optional_blocked:
+    _render_init_section("Optional checks:", optional_blocked)
   print("Next steps:")
   for step in result["next_steps"]:
     print(f"  - {step}")

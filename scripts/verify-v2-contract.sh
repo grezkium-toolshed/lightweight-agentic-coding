@@ -10,12 +10,17 @@ export AI_CLUSTER_STATE_ROOT="$STATE_ROOT"
 
 python3 "$ROOT/scripts/lac.py" profile apply 24gb --json > "$TMP_DIR/profile-24gb.json"
 cp "$STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-24gb.json"
+python3 "$ROOT/scripts/lac.py" profile apply macos-16gb --json > "$TMP_DIR/profile-macos-16gb.json"
+cp "$STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-macos-16gb.json"
 OMLX_CHECK=0
 if [[ "$(uname -s)" == "Darwin" ]]; then
   OMLX_CHECK=1
   OMLX_STATE_ROOT="$TMP_DIR/omlx-state"
   AI_CLUSTER_STATE_ROOT="$OMLX_STATE_ROOT" AI_LOCAL_RUNTIME=omlx python3 "$ROOT/scripts/lac.py" profile apply 24gb --json > "$TMP_DIR/profile-24gb-omlx.json"
   cp "$OMLX_STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-24gb-omlx.json"
+  OMLX_MACOS_16GB_STATE_ROOT="$TMP_DIR/omlx-macos-16gb-state"
+  AI_CLUSTER_STATE_ROOT="$OMLX_MACOS_16GB_STATE_ROOT" AI_LOCAL_RUNTIME=omlx python3 "$ROOT/scripts/lac.py" profile apply macos-16gb --json > "$TMP_DIR/profile-macos-16gb-omlx.json"
+  cp "$OMLX_MACOS_16GB_STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-macos-16gb-omlx.json"
 fi
 python3 "$ROOT/scripts/lac.py" client render opencode --json > "$TMP_DIR/render-opencode.json"
 python3 "$ROOT/scripts/lac.py" client render claude-code --json > "$TMP_DIR/render-claude.json"
@@ -69,10 +74,12 @@ verify_bogus_exit = int(sys.argv[5])
 omlx_check = sys.argv[6] == "1"
 
 profile_24 = json.loads((tmp_dir / "profile-24gb.json").read_text(encoding="utf-8"))
+profile_macos_16gb = json.loads((tmp_dir / "profile-macos-16gb.json").read_text(encoding="utf-8"))
 doctor_24 = json.loads((tmp_dir / "doctor-24gb.json").read_text(encoding="utf-8"))
 doctor_openrouter = json.loads((tmp_dir / "doctor-openrouter.json").read_text(encoding="utf-8"))
 smoke_openrouter = json.loads((tmp_dir / "smoke-openrouter.json").read_text(encoding="utf-8"))
 opencode_config = json.loads((tmp_dir / "opencode-24gb.json").read_text(encoding="utf-8"))
+opencode_config_macos_16gb = json.loads((tmp_dir / "opencode-macos-16gb.json").read_text(encoding="utf-8"))
 opencode_manifest = json.loads((root / ".opencode/render-manifest.json").read_text(encoding="utf-8"))
 provider_list_top = json.loads((tmp_dir / "provider-list-top.json").read_text(encoding="utf-8"))
 provider_list_sub = json.loads((tmp_dir / "provider-list-sub.json").read_text(encoding="utf-8"))
@@ -83,12 +90,22 @@ provider_list_openrouter = json.loads((tmp_dir / "provider-list-openrouter.json"
 assert profile_24["profile_id"] == "24gb"
 assert opencode_config["model"] == "local-cluster/qwen3.6-27b-q4"
 assert opencode_config["provider"]["local-cluster"]["options"]["baseURL"] == "http://127.0.0.1:8080/v1"
+assert profile_macos_16gb["profile_id"] == "macos-16gb"
+assert opencode_config_macos_16gb["model"] == "local-cluster/qwen3.5-9b-q4"
+assert opencode_config_macos_16gb["small_model"] == "local-cluster/gemma-4-e4b-q8"
+assert opencode_config_macos_16gb["provider"]["local-cluster"]["models"]["qwen3.5-9b-q4"]["limit"]["context"] == 32768
 if omlx_check:
     profile_24_omlx = json.loads((tmp_dir / "profile-24gb-omlx.json").read_text(encoding="utf-8"))
     opencode_config_omlx = json.loads((tmp_dir / "opencode-24gb-omlx.json").read_text(encoding="utf-8"))
     assert profile_24_omlx["profile_id"] == "24gb"
     assert opencode_config_omlx["model"] == "local-cluster/Qwen3.6-27B-UD-MLX-6bit"
     assert opencode_config_omlx["provider"]["local-cluster"]["options"]["baseURL"] == "http://127.0.0.1:8000/v1"
+    profile_macos_16gb_omlx = json.loads((tmp_dir / "profile-macos-16gb-omlx.json").read_text(encoding="utf-8"))
+    opencode_config_macos_16gb_omlx = json.loads((tmp_dir / "opencode-macos-16gb-omlx.json").read_text(encoding="utf-8"))
+    assert profile_macos_16gb_omlx["profile_id"] == "macos-16gb"
+    assert opencode_config_macos_16gb_omlx["provider"]["local-cluster"]["options"]["baseURL"] == "http://127.0.0.1:8080/v1"
+    assert opencode_config_macos_16gb_omlx["model"] == "local-cluster/qwen3.5-9b-q4"
+    assert opencode_config_macos_16gb_omlx["small_model"] == "local-cluster/gemma-4-e4b-q8"
 assert opencode_manifest["target"] == "opencode"
 assert doctor_24["assets"]["pack_count"] >= 4
 assert provider_list_top == provider_list_sub
@@ -130,19 +147,30 @@ init_no_cloud = json.loads((tmp_dir / "init-no-cloud.json").read_text(encoding="
 assert init_no_cloud["applied"] is True
 assert init_no_cloud["profile"] == "24gb"
 assert init_no_cloud["cloud"] == []
+assert init_no_cloud["status"] in ("ready", "blocked")
+assert init_no_cloud["recommendation"]["selected_profile"] == "24gb"
+assert init_no_cloud["recommendation"]["default_cloud_overlays"] == ["opencode-go", "openrouter"]
+assert init_no_cloud["generated"]["opencode_config"].endswith("clients/opencode/opencode.json")
+assert "required" in init_no_cloud["prerequisites"] and "optional" in init_no_cloud["prerequisites"]
+assert any(item["id"] == "python" and item["status"] == "ready" for item in init_no_cloud["prerequisites"]["required"])
+assert any(item["status"] in ("ready", "blocked") for item in init_no_cloud["readiness"])
 assert (tmp_dir / "init-no-cloud-state" / "clients/opencode/opencode.json").is_file()
 
 init_cloud = json.loads((tmp_dir / "init-cloud.json").read_text(encoding="utf-8"))
 assert init_cloud["applied"] is True
 assert init_cloud["cloud"] == ["openrouter", "anthropic"]
+assert init_cloud["status"] in ("ready", "blocked")
 assert any("OPENROUTER_API_KEY" in step for step in init_cloud["next_steps"])
 assert any("ANTHROPIC_API_KEY" in step for step in init_cloud["next_steps"])
+assert any(item["id"] == "openrouter-api-key" for item in init_cloud["prerequisites"]["required"])
 
 init_default_cloud = json.loads((tmp_dir / "init-default-cloud.json").read_text(encoding="utf-8"))
 assert init_default_cloud["applied"] is True
 assert init_default_cloud["cloud"] == ["opencode-go", "openrouter"]
+assert init_default_cloud["status"] in ("ready", "blocked")
 assert any("OPENCODE_GO_API_KEY" in step for step in init_default_cloud["next_steps"])
 assert any("OPENROUTER_API_KEY" in step for step in init_default_cloud["next_steps"])
+assert any(item["id"] == "opencode-go-api-key" for item in init_default_cloud["prerequisites"]["required"])
 
 assert any(provider["id"] == "local-cluster" and provider["configured"] is False for provider in provider_list_openrouter)
 assert any(provider["id"] == "local-cluster" and provider["configured"] is False for provider in doctor_openrouter["provider_readiness"])
