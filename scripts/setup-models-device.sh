@@ -96,7 +96,7 @@ case "$PROFILE" in
     add_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
     ;;
   64gb)
-    MODELS+=("qwen3.6|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|unsloth/Qwen3.6-35B-A3B-GGUF|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|38000")
+    MODELS+=("qwen3.6|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|unsloth/Qwen3.6-35B-A3B-GGUF|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|36000")
     MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q4_K_XL.gguf|17000")
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
     add_mlx "unsloth/Qwen3.6-35B-A3B-MLX-8bit"
@@ -109,7 +109,7 @@ case "$PROFILE" in
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
     ;;
   128gb-multi)
-    MODELS+=("qwen3.6|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|unsloth/Qwen3.6-35B-A3B-GGUF|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|38000")
+    MODELS+=("qwen3.6|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|unsloth/Qwen3.6-35B-A3B-GGUF|Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf|36000")
     MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q4_K_XL.gguf|17000")
     MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q3_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q3_K_XL.gguf|14000")
     MODELS+=("qwen|Qwen3-Coder-Next-MXFP4_MOE.gguf|unsloth/Qwen3-Coder-Next-GGUF|Qwen3-Coder-Next-MXFP4_MOE.gguf|28000")
@@ -186,44 +186,97 @@ download_one() {
 
   mkdir -p "$target_dir"
 
-  if [[ -f "$target_file" ]]; then
-    local size_mb
-    size_mb="$(du -m "$target_file" | awk '{print $1}')"
-    if [[ "$size_mb" -ge "$min_mb" ]]; then
-      echo "[skip] $target_file (${size_mb}MB)"
-      return
-    fi
-    echo "[warn] $target_file too small (${size_mb}MB < ${min_mb}MB), re-downloading"
-    rm -f "$target_file"
-  fi
-
-  # Fetch expected file size from Hugging Face for validation
+  # Fetch expected file size from Hugging Face for validation. This is more
+  # reliable than profile-era minimum sizes because upstream artifacts can be
+  # smaller than our conservative estimates.
   local expected_bytes
-  expected_bytes="$(curl -sI -L --max-redirs 3 "$url" 2>/dev/null | grep -i 'content-length' | tail -1 | awk '{print $2}' | tr -d '\r')"
+  expected_bytes="$(curl -sI -L --max-redirs 5 "$url" 2>/dev/null | grep -i 'content-length' | tail -1 | awk '{print $2}' | tr -d '\r')"
   local expected_mb=0
   if [[ -n "$expected_bytes" && "$expected_bytes" -gt 0 ]] 2>/dev/null; then
     expected_mb=$(( expected_bytes / 1048576 ))
+  else
+    expected_bytes=0
   fi
 
-  echo "[get ] $url"
-  if ! curl -fL --retry 3 --retry-delay 3 --retry-max-time 300 -C - -o "$tmp_file" "$url"; then
-    echo "[fail] Download failed: $url" >&2
-    rm -f "$tmp_file"
-    exit 1
+  if [[ -f "$target_file" ]]; then
+    local size_bytes size_mb
+    size_bytes="$(wc -c < "$target_file" | tr -d ' ')"
+    size_mb=$(( size_bytes / 1048576 ))
+    if [[ "$expected_bytes" -gt 0 && "$size_bytes" -ge "$expected_bytes" ]]; then
+      echo "[skip] $target_file (${size_mb}MB of ~${expected_mb}MB)"
+      return
+    fi
+    if [[ "$expected_bytes" -eq 0 && "$size_mb" -ge "$min_mb" ]]; then
+      echo "[skip] $target_file (${size_mb}MB)"
+      return
+    fi
+    echo "[warn] $target_file incomplete (${size_mb}MB${expected_mb:+ of ~${expected_mb}MB}); preserving for resume"
+    mv "$target_file" "$tmp_file"
   fi
-  mv "$tmp_file" "$target_file"
 
-  local new_mb
-  new_mb="$(du -m "$target_file" | awk '{print $1}')"
-  if [[ "$new_mb" -lt "$min_mb" ]]; then
-    echo "Download too small for $filename (${new_mb}MB < ${min_mb}MB)" >&2
-    rm -f "$target_file"
-    exit 1
+  if [[ ! -f "$target_file" && -f "$tmp_file" ]]; then
+    local tmp_bytes tmp_mb
+    tmp_bytes="$(wc -c < "$tmp_file" | tr -d ' ')"
+    tmp_mb=$(( tmp_bytes / 1048576 ))
+    if [[ "$expected_bytes" -gt 0 && "$tmp_bytes" -ge "$expected_bytes" ]]; then
+      echo "[resume] Promoting completed partial file: $tmp_file"
+      mv "$tmp_file" "$target_file"
+    elif [[ "$expected_bytes" -eq 0 && "$tmp_mb" -ge "$min_mb" ]]; then
+      echo "[resume] Promoting completed partial file: $tmp_file"
+      mv "$tmp_file" "$target_file"
+    fi
   fi
-  if [[ "$expected_mb" -gt 0 && "$new_mb" -lt $(( expected_mb * 95 / 100 )) ]]; then
-    echo "Download incomplete for $filename (${new_mb}MB vs expected ~${expected_mb}MB)" >&2
-    rm -f "$target_file"
-    exit 1
+  if [[ -f "$target_file" ]]; then
+    local promoted_bytes promoted_mb
+    promoted_bytes="$(wc -c < "$target_file" | tr -d ' ')"
+    promoted_mb=$(( promoted_bytes / 1048576 ))
+    if [[ "$expected_bytes" -gt 0 && "$promoted_bytes" -ge "$expected_bytes" ]]; then
+      echo "[skip] $target_file (${promoted_mb}MB of ~${expected_mb}MB)"
+      return
+    elif [[ "$expected_bytes" -eq 0 && "$promoted_mb" -ge "$min_mb" ]]; then
+      echo "[skip] $target_file (${promoted_mb}MB)"
+      return
+    fi
+  fi
+
+  if command -v hf >/dev/null 2>&1; then
+    echo "[hf  ] $repo/$remote -> $target_dir"
+    if ! hf download "$repo" "$remote" --local-dir "$target_dir"; then
+      echo "[fail] Hugging Face CLI download failed: $repo/$remote" >&2
+      return 1
+    fi
+  elif command -v huggingface-cli >/dev/null 2>&1; then
+    echo "[hf  ] $repo/$remote -> $target_dir"
+    if ! huggingface-cli download "$repo" "$remote" --local-dir "$target_dir"; then
+      echo "[fail] Hugging Face CLI download failed: $repo/$remote" >&2
+      return 1
+    fi
+  else
+    echo "[get ] $url"
+    if ! curl -fL --retry 3 --retry-delay 3 --retry-max-time 300 -C - -o "$tmp_file" "$url"; then
+      echo "[fail] Download failed, partial file preserved for resume: $tmp_file" >&2
+      return 1
+    fi
+    mv "$tmp_file" "$target_file"
+  fi
+
+  if [[ ! -f "$target_file" ]]; then
+    echo "[fail] Expected downloaded file missing: $target_file" >&2
+    return 1
+  fi
+
+  local new_bytes new_mb
+  new_bytes="$(wc -c < "$target_file" | tr -d ' ')"
+  new_mb=$(( new_bytes / 1048576 ))
+  if [[ "$expected_bytes" -gt 0 ]]; then
+    if [[ "$new_bytes" -lt "$expected_bytes" ]]; then
+      echo "[fail] Download incomplete for $filename (${new_mb}MB vs expected ~${expected_mb}MB); keeping file for resume" >&2
+      mv "$target_file" "$tmp_file"
+      return 1
+    fi
+  elif [[ "$new_mb" -lt "$min_mb" ]]; then
+    echo "[fail] Download too small for $filename (${new_mb}MB < ${min_mb}MB); keeping file for inspection/resume" >&2
+    return 1
   fi
   echo "[ ok ] $target_file (${new_mb}MB${expected_mb:+ of ~${expected_mb}MB})"
 }
@@ -239,13 +292,19 @@ download_mlx_repo() {
 
   if command -v hf >/dev/null 2>&1; then
     echo "[mlx ] $repo -> $target_dir"
-    hf download "$repo" --local-dir "$target_dir"
+    if ! hf download "$repo" --local-dir "$target_dir"; then
+      echo "[fail] MLX download failed: $repo" >&2
+      return 1
+    fi
     return
   fi
 
   if command -v huggingface-cli >/dev/null 2>&1; then
     echo "[mlx ] $repo -> $target_dir"
-    huggingface-cli download "$repo" --local-dir "$target_dir"
+    if ! huggingface-cli download "$repo" --local-dir "$target_dir"; then
+      echo "[fail] MLX download failed: $repo" >&2
+      return 1
+    fi
     return
   fi
 
@@ -258,15 +317,25 @@ if should_stage_mlx && [[ "${#MLX_MODELS[@]}" -gt 0 ]]; then
   echo "MLX staging: enabled for macOS"
 fi
 
+failures=0
 for item in "${MODELS[@]}"; do
   IFS='|' read -r subdir filename repo remote min_mb <<< "$item"
-  download_one "$subdir" "$filename" "$repo" "$remote" "$min_mb"
+  if ! download_one "$subdir" "$filename" "$repo" "$remote" "$min_mb"; then
+    failures=$((failures + 1))
+  fi
 done
 
 if should_stage_mlx; then
   for repo in "${MLX_MODELS[@]}"; do
-    download_mlx_repo "$repo"
+    if ! download_mlx_repo "$repo"; then
+      failures=$((failures + 1))
+    fi
   done
+fi
+
+if [[ "$failures" -gt 0 ]]; then
+  echo "Done with $failures failed download(s). Re-run the same command to resume." >&2
+  exit 1
 fi
 
 echo "Done."

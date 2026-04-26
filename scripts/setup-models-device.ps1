@@ -47,7 +47,7 @@ switch ($Profile) {
     Add-MlxModel 'unsloth/Qwen3.6-27B-UD-MLX-6bit'
   }
   '64gb' {
-    $models += @{Dir='qwen3.6'; File='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; Repo='unsloth/Qwen3.6-35B-A3B-GGUF'; Remote='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; MinMB=38000}
+    $models += @{Dir='qwen3.6'; File='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; Repo='unsloth/Qwen3.6-35B-A3B-GGUF'; Remote='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; MinMB=36000}
     $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q4_K_XL.gguf'; MinMB=17000}
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
     Add-MlxModel 'unsloth/Qwen3.6-35B-A3B-MLX-8bit'
@@ -60,7 +60,7 @@ switch ($Profile) {
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
   }
   '128gb-multi' {
-    $models += @{Dir='qwen3.6'; File='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; Repo='unsloth/Qwen3.6-35B-A3B-GGUF'; Remote='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; MinMB=38000}
+    $models += @{Dir='qwen3.6'; File='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; Repo='unsloth/Qwen3.6-35B-A3B-GGUF'; Remote='Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf'; MinMB=36000}
     $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q4_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q4_K_XL.gguf'; MinMB=17000}
     $models += @{Dir='qwen3.6'; File='Qwen3.6-27B-UD-Q3_K_XL.gguf'; Repo='unsloth/Qwen3.6-27B-GGUF'; Remote='Qwen3.6-27B-UD-Q3_K_XL.gguf'; MinMB=14000}
     $models += @{Dir='qwen'; File='Qwen3-Coder-Next-MXFP4_MOE.gguf'; Repo='unsloth/Qwen3-Coder-Next-GGUF'; Remote='Qwen3-Coder-Next-MXFP4_MOE.gguf'; MinMB=28000}
@@ -112,59 +112,131 @@ switch ($Profile) {
   default { throw "Unsupported profile: $Profile" }
 }
 
-foreach ($m in $models) {
+function Get-ExpectedBytes([string]$Url) {
+  try {
+    $headResp = Invoke-WebRequest -Uri $Url -Method Head -UseBasicParsing -MaximumRedirection 5
+    if ($headResp.Headers.'Content-Length') {
+      return [int64]($headResp.Headers.'Content-Length'[0])
+    }
+  } catch {
+    return 0
+  }
+  return 0
+}
+
+function Download-One($m) {
   $targetDir = Join-Path $ModelsDir $m.Dir
   $targetFile = Join-Path $targetDir $m.File
+  $tmpFile = "$targetFile.downloading"
+  $url = "https://huggingface.co/$($m.Repo)/resolve/main/$($m.Remote)"
   New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
 
+  $expectedBytes = Get-ExpectedBytes $url
+  $expectedMB = if ($expectedBytes -gt 0) { [int]([math]::Floor($expectedBytes / 1MB)) } else { 0 }
+
   if (Test-Path $targetFile) {
-    $mb = [int]([math]::Round((Get-Item $targetFile).Length / 1MB))
-    if ($mb -ge $m.MinMB) {
+    $bytes = (Get-Item $targetFile).Length
+    $mb = [int]([math]::Floor($bytes / 1MB))
+    if ($expectedBytes -gt 0 -and $bytes -ge $expectedBytes) {
+      Write-Host "[skip] $targetFile ($mb MB of ~$expectedMB MB)"
+      return $true
+    }
+    if ($expectedBytes -eq 0 -and $mb -ge $m.MinMB) {
       Write-Host "[skip] $targetFile ($mb MB)"
-      continue
+      return $true
     }
-    Write-Host "[warn] $targetFile too small ($mb MB < $($m.MinMB) MB), re-downloading"
-    Remove-Item $targetFile -Force
+    $expectedLabel = if ($expectedMB -gt 0) { " of ~$expectedMB MB" } else { "" }
+    Write-Host "[warn] $targetFile incomplete ($mb MB$expectedLabel); preserving for resume"
+    Move-Item -Force $targetFile $tmpFile
   }
 
-  $url = "https://huggingface.co/$($m.Repo)/resolve/main/$($m.Remote)"
-
-  # Fetch expected file size from Hugging Face for validation
-  $expectedMB = 0
-  try {
-    $headResp = Invoke-WebRequest -Uri $url -Method Head -UseBasicParsing -MaximumRedirection 3
-    if ($headResp.Headers.'Content-Length') {
-      $expectedBytes = [int64]($headResp.Headers.'Content-Length'[0])
-      $expectedMB = [int]([math]::Round($expectedBytes / 1MB))
+  if ((-not (Test-Path $targetFile)) -and (Test-Path $tmpFile)) {
+    $tmpBytes = (Get-Item $tmpFile).Length
+    $tmpMB = [int]([math]::Floor($tmpBytes / 1MB))
+    if (($expectedBytes -gt 0 -and $tmpBytes -ge $expectedBytes) -or ($expectedBytes -eq 0 -and $tmpMB -ge $m.MinMB)) {
+      Write-Host "[resume] Promoting completed partial file: $tmpFile"
+      Move-Item -Force $tmpFile $targetFile
     }
-  } catch {
-    # Non-fatal: continue without expected size check
+  }
+  if (Test-Path $targetFile) {
+    $promotedBytes = (Get-Item $targetFile).Length
+    $promotedMB = [int]([math]::Floor($promotedBytes / 1MB))
+    if ($expectedBytes -gt 0 -and $promotedBytes -ge $expectedBytes) {
+      Write-Host "[skip] $targetFile ($promotedMB MB of ~$expectedMB MB)"
+      return $true
+    } elseif ($expectedBytes -eq 0 -and $promotedMB -ge $m.MinMB) {
+      Write-Host "[skip] $targetFile ($promotedMB MB)"
+      return $true
+    }
   }
 
-  Write-Host "[get ] $url"
-  try {
-    Invoke-WebRequest -Uri $url -OutFile $targetFile -UseBasicParsing
-  } catch {
-    Write-Host "[fail] Download failed: $url"
-    if (Test-Path $targetFile) { Remove-Item $targetFile -Force }
-    throw
+  $hf = Get-Command hf -ErrorAction SilentlyContinue
+  $huggingFaceCli = Get-Command huggingface-cli -ErrorAction SilentlyContinue
+  if ($hf) {
+    Write-Host "[hf  ] $($m.Repo)/$($m.Remote) -> $targetDir"
+    & $hf.Source download $m.Repo $m.Remote --local-dir $targetDir
+    if ($LASTEXITCODE -ne 0) {
+      Write-Warning "Hugging Face CLI download failed: $($m.Repo)/$($m.Remote)"
+      return $false
+    }
+  } elseif ($huggingFaceCli) {
+    Write-Host "[hf  ] $($m.Repo)/$($m.Remote) -> $targetDir"
+    & $huggingFaceCli.Source download $m.Repo $m.Remote --local-dir $targetDir
+    if ($LASTEXITCODE -ne 0) {
+      Write-Warning "Hugging Face CLI download failed: $($m.Repo)/$($m.Remote)"
+      return $false
+    }
+  } else {
+    $curl = Get-Command curl -CommandType Application -ErrorAction SilentlyContinue
+    if ($curl) {
+      Write-Host "[get ] $url"
+      & $curl.Source -fL --retry 3 --retry-delay 3 --retry-max-time 300 -C - -o $tmpFile $url
+      if ($LASTEXITCODE -ne 0) {
+        Write-Warning "Download failed, partial file preserved for resume: $tmpFile"
+        return $false
+      }
+    } else {
+      Write-Host "[get ] $url"
+      try {
+        Invoke-WebRequest -Uri $url -OutFile $tmpFile -UseBasicParsing
+      } catch {
+        Write-Warning "Download failed, partial file preserved for inspection: $tmpFile"
+        return $false
+      }
+    }
+    Move-Item -Force $tmpFile $targetFile
   }
 
-  $newMB = [int]([math]::Round((Get-Item $targetFile).Length / 1MB))
-  if ($newMB -lt $m.MinMB) {
-    Write-Error "Download too small for $($m.File): $newMB MB (minimum: $($m.MinMB) MB)"
-    Remove-Item $targetFile -Force
-    throw "Download validation failed"
+  if (-not (Test-Path $targetFile)) {
+    Write-Warning "Expected downloaded file missing: $targetFile"
+    return $false
   }
-  if ($expectedMB -gt 0 -and $newMB -lt [int]($expectedMB * 0.95)) {
-    Write-Error "Download incomplete for $($m.File): $newMB MB (expected ~$expectedMB MB)"
-    Remove-Item $targetFile -Force
-    throw "Download validation failed"
+
+  $newBytes = (Get-Item $targetFile).Length
+  $newMB = [int]([math]::Floor($newBytes / 1MB))
+  if ($expectedBytes -gt 0) {
+    if ($newBytes -lt $expectedBytes) {
+      Write-Warning "Download incomplete for $($m.File): $newMB MB (expected ~$expectedMB MB); keeping file for resume"
+      Move-Item -Force $targetFile $tmpFile
+      return $false
+    }
+  } elseif ($newMB -lt $m.MinMB) {
+    Write-Warning "Download too small for $($m.File): $newMB MB (minimum: $($m.MinMB) MB); keeping file for inspection/resume"
+    return $false
   }
+
   if ($expectedMB -gt 0) {
     Write-Host "[ ok ] $targetFile ($newMB MB of ~$expectedMB MB)"
   } else {
     Write-Host "[ ok ] $targetFile ($newMB MB)"
+  }
+  return $true
+}
+
+$failures = 0
+foreach ($m in $models) {
+  if (-not (Download-One $m)) {
+    $failures += 1
   }
 }
 
@@ -199,8 +271,17 @@ function Download-MlxRepo([string]$Repo) {
 if ((Should-StageMlx) -and $mlxModels.Count -gt 0) {
   Write-Host 'MLX staging: enabled for macOS'
   foreach ($repo in $mlxModels) {
-    Download-MlxRepo $repo
+    try {
+      Download-MlxRepo $repo
+    } catch {
+      Write-Warning $_
+      $failures += 1
+    }
   }
+}
+
+if ($failures -gt 0) {
+  throw "Done with $failures failed download(s). Re-run the same command to resume."
 }
 
 Write-Host "Done."

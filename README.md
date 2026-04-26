@@ -59,7 +59,7 @@ Use JSON when scripting:
 - `24gb`: Qwen 3.6 27B `UD-Q4_K_XL` + `UD-Q3_K_XL` fallback + embeddings
 - `32gb`: Qwen 3.6 27B `UD-Q4_K_XL` + optional coder specialist
 - `64gb`: Qwen 3.6 35B-A3B `UD-Q8_K_XL` + 27B fallback + coder specialist + embeddings
-- `128gb-multi`: multi-model Qwen local workstation
+- `128gb-multi`: multi-model Qwen workstation with Qwen 3.6 35B-A3B Q8, Qwen 3.6 27B Q4/Q3 fallbacks, Qwen3 Coder Next, and embeddings
 - `128gb-qwen122b`: large-model Qwen-focused profile
 - `128gb-minimax`: MiniMax M2.7 `UD-IQ4_XS` profile for a practical 128GB fit
 - `gemma-16gb`: Gemma 4 26B-A4B (Q4) + E4B (Q8) fallback
@@ -401,6 +401,13 @@ Model storage:
 - macOS MLX artifacts default to `models/mlx/`
 - override with `AI_MODELS_DIR=/path/to/models`
 
+Model download behavior:
+
+- `./bin/lac models sync <profile>` prefers `hf` or `huggingface-cli` when installed, because the Hugging Face CLI has the best resume/cache behavior.
+- If the Hugging Face CLI is not installed, the Unix script uses resumable `curl` downloads and preserves `.downloading` files when a transfer fails.
+- Sync validates completed files against Hugging Face-reported size metadata when available. The older minimum-size checks are only a fallback when remote metadata cannot be read.
+- A failed model no longer stops the whole profile immediately. The sync continues through the remaining models, reports failures at the end, and exits non-zero so rerunning the same command can resume or fill gaps.
+
 ## OpenCode Assets
 
 OpenCode is the lead supported client path.
@@ -464,6 +471,13 @@ oMLX uses:
 - Confirm models were downloaded: `./bin/lac models sync <profile>`
 - Confirm `AI_MODELS_DIR` points to the right folder
 - Check the rendered preset: `state/runtime/presets.active.ini`
+
+Model sync reports failed downloads
+
+- Re-run the same command: `./bin/lac models sync <profile>`
+- Install Hugging Face CLI for more reliable resume/cache handling: `python3 -m pip install --user 'huggingface_hub[cli]'`
+- Check for preserved partial files ending in `.downloading` under `models/`
+- The sync may still download later models in the profile even if one earlier model fails; use the final summary to see whether anything remains missing
 
 OpenCode does not see the generated config
 

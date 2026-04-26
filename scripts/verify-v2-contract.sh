@@ -7,6 +7,7 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 
 STATE_ROOT="$TMP_DIR/state"
 export AI_CLUSTER_STATE_ROOT="$STATE_ROOT"
+export AI_LOCAL_RUNTIME="llama.cpp"
 
 python3 "$ROOT/scripts/lac.py" profile apply 24gb --json > "$TMP_DIR/profile-24gb.json"
 cp "$STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-24gb.json"
