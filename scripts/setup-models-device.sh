@@ -7,7 +7,7 @@ AI_MODELS_DIR="${AI_MODELS_DIR:-$AI_CLUSTER_ROOT/models}"
 
 usage() {
   cat << USAGE
-Usage: $0 --profile <16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax|gemma-16gb|gemma-24gb|gemma-32gb|gemma-64gb|openrouter|opencode-go>
+Usage: $0 --profile <16gb|macos-16gb|24gb|32gb|64gb|128gb-multi|128gb-qwen122b|128gb-minimax|gemma-16gb|gemma-24gb|gemma-32gb|gemma-64gb|openrouter|opencode-go>
 
 Environment overrides:
   AI_CLUSTER_ROOT  Base repository path (default: script parent)
@@ -80,6 +80,11 @@ case "$PROFILE" in
     MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q3_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q3_K_XL.gguf|14000")
     add_mlx "unsloth/Qwen3.6-27B-UD-MLX-6bit"
     ;;
+  macos-16gb)
+    MODELS+=("qwen3.5|Qwen3.5-9B-Q4_K_M.gguf|unsloth/Qwen3.5-9B-GGUF|Qwen3.5-9B-Q4_K_M.gguf|5000")
+    MODELS+=("gemma4|gemma-4-E4B-IT-Q8_0.gguf|unsloth/gemma-4-E4B-IT-GGUF|gemma-4-E4B-IT-Q8_0.gguf|4000")
+    add_mlx "unsloth/gemma-4-E4B-it-MLX-8bit"
+    ;;
   24gb)
     MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q4_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q4_K_XL.gguf|17000")
     MODELS+=("qwen3.6|Qwen3.6-27B-UD-Q3_K_XL.gguf|unsloth/Qwen3.6-27B-GGUF|Qwen3.6-27B-UD-Q3_K_XL.gguf|14000")
@@ -129,7 +134,8 @@ case "$PROFILE" in
   gemma-16gb)
     MODELS+=("gemma4|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|unsloth/gemma-4-26B-A4B-IT-GGUF|gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf|15000")
     MODELS+=("gemma4|gemma-4-E4B-IT-Q8_0.gguf|unsloth/gemma-4-E4B-IT-GGUF|gemma-4-E4B-IT-Q8_0.gguf|4000")
-    add_mlx "unsloth/gemma-4-31b-it-UD-MLX-4bit"
+    add_mlx "unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit"
+    add_mlx "unsloth/gemma-4-E4B-it-MLX-8bit"
     ;;
   gemma-24gb)
     MODELS+=("gemma4|gemma-4-31B-IT-UD-Q4_K_XL.gguf|unsloth/gemma-4-31B-IT-GGUF|gemma-4-31B-IT-UD-Q4_K_XL.gguf|16000")

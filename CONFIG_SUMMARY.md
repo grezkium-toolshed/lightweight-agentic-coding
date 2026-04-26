@@ -38,7 +38,9 @@ The supported v2 interface is:
 - `./bin/lac doctor`
 - `./bin/lac smoke`
 
-The global `--json` flag is supported repo-wide for machine-readable output. Without it, `doctor` and `smoke` print a compact human-readable summary; the JSON written to `state/reports/*.json` is identical either way.
+`lac init` is the primary onboarding surface. Its text output groups hardware detection, selected profile, cloud overlays, generated files, readiness, required checks, optional checks, and next steps. Its JSON output includes the same decision data for automation: `status`, `recommendation`, `prerequisites`, `readiness`, `generated`, and `next_steps`.
+
+The global `--json` flag is supported repo-wide for machine-readable output. Without it, `init`, `doctor`, and `smoke` print compact human-readable summaries; the JSON written to `state/reports/*.json` for doctor and smoke is identical either way.
 
 The legacy `scripts/*.sh` and `scripts/*.ps1` commands remain as thin compatibility wrappers.
 

@@ -13,6 +13,7 @@ Default quant guidance:
 
 Recommended profile mapping:
 - `16gb`: Qwen 3.6 27B `UD-Q3_K_XL`
+- `macos-16gb`: Qwen3.5 9B `Q4_K_M` + Gemma 4 E4B `Q8_0` for Apple Silicon headroom
 - `24gb`: Qwen 3.6 27B `UD-Q4_K_XL`
 - `32gb`: Qwen 3.6 27B `UD-Q4_K_XL` + qwen3-coder-next
 - `64gb`: Qwen 3.6 35B-A3B `UD-Q8_K_XL` + qwen3-coder-next
@@ -51,6 +52,14 @@ Recommended fallback order:
 ## Office and documentation workloads
 
 For office automation, the model matters less than workflow quality and tool support. Smaller Qwen profiles can still be useful if the repo provides strong skills and clear workflow guidance.
+
+## Apple Silicon 16GB
+
+Use `macos-16gb` for MacBook Air M4 16GB-class machines. It prioritizes OS headroom, context room, and interactive responsiveness over maximum parameter count:
+- Qwen3.5 9B `Q4_K_M` is the default local coding/general model.
+- Gemma 4 E4B `Q8_0` is the smaller alternate for lighter multilingual and local office work.
+- Start at 32K context on 16GB macOS; increase only after validating memory pressure.
+- Use OpenCode Go or OpenRouter overlays for heavier repository-wide coding tasks.
 
 ## Gemma 4 alternative
 

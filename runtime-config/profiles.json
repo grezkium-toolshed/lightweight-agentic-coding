@@ -16,6 +16,21 @@
       "default_model": "local-cluster/qwen3.6-27b-q3",
       "small_model": "local-cluster/qwen3.6-27b-q3"
     },
+    "macos-16gb": {
+      "id": "macos-16gb",
+      "label": "macOS 16 GB Apple Silicon",
+      "description": "Apple Silicon starter profile for MacBook Air-class 16 GB machines, prioritizing OS and context headroom over maximum parameter count.",
+      "preset": "runtime-config/presets/macos-16gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "verification_tier": "standard",
+      "primary_workload": "macos-starter",
+      "recommended_for": ["solo-coder", "office-automation"],
+      "supported_clients": ["opencode", "claude-code", "codex-reference"],
+      "default_model": "local-cluster/qwen3.5-9b-q4",
+      "small_model": "local-cluster/gemma-4-e4b-q8"
+    },
     "24gb": {
       "id": "24gb",
       "label": "24 GB local balanced",

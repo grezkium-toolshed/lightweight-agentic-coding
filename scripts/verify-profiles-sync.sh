@@ -105,6 +105,13 @@ require(
     f"README.md hardware profile list is missing: {sorted(manifest_id_set - readme_profiles)}",
 )
 
+require("Qwen3.5-9B-Q4_K_M.gguf" in sh_text, "setup-models-device.sh missing Qwen3.5 9B Q4_K_M download")
+require("gemma-4-E4B-IT-Q8_0.gguf" in sh_text, "setup-models-device.sh missing Gemma 4 E4B Q8 download")
+require("unsloth/gemma-4-E4B-it-MLX-8bit" in sh_text, "setup-models-device.sh missing Gemma 4 E4B MLX staging")
+require("Qwen3.5-9B-Q4_K_M.gguf" in ps1_text, "setup-models-device.ps1 missing Qwen3.5 9B Q4_K_M download")
+require("gemma-4-E4B-IT-Q8_0.gguf" in ps1_text, "setup-models-device.ps1 missing Gemma 4 E4B Q8 download")
+require("unsloth/gemma-4-E4B-it-MLX-8bit" in ps1_text, "setup-models-device.ps1 missing Gemma 4 E4B MLX staging")
+
 print(f"[ok] manifest profiles: {len(manifest_ids)}")
 print(f"[ok] setup-models-device.sh profiles match manifest")
 print(f"[ok] setup-models-device.ps1 profiles match manifest")
