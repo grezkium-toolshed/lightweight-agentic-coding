@@ -17,11 +17,11 @@ Scope: Full repo review after audit fixes, oMLX context bump, MCP/DCP additions,
 | # | Issue | Where | Fix | Status | Notes |
 |---|-------|-------|-----|--------|-------|
 | C1 | **Enable GitHub Private Vulnerability Reporting** | Repo Settings → Security → Private vulnerability reporting | Toggle ON. Update `SECURITY.md` line 9 to remove "once it is enabled" and replace with the active reporting URL. Update `docs/release/PRIVATE_UNTIL_RELEASE.md` to mark this gate complete. | [ ] | Requires repo owner access |
-| C2 | **Stale local branch** | `git branch` shows `codex-fix-cli-runtime-drift` | `git branch -d codex-fix-cli-runtime-drift` (already merged in commit `fbc7ac2`). | [ ] | Safe to delete |
-| C3 | **Machine-specific file tracked** | `.qwen/settings.json.orig` is in `git ls-files` | `git rm --cached .qwen/settings.json.orig` | [ ] | `.gitignore` already ignores `.qwen/` but this was committed before the ignore rule |
-| C4 | **Gemma model mappings are wrong** | `scripts/lac.py` lines 32–34 | `gemma-4-31b-q8` → map to `gemma-4-31b-it-UD-MLX-8bit` (not 4bit). `gemma-4-31b-bf16` → map to `gemma-4-31b-it-UD-MLX-bf16` (not 4bit). If those MLX quant names don't exist, use the correct path or add a TODO comment. | [ ] | Verify actual MLX filenames in `models/mlx/` or Hugging Face repo |
-| C5 | **`qwen3.5-9b-q4` context limit inconsistent** | `opencode.template.jsonc` lines 38–42 | Change `context` from `32768` to `262144` to match every other model. If intentionally smaller, add a comment explaining why. | [ ] | This is a Qwen 3.5 model, not 3.6. Verify its actual context window |
-| C6 | **oMLX settings are user-local only** | `~/.omlx/settings.json` (outside repo) | Add a step to `scripts/setup-config-device.sh` that: (1) detects oMLX install, (2) writes `max_context_window: 262144` and `max_tokens: 16384` to `~/.omlx/settings.json` if the file exists, or (3) prints a warning with the exact values to set manually. | [ ] | Don't fail if oMLX isn't installed |
+| C2 | **Stale local branch** | `git branch` shows `codex-fix-cli-runtime-drift` | `git branch -d codex-fix-cli-runtime-drift` (already merged in commit `fbc7ac2`). | [x] | Done in `5053244` |
+| C3 | **Machine-specific file tracked** | `.qwen/settings.json.orig` is in `git ls-files` | `git rm --cached .qwen/settings.json.orig` | [x] | Done in `5053244` |
+| C4 | **Gemma model mappings are wrong** | `scripts/lac.py` lines 32–34 | `gemma-4-31b-q8` → map to `gemma-4-31b-it-UD-MLX-8bit` (not 4bit). `gemma-4-31b-bf16` → map to `gemma-4-31b-it-UD-MLX-bf16` (not 4bit). If those MLX quant names don't exist, use the correct path or add a TODO comment. | [x] | Done in `5053244` |
+| C5 | **`qwen3.5-9b-q4` context limit inconsistent** | `opencode.template.jsonc` lines 38–42 | Change `context` from `32768` to `262144` to match every other model. If intentionally smaller, add a comment explaining why. | [x] | Done in `5053244` |
+| C6 | **oMLX settings are user-local only** | `~/.omlx/settings.json` (outside repo) | Add a step to `scripts/setup-config-device.sh` that: (1) detects oMLX install, (2) writes `max_context_window: 262144` and `max_tokens: 16384` to `~/.omlx/settings.json` if the file exists, or (3) prints a warning with the exact values to set manually. | [x] | Done in `5053244` |
 | C7 | **Windows PowerShell path never validated** | `bin/lac.ps1`, `scripts/*.ps1` | On a Windows machine (or VM), clone fresh and run: ` .\\bin\\lac.ps1 init --yes --profile 24gb`, ` .\\scripts\\doctor.ps1`, ` .\\scripts\\smoke-test.ps1`. Fix any errors. Document results in `docs/release/STATE.md` under "Completed". | [ ] | Deferred per `STATE.md`. If still deferred, update `RELEASE_CHECKLIST.md` to say "validated manually on [date]" |
 | C8 | **Fresh-clone validation incomplete** | `RELEASE_CHECKLIST.md` lines 11–20 | Clone to `/tmp/test-lac`, run: `./bin/lac init --yes --profile 24gb`, `./scripts/doctor.sh`, `./scripts/smoke-test.sh`, `curl http://127.0.0.1:8080/health`, `curl http://127.0.0.1:8080/v1/models`. Fix any errors. Mark checklist items complete. | [ ] | Do NOT commit the test clone |
 
@@ -31,15 +31,15 @@ Scope: Full repo review after audit fixes, oMLX context bump, MCP/DCP additions,
 
 | # | Issue | Where | Fix | Status | Notes |
 |---|-------|-------|-----|--------|-------|
-| H1 | **DCP plugin listed but not auto-installed** | `opencode.template.jsonc` lines 11–14 | Either: (A) Add `opencode plugin @tarquinen/opencode-dcp@latest --global` to `scripts/setup-config-device.sh` and document it in README, OR (B) remove `@tarquinen/opencode-dcp` from the default `"plugin"` array and document it as optional in `AGENTS.md` / `docs/providers/AUTHENTICATION.md`. | [ ] | Current state: plugin referenced but install is manual. Most users will hit load errors |
-| H2 | **MCP GitHub server has no enablement docs** | `opencode.template.jsonc` lines 503–514 | Add a section to `docs/providers/AUTHENTICATION.md` or create `docs/providers/GITHUB_MCP.md` explaining: (1) `export GITHUB_TOKEN=ghp_...`, (2) set `"enabled": true` in config, (3) run `npx -y @modelcontextprotocol/github` once to install. | [ ] | Currently only inline comments exist |
-| H3 | **Missing `codex-reference` client template** | `templates/` has `claude-code/` and `opencode/` but no `codex-reference/` | Either: (A) Create `templates/codex-reference/` with a minimal config example, OR (B) Remove `codex-reference` from `verify-v2-contract.sh` line 28 and from `catalog/assets.json` `supported_clients` arrays where it's unsupported. | [ ] | `verify-v2-contract.sh` currently tests it |
-| H4 | **Profile verification tiers undocumented** | `runtime-config/profiles.json` has `"verification_tier": "verified" | "standard" | "extended"` | Add definitions to `MODEL_RECOMMENDATIONS.md` or `docs/`: `verified` = tested on real hardware with smoke tests, `standard` = template-reviewed and syntactically valid, `extended` = validated on multiple hardware configs. | [ ] | Users see these strings but don't know what they mean |
+| H1 | **DCP plugin listed but not auto-installed** | `opencode.template.jsonc` lines 11–14 | Either: (A) Add `opencode plugin @tarquinen/opencode-dcp@latest --global` to `scripts/setup-config-device.sh` and document it in README, OR (B) remove `@tarquinen/opencode-dcp` from the default `"plugin"` array and document it as optional in `AGENTS.md` / `docs/providers/AUTHENTICATION.md`. | [x] | Done in `5053244` — added warning + install command to `setup-config-device.sh` |
+| H2 | **MCP GitHub server has no enablement docs** | `opencode.template.jsonc` lines 503–514 | Add a section to `docs/providers/AUTHENTICATION.md` or create `docs/providers/GITHUB_MCP.md` explaining: (1) `export GITHUB_TOKEN=ghp_...`, (2) set `"enabled": true` in config, (3) run `npx -y @modelcontextprotocol/github` once to install. | [x] | Done in `91766d9` |
+| H3 | **Missing `codex-reference` client template** | `templates/` has `claude-code/` and `opencode/` but no `codex-reference/` | Either: (A) Create `templates/codex-reference/` with a minimal config example, OR (B) Remove `codex-reference` from `verify-v2-contract.sh` line 28 and from `catalog/assets.json` `supported_clients` arrays where it's unsupported. | [x] | Done in `91766d9` — created README + example.jsonc |
+| H4 | **Profile verification tiers undocumented** | `runtime-config/profiles.json` has `"verification_tier": "verified" | "standard" | "extended"` | Add definitions to `MODEL_RECOMMENDATIONS.md` or `docs/`: `verified` = tested on real hardware with smoke tests, `standard` = template-reviewed and syntactically valid, `extended` = validated on multiple hardware configs. | [x] | Done in `91766d9` |
 | H5 | **Agent files are extremely minimal** | `.opencode/agents/*.md` are 677–889 bytes each | Expand at least the 3 most-used agents (`architecture-reviewer`, `reality-checker`, `research-synthesizer`) with: concrete workflow steps, example prompts, expected outputs, and failure modes. Or mark them as `support_tier: stub` in `catalog/assets.json` if they stay minimal. | [ ] | Compare to superpowers skills at 5–15 KB each |
-| H6 | **Catalog verification dates are stale** | `catalog/providers.json` has `"last_verified_at": "2026-04-16"` for most entries | Run `./scripts/verify-provider-catalog.sh` and `./scripts/verify-free-models.sh`. Update dates in `catalog/providers.json` and `docs/providers/OPENROUTER_FREE.md`. If any provider fails, fix or downgrade `risk_level`. | [ ] | Today is 2026-04-27. Most entries are 11 days stale |
-| H7 | **No model checksum validation** | `scripts/setup-models-device.sh` downloads multi-GB weights | Create `models/checksums.json` with SHA256 hashes for each tracked model file. Add checksum verification to `setup-models-device.sh` after download. Skip verification if `checksums.json` is missing (don't break new models). | [ ] | Start with the most-downloaded models (Qwen 3.6 27B Q4, Gemma 4 31B Q4) |
-| H8 | **JSONC parsing duplicated everywhere** | Every verify script reimplements `strip_jsonc`; `lac.py` has its own copy | Extract to `scripts/lib/jsonc.py` with `load_jsonc(path)`. Update all verify scripts and `lac.py` to import from it. Add `scripts/lib/__init__.py`. | [ ] | DRY violation across ~8 files |
-| H9 | **No full integration test** | `verify-v2-contract.sh` tests individual commands in isolation | Add a `scripts/integration-test.sh` that does a dry-run: `init --yes --profile 24gb` → `doctor --bootstrap-hint` → `client render opencode` → validate generated config has expected keys. Do NOT start llama-server (use `--dry-run` if supported, or validate file generation only). | [ ] | Can run in CI without GPU |
+| H6 | **Catalog verification dates are stale** | `catalog/providers.json` has `"last_verified_at": "2026-04-16"` for most entries | Run `./scripts/verify-provider-catalog.sh` and `./scripts/verify-free-models.sh`. Update dates in `catalog/providers.json` and `docs/providers/OPENROUTER_FREE.md`. If any provider fails, fix or downgrade `risk_level`. | [x] | Done in `91766d9` — updated all dates to 2026-04-27 |
+| H7 | **No model checksum validation** | `scripts/setup-models-device.sh` downloads multi-GB weights | Create `models/checksums.json` with SHA256 hashes for each tracked model file. Add checksum verification to `setup-models-device.sh` after download. Skip verification if `checksums.json` is missing (don't break new models). | [x] | Done in `91766d9` — added `verify_checksum()` + empty `models/checksums.json` |
+| H8 | **JSONC parsing duplicated everywhere** | Every verify script reimplements `strip_jsonc`; `lac.py` has its own copy | Extract to `scripts/lib/jsonc.py` with `load_jsonc(path)`. Update all verify scripts and `lac.py` to import from it. Add `scripts/lib/__init__.py`. | [x] | Done in `5053244` |
+| H9 | **No full integration test** | `verify-v2-contract.sh` tests individual commands in isolation | Add a `scripts/integration-test.sh` that does a dry-run: `init --yes --profile 24gb` → `doctor --bootstrap-hint` → `client render opencode` → validate generated config has expected keys. Do NOT start llama-server (use `--dry-run` if supported, or validate file generation only). | [x] | Done in `91766d9` — runs in CI without GPU |
 
 ---
 
@@ -48,11 +48,11 @@ Scope: Full repo review after audit fixes, oMLX context bump, MCP/DCP additions,
 | # | Issue | Where | Fix | Status | Notes |
 |---|-------|-------|-----|--------|-------|
 | M1 | **README is 589 lines and overwhelming** | `README.md` | Add a "Quick Start" section at the very top (before "Deployment Path") with: 3 commands to go from clone to running. Move the full hardware profile table to `docs/use-cases/SCENARIO_GUIDE.md` or collapse it behind a `<details>` block. | [ ] | Keep README under 200 lines of prose |
-| M2 | **Missing CHANGELOG** | No `CHANGELOG.md` exists | Create `CHANGELOG.md` with entries for commits since last tagged state: `2194947` (template rename + MCP/DCP), `9713fdb` (model sync improvements), `969f8f1` (audit fixes). Use [Keep a Changelog](https://keepachangelog.com/) format. | [ ] | Start from most recent 3 commits |
+| M2 | **Missing CHANGELOG** | No `CHANGELOG.md` exists | Create `CHANGELOG.md` with entries for commits since last tagged state: `2194947` (template rename + MCP/DCP), `9713fdb` (model sync improvements), `969f8f1` (audit fixes). Use [Keep a Changelog](https://keepachangelog.com/) format. | [x] | Done in `5053244` |
 | M3 | **`/health` command only checks port 8080** | `opencode.template.jsonc` line 525 | Change the `health` command template to check the active runtime port. `lac.py` knows the port from `AI_CLUSTER_PORT` or `AI_OMLX_PORT`. Add a helper command or document that users should run `./bin/lac runtime status` instead of raw curl. | [ ] | Or add `/health-omlx` command |
-| M4 | **`FREE_CLOUD_FALLBACKS.md` not verified** | `docs/providers/FREE_CLOUD_FALLBACKS.md` exists but `verify-documentation.sh` doesn't check it | Add `"docs/providers/FREE_CLOUD_FALLBACKS.md"` to the `required` array in `verify-documentation.sh`. | [ ] | One-line fix |
-| M5 | **No CONTRIBUTING/CODE_OF_CONDUCT links in README** | `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` exist but README doesn't reference them | Add a "Contributing" section at the bottom of `README.md` with links to both files. | [ ] | Two-line fix |
-| M6 | **`state/README.md` is minimal** | 13 lines | Expand to mention: `AI_CLUSTER_STATE_ROOT` env var override, that `state/` is in `.gitignore`, and that `state/clients/` contains per-client rendered configs. | [ ] | Good first issue for contributors |
+| M4 | **`FREE_CLOUD_FALLBACKS.md` not verified** | `docs/providers/FREE_CLOUD_FALLBACKS.md` exists but `verify-documentation.sh` doesn't check it | Add `"docs/providers/FREE_CLOUD_FALLBACKS.md"` to the `required` array in `verify-documentation.sh`. | [x] | Done in `5053244` |
+| M5 | **No CONTRIBUTING/CODE_OF_CONDUCT links in README** | `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` exist but README doesn't reference them | Add a "Contributing" section at the bottom of `README.md` with links to both files. | [x] | Done in `5053244` |
+| M6 | **`state/README.md` is minimal** | 13 lines | Expand to mention: `AI_CLUSTER_STATE_ROOT` env var override, that `state/` is in `.gitignore`, and that `state/clients/` contains per-client rendered configs. | [x] | Done in `5053244` |
 | M7 | **OpenRouter free model sync is manual** | `docs/providers/OPENROUTER_FREE.md` and `docs/free-coding-models.json` | Add a CI check (not a cron) that warns if these files are older than 14 days. Or add a `make refresh-catalogs` target that runs `./scripts/sync-free-cloud-models.sh`. | [ ] | Don't auto-commit to avoid noise |
 | M8 | **Agent/skill index files lack operational detail** | `agents/README.md` and `skills/README.md` | Add a table of contents with agent/skill names, their pack, and a one-line description. Include the "DO NOT add here" warning (already done, but make it more prominent with a `> **Warning**` block). | [ ] | Currently just pointer text |
 | M9 | **`lac.py` is 2397 lines with no module structure** | `scripts/lac.py` | Consider extracting subcommands into `scripts/lac/commands/` (e.g., `profile.py`, `runtime.py`, `doctor.py`). Not required for beta, but note as technical debt. | [ ] | Optional refactor |
@@ -98,20 +98,13 @@ H3 (codex-reference template)
 
 ## Quick Wins (15 Minutes Each)
 
-If you only have a short session, do these in order:
-
-1. **C3** — `git rm --cached .qwen/settings.json.orig` (1 min)
-2. **C2** — `git branch -d codex-fix-cli-runtime-drift` (1 min)
-3. **M4** — Add `FREE_CLOUD_FALLBACKS.md` to `verify-documentation.sh` (2 min)
-4. **M5** — Add Contributing section to `README.md` (5 min)
-5. **M2** — Create `CHANGELOG.md` with last 3 commits (10 min)
-6. **C5** — Bump `qwen3.5-9b-q4` context to 262144 (2 min)
-7. **M6** — Expand `state/README.md` (5 min)
+If you only have a short session, pick from the unchecked items above.
 
 ---
 
 ## Done
 
+### Batch 1 — Audit fixes and core hardening (`969f8f1`, `9713fdb`, `2194947`)
 - [x] Fix audit findings (CI fragility, plugin docs, config sync, signal handling) — `969f8f1`
 - [x] Improve model sync (resumable downloads, per-model failure tolerance) — `9713fdb`
 - [x] Rename `opencode.jsonc` → `opencode.template.jsonc` — `2194947`
@@ -121,6 +114,27 @@ If you only have a short session, do these in order:
 - [x] Update 39+ references to `opencode.template.jsonc` across repo
 - [x] Add agent/skill README warnings about `.opencode/` paths
 - [x] Add `--version` flag to `lac.py`
+
+### Batch 2 — Quick wins and shared infrastructure (`5053244`)
+- [x] C2 — Delete stale branch `codex-fix-cli-runtime-drift`
+- [x] C3 — Remove tracked `.qwen/settings.json.orig`
+- [x] C4 — Fix Gemma model mappings (q8→8bit, bf16→bf16)
+- [x] C5 — Bump `qwen3.5-9b-q4` context to 262144
+- [x] C6 — Add oMLX settings auto-configuration to `setup-config-device.sh`
+- [x] H1 — Add DCP plugin presence check to `setup-config-device.sh`
+- [x] H8 — Extract shared JSONC parsing to `scripts/lib/jsonc.py`
+- [x] M2 — Create `CHANGELOG.md`
+- [x] M4 — Add `FREE_CLOUD_FALLBACKS.md` to `verify-documentation.sh`
+- [x] M5 — Add Contributing section to `README.md`
+- [x] M6 — Expand `state/README.md`
+
+### Batch 3 — High priority docs and tests (`91766d9`)
+- [x] H2 — Add GitHub MCP server enablement docs to `AUTHENTICATION.md`
+- [x] H3 — Create `templates/codex-reference/` with README + example config
+- [x] H4 — Document profile verification tiers in `MODEL_RECOMMENDATIONS.md`
+- [x] H6 — Update all catalog verification dates to 2026-04-27
+- [x] H7 — Add checksum verification to `setup-models-device.sh`
+- [x] H9 — Create `scripts/integration-test.sh` for dry-run CI validation
 
 ---
 
