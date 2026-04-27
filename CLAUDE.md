@@ -21,7 +21,7 @@ Every command accepts a top-level `--json`. Human output is the default; JSON is
 
 ## Source vs generated
 
-- **Source (tracked, edit freely):** `opencode.jsonc`, `runtime-config/presets/*.ini`, `runtime-config/profiles.json`, `catalog/*.json`, `.opencode/agents/*`, `.opencode/skills/*`, `templates/*`, docs
+- **Source (tracked, edit freely):** `opencode.template.jsonc`, `runtime-config/presets/*.ini`, `runtime-config/profiles.json`, `catalog/*.json`, `.opencode/agents/*`, `.opencode/skills/*`, `templates/*`, docs
 - **Generated (don't hand-edit):** everything under `state/` — `state/active/`, `state/runtime/presets.active.ini`, `state/clients/<target>/`, `state/logs/`, `state/reports/`
 
 `AI_CLUSTER_STATE_ROOT` overrides the state root — used by tests and the contract script.
@@ -33,7 +33,7 @@ Every command accepts a top-level `--json`. Human output is the default; JSON is
 ./verify-documentation.sh             # tracked doc presence and consistency
 ./scripts/verify-opencode-assets.sh   # agent/skill schema
 ./scripts/verify-provider-catalog.sh  # catalog/providers.json schema
-./scripts/verify-config-schema.sh     # opencode.jsonc schema
+./scripts/verify-config-schema.sh     # opencode.template.jsonc schema
 ./scripts/verify-profiles-sync.sh     # profile manifest parity across scripts + README
 ```
 
@@ -59,4 +59,4 @@ All six must pass locally. GitHub Actions is currently red — rely on local sig
 - Commits: short imperative subject; body explains *why*, not *what*
 - Prefer editing existing files over creating new ones; docs over new docs
 - Human-readable renderers go through `emit(..., kind=...)` in `scripts/lac.py`
-- New providers: add to `catalog/providers.json` **and** `opencode.jsonc` **and** `PROVIDER_VERIFICATION` in `scripts/lac.py` — all three must agree
+- New providers: add to `catalog/providers.json` **and** `opencode.template.jsonc` **and** `PROVIDER_VERIFICATION` in `scripts/lac.py` — all three must agree

@@ -66,9 +66,9 @@ def require(cond: bool, msg: str):
         raise AssertionError(msg)
 
 
-opencode = load_jsonc(root / "opencode.jsonc")
+opencode = load_jsonc(root / "opencode.template.jsonc")
 openrouter_models = opencode["provider"]["openrouter"]["models"]
-require(isinstance(openrouter_models, dict) and openrouter_models, "opencode.jsonc openrouter models must keep starter defaults")
+require(isinstance(openrouter_models, dict) and openrouter_models, "opencode.template.jsonc openrouter models must keep starter defaults")
 
 openrouter_doc = (root / "docs/providers/OPENROUTER_FREE.md").read_text(encoding="utf-8")
 require("./bin/lac provider models openrouter" in openrouter_doc, "docs/providers/OPENROUTER_FREE.md must point to the provider models command")

@@ -6,7 +6,7 @@ This repository provides a private, replicable **Local AI Cluster**.
 
 Runtime defaults:
 - llama.cpp `llama-server`
-- OpenCode project config at `opencode.jsonc`
+- OpenCode project config at `opencode.template.jsonc`
 - profile-based model setup via `./bin/lac`
 - Qwen 3.6 or Gemma 4 model families
 - curated OpenCode agents under `.opencode/agents/`
@@ -90,9 +90,11 @@ Manual validation:
 
 ## ConfigurationFileLocations
 
-- `opencode.jsonc`: source template for generated OpenCode config
+- `opencode.template.jsonc`: source template for generated OpenCode config
 - `.opencode/agents/`: curated subagents
 - `.opencode/skills/`: curated skills
+- `.opencode/dcp.jsonc`: Dynamic Context Pruning plugin config (requires `@tarquinen/opencode-dcp`)
+- `~/.config/opencode/plugins/`: globally installed OpenCode plugins
 - `runtime-config/presets/<profile>.ini`: template presets
 - `state/runtime/presets.active.ini`: generated active preset
 - `state/active/profile.txt`: generated selected profile marker

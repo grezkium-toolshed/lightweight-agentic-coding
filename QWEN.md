@@ -16,7 +16,7 @@ The architecture is deliberately split into four layers: local runtime, client i
 
 | Path | Purpose |
 |---|---|
-| `opencode.jsonc` | Canonical OpenCode configuration (providers, models, permissions, compaction) |
+| `opencode.template.jsonc` | Canonical OpenCode configuration (providers, models, permissions, compaction) |
 | `.opencode/agents/` | Curated OpenCode subagents (architecture-reviewer, documentation-generator, reality-checker, release-reviewer, research-synthesizer) |
 | `.opencode/skills/` | Curated skills for office workflows (docx, pptx, xlsx, pdf, documentation, research) |
 | `scripts/` | Setup, launch, profile-switch, and doctor scripts (`.sh` + `.ps1`) |
@@ -80,7 +80,7 @@ Get-Content runtime-config/logs/llama-server.log -Wait -Tail 50
 
 ## Providers
 
-`opencode.jsonc` includes five provider blocks:
+`opencode.template.jsonc` includes five provider blocks:
 
 1. **local-cluster** — llama.cpp via `http://127.0.0.1:8080/v1` (primary)
 2. **antigravity** — Antigravity Cloud

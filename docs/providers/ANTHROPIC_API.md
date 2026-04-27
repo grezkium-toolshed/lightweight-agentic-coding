@@ -22,7 +22,7 @@ Create a key at https://console.anthropic.com/settings/keys. Keys are billed per
 
 ## Models in this repo
 
-The `anthropic` provider block in `opencode.jsonc` includes the current Claude 4.x family:
+The `anthropic` provider block in `opencode.template.jsonc` includes the current Claude 4.x family:
 
 | Model ID | Notes |
 |----------|-------|
@@ -48,6 +48,6 @@ Model IDs follow Anthropic's API naming. Keep them in sync with https://docs.cla
 
 Before each beta cut:
 1. Open https://docs.claude.com/en/docs/about-claude/models and confirm current model IDs.
-2. Update the `anthropic` provider block in `opencode.jsonc` if the 4.x family has shifted.
+2. Update the `anthropic` provider block in `opencode.template.jsonc` if the 4.x family has shifted.
 3. Update the `models` array in `catalog/providers.json` to match.
 4. Bump `last_verified_at`.

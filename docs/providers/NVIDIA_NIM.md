@@ -1,6 +1,6 @@
 # NVIDIA NIM Support
 
-This repo includes an `nvidia-nim` provider block in `opencode.jsonc` using the OpenAI-compatible endpoint:
+This repo includes an `nvidia-nim` provider block in `opencode.template.jsonc` using the OpenAI-compatible endpoint:
 
 - `https://integrate.api.nvidia.com/v1`
 

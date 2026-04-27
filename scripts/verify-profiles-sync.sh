@@ -15,7 +15,7 @@ scenario_catalog_path = root / "catalog/scenarios.json"
 setup_models_sh = root / "scripts/setup-models-device.sh"
 setup_models_ps1 = root / "scripts/setup-models-device.ps1"
 readme_path = root / "README.md"
-config_path = root / "opencode.jsonc"
+config_path = root / "opencode.template.jsonc"
 
 
 def load_jsonc(path: Path):
@@ -85,7 +85,7 @@ providers = config["provider"]
 for profile_id, profile in profiles.items():
     for field in ("default_model", "small_model"):
         provider_name, model_id = profile[field].split("/", 1)
-        require(provider_name in providers, f"{profile_id}: provider '{provider_name}' from {field} missing in opencode.jsonc")
+        require(provider_name in providers, f"{profile_id}: provider '{provider_name}' from {field} missing in opencode.template.jsonc")
         require(
             model_id in providers[provider_name]["models"],
             f"{profile_id}: model '{model_id}' from {field} missing in provider '{provider_name}'",

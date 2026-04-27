@@ -6,7 +6,7 @@ OpenRouter provides a `:free` suffix on select models that require no API credit
 
 ## Live Model List
 
-OpenRouter free models are refreshed into `catalog/providers.json` from the live `/models` response. The repo still keeps starter defaults in `opencode.jsonc` so a clean clone can render a working config before the first refresh.
+OpenRouter free models are refreshed into `catalog/providers.json` from the live `/models` response. The repo still keeps starter defaults in `opencode.template.jsonc` so a clean clone can render a working config before the first refresh.
 
 Use these commands:
 - `./bin/lac provider models openrouter` to print the current live model list

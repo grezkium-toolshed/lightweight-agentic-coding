@@ -1,10 +1,10 @@
-# Verify that free cloud models in opencode.jsonc are still accessible.
+# Verify that free cloud models in opencode.template.jsonc are still accessible.
 # Usage: ./scripts/verify-free-models.ps1
 # Prerequisites: OPENROUTER_API_KEY and/or NVIDIA_API_KEY set in environment.
 $ErrorActionPreference = 'Stop'
 
 $Root = if ($env:AI_CLUSTER_ROOT) { $env:AI_CLUSTER_ROOT } else { Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path) }
-$Config = Join-Path $Root 'opencode.jsonc'
+$Config = Join-Path $Root 'opencode.template.jsonc'
 $Timeout = if ($env:MODEL_VERIFY_TIMEOUT) { [int]$env:MODEL_VERIFY_TIMEOUT } else { 10 }
 $Err = 0
 
@@ -116,7 +116,7 @@ Write-Host ""
 # Summary
 if ($Err -ne 0) {
   Write-Host "=== Verification complete — some models are broken ==="
-  Write-Host "Update opencode.jsonc and docs/providers/OPENROUTER_FREE.md"
+  Write-Host "Update opencode.template.jsonc and docs/providers/OPENROUTER_FREE.md"
   Write-Host "to remove removed models."
   exit 1
 } else {

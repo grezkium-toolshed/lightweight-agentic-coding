@@ -69,5 +69,5 @@ The probe sends a real request to each provider's baseURL with your key. `--all`
 ## Important notes
 - These environment variable names are repo conventions for documentation and shell setup. Local-cluster readiness is profile/runtime based, so use the selected profile plus `./bin/lac runtime start` rather than treating env vars as a readiness step.
 - Model availability and quota policies change frequently.
-- Treat the provider blocks in `opencode.jsonc` as verified starter examples, not permanent guarantees.
+- Treat the provider blocks in `opencode.template.jsonc` as verified starter examples, not permanent guarantees.
 - Refresh `docs/FREE_CLOUD_MODELS.md` when preparing a new public beta cut.

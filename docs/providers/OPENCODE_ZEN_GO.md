@@ -24,7 +24,7 @@ Sign in at https://opencode.ai and copy the API key from your account page. In t
 
 ## Models in this repo
 
-Both providers are pre-wired in `opencode.jsonc`. The curated model list evolves upstream; treat the blocks here as a starting point and refresh before each beta cut.
+Both providers are pre-wired in `opencode.template.jsonc`. The curated model list evolves upstream; treat the blocks here as a starting point and refresh before each beta cut.
 
 Current OpenCode Go entries include GLM 5.1, GLM 5, Kimi K2.6, Kimi K2.5, MiMo-V2.5, MiMo-V2.5-Pro, MiMo-V2-Pro, MiMo-V2-Omni, MiniMax M2.7, MiniMax M2.5, Qwen3.6 Plus, and Qwen3.5 Plus.
 
@@ -50,6 +50,6 @@ Use the first command when you want local models plus a Go overlay. Use `profile
 
 Before each beta cut:
 1. Open https://opencode.ai/docs/zen/ and https://opencode.ai/docs/go/ and confirm the current catalog.
-2. Update the `opencode-zen` and `opencode-go` provider blocks in `opencode.jsonc` if any listed model is retired.
+2. Update the `opencode-zen` and `opencode-go` provider blocks in `opencode.template.jsonc` if any listed model is retired.
 3. Update the `models` array in `catalog/providers.json` to match.
 4. Bump `last_verified_at` in `catalog/providers.json` for both providers.

@@ -1,11 +1,11 @@
 #!/bin/bash
-# Verify that free cloud models in opencode.jsonc are still accessible.
+# Verify that free cloud models in opencode.template.jsonc are still accessible.
 # Usage: ./scripts/verify-free-models.sh
 # Prerequisites: OPENROUTER_API_KEY and/or NVIDIA_API_KEY set in environment.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CONFIG="$ROOT/opencode.jsonc"
+CONFIG="$ROOT/opencode.template.jsonc"
 TIMEOUT="${MODEL_VERIFY_TIMEOUT:-10}"
 ERR=0
 
@@ -129,7 +129,7 @@ echo ""
 # --- Summary ---
 if [[ "$ERR" -ne 0 ]]; then
   echo "=== Verification complete — some models are broken ==="
-  echo "Update opencode.jsonc and docs/providers/OPENROUTER_FREE.md"
+  echo "Update opencode.template.jsonc and docs/providers/OPENROUTER_FREE.md"
   echo "to remove removed models."
   exit 1
 else

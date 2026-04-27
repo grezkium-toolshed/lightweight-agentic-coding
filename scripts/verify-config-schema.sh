@@ -10,7 +10,7 @@ from pathlib import Path
 
 root = Path(sys.argv[1])
 files = [
-    root / "opencode.jsonc",
+    root / "opencode.template.jsonc",
     root / "templates/opencode/opencode.example.jsonc",
 ]
 

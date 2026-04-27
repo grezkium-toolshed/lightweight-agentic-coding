@@ -2,7 +2,7 @@
 
 ## Canonical runtime config
 
-- `opencode.jsonc`: source template for OpenCode config in this repo
+- `opencode.template.jsonc`: source template for OpenCode config in this repo
 - `runtime-config/presets/<profile>.ini`: profile templates
 - `runtime-config/profiles.json`: source-of-truth profile manifest
 - `state/runtime/presets.active.ini`: generated active llama.cpp preset
@@ -13,7 +13,7 @@
 
 ## OpenCode config choices
 
-`opencode.jsonc` now includes:
+`opencode.template.jsonc` now includes:
 - local llama.cpp provider config
 - free cloud fallback providers
 - explicit compaction settings

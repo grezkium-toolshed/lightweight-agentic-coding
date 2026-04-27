@@ -539,7 +539,7 @@ class Context:
     self.state_root = STATE_ROOT
     self.paths = {
       "profile_manifest": self.root / "runtime-config/profiles.json",
-      "opencode_template": self.root / "opencode.jsonc",
+      "opencode_template": self.root / "opencode.template.jsonc",
       "asset_catalog": self.root / "catalog/assets.json",
       "workflow_catalog": self.root / "catalog/workflow-packs.json",
       "provider_catalog": self.root / "catalog/providers.json",
@@ -812,7 +812,7 @@ def _resolve_verify_endpoint(ctx, provider_id, rule):
   base = urls.get(provider_id)
   if not base:
     raise SystemExit(
-      f"No baseURL found for provider '{provider_id}' in opencode.jsonc"
+      f"No baseURL found for provider '{provider_id}' in opencode.template.jsonc"
     )
   return base + rule.get("path", "/models")
 

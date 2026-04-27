@@ -12,7 +12,7 @@ Generated: 2026-04-26
 
 ### C4. Plugin `opencode-antigravity-auth` has no docs
 
-- **File:** `opencode.jsonc`, line 7
+- **File:** `opencode.template.jsonc`, line 7
 - **Problem:** The plugin array references an npm package with zero documentation on what it does, how to install it, or that it's required for Antigravity provider to work.
 - **Fix:** Either document installation in `docs/providers/AUTHENTICATION.md` or remove from the template and add a comment explaining it must be installed separately.
 

@@ -529,7 +529,7 @@
     "live": true,
     "list_command": "./bin/lac provider models openrouter",
     "verify_command": "./bin/lac provider verify openrouter --refresh-catalog",
-    "note": "OpenRouter free models are refreshed live and intentionally omitted from this static snapshot; starter defaults remain in opencode.jsonc until refresh."
+    "note": "OpenRouter free models are refreshed live and intentionally omitted from this static snapshot; starter defaults remain in opencode.template.jsonc until refresh."
   },
   "googleai": [
     {

@@ -66,8 +66,8 @@ Use JSON when scripting:
 - `gemma-24gb`: Gemma 4 31B (Q4) + 26B-A4B (Q4) fallback
 - `gemma-32gb`: Gemma 4 31B (Q8) + 26B-A4B (Q4) fallback
 - `gemma-64gb`: Gemma 4 31B (BF16) + 31B (Q8) + 26B-A4B (Q4)
-- `openrouter`: Cloud-only, zero downloads; uses OpenRouter via `opencode.jsonc`
-- `opencode-go`: Cloud-only, zero downloads; uses OpenCode Go subscription models via `opencode.jsonc`
+- `openrouter`: Cloud-only, zero downloads; uses OpenRouter via `opencode.template.jsonc`
+- `opencode-go`: Cloud-only, zero downloads; uses OpenCode Go subscription models via `opencode.template.jsonc`
 
 The 128GB tiers follow a practical `<=115GB` effective memory posture to preserve operating-system and context headroom.
 
@@ -377,7 +377,7 @@ All commands support JSON output:
 
 Source config:
 
-- `opencode.jsonc`: source OpenCode config template
+- `opencode.template.jsonc`: source OpenCode config template
 - `runtime-config/profiles.json`: profile manifest
 - `runtime-config/presets/<profile>.ini`: local runtime preset templates
 - `catalog/providers.json`: provider metadata and freshness

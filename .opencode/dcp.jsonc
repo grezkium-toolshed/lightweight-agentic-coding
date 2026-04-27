@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Opencode-DCP/opencode-dynamic-context-pruning/master/dcp.schema.json",
+  // Enable or disable the plugin
+  "enabled": true,
+  // Debug logging to ~/.config/opencode/logs/dcp/
+  "debug": false,
+  // "off", "minimal", or "detailed"
+  "pruneNotification": "minimal",
+  // "chat" or "toast"
+  "pruneNotificationType": "chat",
+  // Context limits tuned for 262k model context window
+  "compress": {
+    // "range" or "message"
+    "mode": "range",
+    // "allow" (no prompt), "ask" (prompt), "deny" (tool not registered)
+    "permission": "allow",
+    "showCompression": false,
+    // Let active summary tokens extend the effective maxContextLimit
+    "summaryBuffer": true,
+    // Soft upper threshold — above this, DCP injects strong compression nudges
+    "maxContextLimit": 200000,
+    // Soft lower threshold — below this, compression nudges are off
+    "minContextLimit": 100000,
+    // How often the context-limit nudge fires (1 = every fetch)
+    "nudgeFrequency": 5,
+    // Start compression reminders after this many messages since last user msg
+    "iterationNudgeThreshold": 15,
+    // "strong" (more likely) or "soft" (less likely)
+    "nudgeForce": "soft",
+    // Preserve user messages verbatim during compression
+    "protectUserMessages": true
+  },
+  // Automatic pruning strategies
+  "strategies": {
+    // Remove duplicate tool calls (same tool, same arguments)
+    "deduplication": {
+      "enabled": true
+    },
+    // Prune tool inputs for errored tools after X turns
+    "purgeErrors": {
+      "enabled": true,
+      "turns": 4
+    }
+  }
+}

@@ -102,7 +102,7 @@ OpenRouter free models are refreshed from the live catalog path and intentionall
 
 - Use `./bin/lac provider verify openrouter --refresh-catalog` to refresh the catalog from the endpoint.
 - Use `./bin/lac provider models openrouter` to list the currently stored live set.
-- The repo still keeps starter defaults in `opencode.jsonc` for clean-clone rendering, but this page should not mirror them as a frozen table.
+- The repo still keeps starter defaults in `opencode.template.jsonc` for clean-clone rendering, but this page should not mirror them as a frozen table.
 
 ## googleai
 

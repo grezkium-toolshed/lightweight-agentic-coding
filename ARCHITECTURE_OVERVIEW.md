@@ -35,7 +35,7 @@ This CLI is the supported control plane for:
 ## Client integrations
 
 ### OpenCode
-- canonical repo config template: `opencode.jsonc`
+- canonical repo config template: `opencode.template.jsonc`
 - rendered config: `state/clients/opencode/opencode.json`
 - runtime assets: `.opencode/agents/` and `.opencode/skills/`
 - best path for local llama.cpp usage and structured agentic workflows
@@ -53,7 +53,7 @@ This CLI is the supported control plane for:
 
 The default posture is **local always included, cloud as an optional overlay**. Every profile applies a local llama.cpp layer; cloud providers are separate, each gated by its own env var and inert until configured. `lac init` is the on-ramp.
 
-Supported cloud overlays in `opencode.jsonc`:
+Supported cloud overlays in `opencode.template.jsonc`:
 - OpenRouter free tier
 - OpenCode Go (flat subscription) and OpenCode Zen (pay-per-request)
 - Codex via ChatGPT subscription (third-party OAuth helper)
