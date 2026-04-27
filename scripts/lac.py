@@ -371,7 +371,9 @@ def _build_opencode_model_entry(template_models, provider_id, model):
       output = 8192
     limit["output"] = output
 
-  entry = {"limit": limit}
+  entry = {}
+  if limit.get("context") is not None and limit.get("output") is not None:
+    entry["limit"] = limit
   for field in ("name", "description", "supported_parameters"):
     if field in model:
       entry[field] = model[field]
