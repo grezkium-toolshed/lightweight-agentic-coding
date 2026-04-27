@@ -21,6 +21,7 @@ required=(
   docs/providers/OPENCODE_ZEN_GO.md
   docs/providers/CODEX_AUTH.md
   docs/providers/ANTHROPIC_API.md
+  docs/providers/FREE_CLOUD_FALLBACKS.md
   docs/security/THIRD_PARTY_AGENT_INTAKE.md
   docs/security/AGENCY_AGENTS_REVIEW.md
   docs/security/TRUST_MODEL.md
@@ -45,20 +46,16 @@ for f in "${required[@]}"; do
   fi
 done
 
+export PYTHONPATH="${ROOT}/scripts:${PYTHONPATH:-}"
+
 python3 - <<'PY' "$ROOT"
 import json
 import sys
 from pathlib import Path
 
+from lib.jsonc import load_jsonc
+
 root = Path(sys.argv[1])
-
-
-def load_jsonc(path: Path):
-    raw = path.read_text(encoding="utf-8")
-    cleaned = "\n".join(
-        line for line in raw.splitlines() if not line.lstrip().startswith("//")
-    )
-    return json.loads(cleaned)
 
 
 def require(cond: bool, msg: str):

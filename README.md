@@ -584,6 +584,11 @@ These external projects are not part of this repo but may be useful depending on
 - [get-shit-done](https://github.com/gsd-build/get-shit-done): structured Discuss -> Plan -> Execute -> Verify -> Ship workflow with context engineering. This repo includes a lightweight adaptation at `.opencode/skills/gsd/SKILL.md`.
 - [oh-my-opencode-slim](https://github.com/alvinunreal/oh-my-opencode-slim): multi-agent orchestration suite with model mixing, auto-delegation, and curated AI workflows. Useful if you want heavier orchestration than this repo provides. Separate API billing is required.
 
+## Contributing
+
+- See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, coding style, and submission guidelines.
+- See [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) for community expectations.
+
 ## Naming Policy
 
 Branding and docs use `local-ai-cluster`. Repository slug and filesystem paths may still use `ai-coding-cluster` during transition. This is expected while pre-release alignment is in progress.

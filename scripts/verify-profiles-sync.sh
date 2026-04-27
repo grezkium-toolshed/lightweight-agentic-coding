@@ -2,12 +2,15 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export PYTHONPATH="${ROOT}/scripts:${PYTHONPATH:-}"
 
 python3 - <<'PY' "$ROOT"
 import json
 import re
 import sys
 from pathlib import Path
+
+from lib.jsonc import load_jsonc
 
 root = Path(sys.argv[1])
 manifest_path = root / "runtime-config/profiles.json"
@@ -16,14 +19,6 @@ setup_models_sh = root / "scripts/setup-models-device.sh"
 setup_models_ps1 = root / "scripts/setup-models-device.ps1"
 readme_path = root / "README.md"
 config_path = root / "opencode.template.jsonc"
-
-
-def load_jsonc(path: Path):
-    raw = path.read_text(encoding="utf-8")
-    cleaned = "\n".join(
-        line for line in raw.splitlines() if not line.lstrip().startswith("//")
-    )
-    return json.loads(cleaned)
 
 
 def require(cond: bool, message: str):

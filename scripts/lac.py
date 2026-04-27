@@ -14,10 +14,17 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Allow importing shared utilities from scripts/lib/
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+from lib.jsonc import load_jsonc  # noqa: E402
+
 
 VERSION = "0.1.0"
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = _SCRIPT_DIR.parent
 STATE_ROOT = Path(os.environ.get("AI_CLUSTER_STATE_ROOT", ROOT / "state"))
 PORT = int(os.environ.get("AI_CLUSTER_PORT", "8080"))
 HOST = os.environ.get("AI_CLUSTER_HOST", "127.0.0.1")
@@ -28,12 +35,12 @@ LOCAL_MLX_MODEL_IDS = {
   "qwen3.6-27b-q4": "Qwen3.6-27B-UD-MLX-6bit",
   "qwen3.6-35b-a3b-q8": "Qwen3.6-35B-A3B-MLX-8bit",
   # Gemma 4 MLX Dynamic quants (Unsloth)
-  # Dense 31B: 4bit (matches Qwen dense pattern)
+  # Dense 31B — each quant maps to its own bit depth
   "gemma-4-31b-q4": "gemma-4-31b-it-UD-MLX-4bit",
-  "gemma-4-31b-q8": "gemma-4-31b-it-UD-MLX-4bit",
-  "gemma-4-31b-bf16": "gemma-4-31b-it-UD-MLX-4bit",
+  "gemma-4-31b-q8": "gemma-4-31b-it-UD-MLX-8bit",
+  "gemma-4-31b-bf16": "gemma-4-31b-it-UD-MLX-bf16",
   "gemma-4-e4b-q8": "gemma-4-E4B-it-MLX-8bit",
-  # MoE 26B-A4B: 8bit (matches Qwen MoE pattern)
+  # MoE 26B-A4B: 8bit (only Unsloth MLX quant available for this variant)
   "gemma-4-26b-a4b-q4": "gemma-4-26b-a4b-it-UD-MLX-8bit",
 }
 
@@ -42,18 +49,8 @@ def utc_now():
   return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def strip_jsonc(text):
-  return "\n".join(
-    line for line in text.splitlines() if not line.lstrip().startswith("//")
-  )
-
-
 def load_json(path):
   return json.loads(path.read_text(encoding="utf-8"))
-
-
-def load_jsonc(path):
-  return json.loads(strip_jsonc(path.read_text(encoding="utf-8")))
 
 
 def write_text(path, content):

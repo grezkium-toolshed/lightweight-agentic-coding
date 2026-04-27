@@ -2,25 +2,19 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export PYTHONPATH="${ROOT}/scripts:${PYTHONPATH:-}"
 
 python3 - <<'PY' "$ROOT"
-import json
 import sys
 from pathlib import Path
+
+from lib.jsonc import load_jsonc
 
 root = Path(sys.argv[1])
 files = [
     root / "opencode.template.jsonc",
     root / "templates/opencode/opencode.example.jsonc",
 ]
-
-
-def load_jsonc(path: Path):
-    raw = path.read_text(encoding="utf-8")
-    cleaned = "\n".join(
-        line for line in raw.splitlines() if not line.lstrip().startswith("//")
-    )
-    return json.loads(cleaned)
 
 
 def require(cond: bool, message: str):
