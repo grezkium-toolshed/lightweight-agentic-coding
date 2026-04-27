@@ -520,9 +520,9 @@
       "description": "Validate local cluster setup",
       "agent": "build"
     },
-    // Check runtime health
+    // Check runtime health on the active port (llama.cpp 8080 or oMLX 8000)
     "health": {
-      "template": "Check if the local runtime is healthy by running: `curl -s http://127.0.0.1:8080/health`. Report the status.",
+      "template": "Check if the local runtime is healthy. Try `curl -s http://127.0.0.1:8080/health` first (llama.cpp default). If that fails, try `curl -s http://127.0.0.1:8000/health` (oMLX default). Report which port responded and the status. If neither responds, suggest running `./bin/lac runtime status` to see which runtime is configured.",
       "description": "Check runtime health",
       "agent": "build"
     }

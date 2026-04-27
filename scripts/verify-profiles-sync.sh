@@ -87,17 +87,17 @@ for profile_id, profile in profiles.items():
         )
 
 readme = readme_path.read_text(encoding="utf-8")
-hardware_section_match = re.search(
-    r"## Hardware profiles\n(?P<section>.*?)(?:\n## |\Z)",
+profile_section_match = re.search(
+    r"## Which Profile\?\n(?P<section>.*?)(?:\n## |\Z)",
     readme,
     re.S,
 )
-require(hardware_section_match is not None, "README.md is missing the '## Hardware profiles' section")
-hardware_section = hardware_section_match.group("section")
-readme_profiles = set(re.findall(r"`([a-z0-9-]+)`", hardware_section))
+require(profile_section_match is not None, "README.md is missing the '## Which Profile?' section")
+profile_section = profile_section_match.group("section")
+readme_profiles = set(re.findall(r"`([a-z0-9-]+)`", profile_section))
 require(
     manifest_id_set <= readme_profiles,
-    f"README.md hardware profile list is missing: {sorted(manifest_id_set - readme_profiles)}",
+    f"README.md profile list is missing: {sorted(manifest_id_set - readme_profiles)}",
 )
 
 require("Qwen3.5-9B-Q4_K_M.gguf" in sh_text, "setup-models-device.sh missing Qwen3.5 9B Q4_K_M download")
@@ -110,6 +110,6 @@ require("unsloth/gemma-4-E4B-it-MLX-8bit" in ps1_text, "setup-models-device.ps1 
 print(f"[ok] manifest profiles: {len(manifest_ids)}")
 print(f"[ok] setup-models-device.sh profiles match manifest")
 print(f"[ok] setup-models-device.ps1 profiles match manifest")
-print(f"[ok] README hardware profiles cover manifest ids")
+print(f"[ok] README profile list covers manifest ids")
 print("Profile parity checks passed.")
 PY
