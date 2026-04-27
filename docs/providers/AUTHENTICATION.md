@@ -66,6 +66,17 @@ The probe sends a real request to each provider's baseURL with your key. `--all`
 - recommended usage: direct access to the Claude 4.x family
 - details: `ANTHROPIC_API.md`
 
+## GitHub MCP Server
+
+The `opencode.template.jsonc` includes a disabled GitHub MCP server configuration. To enable it:
+
+1. Create a GitHub personal access token with `repo`, `issues`, and `pull_requests` scopes.
+2. Export it: `export GITHUB_TOKEN=ghp_...`
+3. Set `"enabled": true` in the `mcp.github` block of your generated OpenCode config.
+4. Install the MCP server on first use: `npx -y @modelcontextprotocol/github`
+
+When enabled, OpenCode can read PRs, issues, CI checks, and perform code search via the GitHub API.
+
 ## Important notes
 - These environment variable names are repo conventions for documentation and shell setup. Local-cluster readiness is profile/runtime based, so use the selected profile plus `./bin/lac runtime start` rather than treating env vars as a readiness step.
 - Model availability and quota policies change frequently.

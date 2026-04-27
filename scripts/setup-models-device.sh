@@ -51,6 +51,37 @@ is_macos() {
   [[ "$(uname -s)" == "Darwin" ]]
 }
 
+# Verify file against models/checksums.json if an entry exists.
+# Returns 0 if checksum matches or no checksum is recorded.
+verify_checksum() {
+  local file_path="$1"
+  local checksums_file="$AI_MODELS_DIR/checksums.json"
+  [[ -f "$checksums_file" ]] || return 0
+
+  local rel_path
+  rel_path="${file_path#$AI_MODELS_DIR/}"
+
+  local expected
+  expected="$(python3 -c "
+import json, sys
+from pathlib import Path
+checksums = json.load(Path('$checksums_file').open())
+print(checksums.get('checksums', {}).get('$rel_path', ''))
+" 2>/dev/null)"
+
+  [[ -n "$expected" ]] || return 0
+
+  local actual
+  actual="$(shasum -a 256 "$file_path" 2>/dev/null | awk '{print $1}')"
+  if [[ "$actual" != "$expected" ]]; then
+    echo "[warn] Checksum mismatch for $rel_path" >&2
+    echo "       expected: $expected" >&2
+    echo "       actual:   $actual" >&2
+    return 1
+  fi
+  echo "[checksum ok] $rel_path"
+}
+
 should_stage_mlx() {
   case "${AI_INCLUDE_MLX:-auto}" in
     1|true|yes)
@@ -278,6 +309,9 @@ download_one() {
     echo "[fail] Download too small for $filename (${new_mb}MB < ${min_mb}MB); keeping file for inspection/resume" >&2
     return 1
   fi
+
+  verify_checksum "$target_file" || true
+
   echo "[ ok ] $target_file (${new_mb}MB${expected_mb:+ of ~${expected_mb}MB})"
 }
 

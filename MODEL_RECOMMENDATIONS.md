@@ -139,3 +139,13 @@ Use these defaults for Gemma 4 (different from the Qwen baseline):
 - EOS token: `<turn|>`
 
 **Warning:** Do not use CUDA 13.2 runtime with GGUFs — it causes degraded outputs.
+
+## Profile Verification Tiers
+
+Profiles in `runtime-config/profiles.json` carry a `verification_tier` field:
+
+- `verified` — Tested on real hardware with smoke tests (`./scripts/doctor.sh` and `./scripts/smoke-test.sh`). This is the strongest guarantee.
+- `standard` — Template-reviewed and syntactically valid. Preset values are consistent with the model family guidance, but the profile has not been executed on physical hardware in this repo.
+- `extended` — Validated on multiple hardware configurations or by community feedback. Used for niche or high-memory profiles where the maintainer has less direct access to matching hardware.
+
+Use `verified` profiles for production or team baselines. `standard` and `extended` profiles are safe to try but should be validated locally before relying on them.

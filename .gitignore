@@ -4,12 +4,8 @@ Thumbs.db
 *.swp
 *.swo
 
-# Local model artifacts
-models/**/*.gguf
-models/**/.cache/
-models/**/*.lock
-models/**/*.metadata
-models/**/blobs/
+# Local model artifacts — NEVER commit model weights or generated model metadata
+models/**
 
 # Backups and generated config copies
 backup-configs/
