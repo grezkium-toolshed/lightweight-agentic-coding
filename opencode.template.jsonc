@@ -106,30 +106,10 @@
       "name": "Antigravity Cloud",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
-        "gpt-oss-120b": {
-          "limit": {
-            "context": 131072,
-            "output": 16384
-          }
-        },
-        "gpt-oss-20b": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        },
-        "qwen3-coder-480b": {
-          "limit": {
-            "context": 262144,
-            "output": 16384
-          }
-        },
-        "deepseek-v3.2": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        }
+        "gpt-oss-120b": {},
+        "gpt-oss-20b": {},
+        "qwen3-coder-480b": {},
+        "deepseek-v3.2": {}
       },
       "options": {
         "baseURL": "https://api.antigravity.ai/v1",
@@ -141,36 +121,11 @@
       "name": "Z.AI Cloud",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
-        "zai/glm-5": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        },
-        "zai/glm-4.7": {
-          "limit": {
-            "context": 200000,
-            "output": 12288
-          }
-        },
-        "zai/glm-4.5": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        },
-        "zai/glm-4.5-air": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        },
-        "zai/glm-4.6": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        }
+        "zai/glm-5": {},
+        "zai/glm-4.7": {},
+        "zai/glm-4.5": {},
+        "zai/glm-4.5-air": {},
+        "zai/glm-4.6": {}
       },
       "options": {
         "baseURL": "https://open.z.ai/api/paas/v4",
@@ -182,72 +137,17 @@
       "name": "NVIDIA NIM Free or Trial",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
-        "deepseek-ai/deepseek-v3.2": {
-          "limit": {
-            "context": 128000,
-            "output": 12288
-          }
-        },
-        "qwen/qwen3-coder-480b-a35b-instruct": {
-          "limit": {
-            "context": 256000,
-            "output": 16384
-          }
-        },
-        "qwen/qwen2.5-coder-32b-instruct": {
-          "limit": {
-            "context": 32000,
-            "output": 8192
-          }
-        },
-        "openai/gpt-oss-120b": {
-          "limit": {
-            "context": 128000,
-            "output": 12288
-          }
-        },
-        "meta/llama-3.3-70b-instruct": {
-          "limit": {
-            "context": 128000,
-            "output": 8192
-          }
-        },
-        "nvidia/nemotron-3-nano-30b-a3b": {
-          "limit": {
-            "context": 128000,
-            "output": 8192
-          }
-        },
-        "moonshotai/kimi-k2.5": {
-          "limit": {
-            "context": 128000,
-            "output": 12288
-          }
-        },
-        "minimaxai/minimax-m2.1": {
-          "limit": {
-            "context": 200000,
-            "output": 12288
-          }
-        },
-        "deepseek-ai/deepseek-v3.1-terminus": {
-          "limit": {
-            "context": 128000,
-            "output": 12288
-          }
-        },
-        "qwen/qwen3-235b-a22b": {
-          "limit": {
-            "context": 128000,
-            "output": 12288
-          }
-        },
-        "mistralai/devstral-2-123b-instruct-2512": {
-          "limit": {
-            "context": 256000,
-            "output": 16384
-          }
-        }
+        "deepseek-ai/deepseek-v3.2": {},
+        "qwen/qwen3-coder-480b-a35b-instruct": {},
+        "qwen/qwen2.5-coder-32b-instruct": {},
+        "openai/gpt-oss-120b": {},
+        "meta/llama-3.3-70b-instruct": {},
+        "nvidia/nemotron-3-nano-30b-a3b": {},
+        "moonshotai/kimi-k2.5": {},
+        "minimaxai/minimax-m2.1": {},
+        "deepseek-ai/deepseek-v3.1-terminus": {},
+        "qwen/qwen3-235b-a22b": {},
+        "mistralai/devstral-2-123b-instruct-2512": {}
       },
       "options": {
         "baseURL": "https://integrate.api.nvidia.com/v1",
@@ -263,72 +163,17 @@
       "npm": "@ai-sdk/openai-compatible",
       // Starter defaults are replaced by catalog-backed entries after refresh.
       "models": {
-        "qwen/qwen3-coder:480b-free": {
-          "limit": {
-            "context": 262144,
-            "output": 16384
-          }
-        },
-        "mistralai/devstral-2-free": {
-          "limit": {
-            "context": 262144,
-            "output": 16384
-          }
-        },
-        "stepfun/step-3.5-flash:free": {
-          "limit": {
-            "context": 262144,
-            "output": 16384
-          }
-        },
-        "openai/gpt-oss-120b:free": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        },
-        "openai/gpt-oss-20b:free": {
-          "limit": {
-            "context": 131072,
-            "output": 8192
-          }
-        },
-        "nvidia/nemotron-3-nano-30b-a3b:free": {
-          "limit": {
-            "context": 131072,
-            "output": 8192
-          }
-        },
-        "openai/gpt-4o-mini:free": {
-          "limit": {
-            "context": 131072,
-            "output": 8192
-          }
-        },
-        "google/gemini-2.0-flash-exp:free": {
-          "limit": {
-            "context": 131072,
-            "output": 8192
-          }
-        },
-        "meta-llama/llama-3.3-70b-instruct:free": {
-          "limit": {
-            "context": 131072,
-            "output": 8192
-          }
-        },
-        "z-ai/glm-4.5-air:free": {
-          "limit": {
-            "context": 131072,
-            "output": 8192
-          }
-        },
-        "qwen/qwen3-next-80b-a3b-instruct:free": {
-          "limit": {
-            "context": 131072,
-            "output": 8192
-          }
-        }
+        "qwen/qwen3-coder:480b-free": {},
+        "mistralai/devstral-2-free": {},
+        "stepfun/step-3.5-flash:free": {},
+        "openai/gpt-oss-120b:free": {},
+        "openai/gpt-oss-20b:free": {},
+        "nvidia/nemotron-3-nano-30b-a3b:free": {},
+        "openai/gpt-4o-mini:free": {},
+        "google/gemini-2.0-flash-exp:free": {},
+        "meta-llama/llama-3.3-70b-instruct:free": {},
+        "z-ai/glm-4.5-air:free": {},
+        "qwen/qwen3-next-80b-a3b-instruct:free": {}
       },
       "options": {
         "baseURL": "https://openrouter.ai/api/v1",
@@ -340,24 +185,9 @@
       "name": "OpenCode Zen",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
-        "glm-4.7": {
-          "limit": {
-            "context": 200000,
-            "output": 12288
-          }
-        },
-        "claude-sonnet-4-6": {
-          "limit": {
-            "context": 200000,
-            "output": 12288
-          }
-        },
-        "gpt-5-codex": {
-          "limit": {
-            "context": 200000,
-            "output": 12288
-          }
-        }
+        "glm-4.7": {},
+        "claude-sonnet-4-6": {},
+        "gpt-5-codex": {}
       },
       "options": {
         "baseURL": "https://api.opencode.ai/zen/v1",
@@ -369,78 +199,18 @@
       "name": "OpenCode Go",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
-        "glm-5.1": {
-          "limit": {
-            "context": 200000,
-            "output": 12288
-          }
-        },
-        "glm-5": {
-          "limit": {
-            "context": 200000,
-            "output": 12288
-          }
-        },
-        "kimi-k2.6": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        },
-        "kimi-k2.5": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        },
-        "mimo-v2.5-pro": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        },
-        "mimo-v2.5": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        },
-        "mimo-v2-pro": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        },
-        "mimo-v2-omni": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        },
-        "qwen3.6-plus": {
-          "limit": {
-            "context": 262144,
-            "output": 16384
-          }
-        },
-        "qwen3.5-plus": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        },
-        "minimax-m2.7": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        },
-        "minimax-m2.5": {
-          "limit": {
-            "context": 131072,
-            "output": 12288
-          }
-        }
+        "glm-5.1": {},
+        "glm-5": {},
+        "kimi-k2.6": {},
+        "kimi-k2.5": {},
+        "mimo-v2.5-pro": {},
+        "mimo-v2.5": {},
+        "mimo-v2-pro": {},
+        "mimo-v2-omni": {},
+        "qwen3.6-plus": {},
+        "qwen3.5-plus": {},
+        "minimax-m2.7": {},
+        "minimax-m2.5": {}
       },
       "options": {
         "baseURL": "https://opencode.ai/zen/go/v1",
@@ -452,18 +222,8 @@
       "name": "Codex (ChatGPT Subscription)",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
-        "gpt-5-codex": {
-          "limit": {
-            "context": 200000,
-            "output": 16384
-          }
-        },
-        "gpt-5": {
-          "limit": {
-            "context": 200000,
-            "output": 16384
-          }
-        }
+        "gpt-5-codex": {},
+        "gpt-5": {}
       },
       "options": {
         "baseURL": "https://api.openai.com/v1",
@@ -475,24 +235,9 @@
       "name": "Anthropic API",
       "npm": "@ai-sdk/anthropic",
       "models": {
-        "claude-opus-4-7": {
-          "limit": {
-            "context": 200000,
-            "output": 16384
-          }
-        },
-        "claude-sonnet-4-6": {
-          "limit": {
-            "context": 200000,
-            "output": 16384
-          }
-        },
-        "claude-haiku-4-5-20251001": {
-          "limit": {
-            "context": 200000,
-            "output": 16384
-          }
-        }
+        "claude-opus-4-7": {},
+        "claude-sonnet-4-6": {},
+        "claude-haiku-4-5-20251001": {}
       },
       "options": {
         "timeout": 600000,

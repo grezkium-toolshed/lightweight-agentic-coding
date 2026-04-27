@@ -136,12 +136,16 @@ If you only have a short session, pick from the unchecked items above.
 - [x] H7 — Add checksum verification to `setup-models-device.sh`
 - [x] H9 — Create `scripts/integration-test.sh` for dry-run CI validation
 
-### Batch 4 — Agent expansion and README hardening (this session)
+### Batch 4 — Agent expansion and README hardening (`59c6d22`)
 - [x] H5 — Expand `architecture-reviewer`, `reality-checker`, `research-synthesizer` agents with workflow phases, anti-patterns, and failure modes
-- [x] M1 — Rewrite README to 175 lines with Quick Start, collapsed profile details, and concise reference sections
+- [x] M1 — Rewrite README to 195 lines with Quick Start, collapsed profile details, and concise reference sections
 - [x] M3 — Update `/health` command to check both port 8080 (llama.cpp) and 8000 (oMLX)
 - [x] M8 — Add TOC tables to `agents/README.md` and `skills/README.md`
 - [x] M10 — Add inline documentation headers to all 14 preset `.ini` files
+
+### Batch 5 — Cloud provider context limits (this session)
+- [x] Remove `limit` blocks from all cloud providers (antigravity, z-ai, nvidia-nim, openrouter, opencode-zen, opencode-go, codex-auth, anthropic) so they use provider defaults instead of capped 131k/128k values
+- [x] Keep `limit` blocks on `local-cluster` models only (hardware-constrained local runtime)
 
 ---
 
