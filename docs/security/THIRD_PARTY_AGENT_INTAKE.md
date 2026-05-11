@@ -21,3 +21,7 @@ Do not import external agent or skill packs directly into the default runtime pa
 
 ## Default policy
 Curate. Do not bulk import.
+
+## Optional external packs
+
+External packs that add real authenticated capability should stay opt-in even when they are broadly useful. Microsoft Graph is the model case: the `msgraph` skill can run offline endpoint searches, but it can also call tenant APIs after delegated or app-only authentication. Keep it outside the tracked default skill tree, document least-privilege setup, and verify local installs without printing secret values.

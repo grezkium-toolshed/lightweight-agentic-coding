@@ -8,9 +8,11 @@ import shutil
 import signal
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -29,6 +31,14 @@ STATE_ROOT = Path(os.environ.get("AI_CLUSTER_STATE_ROOT", ROOT / "state"))
 PORT = int(os.environ.get("AI_CLUSTER_PORT", "8080"))
 HOST = os.environ.get("AI_CLUSTER_HOST", "127.0.0.1")
 OMLX_PORT = int(os.environ.get("AI_OMLX_PORT", os.environ.get("OMLX_PORT", "8000")))
+OPTIONAL_SKILLS = {
+  "msgraph": {
+    "label": "Microsoft Graph Skill",
+    "install_url": "https://github.com/merill/msgraph/releases/latest/download/msgraph.zip",
+    "docs": "docs/providers/MICROSOFT_GRAPH.md",
+    "required_help_terms": ["auth", "graph-call", "openapi-search"],
+  }
+}
 LOCAL_MLX_MODEL_IDS = {
   # Qwen 3.6 MLX quants (Unsloth)
   "qwen3.6-27b-q3": "Qwen3.6-27B-UD-MLX-6bit",
@@ -623,13 +633,172 @@ def load_workflow_catalog(ctx):
   return load_json(ctx.paths["workflow_catalog"])
 
 
+def optional_skill_root(ctx):
+  return Path(os.environ.get("AI_CLUSTER_OPENCODE_SKILLS_DIR", str(ctx.root / ".opencode/skills")))
+
+
+def optional_skill_path(ctx, skill_id):
+  return optional_skill_root(ctx) / skill_id
+
+
+def optional_skill_status(ctx, skill_id):
+  if skill_id not in OPTIONAL_SKILLS:
+    raise SystemExit(f"Unsupported optional skill: {skill_id}")
+  path = optional_skill_path(ctx, skill_id)
+  return {
+    "id": skill_id,
+    "label": OPTIONAL_SKILLS[skill_id]["label"],
+    "installed": (path / "SKILL.md").is_file(),
+    "path": str(path),
+    "docs": OPTIONAL_SKILLS[skill_id]["docs"],
+  }
+
+
+def _copy_optional_skill_from_dir(source, target):
+  candidate = source
+  if not (candidate / "SKILL.md").is_file() and (source / "msgraph" / "SKILL.md").is_file():
+    candidate = source / "msgraph"
+  if not (candidate / "SKILL.md").is_file():
+    raise SystemExit(f"Source does not contain an msgraph SKILL.md: {source}")
+  shutil.copytree(candidate, target)
+
+
+def _extract_zip_safely(archive, extract_root):
+  root = extract_root.resolve()
+  for member in archive.infolist():
+    destination = (extract_root / member.filename).resolve()
+    if root != destination and root not in destination.parents:
+      raise SystemExit(f"Unsafe path in skill archive: {member.filename}")
+  archive.extractall(extract_root)
+
+
+def _copy_optional_skill_from_zip(source, target):
+  with tempfile.TemporaryDirectory(prefix="lac-msgraph-") as tmp:
+    extract_root = Path(tmp)
+    with zipfile.ZipFile(source) as archive:
+      _extract_zip_safely(archive, extract_root)
+    _copy_optional_skill_from_dir(extract_root, target)
+
+
+def install_optional_skill(ctx, skill_id, source=None, force=False):
+  if skill_id not in OPTIONAL_SKILLS:
+    raise SystemExit(f"Unsupported optional skill: {skill_id}")
+  target = optional_skill_path(ctx, skill_id)
+  if target.exists():
+    if not force:
+      status = optional_skill_status(ctx, skill_id)
+      status["changed"] = False
+      status["message"] = f"{skill_id} is already installed"
+      return status
+
+  target.parent.mkdir(parents=True, exist_ok=True)
+  with tempfile.TemporaryDirectory(prefix="lac-msgraph-stage-", dir=target.parent) as stage:
+    staged_target = Path(stage) / skill_id
+    if source:
+      source_path = Path(source).expanduser()
+      if not source_path.exists():
+        raise SystemExit(f"Skill source not found: {source_path}")
+      if source_path.is_dir():
+        _copy_optional_skill_from_dir(source_path, staged_target)
+      else:
+        _copy_optional_skill_from_zip(source_path, staged_target)
+    else:
+      archive_path = Path(stage) / "msgraph.zip"
+      try:
+        urllib.request.urlretrieve(OPTIONAL_SKILLS[skill_id]["install_url"], archive_path)
+      except urllib.error.URLError as exc:
+        raise SystemExit(f"Failed to download {skill_id}: {exc}") from exc
+      _copy_optional_skill_from_zip(archive_path, staged_target)
+    if target.exists():
+      shutil.rmtree(target)
+    shutil.move(str(staged_target), str(target))
+
+  status = optional_skill_status(ctx, skill_id)
+  status["changed"] = True
+  status["source"] = source or OPTIONAL_SKILLS[skill_id]["install_url"]
+  return status
+
+
+def remove_optional_skill(ctx, skill_id):
+  if skill_id not in OPTIONAL_SKILLS:
+    raise SystemExit(f"Unsupported optional skill: {skill_id}")
+  target = optional_skill_path(ctx, skill_id)
+  if not target.exists():
+    status = optional_skill_status(ctx, skill_id)
+    status["changed"] = False
+    status["message"] = f"{skill_id} is not installed"
+    return status
+  shutil.rmtree(target)
+  status = optional_skill_status(ctx, skill_id)
+  status["changed"] = True
+  return status
+
+
+def verify_optional_skill(ctx, skill_id, timeout=10):
+  status = optional_skill_status(ctx, skill_id)
+  checks = []
+
+  def add_check(name, ok, detail=""):
+    checks.append({"name": name, "ok": ok, "detail": detail})
+
+  skill_path = Path(status["path"])
+  add_check("skill-directory", skill_path.is_dir(), str(skill_path))
+  add_check("skill-md", (skill_path / "SKILL.md").is_file(), str(skill_path / "SKILL.md"))
+
+  if os.name == "nt":
+    run_script = skill_path / "scripts/run.ps1"
+    command = ["pwsh", "-NoLogo", "-NoProfile", "-File", str(run_script), "--help"]
+    auth_command = ["pwsh", "-NoLogo", "-NoProfile", "-File", str(run_script), "auth", "status"]
+  else:
+    run_script = skill_path / "scripts/run.sh"
+    command = ["bash", str(run_script), "--help"]
+    auth_command = ["bash", str(run_script), "auth", "status"]
+
+  add_check("launcher", run_script.is_file(), str(run_script))
+  help_output = ""
+  if run_script.is_file():
+    try:
+      completed = subprocess.run(command, check=False, capture_output=True, text=True, timeout=timeout)
+      help_output = (completed.stdout or "") + (completed.stderr or "")
+      add_check("help-command", completed.returncode == 0, f"exit={completed.returncode}")
+    except subprocess.TimeoutExpired:
+      add_check("help-command", False, "timeout")
+    for term in OPTIONAL_SKILLS[skill_id]["required_help_terms"]:
+      add_check(f"help-term:{term}", term in help_output, term)
+    try:
+      auth_completed = subprocess.run(auth_command, check=False, capture_output=True, text=True, timeout=timeout)
+      add_check("auth-status", auth_completed.returncode == 0, f"exit={auth_completed.returncode}")
+    except subprocess.TimeoutExpired:
+      add_check("auth-status", False, "timeout")
+  else:
+    add_check("help-command", False, "launcher missing")
+    for term in OPTIONAL_SKILLS[skill_id]["required_help_terms"]:
+      add_check(f"help-term:{term}", False, "launcher missing")
+    add_check("auth-status", False, "launcher missing")
+
+  return {
+    "id": skill_id,
+    "ok": all(check["ok"] for check in checks),
+    "installed": status["installed"],
+    "path": status["path"],
+    "checks": checks,
+  }
+
+
 def build_pack_summary(ctx):
   asset_catalog = load_asset_catalog(ctx)
   workflow_catalog = load_workflow_catalog(ctx)
   asset_by_id = {asset["id"]: asset for asset in asset_catalog["assets"]}
   packs = []
   for pack in workflow_catalog["packs"]:
-    pack_assets = [asset_by_id[asset_id] for asset_id in pack["assets"]]
+    pack_assets = []
+    for asset_id in pack["assets"]:
+      asset = copy.deepcopy(asset_by_id[asset_id])
+      asset_path = ctx.root / asset["path"]
+      if asset_id == "skill:msgraph":
+        asset_path = optional_skill_path(ctx, "msgraph") / "SKILL.md"
+      asset["installed"] = asset_path.is_file()
+      pack_assets.append(asset)
     packs.append(
       {
         "id": pack["id"],
@@ -638,6 +807,8 @@ def build_pack_summary(ctx):
         "supported_clients": pack["supported_clients"],
         "required_tools": pack["required_tools"],
         "trust_level": pack["trust_level"],
+        "support_tier": pack.get("support_tier", "supported"),
+        "installed": all(asset["installed"] for asset in pack_assets),
         "asset_count": len(pack_assets),
         "assets": pack_assets,
       }
@@ -662,6 +833,7 @@ def render_client(ctx, target):
       "target": target,
       "manifest_path": str(path),
       "pack_count": len(packs),
+      "packs": packs,
       "runtime_asset_root": str(ctx.root / ".opencode"),
     }
 
@@ -688,6 +860,7 @@ def render_client(ctx, target):
       "target": target,
       "manifest_path": str(target_root / "manifest.json"),
       "pack_count": len(packs),
+      "packs": packs,
       "render_root": str(target_root),
     }
 
@@ -712,6 +885,7 @@ def render_client(ctx, target):
       "target": target,
       "manifest_path": str(target_root / "manifest.json"),
       "pack_count": len(packs),
+      "packs": packs,
       "render_root": str(target_root),
     }
 
@@ -1431,15 +1605,17 @@ def client_open(ctx, target, desktop=False):
 def render_pack_list(packs):
   for pack in packs:
     clients = ", ".join(pack["supported_clients"])
+    installed = "installed" if pack.get("installed") else "not installed"
     print(
       f"{pack['id']}: {pack['label']} | trust {pack['trust_level']} | "
-      f"{pack['asset_count']} assets | clients: {clients}"
+      f"{pack['asset_count']} assets | {installed} | clients: {clients}"
     )
 
 
 def render_pack_show(pack):
   print(f"{pack['id']}: {pack['label']}")
   print(f"  trust: {pack['trust_level']}")
+  print(f"  installed: {'yes' if pack.get('installed') else 'no'}")
   print(f"  description: {pack['description']}")
   print(f"  clients: {', '.join(pack['supported_clients'])}")
   print(f"  tools: {', '.join(pack['required_tools'])}")
@@ -1447,8 +1623,24 @@ def render_pack_show(pack):
   for asset in pack["assets"]:
     print(
       f"    - {asset['id']} [{asset['type']}] "
-      f"support={asset['support_tier']} trust={asset['trust_level']}"
+      f"support={asset['support_tier']} trust={asset['trust_level']} "
+      f"installed={'yes' if asset.get('installed') else 'no'}"
     )
+
+
+def render_skill_status(payload):
+  state = "installed" if payload.get("installed") else "not installed"
+  print(f"{payload['id']}: {state} | {payload['path']}")
+  if payload.get("message"):
+    print(payload["message"])
+
+
+def render_skill_verify(payload):
+  ok = "ok" if payload.get("ok") else "FAIL"
+  print(f"{payload['id']}: {ok} | {payload['path']}")
+  for check in payload.get("checks", []):
+    state = "ok" if check["ok"] else "FAIL"
+    print(f"  {check['name']}: {state} {check.get('detail', '')}".rstrip())
 
 
 def render_scenario_list(scenarios):
@@ -2085,6 +2277,12 @@ def emit(payload, json_mode=False, kind=None):
   if kind == "pack-show":
     render_pack_show(payload)
     return
+  if kind == "skill-status":
+    render_skill_status(payload)
+    return
+  if kind == "skill-verify":
+    render_skill_verify(payload)
+    return
   if kind == "scenario-list":
     render_scenario_list(payload)
     return
@@ -2212,6 +2410,24 @@ def build_parser():
   pack_show_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
   pack_show_parser.add_argument("pack_id")
 
+  skill_parser = subparsers.add_parser("skill")
+  skill_sub = skill_parser.add_subparsers(dest="skill_command", required=True)
+  skill_status_parser = skill_sub.add_parser("status")
+  skill_status_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+  skill_status_parser.add_argument("skill_id", choices=sorted(OPTIONAL_SKILLS))
+  skill_install_parser = skill_sub.add_parser("install")
+  skill_install_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+  skill_install_parser.add_argument("--source", help="Local msgraph directory or zip; omit to download upstream release")
+  skill_install_parser.add_argument("--force", action="store_true", help="Replace an existing optional skill install")
+  skill_install_parser.add_argument("skill_id", choices=sorted(OPTIONAL_SKILLS))
+  skill_remove_parser = skill_sub.add_parser("remove")
+  skill_remove_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+  skill_remove_parser.add_argument("skill_id", choices=sorted(OPTIONAL_SKILLS))
+  skill_verify_parser = skill_sub.add_parser("verify")
+  skill_verify_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+  skill_verify_parser.add_argument("--timeout", type=int, default=10)
+  skill_verify_parser.add_argument("skill_id", choices=sorted(OPTIONAL_SKILLS))
+
   scenario_parser = subparsers.add_parser("scenario")
   scenario_sub = scenario_parser.add_subparsers(dest="scenario_command", required=True)
   scenario_list_parser = scenario_sub.add_parser("list")
@@ -2320,6 +2536,25 @@ def main():
     if args.pack_command == "show":
       emit(pack_show(ctx, args.pack_id), args.json, kind="pack-show")
       return
+
+  if args.command == "skill":
+    if args.skill_command == "status":
+      emit(optional_skill_status(ctx, args.skill_id), args.json, kind="skill-status")
+      return
+    if args.skill_command == "install":
+      emit(
+        install_optional_skill(ctx, args.skill_id, source=args.source, force=args.force),
+        args.json,
+        kind="skill-status",
+      )
+      return
+    if args.skill_command == "remove":
+      emit(remove_optional_skill(ctx, args.skill_id), args.json, kind="skill-status")
+      return
+    if args.skill_command == "verify":
+      payload = verify_optional_skill(ctx, args.skill_id, timeout=args.timeout)
+      emit(payload, args.json, kind="skill-verify")
+      raise SystemExit(0 if payload["ok"] else 1)
 
   if args.command == "scenario":
     if args.scenario_command == "list":

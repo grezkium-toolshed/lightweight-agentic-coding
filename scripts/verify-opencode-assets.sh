@@ -39,6 +39,10 @@ def has_key(frontmatter: str, key: str):
 
 
 def check_skill(path: Path):
+    asset = catalog_paths.get(str(path.relative_to(root)))
+    if asset and asset.get("support_tier") == "optional" and asset.get("source") == "upstream-external":
+        return
+
     text = path.read_text(encoding="utf-8")
     frontmatter, body = split_frontmatter(text, path)
     if not frontmatter:

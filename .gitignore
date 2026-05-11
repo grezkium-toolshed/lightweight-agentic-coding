@@ -23,6 +23,7 @@ runtime-config/opencode.active.json
 .opencode/package.json
 .opencode/package-lock.json
 .opencode/node_modules/
+.opencode/skills/msgraph/
 .claude/
 .qwen/
 *.log

@@ -22,3 +22,4 @@ Read next:
 - `OPENCODE_ZEN_GO.md`
 - `CODEX_AUTH.md`
 - `ANTHROPIC_API.md`
+- `MICROSOFT_GRAPH.md`

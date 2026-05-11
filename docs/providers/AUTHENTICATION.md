@@ -77,6 +77,17 @@ The `opencode.template.jsonc` includes a disabled GitHub MCP server configuratio
 
 When enabled, OpenCode can read PRs, issues, CI checks, and perform code search via the GitHub API.
 
+## Microsoft Graph Skill Pack
+
+Microsoft Graph support is available as an optional skill pack, not part of the default runtime:
+
+```bash
+./bin/lac skill install msgraph
+./bin/lac skill verify msgraph
+```
+
+Use delegated auth for workstation use, or a least-privilege service principal for unattended workflows. See `MICROSOFT_GRAPH.md`.
+
 ## Important notes
 - These environment variable names are repo conventions for documentation and shell setup. Local-cluster readiness is profile/runtime based, so use the selected profile plus `./bin/lac runtime start` rather than treating env vars as a readiness step.
 - Model availability and quota policies change frequently.

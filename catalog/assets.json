@@ -192,6 +192,23 @@
         "network": "not required"
       },
       "supported_clients": ["opencode", "claude-code", "codex-reference"]
+    },
+    {
+      "id": "skill:msgraph",
+      "type": "skill",
+      "path": ".opencode/skills/msgraph/SKILL.md",
+      "pack": "microsoft-graph",
+      "trust_level": "reviewed-external",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "merill/msgraph",
+      "review_status": "opt-in-reviewed",
+      "permission_notes": {
+        "shell": "uses bundled msgraph launcher and binaries",
+        "network": "required for Graph API execution; local index search is offline",
+        "auth": "delegated or app-only Microsoft Graph auth; secrets must remain in environment or the upstream auth cache"
+      },
+      "supported_clients": ["opencode", "claude-code", "codex-reference"]
     }
   ]
 }
