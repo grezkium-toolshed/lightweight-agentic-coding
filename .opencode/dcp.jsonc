@@ -8,6 +8,11 @@
   "pruneNotification": "minimal",
   // "chat" or "toast"
   "pruneNotificationType": "chat",
+  // Register /dcp, /dcp context, /dcp stats, /dcp sweep, and related commands
+  "commands": {
+    "enabled": true,
+    "protectedTools": []
+  },
   // Context limits tuned for 262k model context window
   "compress": {
     // "range" or "message"

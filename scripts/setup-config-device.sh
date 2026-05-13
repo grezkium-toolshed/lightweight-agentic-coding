@@ -60,19 +60,27 @@ else
   echo "[setup] oMLX not detected (no $OMLX_SETTINGS). Skipping oMLX configuration."
 fi
 
-# --- DCP plugin check --------------------------------------------------------
-DCP_PLUGIN="@tarquinen/opencode-dcp"
-DCP_INSTALLED=0
-if command -v opencode >/dev/null 2>&1; then
-  if opencode plugin list 2>/dev/null | grep -q "$DCP_PLUGIN"; then
-    DCP_INSTALLED=1
-  fi
+# --- DCP plugin install ------------------------------------------------------
+DCP_PLUGIN="@tarquinen/opencode-dcp@latest"
+DCP_CACHE_DIR="${HOME}/.cache/opencode/packages/@tarquinen/opencode-dcp@latest"
+DCP_PACKAGE_JSON="${DCP_CACHE_DIR}/node_modules/@tarquinen/opencode-dcp/package.json"
+if [[ -f "$DCP_PACKAGE_JSON" ]] && grep -q '"version"[[:space:]]*:[[:space:]]*"3.1.9"' "$DCP_PACKAGE_JSON"; then
+  echo "[setup] Removing stale DCP 3.1.9 package cache before reinstall..."
+  rm -rf "$DCP_CACHE_DIR"
 fi
-
-if [[ "$DCP_INSTALLED" -eq 0 ]]; then
-  echo "[setup] WARNING: Dynamic Context Pruning plugin '$DCP_PLUGIN' is not installed."
-  echo "[setup] It is listed in opencode.template.jsonc but will fail to load until installed."
-  echo "[setup] Install with: opencode plugin $DCP_PLUGIN --global"
+if [[ "${AI_CLUSTER_INSTALL_DCP:-1}" == "0" ]]; then
+  echo "[setup] DCP plugin install skipped (AI_CLUSTER_INSTALL_DCP=0)."
+elif command -v opencode >/dev/null 2>&1; then
+  echo "[setup] Installing/updating Dynamic Context Pruning plugin: $DCP_PLUGIN"
+  if opencode plugin "$DCP_PLUGIN" --global --force; then
+    echo "[setup] DCP plugin ready. Restart OpenCode and run /dcp to verify."
+  else
+    echo "[setup] WARNING: DCP plugin install failed."
+    echo "[setup] Retry manually with: opencode plugin $DCP_PLUGIN --global --force"
+  fi
+else
+  echo "[setup] WARNING: opencode is not in PATH; cannot install DCP plugin."
+  echo "[setup] After installing OpenCode, run: opencode plugin $DCP_PLUGIN --global --force"
 fi
 
 echo "[setup] Device configuration complete for profile: $PROFILE"

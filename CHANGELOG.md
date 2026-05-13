@@ -22,6 +22,7 @@ for tagged releases (public beta and beyond).
 - Expanded `state/README.md` with env-var override and git-ignore notes.
 - Added `docs/providers/FREE_CLOUD_FALLBACKS.md` to documentation verification checks.
 - Added Contributing section to `README.md`.
+- Device setup now installs or refreshes `@tarquinen/opencode-dcp@latest` so `/dcp` is available after restarting OpenCode.
 
 ### Fixed
 
@@ -33,6 +34,7 @@ for tagged releases (public beta and beyond).
 - Foreground runtime mode missing SIGINT/SIGTERM cleanup in `scripts/lac.py`.
 - Root `agents/` and `skills/` directories missing warnings about `.opencode/` runtime paths.
 - Missing `--version` flag on `./bin/lac` CLI.
+- DCP setup no longer calls the unsupported `opencode plugin list` command.
 
 ## [0.1.0] — 2026-04-27
 

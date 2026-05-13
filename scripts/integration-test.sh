@@ -50,7 +50,28 @@ run python3 "$ROOT/scripts/lac.py" provider list --json > "$TMP_DIR/providers.js
 run python3 "$ROOT/scripts/lac.py" pack list --json > "$TMP_DIR/packs.json"
 run python3 "$ROOT/scripts/lac.py" scenario list --json > "$TMP_DIR/scenarios.json"
 
-# 7. Optional msgraph skill lifecycle works against a temp skill root
+# 7. DCP plugin setup stays on the supported install path
+python3 - <<'PY' "$ROOT"
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+template = (root / "opencode.template.jsonc").read_text(encoding="utf-8")
+setup_sh = (root / "scripts/setup-config-device.sh").read_text(encoding="utf-8")
+setup_ps1 = (root / "scripts/setup-config-device.ps1").read_text(encoding="utf-8")
+dcp_config = (root / ".opencode/dcp.jsonc").read_text(encoding="utf-8")
+
+assert "@tarquinen/opencode-dcp@latest" in template
+assert "opencode plugin list" not in setup_sh
+assert "Removing stale DCP 3.1.9 package cache" in setup_sh
+assert "opencode plugin \"$DCP_PLUGIN\" --global --force" in setup_sh
+assert "Removing stale DCP 3.1.9 package cache" in setup_ps1
+assert "opencode plugin $DcpPlugin --global --force" in setup_ps1
+assert '"commands"' in dcp_config and '"enabled": true' in dcp_config
+PY
+
+# 8. Optional msgraph skill lifecycle works against a temp skill root
 SKILL_ROOT="$TMP_DIR/opencode-skills"
 FAKE_MSGRAPH="$TMP_DIR/fixtures/msgraph"
 mkdir -p "$FAKE_MSGRAPH/scripts"
@@ -105,11 +126,11 @@ if ! env AI_CLUSTER_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac
 fi
 test ! -e "$SKILL_ROOT/msgraph" || { echo "[FAIL] msgraph skill directory was not removed"; FAILED=1; }
 
-# 8. Init wizard works with --yes
+# 9. Init wizard works with --yes
 INIT_STATE="$TMP_DIR/init-state"
 AI_CLUSTER_STATE_ROOT="$INIT_STATE" run python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --no-cloud --json > "$TMP_DIR/init.json"
 
-# 9. Validate generated preset
+# 10. Validate generated preset
 if [[ -f "$INIT_STATE/runtime/presets.active.ini" ]]; then
   echo "[ok] presets.active.ini generated"
 else

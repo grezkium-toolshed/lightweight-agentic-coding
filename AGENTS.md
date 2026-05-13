@@ -93,7 +93,7 @@ Manual validation:
 - `opencode.template.jsonc`: source template for generated OpenCode config
 - `.opencode/agents/`: curated subagents
 - `.opencode/skills/`: curated skills
-- `.opencode/dcp.jsonc`: Dynamic Context Pruning plugin config (requires `@tarquinen/opencode-dcp`)
+- `.opencode/dcp.jsonc`: Dynamic Context Pruning plugin config (installed/refreshed as `@tarquinen/opencode-dcp@latest` by device setup)
 - `~/.config/opencode/plugins/`: globally installed OpenCode plugins
 - `runtime-config/presets/<profile>.ini`: template presets
 - `state/runtime/presets.active.ini`: generated active preset

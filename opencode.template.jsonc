@@ -10,7 +10,7 @@
   // Upstream: https://github.com/Opencode-DCP/opencode-dynamic-context-pruning
   "plugin": [
     "opencode-antigravity-auth",
-    "@tarquinen/opencode-dcp"
+    "@tarquinen/opencode-dcp@latest"
   ],
   "provider": {
     "local-cluster": {
