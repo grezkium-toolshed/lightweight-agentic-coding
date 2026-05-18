@@ -15,8 +15,7 @@ from lib.jsonc import load_jsonc
 root = Path(sys.argv[1])
 manifest_path = root / "runtime-config/profiles.json"
 scenario_catalog_path = root / "catalog/scenarios.json"
-setup_models_sh = root / "scripts/setup-models-device.sh"
-setup_models_ps1 = root / "scripts/setup-models-device.ps1"
+models_py = root / "src/lac/models.py"
 readme_path = root / "README.md"
 config_path = root / "opencode.template.jsonc"
 
@@ -30,25 +29,14 @@ manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 profiles = manifest["profiles"]
 scenario_catalog = json.loads(scenario_catalog_path.read_text(encoding="utf-8"))
 scenario_ids = {scenario["id"] for scenario in scenario_catalog["scenarios"]}
-manifest_ids = list(profiles.keys())
-manifest_id_set = set(manifest_ids)
+manifest_ids = set(profiles.keys())
 
-sh_text = setup_models_sh.read_text(encoding="utf-8")
-ps1_text = setup_models_ps1.read_text(encoding="utf-8")
+models_text = models_py.read_text(encoding="utf-8")
 
-sh_profiles = set(
-    match.group(1)
-    for match in re.finditer(r"(?m)^[ \t]*([a-z0-9-]+)\)", sh_text)
-    if match.group(1) not in {"--profile", "*", "auto"}
-)
-ps1_profiles = set(
-    match.group(1)
-    for match in re.finditer(r"(?m)^[ \t]*'([a-z0-9-]+)'\s*\{", ps1_text)
-    if match.group(1) != "auto"
-)
-
-require(sh_profiles == manifest_id_set, f"setup-models-device.sh profiles differ from runtime-config/profiles.json: {sorted(sh_profiles ^ manifest_id_set)}")
-require(ps1_profiles == manifest_id_set, f"setup-models-device.ps1 profiles differ from runtime-config/profiles.json: {sorted(ps1_profiles ^ manifest_id_set)}")
+py_profiles = set(re.findall(r'    "([a-z0-9-]+)":\s*\{', models_text))
+cloud_profiles = set(re.findall(r'"([a-z0-9-]+)"', models_text.split("CLOUD_PROFILES = {")[1].split("}")[0]))
+all_py_profiles = py_profiles | cloud_profiles
+require(all_py_profiles == manifest_ids, f"src/lac/models.py profiles differ from runtime-config/profiles.json: {sorted(all_py_profiles ^ manifest_ids)}")
 
 for profile_id, profile in profiles.items():
     require(profile["id"] == profile_id, f"{profile_id}: id must match profile key")
@@ -96,20 +84,16 @@ require(profile_section_match is not None, "README.md is missing the '## Which P
 profile_section = profile_section_match.group("section")
 readme_profiles = set(re.findall(r"`([a-z0-9-]+)`", profile_section))
 require(
-    manifest_id_set <= readme_profiles,
-    f"README.md profile list is missing: {sorted(manifest_id_set - readme_profiles)}",
+    manifest_ids <= readme_profiles,
+    f"README.md profile list is missing: {sorted(manifest_ids - readme_profiles)}",
 )
 
-require("Qwen3.5-9B-Q4_K_M.gguf" in sh_text, "setup-models-device.sh missing Qwen3.5 9B Q4_K_M download")
-require("gemma-4-E4B-IT-Q8_0.gguf" in sh_text, "setup-models-device.sh missing Gemma 4 E4B Q8 download")
-require("unsloth/gemma-4-E4B-it-MLX-8bit" in sh_text, "setup-models-device.sh missing Gemma 4 E4B MLX staging")
-require("Qwen3.5-9B-Q4_K_M.gguf" in ps1_text, "setup-models-device.ps1 missing Qwen3.5 9B Q4_K_M download")
-require("gemma-4-E4B-IT-Q8_0.gguf" in ps1_text, "setup-models-device.ps1 missing Gemma 4 E4B Q8 download")
-require("unsloth/gemma-4-E4B-it-MLX-8bit" in ps1_text, "setup-models-device.ps1 missing Gemma 4 E4B MLX staging")
+require("Qwen3.5-9B-Q4_K_M.gguf" in models_text, "src/lac/models.py missing Qwen3.5 9B Q4_K_M download")
+require("gemma-4-E4B-IT-Q8_0.gguf" in models_text, "src/lac/models.py missing Gemma 4 E4B Q8 download")
+require("gemma-4-E4B-it-MLX-8bit" in models_text, "src/lac/models.py missing Gemma 4 E4B MLX staging")
 
 print(f"[ok] manifest profiles: {len(manifest_ids)}")
-print(f"[ok] setup-models-device.sh profiles match manifest")
-print(f"[ok] setup-models-device.ps1 profiles match manifest")
+print(f"[ok] src/lac/models.py profiles match manifest")
 print(f"[ok] README profile list covers manifest ids")
 print("Profile parity checks passed.")
 PY

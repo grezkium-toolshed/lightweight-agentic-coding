@@ -40,6 +40,7 @@ from lac.packs import (
 )
 from lac.scenarios import scenario_list, scenario_show
 from lac.clients import render_client, client_open
+from lac.models import models_sync
 
 
 def load_json(path):
@@ -142,17 +143,46 @@ def _strip_global_json_flag(argv):
     return filtered, json_mode
 
 
-def run_models_sync(profile_id):
-    if os.name == "nt":
-        command = [
-            "pwsh", "-NoLogo", "-NoProfile", "-File",
-            str(ROOT / "scripts/setup-models-device.ps1"),
-            "-Profile", profile_id,
-        ]
+def device_setup(ctx, profile_id):
+    from lac.profiles import profile_apply
+    print(f"[setup] Applying profile: {profile_id}")
+    profile_apply(ctx, profile_id, verbose_runtime=False)
+    omlx_settings = Path.home() / ".omlx" / "settings.json"
+    if omlx_settings.is_file():
+        print(f"[setup] oMLX detected at {omlx_settings} — updating context limits...")
+        cfg = json.loads(omlx_settings.read_text(encoding="utf-8"))
+        cfg.setdefault("sampling", {})
+        cfg["sampling"]["max_context_window"] = 262144
+        cfg["sampling"]["max_tokens"] = 16384
+        omlx_settings.write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
+        print("[setup] oMLX max_context_window=262144 max_tokens=16384")
     else:
-        command = ["bash", str(ROOT / "scripts/setup-models-device.sh"), "--profile", profile_id]
-    result = subprocess.run(command, check=False)
-    return result.returncode
+        print(f"[setup] oMLX not detected (no {omlx_settings}). Skipping oMLX configuration.")
+    dcp_plugin = "@tarquinen/opencode-dcp@latest"
+    dcp_cache_dir = Path.home() / ".cache" / "opencode" / "packages" / dcp_plugin
+    dcp_package_json = dcp_cache_dir / "node_modules" / dcp_plugin / "package.json"
+    if dcp_package_json.is_file() and '"version"' in dcp_package_json.read_text(encoding="utf-8") and '"3.1.9"' in dcp_package_json.read_text(encoding="utf-8"):
+        print("[setup] Removing stale DCP 3.1.9 package cache before reinstall...")
+        shutil.rmtree(dcp_cache_dir, ignore_errors=True)
+    if os.environ.get("AI_CLUSTER_INSTALL_DCP", "1") == "0":
+        print("[setup] DCP plugin install skipped (AI_CLUSTER_INSTALL_DCP=0).")
+    elif command_exists("opencode"):
+        print(f"[setup] Installing/updating Dynamic Context Pruning plugin: {dcp_plugin}")
+        result = subprocess.run(["opencode", "plugin", dcp_plugin, "--global", "--force"], check=False)
+        if result.returncode == 0:
+            print("[setup] DCP plugin ready. Restart OpenCode and run /dcp to verify.")
+        else:
+            print("[setup] WARNING: DCP plugin install failed.")
+            print(f"[setup] Retry manually with: opencode plugin {dcp_plugin} --global --force")
+    else:
+        print("[setup] WARNING: opencode is not in PATH; cannot install DCP plugin.")
+        print(f"[setup] After installing OpenCode, run: opencode plugin {dcp_plugin} --global --force")
+    print(f"[setup] Device configuration complete for profile: {profile_id}")
+    return 0
+
+
+def run_models_sync(profile_id):
+    return models_sync(profile_id)
 
 
 def doctor(ctx, strict=False, bootstrap_hint=False):
@@ -932,6 +962,10 @@ def build_parser():
     provider_verify_parser.add_argument("--refresh-catalog", action="store_true", dest="refresh_catalog", help="Update last_verified_at in catalog/providers.json on success")
     provider_verify_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
 
+    setup_parser = subparsers.add_parser("setup", help="Apply profile and configure device (oMLX, DCP plugin)")
+    setup_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+    setup_parser.add_argument("profile_id")
+
     init_parser = subparsers.add_parser("init", help="Interactive onboarding wizard")
     init_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
     init_parser.add_argument("--yes", action="store_true", help="Non-interactive; accept defaults or flag values")
@@ -1058,6 +1092,9 @@ def main():
                 record.pop("parsed_models", None)
             emit(record, args.json, kind="provider-verify")
             raise SystemExit(1 if record["status"] == "error" else 0)
+
+    if args.command == "setup":
+        raise SystemExit(device_setup(ctx, args.profile_id))
 
     if args.command == "init":
         result = init_wizard(ctx, yes=args.yes, profile=args.profile, cloud=args.cloud, no_cloud=args.no_cloud)

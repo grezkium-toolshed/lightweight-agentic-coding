@@ -1,0 +1,289 @@
+"""Model sync: download GGUF and MLX weights from Hugging Face."""
+
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+
+PROFILE_MODELS = {
+    "16gb": {
+        "gguf": [
+            ("qwen3.6", "Qwen3.6-27B-UD-Q3_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 14000),
+        ],
+        "mlx": ["unsloth/Qwen3.6-27B-UD-MLX-6bit"],
+    },
+    "macos-16gb": {
+        "gguf": [
+            ("qwen3.5", "Qwen3.5-9B-Q4_K_M.gguf", "unsloth/Qwen3.5-9B-GGUF", 5000),
+            ("gemma4", "gemma-4-E4B-IT-Q8_0.gguf", "unsloth/gemma-4-E4B-IT-GGUF", 4000),
+        ],
+        "mlx": ["unsloth/gemma-4-E4B-it-MLX-8bit"],
+    },
+    "24gb": {
+        "gguf": [
+            ("qwen3.6", "Qwen3.6-27B-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 17000),
+            ("qwen3.6", "Qwen3.6-27B-UD-Q3_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 14000),
+        ],
+        "mlx": ["unsloth/Qwen3.6-27B-UD-MLX-6bit"],
+    },
+    "32gb": {
+        "gguf": [
+            ("qwen3.6", "Qwen3.6-27B-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 17000),
+            ("qwen", "Qwen3-Coder-Next-MXFP4_MOE.gguf", "unsloth/Qwen3-Coder-Next-GGUF", 28000),
+        ],
+        "mlx": ["unsloth/Qwen3.6-27B-UD-MLX-6bit"],
+    },
+    "64gb": {
+        "gguf": [
+            ("qwen3.6", "Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-GGUF", 36000),
+            ("qwen3.6", "Qwen3.6-27B-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 17000),
+            ("qwen", "Qwen3-Coder-Next-MXFP4_MOE.gguf", "unsloth/Qwen3-Coder-Next-GGUF", 28000),
+        ],
+        "mlx": ["unsloth/Qwen3.6-35B-A3B-MLX-8bit", "unsloth/Qwen3.6-27B-UD-MLX-6bit"],
+    },
+    "128gb-qwen122b": {
+        "gguf": [
+            ("qwen3.5", "Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf", "unsloth/Qwen3.5-122B-A10B-GGUF", 100),
+            ("qwen3.5", "Qwen3.5-122B-A10B-MXFP4_MOE-00002-of-00003.gguf", "unsloth/Qwen3.5-122B-A10B-GGUF", 42000),
+            ("qwen3.5", "Qwen3.5-122B-A10B-MXFP4_MOE-00003-of-00003.gguf", "unsloth/Qwen3.5-122B-A10B-GGUF", 15000),
+            ("qwen", "Qwen3-Coder-Next-MXFP4_MOE.gguf", "unsloth/Qwen3-Coder-Next-GGUF", 28000),
+        ],
+        "mlx": [],
+    },
+    "128gb-multi": {
+        "gguf": [
+            ("qwen3.6", "Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-GGUF", 36000),
+            ("qwen3.6", "Qwen3.6-27B-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 17000),
+            ("qwen3.6", "Qwen3.6-27B-UD-Q3_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 14000),
+            ("qwen", "Qwen3-Coder-Next-MXFP4_MOE.gguf", "unsloth/Qwen3-Coder-Next-GGUF", 28000),
+        ],
+        "mlx": ["unsloth/Qwen3.6-35B-A3B-MLX-8bit", "unsloth/Qwen3.6-27B-UD-MLX-6bit"],
+    },
+    "128gb-minimax": {
+        "gguf": [
+            ("minimax", "MiniMax-M2.7-UD-IQ4_XS-00001-of-00003.gguf", os.environ.get("MINIMAX_REPO", "unsloth/MiniMax-M2.7-GGUF"), 5),
+            ("minimax", "MiniMax-M2.7-UD-IQ4_XS-00002-of-00003.gguf", os.environ.get("MINIMAX_REPO", "unsloth/MiniMax-M2.7-GGUF"), 30000),
+            ("minimax", "MiniMax-M2.7-UD-IQ4_XS-00003-of-00003.gguf", os.environ.get("MINIMAX_REPO", "unsloth/MiniMax-M2.7-GGUF"), 30000),
+            ("qwen", "Qwen3-Coder-Next-MXFP4_MOE.gguf", "unsloth/Qwen3-Coder-Next-GGUF", 28000),
+        ],
+        "mlx": [],
+    },
+    "gemma-16gb": {
+        "gguf": [
+            ("gemma4", "gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf", "unsloth/gemma-4-26B-A4B-IT-GGUF", 15000),
+            ("gemma4", "gemma-4-E4B-IT-Q8_0.gguf", "unsloth/gemma-4-E4B-IT-GGUF", 4000),
+        ],
+        "mlx": ["unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit", "unsloth/gemma-4-E4B-it-MLX-8bit"],
+    },
+    "gemma-24gb": {
+        "gguf": [
+            ("gemma4", "gemma-4-31B-IT-UD-Q4_K_XL.gguf", "unsloth/gemma-4-31B-IT-GGUF", 16000),
+            ("gemma4", "gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf", "unsloth/gemma-4-26B-A4B-IT-GGUF", 15000),
+        ],
+        "mlx": ["unsloth/gemma-4-31b-it-UD-MLX-4bit", "unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit"],
+    },
+    "gemma-32gb": {
+        "gguf": [
+            ("gemma4", "gemma-4-31B-IT-Q8_0.gguf", "unsloth/gemma-4-31B-IT-GGUF", 32000),
+            ("gemma4", "gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf", "unsloth/gemma-4-26B-A4B-IT-GGUF", 15000),
+        ],
+        "mlx": ["unsloth/gemma-4-31b-it-UD-MLX-4bit", "unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit"],
+    },
+    "gemma-64gb": {
+        "gguf": [
+            ("gemma4", "gemma-4-31B-IT-BF16.gguf", "unsloth/gemma-4-31B-IT-GGUF", 60000),
+            ("gemma4", "gemma-4-31B-IT-Q8_0.gguf", "unsloth/gemma-4-31B-IT-GGUF", 32000),
+            ("gemma4", "gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf", "unsloth/gemma-4-26B-A4B-IT-GGUF", 15000),
+        ],
+        "mlx": ["unsloth/gemma-4-31b-it-UD-MLX-4bit", "unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit"],
+    },
+}
+
+CLOUD_PROFILES = {"openrouter", "opencode-go"}
+
+
+def command_exists(name):
+    return shutil.which(name) is not None
+
+
+def _hf_cli():
+    if command_exists("hf"):
+        return "hf"
+    if command_exists("huggingface-cli"):
+        return "huggingface-cli"
+    return None
+
+
+def _should_stage_mlx():
+    value = os.environ.get("AI_INCLUDE_MLX", "auto").lower()
+    if value in ("1", "true", "yes"):
+        if sys.platform != "darwin":
+            print("MLX is only supported on macOS. Ignoring AI_INCLUDE_MLX.", file=sys.stderr)
+            return False
+        return True
+    if value in ("0", "false", "no"):
+        return False
+    if value == "auto":
+        return sys.platform == "darwin"
+    raise SystemExit(f"Unsupported AI_INCLUDE_MLX value: {value}")
+
+
+def _verify_checksum(file_path, models_dir):
+    checksums_file = Path(models_dir) / "checksums.json"
+    if not checksums_file.is_file():
+        return True
+    rel_path = str(Path(file_path).relative_to(models_dir))
+    checksums = json.loads(checksums_file.read_text(encoding="utf-8"))
+    expected = checksums.get("checksums", {}).get(rel_path, "")
+    if not expected:
+        return True
+    actual = hashlib.sha256(Path(file_path).read_bytes()).hexdigest()
+    if actual != expected:
+        print(f"[warn] Checksum mismatch for {rel_path}", file=sys.stderr)
+        print(f"       expected: {expected}", file=sys.stderr)
+        print(f"       actual:   {actual}", file=sys.stderr)
+        return False
+    print(f"[checksum ok] {rel_path}")
+    return True
+
+
+def _get_expected_bytes(url):
+    import urllib.request
+    try:
+        req = urllib.request.Request(url, method="HEAD")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            cl = resp.headers.get("Content-Length")
+            if cl:
+                return int(cl)
+    except Exception:
+        pass
+    return 0
+
+
+def _download_one(subdir, filename, repo, remote, min_mb, models_dir):
+    target_dir = Path(models_dir) / subdir
+    target_file = target_dir / filename
+    tmp_file = target_file.with_name(filename + ".downloading")
+    url = f"https://huggingface.co/{repo}/resolve/main/{remote}"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    expected_bytes = _get_expected_bytes(url)
+    expected_mb = expected_bytes // (1024 * 1024) if expected_bytes else 0
+    if target_file.is_file():
+        size_bytes = target_file.stat().st_size
+        size_mb = size_bytes // (1024 * 1024)
+        if expected_bytes > 0 and size_bytes >= expected_bytes:
+            print(f"[skip] {target_file} ({size_mb}MB of ~{expected_mb}MB)")
+            return True
+        if expected_bytes == 0 and size_mb >= min_mb:
+            print(f"[skip] {target_file} ({size_mb}MB)")
+            return True
+        print(f"[warn] {target_file} incomplete ({size_mb}MB{' of ~' + str(expected_mb) + 'MB' if expected_mb else ''}); preserving for resume")
+        shutil.move(str(target_file), str(tmp_file))
+    if not target_file.is_file() and tmp_file.is_file():
+        tmp_bytes = tmp_file.stat().st_size
+        tmp_mb = tmp_bytes // (1024 * 1024)
+        if expected_bytes > 0 and tmp_bytes >= expected_bytes:
+            print(f"[resume] Promoting completed partial file: {tmp_file}")
+            shutil.move(str(tmp_file), str(target_file))
+        elif expected_bytes == 0 and tmp_mb >= min_mb:
+            print(f"[resume] Promoting completed partial file: {tmp_file}")
+            shutil.move(str(tmp_file), str(target_file))
+    if target_file.is_file():
+        promoted_bytes = target_file.stat().st_size
+        promoted_mb = promoted_bytes // (1024 * 1024)
+        if expected_bytes > 0 and promoted_bytes >= expected_bytes:
+            print(f"[skip] {target_file} ({promoted_mb}MB of ~{expected_mb}MB)")
+            return True
+        elif expected_bytes == 0 and promoted_mb >= min_mb:
+            print(f"[skip] {target_file} ({promoted_mb}MB)")
+            return True
+    hf = _hf_cli()
+    if hf:
+        print(f"[hf  ] {repo}/{remote} -> {target_dir}")
+        result = subprocess.run([hf, "download", repo, remote, "--local-dir", str(target_dir)], check=False)
+        if result.returncode != 0:
+            print(f"[fail] Hugging Face CLI download failed: {repo}/{remote}", file=sys.stderr)
+            return False
+    else:
+        print(f"[get ] {url}")
+        result = subprocess.run(
+            ["curl", "-fL", "--retry", "3", "--retry-delay", "3", "--retry-max-time", "300", "-C", "-", "-o", str(tmp_file), url],
+            check=False,
+        )
+        if result.returncode != 0:
+            print(f"[fail] Download failed, partial file preserved for resume: {tmp_file}", file=sys.stderr)
+            return False
+        shutil.move(str(tmp_file), str(target_file))
+    if not target_file.is_file():
+        print(f"[fail] Expected downloaded file missing: {target_file}", file=sys.stderr)
+        return False
+    new_bytes = target_file.stat().st_size
+    new_mb = new_bytes // (1024 * 1024)
+    if expected_bytes > 0:
+        if new_bytes < expected_bytes:
+            print(f"[fail] Download incomplete for {filename} ({new_mb}MB vs expected ~{expected_mb}MB); keeping file for resume", file=sys.stderr)
+            shutil.move(str(target_file), str(tmp_file))
+            return False
+    elif new_mb < min_mb:
+        print(f"[fail] Download too small for {filename} ({new_mb}MB < {min_mb}MB); keeping file for inspection/resume", file=sys.stderr)
+        return False
+    _verify_checksum(str(target_file), models_dir)
+    print(f"[ ok ] {target_file} ({new_mb}MB{' of ~' + str(expected_mb) + 'MB' if expected_mb else ''})")
+    return True
+
+
+def _download_mlx_repo(repo, models_dir):
+    target_dir = Path(models_dir) / "mlx" / repo.split("/", 1)[1]
+    if target_dir.is_dir():
+        print(f"[skip] {target_dir}")
+        return True
+    hf = _hf_cli()
+    if hf:
+        print(f"[mlx ] {repo} -> {target_dir}")
+        result = subprocess.run([hf, "download", repo, "--local-dir", str(target_dir)], check=False)
+        if result.returncode != 0:
+            print(f"[fail] MLX download failed: {repo}", file=sys.stderr)
+            return False
+        return True
+    print(f"[warn] Skipping MLX repo {repo}: install the Hugging Face CLI ('hf' or 'huggingface-cli') to stage macOS MLX weights.", file=sys.stderr)
+    return False
+
+
+def models_sync(profile_id, models_dir=None, root=None):
+    from lac.context import ROOT as DEFAULT_ROOT
+    if root is None:
+        root = DEFAULT_ROOT
+    if models_dir is None:
+        models_dir = os.environ.get("AI_MODELS_DIR", str(root / "models"))
+    if profile_id in CLOUD_PROFILES:
+        print(f"Profile: {profile_id}")
+        print(f"No local model downloads are required for the cloud-only {profile_id} profile.")
+        return 0
+    if profile_id not in PROFILE_MODELS:
+        print(f"Unsupported profile: {profile_id}", file=sys.stderr)
+        return 1
+    profile = PROFILE_MODELS[profile_id]
+    Path(models_dir).mkdir(parents=True, exist_ok=True)
+    print(f"Profile: {profile_id}")
+    print(f"Models dir: {models_dir}")
+    stage_mlx = _should_stage_mlx()
+    if stage_mlx and profile["mlx"]:
+        print("MLX staging: enabled for macOS")
+    failures = 0
+    for subdir, filename, repo, min_mb in profile["gguf"]:
+        remote = filename
+        if not _download_one(subdir, filename, repo, remote, min_mb, models_dir):
+            failures += 1
+    if stage_mlx:
+        for repo in profile["mlx"]:
+            if not _download_mlx_repo(repo, models_dir):
+                failures += 1
+    if failures > 0:
+        print(f"Done with {failures} failed download(s). Re-run the same command to resume.", file=sys.stderr)
+        return 1
+    print("Done.")
+    return 0
