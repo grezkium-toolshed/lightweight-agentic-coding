@@ -17,12 +17,4 @@ lac = "lac.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"lac" = [
-  "catalog/*.json",
-  "runtime-config/**/*.ini",
-  "runtime-config/profiles.json",
-  "opencode.template.jsonc",
-  ".opencode/agents/*.md",
-  ".opencode/skills/*/SKILL.md",
-  "templates/**/*",
-]
+"lac" = ["data/**/*"]

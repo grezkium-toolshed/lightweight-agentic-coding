@@ -1,0 +1,242 @@
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "local-cluster",
+      "label": "Local llama.cpp Cluster",
+      "env_var": "AI_CLUSTER_LOCAL_RUNTIME",
+      "docs_path": "docs/providers/README.md",
+      "last_verified_at": "2026-04-27",
+      "verification_method": "repo-runtime-contract-review",
+      "risk_level": "low",
+      "models": [
+        {
+          "id": "local-cluster/qwen3.5-27b-q4",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "local-cluster/gemma-4-31b-q4",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        }
+      ]
+    },
+    {
+      "id": "antigravity",
+      "label": "Antigravity Cloud",
+      "env_var": "ANTIGRAVITY_API_KEY",
+      "docs_path": "docs/providers/AUTHENTICATION.md",
+      "last_verified_at": "2026-04-27",
+      "verification_method": "repo-runtime-contract-review",
+      "risk_level": "medium",
+      "models": [
+        {
+          "id": "antigravity/qwen3-coder-480b",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "medium"
+        }
+      ]
+    },
+    {
+      "id": "z-ai",
+      "label": "Z.AI Cloud",
+      "env_var": "ZAI_API_KEY",
+      "docs_path": "docs/providers/AUTHENTICATION.md",
+      "last_verified_at": "2026-04-27",
+      "verification_method": "repo-runtime-contract-review",
+      "risk_level": "medium",
+      "models": [
+        {
+          "id": "z-ai/zai/glm-5",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "medium"
+        }
+      ]
+    },
+    {
+      "id": "nvidia-nim",
+      "label": "NVIDIA NIM",
+      "env_var": "NVIDIA_API_KEY",
+      "docs_path": "docs/providers/NVIDIA_NIM.md",
+      "last_verified_at": "2026-04-27",
+      "verification_method": "repo-runtime-contract-review",
+      "risk_level": "medium",
+      "models": [
+        {
+          "id": "nvidia-nim/qwen/qwen3-coder-480b-a35b-instruct",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "medium"
+        }
+      ]
+    },
+    {
+      "id": "openrouter",
+      "label": "OpenRouter Free Tier",
+      "env_var": "OPENROUTER_API_KEY",
+      "docs_path": "docs/providers/OPENROUTER_FREE.md",
+      "last_verified_at": "2026-04-27",
+      "verification_method": "repo-runtime-contract-review",
+      "risk_level": "high",
+      "models": [
+        {
+          "id": "openrouter/qwen/qwen3-coder:480b-free",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "high"
+        },
+        {
+          "id": "openrouter/openai/gpt-4o-mini:free",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "high"
+        }
+      ]
+    },
+    {
+      "id": "opencode-zen",
+      "label": "OpenCode Zen",
+      "env_var": "OPENCODE_ZEN_API_KEY",
+      "docs_path": "docs/providers/OPENCODE_ZEN_GO.md",
+      "last_verified_at": "2026-04-27",
+      "verification_method": "repo-runtime-contract-review",
+      "risk_level": "medium",
+      "models": [
+        {
+          "id": "opencode-zen/glm-4.7",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "medium"
+        }
+      ]
+    },
+    {
+      "id": "opencode-go",
+      "label": "OpenCode Go",
+      "env_var": "OPENCODE_GO_API_KEY",
+      "docs_path": "docs/providers/OPENCODE_ZEN_GO.md",
+      "last_verified_at": "2026-04-27",
+      "verification_method": "repo-runtime-contract-review",
+      "risk_level": "low",
+      "models": [
+        {
+          "id": "opencode-go/glm-5.1",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/glm-5",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/kimi-k2.6",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/kimi-k2.5",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/mimo-v2.5-pro",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/mimo-v2.5",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/mimo-v2-pro",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/mimo-v2-omni",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/qwen3.6-plus",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/qwen3.5-plus",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/minimax-m2.7",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/minimax-m2.5",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        }
+      ]
+    },
+    {
+      "id": "codex-auth",
+      "label": "Codex via ChatGPT Subscription",
+      "env_var": "OPENAI_API_KEY",
+      "docs_path": "docs/providers/CODEX_AUTH.md",
+      "last_verified_at": "2026-04-27",
+      "verification_method": "repo-runtime-contract-review",
+      "risk_level": "medium",
+      "models": [
+        {
+          "id": "codex-auth/gpt-5-codex",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "medium"
+        }
+      ]
+    },
+    {
+      "id": "anthropic",
+      "label": "Anthropic API",
+      "env_var": "ANTHROPIC_API_KEY",
+      "docs_path": "docs/providers/ANTHROPIC_API.md",
+      "last_verified_at": "2026-04-27",
+      "verification_method": "repo-runtime-contract-review",
+      "risk_level": "low",
+      "models": [
+        {
+          "id": "anthropic/claude-sonnet-4-6",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        },
+        {
+          "id": "anthropic/claude-opus-4-7",
+          "last_verified_at": "2026-04-27",
+          "verification_method": "config-review",
+          "risk_level": "low"
+        }
+      ]
+    }
+  ]
+}

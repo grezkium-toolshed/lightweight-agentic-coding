@@ -316,8 +316,8 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
         "assets": {
             "catalog_asset_count": len(asset_catalog["assets"]),
             "pack_count": len(workflow_catalog["packs"]),
-            "opencode_agents": len(list((ctx.root / ".opencode/agents").glob("*.md"))),
-            "opencode_skills": len(list((ctx.root / ".opencode/skills").glob("*/SKILL.md"))),
+            "opencode_agents": len(list(ctx.paths["opencode_agents_dir"].glob("*.md"))),
+            "opencode_skills": len(list(ctx.paths["opencode_skills_dir"].glob("*/SKILL.md"))),
         },
     }
     failures = []
@@ -351,8 +351,8 @@ def smoke(ctx, timeout):
         "runtime": runtime,
         "runtime_url": base_url,
         "client_assets": {
-            "agents": len(list((ctx.root / ".opencode/agents").glob("*.md"))),
-            "skills": len(list((ctx.root / ".opencode/skills").glob("*/SKILL.md"))),
+            "agents": len(list(ctx.paths["opencode_agents_dir"].glob("*.md"))),
+            "skills": len(list(ctx.paths["opencode_skills_dir"].glob("*/SKILL.md"))),
         },
     }
     if profile and profile["runtime_mode"] == "cloud":

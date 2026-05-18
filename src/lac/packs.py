@@ -15,7 +15,12 @@ def load_workflow_catalog(ctx):
 def optional_skill_root(ctx):
     import os
     from pathlib import Path
-    return Path(os.environ.get("AI_CLUSTER_OPENCODE_SKILLS_DIR", str(ctx.root / ".opencode/skills")))
+    env_dir = os.environ.get("AI_CLUSTER_OPENCODE_SKILLS_DIR")
+    if env_dir:
+        return Path(env_dir)
+    if ctx._is_repo:
+        return ctx.root / ".opencode/skills"
+    return Path.home() / ".local/share/lac/skills"
 
 
 def optional_skill_path(ctx, skill_id):
