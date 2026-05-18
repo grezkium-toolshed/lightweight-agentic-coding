@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lac-cli"
+version = "0.1.0"
+description = "Local AI Cluster CLI — profile management, runtime lifecycle, and provider orchestration"
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MIT"}
+
+[project.scripts]
+lac = "lac.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"lac" = [
+  "catalog/*.json",
+  "runtime-config/**/*.ini",
+  "runtime-config/profiles.json",
+  "opencode.template.jsonc",
+  ".opencode/agents/*.md",
+  ".opencode/skills/*/SKILL.md",
+  "templates/**/*",
+]

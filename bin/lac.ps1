@@ -1,19 +1,20 @@
 $ErrorActionPreference = 'Stop'
-$Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 
+# Repo-local dev wrapper: runs from source tree.
+# After `pip install`, users can just run `lac` directly.
 if (Get-Command python3 -ErrorAction SilentlyContinue) {
-  & python3 (Join-Path $Root 'scripts/lac.py') @args
+  & python3 -m lac @args
   exit $LASTEXITCODE
 }
 
 if (Get-Command python -ErrorAction SilentlyContinue) {
-  & python (Join-Path $Root 'scripts/lac.py') @args
+  & python -m lac @args
   exit $LASTEXITCODE
 }
 
 if (Get-Command py -ErrorAction SilentlyContinue) {
-  & py -3 (Join-Path $Root 'scripts/lac.py') @args
+  & py -m lac @args
   exit $LASTEXITCODE
 }
 
-throw 'Python 3 is required to run bin/lac.ps1'
+throw 'Python 3 is required to run lac'

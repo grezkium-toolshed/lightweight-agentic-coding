@@ -1,0 +1,2 @@
+[console_scripts]
+lac = lac.cli:main
