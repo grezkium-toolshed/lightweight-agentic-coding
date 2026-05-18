@@ -1,0 +1,125 @@
+"""Client integrations: render adapters, open clients."""
+
+import json
+import os
+import shutil
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+
+def utc_now():
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def command_exists(name):
+    import shutil
+    return shutil.which(name) is not None
+
+
+def render_client(ctx, target):
+    from lac.packs import build_pack_summary
+    packs = build_pack_summary(ctx)
+    manifest = {
+        "generated_at": utc_now(),
+        "target": target,
+        "pack_count": len(packs),
+        "packs": packs,
+    }
+    if target == "opencode":
+        path = ctx.root / ".opencode/render-manifest.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+        out_path = ctx.state_root / "clients/opencode/manifest.json"
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+        return {
+            "target": target,
+            "manifest_path": str(path),
+            "pack_count": len(packs),
+            "packs": packs,
+            "runtime_asset_root": str(ctx.root / ".opencode"),
+        }
+    if target == "claude-code":
+        target_root = ctx.state_root / "clients/claude-code"
+        target_root.mkdir(parents=True, exist_ok=True)
+        template_root = ctx.root / "templates/claude-code"
+        shutil.copytree(template_root, target_root / "templates", dirs_exist_ok=True)
+        lines = [
+            "# Claude Code Adapter", "",
+            "This adapter reuses the curated Local AI Cluster workflow packs as references for Claude Code.",
+            "", "## Included Packs", "",
+        ]
+        for pack in packs:
+            lines.append(f"- `{pack['id']}`: {pack['description']}")
+        lines.append("")
+        lines.append("OpenCode remains the lead runtime target. This adapter is a reviewed reference bundle.")
+        (target_root / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        (target_root / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+        return {
+            "target": target,
+            "manifest_path": str(target_root / "manifest.json"),
+            "pack_count": len(packs),
+            "packs": packs,
+            "render_root": str(target_root),
+        }
+    if target == "codex-reference":
+        target_root = ctx.state_root / "clients/codex-reference"
+        target_root.mkdir(parents=True, exist_ok=True)
+        lines = [
+            "# Codex Reference Adapter", "",
+            "This adapter provides a reference view of the curated workflow packs for Codex-style environments.",
+            "", "## Workflow Packs", "",
+        ]
+        for pack in packs:
+            lines.append(f"- `{pack['id']}`: trust `{pack['trust_level']}`, tools `{', '.join(pack['required_tools'])}`")
+        lines.append("")
+        lines.append("Use the asset catalog for source attribution, support tier, and permission notes.")
+        (target_root / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        (target_root / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+        return {
+            "target": target,
+            "manifest_path": str(target_root / "manifest.json"),
+            "pack_count": len(packs),
+            "packs": packs,
+            "render_root": str(target_root),
+        }
+    raise SystemExit(f"Unsupported client target: {target}")
+
+
+def client_open(ctx, target, desktop=False):
+    if target != "opencode":
+        raise SystemExit("Only the OpenCode runtime target supports launch.")
+    config_path = ctx.paths["opencode_config"]
+    if not config_path.is_file():
+        raise SystemExit(f"Missing generated OpenCode config: {config_path}\nRun ./bin/lac profile apply <profile> first.")
+    env = os.environ.copy()
+    env["OPENCODE_CONFIG"] = str(config_path)
+    if desktop:
+        app_name = os.environ.get("OPENCODE_DESKTOP_APP", "OpenCode")
+        if sys.platform == "darwin":
+            candidates = [
+                Path("/Applications") / f"{app_name}.app" / "Contents/MacOS" / app_name,
+                Path.home() / "Applications" / f"{app_name}.app" / "Contents/MacOS" / app_name,
+            ]
+            for executable in candidates:
+                if executable.is_file():
+                    subprocess.Popen([str(executable)], env=env, start_new_session=True)
+                    return {
+                        "ok": True, "target": target, "desktop": True,
+                        "message": f"Launched {app_name} desktop with generated config: {config_path}",
+                    }
+            if command_exists("open"):
+                result = subprocess.run(["open", "-a", app_name], env=env, check=False)
+                if result.returncode != 0:
+                    raise SystemExit(f"Failed to launch {app_name}. Set OPENCODE_DESKTOP_APP if the app name differs.")
+                return {
+                    "ok": True, "target": target, "desktop": True,
+                    "message": f"Launched {app_name} desktop. If it was already running, restart it so OPENCODE_CONFIG is picked up: {config_path}",
+                }
+        raise SystemExit("Desktop auto-launch is only implemented for macOS.")
+    if not command_exists("opencode"):
+        raise SystemExit("opencode is not in PATH.")
+    completed = subprocess.run(["opencode"], env=env, check=False)
+    return {"ok": completed.returncode == 0, "target": target, "desktop": False}
