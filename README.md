@@ -4,18 +4,28 @@ A private, replicable local-first AI workstation. Turns a laptop or desktop into
 
 > This repo is preparing for public beta. Keep it private until `RELEASE_CHECKLIST.md` and `docs/release/PRIVATE_UNTIL_RELEASE.md` are complete.
 
+## Installation
+
+```bash
+# From a clone (development or production)
+cd ai-coding-cluster
+python3 -m pip install .
+```
+
+After install, `lac` is on your PATH and works from any directory. The `./bin/lac` wrapper remains for repo-local development.
+
 ## Quick Start
 
 ```bash
 # 1. Choose a profile (interactive, or use --yes --profile <name>)
-./bin/lac init
+lac init
 
 # 2. Download model weights for your profile
-./bin/lac models sync <profile>
+lac models sync <profile>
 
 # 3. Start the runtime and open OpenCode
-./bin/lac runtime start
-./bin/lac client open opencode
+lac runtime start
+lac client open opencode
 ```
 
 `lac init` detects hardware, recommends a profile, renders config, and prints next steps. Its final summary is the source of truth for what is ready, blocked, and optional.
@@ -73,34 +83,34 @@ Optional cloud provider keys: `OPENCODE_GO_API_KEY`, `OPENROUTER_API_KEY`, `ANTH
 macOS / Linux (24GB local + OpenRouter fallback):
 
 ```bash
-./bin/lac init --yes --profile 24gb --cloud openrouter
-./bin/lac models sync 24gb
-./bin/lac runtime start
-./bin/lac client open opencode
+lac init --yes --profile 24gb --cloud openrouter
+lac models sync 24gb
+lac runtime start
+lac client open opencode
 ```
 
-Windows PowerShell (24GB local + OpenRouter fallback):
+Windows (after `py -m pip install .`):
 
 ```powershell
-.\bin\lac.ps1 init --yes --profile 24gb --cloud openrouter
-.\bin\lac.ps1 models sync 24gb
-.\bin\lac.ps1 runtime start
-.\bin\lac.ps1 client open opencode
+lac init --yes --profile 24gb --cloud openrouter
+lac models sync 24gb
+lac runtime start
+lac client open opencode
 ```
 
 Cloud-only (no local runtime):
 
 ```bash
 export OPENROUTER_API_KEY=...
-./bin/lac init --yes --profile openrouter --no-cloud
-./bin/lac client open opencode
+lac init --yes --profile openrouter --no-cloud
+lac client open opencode
 ```
 
 ## Verify
 
 ```bash
-./bin/lac doctor
-./bin/lac smoke
+lac doctor
+lac smoke
 curl http://127.0.0.1:8080/health
 curl http://127.0.0.1:8080/v1/models
 ```
@@ -110,11 +120,37 @@ Expected: `doctor` and `smoke` report `ok`, `/health` responds, `/v1/models` lis
 ## Daily Use
 
 ```bash
-./bin/lac runtime start      # Start local server
-./bin/lac runtime stop       # Stop local server
-./bin/lac runtime status     # Check runtime state
-./bin/lac client open opencode  # Launch OpenCode CLI
-./bin/lac doctor             # Validate setup
+lac runtime start      # Start local server
+lac runtime stop       # Stop local server
+lac runtime status     # Check runtime state
+lac client open opencode  # Launch OpenCode CLI
+lac doctor             # Validate setup
+```
+
+All commands support `--json` for scripting.
+
+## Device Setup
+
+Apply a profile and configure your device (oMLX context limits, DCP plugin):
+
+```bash
+lac setup <profile>
+```
+
+This runs `profile apply`, updates `~/.omlx/settings.json` if oMLX is installed, and installs the Dynamic Context Pruning plugin.
+
+## Free Model Catalog
+
+Sync the upstream free-models index:
+
+```bash
+lac catalog sync-free
+```
+
+Verify free models are still accessible (requires API keys):
+
+```bash
+lac provider verify-models
 ```
 
 All commands support `--json` for scripting.
@@ -150,12 +186,12 @@ oMLX uses port `8000` by default. Override with `AI_OMLX_PORT`.
 
 | Symptom | Fix |
 |---|---|
-| `Connection refused` | Start runtime: `./bin/lac runtime start`. Check logs: `tail -f state/logs/llama-server.log` |
-| `Cannot open file` | Run `./bin/lac models sync <profile>`. Check `AI_MODELS_DIR` and `state/runtime/presets.active.ini` |
+| `Connection refused` | Start runtime: `lac runtime start`. Check logs: `tail -f state/logs/llama-server.log` |
+| `Cannot open file` | Run `lac models sync <profile>`. Check `AI_MODELS_DIR` and `state/runtime/presets.active.ini` |
 | Model sync fails | Re-run the same command. Install Hugging Face CLI for resume support. Check for `.downloading` partial files |
-| OpenCode misses config | Re-run `./bin/lac init`. For Desktop, quit and relaunch after profile switch |
-| Cloud provider skipped | Set the provider env var, then `./bin/lac provider verify <provider>` |
-| Config parse error | Re-render: `./bin/lac profile apply <profile>`. Run `./scripts/verify-config-schema.sh` |
+| OpenCode misses config | Re-run `lac init`. For Desktop, quit and relaunch after profile switch |
+| Cloud provider skipped | Set the provider env var, then `lac provider verify <provider>` |
+| Config parse error | Re-render: `lac profile apply <profile>`. Run `lac doctor --strict` |
 
 ## Project Scope
 

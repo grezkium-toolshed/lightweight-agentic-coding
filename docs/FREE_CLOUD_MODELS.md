@@ -2,7 +2,7 @@
 
 Source: [vava-nessa/free-coding-models](https://github.com/vava-nessa/free-coding-models)
 
-**Last verified:** 2026-04-20 (structural review; regenerate with `./scripts/sync-free-cloud-models.sh` or `.ps1` to pull the current upstream list).
+**Last verified:** 2026-04-20 (structural review; regenerate with `lac catalog sync-free` to pull the current upstream list).
 
 Kudos to **@vava-nessa** for the free model index and NIM helper tooling.
 

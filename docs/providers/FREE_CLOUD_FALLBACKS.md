@@ -18,4 +18,4 @@ Cloud fallbacks are an adoption bridge, not the primary identity of the repo. Th
 - API key handling
 - model drift over time
 
-Use `scripts/sync-free-cloud-models.*` to refresh the community-maintained snapshot of currently free coding-capable models.
+Use `lac catalog sync-free` to refresh the community-maintained snapshot of currently free coding-capable models.

@@ -74,9 +74,8 @@ The repo is broader than a coding-focused local setup. It should support:
 Common issues:
 - `Connection refused`: start llama-server first
 - `Cannot open file`: verify `AI_MODELS_DIR` and profile model files
-- config parse error: regenerate with `setup-config-device`
-- missing cloud provider access: confirm provider-specific API keys and quotas
-- cloud model not found: run `./scripts/verify-free-models.sh` to check configured free models
+- config parse error: re-render with `lac profile apply <profile>` or `lac setup <profile>`
+- cloud model not found: run `lac provider verify-models` to check configured free models
 
 ## TestingStrategy
 
