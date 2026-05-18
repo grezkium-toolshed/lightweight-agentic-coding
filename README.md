@@ -6,18 +6,20 @@ A private, replicable local-first AI workstation. Turns a laptop or desktop into
 
 ## Installation
 
-Requires Python 3.10+.
+Requires Python 3.10+. Installs the `lac` CLI tool and bundles all agents, skills, catalogs, and presets.
 
 ```bash
-# Clone and install the Local AI Cluster CLI
-cd ai-coding-cluster
-./bin/lac install
+# Clone the repository
+git clone https://github.com/<user>/ai-coding-cluster
+
+# Install the local-ai-cluster package
+python3 -m pip install --upgrade ./ai-coding-cluster
 ```
 
-For development (editable — changes to source reflect immediately):
+For development (editable mode — changes to source reflect immediately without reinstalling):
 
 ```bash
-./bin/lac install --dev
+python3 -m pip install --upgrade -e ./ai-coding-cluster
 ```
 
 After install, `lac` is on your PATH and works from any directory.
