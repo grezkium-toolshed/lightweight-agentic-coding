@@ -41,6 +41,7 @@ from lac.packs import (
 from lac.scenarios import scenario_list, scenario_show
 from lac.clients import render_client, client_open
 from lac.models import models_sync
+from lac.catalog import sync_free
 
 
 def load_json(path):
@@ -178,6 +179,77 @@ def device_setup(ctx, profile_id):
         print("[setup] WARNING: opencode is not in PATH; cannot install DCP plugin.")
         print(f"[setup] After installing OpenCode, run: opencode plugin {dcp_plugin} --global --force")
     print(f"[setup] Device configuration complete for profile: {profile_id}")
+    return 0
+
+
+def verify_free_models(ctx, providers=None, timeout=10):
+    if providers is None:
+        providers = ["openrouter", "nvidia-nim"]
+    provider_endpoints = {
+        "openrouter": {"base_url": "https://openrouter.ai/api/v1", "env_var": "OPENROUTER_API_KEY"},
+        "nvidia-nim": {"base_url": "https://integrate.api.nvidia.com/v1", "env_var": "NVIDIA_API_KEY"},
+    }
+    template = load_jsonc(ctx.paths["opencode_template"])
+    errors = 0
+    print("=== Free Model Verification ===")
+    print(f"Timeout per model: {timeout}s")
+    print()
+    for provider_id in providers:
+        if provider_id not in provider_endpoints:
+            print(f"[{provider_id}] unknown provider, skipping")
+            continue
+        endpoint = provider_endpoints[provider_id]
+        api_key = os.environ.get(endpoint["env_var"], "")
+        provider_block = template.get("provider", {}).get(provider_id, {})
+        models = list(provider_block.get("models", {}).keys())
+        if not models:
+            print(f"[{provider_id}] No models found in provider block")
+            print()
+            continue
+        print(f"[{provider_id}] Free models:")
+        if not api_key:
+            print(f"  [?] no API key set (set {endpoint['env_var']})")
+            print()
+            continue
+        for model_id in models:
+            url = f"{endpoint['base_url']}/chat/completions"
+            payload = json.dumps({
+                "model": model_id,
+                "messages": [{"role": "user", "content": "hi"}],
+                "max_tokens": 4,
+            }).encode("utf-8")
+            req = urllib.request.Request(url, data=payload, method="POST")
+            req.add_header("Authorization", f"Bearer {api_key}")
+            req.add_header("Content-Type", "application/json")
+            http_code = "000"
+            try:
+                with urllib.request.urlopen(req, timeout=timeout) as resp:
+                    http_code = str(resp.status)
+            except urllib.error.HTTPError as exc:
+                http_code = str(exc.code)
+            except Exception:
+                http_code = "000"
+            if http_code in ("200", "201"):
+                print(f"  [ok] {model_id}")
+            elif http_code == "404":
+                print(f"  [!!] {model_id} — REMOVED (404)")
+                errors += 1
+            elif http_code == "429":
+                print(f"  [--] {model_id} — rate-limited (429)")
+            elif http_code in ("401", "403"):
+                print(f"  [!!] {model_id} — auth error ({http_code})")
+                errors += 1
+            elif http_code == "000":
+                print(f"  [??] {model_id} — connection timeout")
+            else:
+                print(f"  [??] {model_id} — unexpected status {http_code}")
+        print()
+    if errors:
+        print("=== Verification complete — some models are broken ===")
+        print("Update opencode.template.jsonc and docs/providers/OPENROUTER_FREE.md")
+        print("to remove removed models.")
+        return 1
+    print("=== Verification complete — no broken models ===")
     return 0
 
 
@@ -961,10 +1033,20 @@ def build_parser():
     provider_verify_parser.add_argument("--timeout", type=int, default=5, help="Per-request timeout in seconds")
     provider_verify_parser.add_argument("--refresh-catalog", action="store_true", dest="refresh_catalog", help="Update last_verified_at in catalog/providers.json on success")
     provider_verify_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+    provider_verify_models_parser = provider_sub.add_parser("verify-models", help="Verify free models via chat completion probes")
+    provider_verify_models_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+    provider_verify_models_parser.add_argument("--timeout", type=int, default=10, help="Per-request timeout in seconds")
+    provider_verify_models_parser.add_argument("--providers", help="Comma-separated provider ids (default: openrouter,nvidia-nim)")
 
     setup_parser = subparsers.add_parser("setup", help="Apply profile and configure device (oMLX, DCP plugin)")
     setup_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
     setup_parser.add_argument("profile_id")
+
+    catalog_parser = subparsers.add_parser("catalog", help="Catalog management commands")
+    catalog_sub = catalog_parser.add_subparsers(dest="catalog_command", required=True)
+    catalog_sync_free_parser = catalog_sub.add_parser("sync-free", help="Sync free cloud models from upstream source")
+    catalog_sync_free_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+    catalog_sync_free_parser.add_argument("--source-url", help="Override upstream source URL")
 
     init_parser = subparsers.add_parser("init", help="Interactive onboarding wizard")
     init_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
@@ -1066,6 +1148,9 @@ def main():
         if args.provider_command == "status":
             emit(provider_status(ctx), args.json, kind="provider-status")
             return
+        if args.provider_command == "verify-models":
+            providers = [p.strip() for p in args.providers.split(",")] if args.providers else None
+            raise SystemExit(verify_free_models(ctx, providers=providers, timeout=args.timeout))
         if args.provider_command == "verify":
             if args.all_providers and args.provider_id:
                 parser.error("provider verify: pass either <provider_id> or --all, not both")
@@ -1095,6 +1180,10 @@ def main():
 
     if args.command == "setup":
         raise SystemExit(device_setup(ctx, args.profile_id))
+
+    if args.command == "catalog":
+        if args.catalog_command == "sync-free":
+            raise SystemExit(sync_free(root=ROOT, source_url=getattr(args, "source_url", None)))
 
     if args.command == "init":
         result = init_wizard(ctx, yes=args.yes, profile=args.profile, cloud=args.cloud, no_cloud=args.no_cloud)
