@@ -32,3 +32,13 @@ runtime-config/opencode.active.json
 # Python cache
 __pycache__/
 *.pyc
+
+# Python build artifacts
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
