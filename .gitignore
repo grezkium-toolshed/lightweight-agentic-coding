@@ -34,7 +34,7 @@ __pycache__/
 *.pyc
 
 # Python build artifacts
-*.egg-info/
+**/*.egg-info/
 dist/
 build/
 *.egg

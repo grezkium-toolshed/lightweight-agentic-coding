@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lac-cli"
+name = "local-ai-cluster"
 version = "0.1.0"
 description = "Local AI Cluster CLI — profile management, runtime lifecycle, and provider orchestration"
 requires-python = ">=3.10"

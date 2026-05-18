@@ -9,7 +9,13 @@ A private, replicable local-first AI workstation. Turns a laptop or desktop into
 ```bash
 # From a clone (development or production)
 cd ai-coding-cluster
-python3 -m pip install .
+python3 -m pip install local-ai-cluster
+```
+
+For development (editable, changes reflect immediately):
+
+```bash
+python3 -m pip install -e .
 ```
 
 After install, `lac` is on your PATH and works from any directory. The `./bin/lac` wrapper remains for repo-local development.
