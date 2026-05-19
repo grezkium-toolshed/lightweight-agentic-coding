@@ -35,6 +35,18 @@
             "output": 16384
           }
         },
+        "qwen3.6-27b-mtp-q4": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
+        "qwen3.6-35b-a3b-mtp-q6": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
         "qwen3.5-9b-q4": {
           "limit": {
             "context": 262144,
@@ -45,12 +57,6 @@
           "limit": {
             "context": 131072,
             "output": 12288
-          }
-        },
-        "qwen3-coder-next-80b": {
-          "limit": {
-            "context": 262144,
-            "output": 16384
           }
         },
         "minimax-m2.7": {
