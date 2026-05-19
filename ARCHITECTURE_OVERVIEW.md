@@ -18,7 +18,7 @@ The runtime stays llama.cpp-first:
 - profile presets live under `runtime-config/presets/`
 - `state/runtime/presets.active.ini` is generated from the chosen hardware profile
 - Qwen 3.6 MoE is the target baseline model family for general work
-- `qwen3-coder-next` remains a specialist model for high-value coding tasks
+- Qwen 3.6 MTP (27B Q4, 35B-A3B Q6) replaces coder-next as the fast coding and architect model
 
 ## CLI orchestration
 

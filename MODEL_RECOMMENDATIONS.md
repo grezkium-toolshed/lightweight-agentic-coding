@@ -15,8 +15,8 @@ Recommended profile mapping:
 - `16gb`: Qwen 3.6 27B `UD-Q3_K_XL`
 - `macos-16gb`: Qwen3.5 9B `Q4_K_M` + Gemma 4 E4B `Q8_0` for Apple Silicon headroom
 - `24gb`: Qwen 3.6 27B `UD-Q4_K_XL`
-- `32gb`: Qwen 3.6 27B `UD-Q4_K_XL` + qwen3-coder-next
-- `64gb`: Qwen 3.6 35B-A3B `UD-Q8_K_XL` + qwen3-coder-next
+- `32gb`: Qwen 3.6 27B `UD-Q4_K_XL` + 27B MTP `UD-Q4_K_XL`
+- `64gb`: Qwen 3.6 35B-A3B `UD-Q8_K_XL` + 35B-A3B MTP `UD-Q6_K_XL`
 - `128gb-multi`: multiple practical local models
 - `128gb-qwen122b`: Qwen 122B-focused
 - `128gb-minimax`: MiniMax M2.7 `UD-IQ4_XS` alternative
@@ -57,7 +57,8 @@ Gemma 4 profiles keep the Unsloth-style Gemma defaults: `temperature=1.0`, `top_
 | `64gb` / Qwen 3.6 27B Q4 fallback | `UD-Q4_K_XL` | 128K | `0.6 / 0.9 / 40` | presence `0.2`, repeat `1.05` | Stable fallback when the 35B-A3B path is too heavy. |
 | `gemma-16gb` / Gemma 4 E4B Q8 fallback | `Q8_0` | 128K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Gemma default settings with smaller fallback model. |
 | `gemma-24gb+` / Gemma 4 26B/31B | `UD-Q4_K_XL`, `Q8_0`, or `BF16` | 256K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Unsloth Gemma defaults; profile chooses quant/context by hardware tier. |
-| `32gb+` / Qwen3 Coder Next | `MXFP4_MOE` | 64K-256K | `0.2 / 0.9 / 32` | presence `0.0`, repeat `1.02` | Low-temperature coding specialist, not the default general model. |
+| `32gb+` / Qwen3.6 27B MTP | `UD-Q4_K_XL` (MTP) | 256K | `0.7 / 0.9 / 40` | presence `0.2`, repeat `1.04` | MTP speculative decoding; 1.4-2.2x faster than baseline. `spec-draft-n-max=6` (tunable 1-6). |
+| `64gb+` / Qwen3.6 35B-A3B MTP | `UD-Q6_K_XL` (MTP) | 256K | `0.7 / 0.92 / 40` | presence `0.4`, repeat `1.04` | MTP speculative decoding; fast architect replacement for coder-next. ~1GB extra headroom vs non-MTP. |
 
 ## 128GB MiniMax alternative
 
@@ -70,9 +71,11 @@ Why this one:
 - Unsloth lists it at about 108 GB, which fits the repo's 128 GB headroom posture much better than `UD-Q4_K_XL`
 - it is the practical compromise when you want stronger quality than very low-bit MiniMax options without exceeding the memory budget
 
-## Specialist local model
+## MTP specialist models
 
-Keep `qwen3-coder-next` as a coding specialist, not the default answer for every task. It belongs in the higher-memory tiers and multi-model setups.
+Use Qwen 3.6 MTP variants as the fast coding and architect replacement. The 27B MTP (Q4) is the best general-purpose fast model, while the 35B-A3B MTP (Q6) provides stronger reasoning at higher speed than the non-MTP baseline. Both support 256K context and deliver 1.4-2.2x faster inference via speculative decoding (`--spec-type draft-mtp --spec-draft-n-max 6`). MTP requires ~1GB extra RAM/VRAM headroom over the non-MTP equivalent.
+
+Qwen Coder Next was removed from local presets in favor of MTP models, as the newer Qwen 3.6 family has better tool-call reliability and MTP provides sufficient generation speed. Cloud provider entries for coder models remain available as fallbacks.
 
 ## When to use free cloud fallbacks
 

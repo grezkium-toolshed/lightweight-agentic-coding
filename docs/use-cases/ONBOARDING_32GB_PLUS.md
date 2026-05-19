@@ -8,7 +8,7 @@
 ## Recommended path
 1. Start with `./bin/lac init`; let it recommend `32gb`, `64gb`, or a larger profile from detected RAM.
 2. Use Qwen 3.6 MoE as the main general model.
-3. Use `qwen3-coder-next` as a specialist for high-value coding work.
+3. Use Qwen 3.6 MTP (27B Q4 or 35B-A3B Q6) as the fast coding and architect model.
 4. Add hosted-model fallbacks only when there is a clear quality or speed benefit.
 
 ## Good first commands

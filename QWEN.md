@@ -68,9 +68,9 @@ Get-Content runtime-config/logs/llama-server.log -Wait -Tail 50
 |---|---|
 | `16gb` | Qwen 3.6 27B `UD-Q3_K_XL` + embeddings |
 | `24gb` | Qwen 3.6 27B `UD-Q4_K_XL` + `UD-Q3_K_XL` fallback + embeddings |
-| `32gb` | Qwen 3.6 27B `UD-Q4_K_XL` + optional coder-next |
-| `64gb` | Qwen 3.6 35B-A3B `UD-Q8_K_XL` + coder-next + 27B + embeddings |
-| `128gb-multi` | Qwen 3.6 35B-A3B `UD-Q8_K_XL` + coder-next + 27B `UD-Q4_K_XL` + 27B `UD-Q3_K_XL` + embeddings |
+| `32gb` | Qwen 3.6 27B `UD-Q4_K_XL` + 27B MTP `UD-Q4_K_XL` |
+| `64gb` | Qwen 3.6 35B-A3B `UD-Q8_K_XL` + 35B-A3B MTP `UD-Q6_K_XL` + 27B + embeddings |
+| `128gb-multi` | Qwen 3.6 35B-A3B `UD-Q8_K_XL` + 27B MTP `UD-Q4_K_XL` + 35B-A3B MTP `UD-Q6_K_XL` + 27B `UD-Q4_K_XL` + embeddings |
 | `128gb-qwen122b` | Qwen 3.5 122B-focused |
 | `128gb-minimax` | MiniMax-focused |
 | `gemma-16gb` | Gemma 4 26B-A4B (Q4) + E4B (Q8) fallback |
@@ -113,7 +113,7 @@ Recommended cloud fallback order: NVIDIA NIM → OpenRouter → z.ai → Antigra
 
 - **This repo is private** until release gates in `docs/release/PRIVATE_UNTIL_RELEASE.md` are complete
 - The 128GB tiers follow a `<=115GB` effective memory usage policy
-- `qwen3-coder-next` is a specialist model, not the default for every task
+- Qwen 3.6 MTP models (27B Q4, 35B-A3B Q6) replace coder-next in local presets for better tool-call reliability and 1.4-2.2x faster inference
 - Free cloud model snapshots in `docs/free-coding-models.json` should be refreshed before each beta cut
 
 ## Gemma 4 Alternative
