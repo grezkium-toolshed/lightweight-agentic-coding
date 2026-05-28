@@ -22,6 +22,7 @@ required=(
   docs/providers/CODEX_AUTH.md
   docs/providers/ANTHROPIC_API.md
   docs/providers/FREE_CLOUD_FALLBACKS.md
+  docs/providers/GPU_BURSTING.md
   docs/security/THIRD_PARTY_AGENT_INTAKE.md
   docs/security/AGENCY_AGENTS_REVIEW.md
   docs/security/TRUST_MODEL.md
