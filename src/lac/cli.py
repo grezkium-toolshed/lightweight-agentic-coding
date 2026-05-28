@@ -275,6 +275,93 @@ def run_models_sync(profile_id):
     return models_sync(profile_id)
 
 
+def _demo_cloud(ctx, yes=False):
+    """Cloud demo: OpenRouter free tier, zero downloads."""
+    api_key = os.environ.get("OPENROUTER_API_KEY", "")
+    if not api_key:
+        print("Cloud demo needs an OpenRouter API key (free tier available).")
+        print("Get one: https://openrouter.ai/keys")
+        if yes:
+            print("No API key set and --yes is active. Aborting cloud demo.")
+            return {"status": "error", "message": "OPENROUTER_API_KEY not set"}
+        api_key = input("Paste your OpenRouter API key: ").strip()
+        if not api_key:
+            print("No API key entered. Try: lac demo --local")
+            return {"status": "error", "message": "No API key provided"}
+        shell_rc = Path.home() / ".zshrc"
+        if shell_rc.is_file():
+            save = input(f"Save to {shell_rc} for future sessions? [Y/n]: ").strip().lower()
+            if save in ("", "y", "yes"):
+                existing = shell_rc.read_text(encoding="utf-8")
+                if "OPENROUTER_API_KEY" not in existing:
+                    shell_rc.write_text(f"{existing}\nexport OPENROUTER_API_KEY=\"{api_key}\"\n", encoding="utf-8")
+                    print(f"Saved to {shell_rc}. Restart your shell or run 'source {shell_rc}'.")
+                else:
+                    print("OPENROUTER_API_KEY already found in .zshrc — skipping.")
+        os.environ["OPENROUTER_API_KEY"] = api_key
+    else:
+        print("Using OPENROUTER_API_KEY from environment.")
+
+    from lac.profiles import profile_apply
+    print("Applying openrouter profile...")
+    profile_apply(ctx, "openrouter", verbose_runtime=False)
+
+    from lac.clients import render_client, client_open
+    print("Rendering OpenChamber client config...")
+    render_client(ctx, "openchamber")
+    print("Launching OpenChamber...")
+    client_open(ctx, "openchamber")
+
+    return {"status": "ok", "mode": "cloud", "profile": "openrouter"}
+
+
+def _demo_local(ctx, yes=False):
+    """Local demo: download micro model, start runtime, launch OpenChamber."""
+    from lac.models import models_sync
+    from lac.profiles import profile_apply
+    from lac.runtime import runtime_start
+    from lac.clients import render_client, client_open
+
+    models_dir = Path(os.environ.get("AI_MODELS_DIR", str(ROOT / "models")))
+    model_file = models_dir / "qwen3.5" / "Qwen3.5-4B-Q4_K_M.gguf"
+
+    need_download = not model_file.is_file()
+    if need_download:
+        print("Micro model (Qwen3.5-4B ~2.5 GB) needs to be downloaded.")
+        if yes:
+            print("Downloading (--yes active)...")
+        else:
+            proceed = input("Download now? [Y/n]: ").strip().lower()
+            if proceed not in ("", "y", "yes"):
+                print("Aborted. Run later: lac models sync micro")
+                return {"status": "error", "message": "Download aborted"}
+        print("Downloading model...")
+        result = models_sync("micro")
+        if result != 0:
+            print("Model download failed. Check your internet connection and Hugging Face CLI.")
+            return {"status": "error", "message": "Download failed"}
+
+    print("Applying micro profile...")
+    profile_apply(ctx, "micro", verbose_runtime=False)
+
+    print("Starting local runtime (llama-server)...")
+    runtime_start(ctx, show_logs=False, tail_hint=False)
+
+    print("Rendering OpenChamber client config...")
+    render_client(ctx, "openchamber")
+    print("Launching OpenChamber...")
+    client_open(ctx, "openchamber")
+
+    return {"status": "ok", "mode": "local", "profile": "micro"}
+
+
+def run_demo(ctx, mode="cloud", yes=False):
+    """Run the demo — cloud (OpenRouter) or local (micro model)."""
+    if mode == "cloud":
+        return _demo_cloud(ctx, yes=yes)
+    return _demo_local(ctx, yes=yes)
+
+
 def doctor(ctx, strict=False, bootstrap_hint=False):
     checks = []
     def add_check(kind, path, exists, generated=False, hint=None):
@@ -595,6 +682,13 @@ def build_parser():
     init_parser.add_argument("--cloud", help="Comma-separated cloud provider ids to enable (non-interactive)")
     init_parser.add_argument("--no-cloud", action="store_true", help="Do not enable any cloud overlay")
 
+    demo_parser = subparsers.add_parser("demo", help="Instant chat: cloud (zero download) or local (tiny model)")
+    demo_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+    demo_parser.add_argument("--yes", action="store_true", help="Non-interactive; accept all prompts")
+    demo_group = demo_parser.add_mutually_exclusive_group()
+    demo_group.add_argument("--local", action="store_true", help="Download and run a tiny 2.5 GB model locally")
+    demo_group.add_argument("--cloud", action="store_true", help="Use OpenRouter free tier (no local models)")
+
     return parser
 
 
@@ -733,6 +827,12 @@ def main():
         )
         emit(result, args.json, kind="init")
         return
+
+    if args.command == "demo":
+        mode = "local" if args.local else "cloud"
+        result = run_demo(ctx, mode=mode, yes=args.yes)
+        emit(result, args.json, kind="demo")
+        raise SystemExit(0 if result["status"] == "ok" else 1)
 
     parser.error("Unknown command")
 

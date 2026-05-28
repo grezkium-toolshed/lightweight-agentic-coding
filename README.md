@@ -48,6 +48,7 @@ OpenChamber is a web/PWA/desktop GUI for OpenCode that gives you phone and table
 
 | Machine | Profile | Notes |
 |---|---|---|
+| Any machine, demo | `micro` | Tiny CPU-only Qwen3.5-4B Q4 (~2.5 GB), instant chat |
 | MacBook Air M4 16GB | `macos-16gb` | Headroom-first Apple Silicon |
 | 16GB non-Mac | `16gb` | Qwen 3.6 27B Q3 starter |
 | 24GB laptop/workstation | `24gb` | Balanced Qwen 3.6 27B Q4 |
@@ -62,6 +63,7 @@ See `MODEL_RECOMMENDATIONS.md` for preset rationale and verification tiers.
 <details>
 <summary>Full profile list</summary>
 
+- `micro`: Tiny CPU-only Qwen3.5-4B Q4 (~2.5 GB) for lite demos and fast trials
 - `16gb`: Qwen 3.6 27B `UD-Q3_K_XL` starter + embeddings
 - `macos-16gb`: Apple Silicon 16GB headroom profile with Qwen3.5 9B Q4 + Gemma 4 E4B Q8 + embeddings
 - `24gb`: Qwen 3.6 27B `UD-Q4_K_XL` + `UD-Q3_K_XL` fallback + embeddings
@@ -92,6 +94,26 @@ Required: Python 3, `llama-server` (from llama.cpp), OpenCode CLI, Git, curl.
 | OpenChamber (optional) | `curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh \| bash` | same | same |
 
 Optional cloud provider keys: `OPENCODE_GO_API_KEY`, `OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`, etc. See `docs/providers/AUTHENTICATION.md`.
+
+## Quick demo (no install needed — cloud)
+
+Run with zero downloads:
+```bash
+lac demo
+# Or non-interactive: lac demo --cloud --yes
+```
+
+## Local demo (tiny model, offline)
+
+Run fully local with a 2.5 GB model:
+```bash
+lac demo --local
+# Or non-interactive: lac demo --local --yes
+```
+
+OpenChamber web UI opens at `http://localhost:3000`.
+
+---
 
 ## Setup Examples
 

@@ -10,6 +10,12 @@ from pathlib import Path
 
 
 PROFILE_MODELS = {
+    "micro": {
+        "gguf": [
+            ("qwen3.5", "Qwen3.5-4B-Q4_K_M.gguf", "unsloth/Qwen3.5-4B-GGUF", 2500),
+        ],
+        "mlx": [],
+    },
     "16gb": {
         "gguf": [
             ("qwen3.6", "Qwen3.6-27B-UD-Q3_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 14000),

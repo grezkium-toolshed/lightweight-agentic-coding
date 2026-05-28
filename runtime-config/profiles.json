@@ -1,6 +1,21 @@
 {
   "version": 2,
   "profiles": {
+    "micro": {
+      "id": "micro",
+      "label": "Micro demo (2.5 GB)",
+      "description": "Tiny CPU-only profile for lite demos, quick trials, and machines with limited RAM. Uses Qwen3.5-4B Q4_K_M (~2.5 GB GGUF).",
+      "preset": "runtime-config/presets/micro.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "verification_tier": "standard",
+      "primary_workload": "demo",
+      "recommended_for": ["solo-coder"],
+      "supported_clients": ["opencode", "openchamber"],
+      "default_model": "local-cluster/qwen3.5-4b-q4",
+      "small_model": "local-cluster/qwen3.5-4b-q4"
+    },
     "16gb": {
       "id": "16gb",
       "label": "16 GB local starter",
