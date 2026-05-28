@@ -250,8 +250,8 @@ Still evolving:
 
 ## Acknowledgments
 
-- **OpenChamber** — powers our web, mobile, and desktop remote access. Built by [@btriapitsyn](https://github.com/btriapitsyn) and contributors. https://github.com/openchamber/openchamber
-- **@vava-nessa** — for the free model index tooling used in our cloud model snapshots.
+- **OpenChamber** — powers our web, mobile, and desktop remote access. Built by [@btriapitsyn](https://github.com/btriapitsyn) and contributors. [github.com/openchamber/openchamber](https://github.com/openchamber/openchamber)
+- **@vava-nessa** — for the free model index tooling used in our cloud model snapshots ([@vava-nessa](https://github.com/vava-nessa)).
 
 ## Free Model Snapshot Policy
 
