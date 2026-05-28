@@ -33,12 +33,16 @@ lac init
 # 2. Download model weights for your profile
 lac models sync <profile>
 
-# 3. Start the runtime and open OpenCode
+# 3. Start the runtime and open your client
 lac runtime start
-lac client open opencode
+lac client open opencode         # OpenCode CLI (terminal)
+lac client open openchamber      # OpenChamber web UI (browser/phone)
+lac client open openchamber --desktop  # OpenChamber macOS desktop app
 ```
 
 `lac init` detects hardware, recommends a profile, renders config, and prints next steps. Its final summary is the source of truth for what is ready, blocked, and optional.
+
+OpenChamber is a web/PWA/desktop GUI for OpenCode that gives you phone and tablet access — see [`docs/providers/OPENCHAMBER.md`](docs/providers/OPENCHAMBER.md) for remote access via Tailscale or Cloudflare tunnel.
 
 ## Which Profile?
 
@@ -85,6 +89,7 @@ Required: Python 3, `llama-server` (from llama.cpp), OpenCode CLI, Git, curl.
 | OpenCode CLI | `curl -fsSL https://opencode.ai/install \| bash` | same | `npm install -g opencode-ai` |
 | llama-server | `brew install llama.cpp` | build from source | download release, add to `PATH` |
 | Hugging Face CLI | `python3 -m pip install --user 'huggingface_hub[cli]'` | same | `py -3 -m pip install --user "huggingface_hub[cli]"` |
+| OpenChamber (optional) | `curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh \| bash` | same | same |
 
 Optional cloud provider keys: `OPENCODE_GO_API_KEY`, `OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`, etc. See `docs/providers/AUTHENTICATION.md`.
 
@@ -116,6 +121,17 @@ lac init --yes --profile openrouter --no-cloud
 lac client open opencode
 ```
 
+With OpenChamber remote access:
+
+```bash
+lac profile apply 64gb
+lac runtime start
+lac client open openchamber --remote-host http://100.x.x.x:4095
+# Phone/tablet: open http://100.x.x.x:3000 in browser
+```
+
+See [`docs/providers/OPENCHAMBER.md`](docs/providers/OPENCHAMBER.md) for Tailscale and Cloudflare tunnel setup.
+
 ## Verify
 
 ```bash
@@ -130,11 +146,14 @@ Expected: `doctor` and `smoke` report `ok`, `/health` responds, `/v1/models` lis
 ## Daily Use
 
 ```bash
-lac runtime start      # Start local server
-lac runtime stop       # Stop local server
-lac runtime status     # Check runtime state
-lac client open opencode  # Launch OpenCode CLI
-lac doctor             # Validate setup
+lac runtime start                  # Start local server
+lac runtime stop                   # Stop local server
+lac runtime status                 # Check runtime state
+lac client open opencode           # Launch OpenCode CLI (terminal)
+lac client open openchamber        # Launch OpenChamber web UI (http://localhost:3000)
+lac client open openchamber --desktop  # Launch OpenChamber macOS desktop app
+lac client open openchamber --remote-host http://100.x.x.x:4095  # Connect via Tailscale
+lac doctor                         # Validate setup
 ```
 
 All commands support `--json` for scripting.
@@ -175,6 +194,7 @@ Source (tracked):
 Generated (in `state/`, ignored by git):
 - `state/runtime/presets.active.ini` — rendered llama.cpp preset
 - `state/clients/opencode/opencode.json` — rendered OpenCode config
+- `state/clients/openchamber/` — OpenChamber adapter config (manifest, env)
 - `state/active/profile.txt` — selected profile marker
 - `state/logs/llama-server.log` — runtime logs
 - `state/reports/doctor.json` — doctor report
@@ -222,6 +242,7 @@ Still evolving:
 - `MODEL_RECOMMENDATIONS.md` — model and profile deep dive
 - `CONFIG_SUMMARY.md` — configuration details
 - `docs/providers/AUTHENTICATION.md` — provider setup
+- `docs/providers/OPENCHAMBER.md` — remote access via OpenChamber (Tailscale, Cloudflare tunnel)
 - `docs/use-cases/SCENARIO_GUIDE.md` — use-case guidance
 - `docs/security/TRUST_MODEL.md` — security model
 - `CONTRIBUTING.md` — contribution guidelines
