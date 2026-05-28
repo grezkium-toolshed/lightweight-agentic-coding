@@ -46,6 +46,7 @@ from lac.init import (
     init_wizard, render_init_text, CLOUD_PROVIDER_HINTS,
     _parse_cloud_arg, _validate_cloud_ids,
 )
+from lac.doctor import run_fixes
 from lac.render import (
     render_pack_list, render_pack_show, render_skill_status, render_skill_verify,
     render_scenario_list, render_scenario_show, render_provider_list,
@@ -568,6 +569,7 @@ def build_parser():
     doctor_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
     doctor_parser.add_argument("--strict", action="store_true")
     doctor_parser.add_argument("--bootstrap-hint", action="store_true")
+    doctor_parser.add_argument("--fix", action="store_true", help="Attempt to auto-fix detected issues")
 
     smoke_parser = subparsers.add_parser("smoke")
     smoke_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
@@ -700,6 +702,10 @@ def main():
     ctx = Context()
 
     if args.command == "doctor":
+        if getattr(args, "fix", False):
+            report = run_fixes(ctx, yes=False)
+            emit(report, args.json, kind="doctor")
+            raise SystemExit(0 if report["ok"] else 1)
         report = doctor(ctx, strict=args.strict, bootstrap_hint=args.bootstrap_hint)
         emit(report, args.json, kind="doctor")
         raise SystemExit(0 if report["ok"] or not args.strict else 1)
