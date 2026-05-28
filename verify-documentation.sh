@@ -25,6 +25,7 @@ required=(
   docs/security/THIRD_PARTY_AGENT_INTAKE.md
   docs/security/AGENCY_AGENTS_REVIEW.md
   docs/security/TRUST_MODEL.md
+  docs/use-cases/BENCHMARKING.md
   docs/use-cases/SCENARIO_GUIDE.md
   docs/use-cases/STARTUP_HOME_TEAM.md
   docs/use-cases/HYBRID_WORKSPACES.md

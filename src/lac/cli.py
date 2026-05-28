@@ -46,6 +46,7 @@ from lac.init import (
     init_wizard, render_init_text, CLOUD_PROVIDER_HINTS,
     _parse_cloud_arg, _validate_cloud_ids,
 )
+from lac.bench import bench
 from lac.doctor import run_fixes
 from lac.render import (
     render_pack_list, render_pack_show, render_skill_status, render_skill_verify,
@@ -571,6 +572,14 @@ def build_parser():
     doctor_parser.add_argument("--bootstrap-hint", action="store_true")
     doctor_parser.add_argument("--fix", action="store_true", help="Attempt to auto-fix detected issues")
 
+    bench_parser = subparsers.add_parser("bench")
+    bench_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+    bench_parser.add_argument("--model", help="Benchmark a specific model slot (default: all)")
+    bench_parser.add_argument("--draft-n", type=int, help="MTP draft token count (e.g. 6)")
+    bench_parser.add_argument("--prompt", default=None, help="Custom prompt for the benchmark")
+    bench_parser.add_argument("--timeout", type=int, default=int(os.environ.get("BENCH_TIMEOUT", "120")),
+                              help="Per-request timeout in seconds")
+
     smoke_parser = subparsers.add_parser("smoke")
     smoke_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
     smoke_parser.add_argument("--timeout", type=int, default=int(os.environ.get("SMOKE_TIMEOUT", "30")))
@@ -709,6 +718,12 @@ def main():
         report = doctor(ctx, strict=args.strict, bootstrap_hint=args.bootstrap_hint)
         emit(report, args.json, kind="doctor")
         raise SystemExit(0 if report["ok"] or not args.strict else 1)
+
+    if args.command == "bench":
+        report = bench(ctx, model=args.model, draft_n=args.draft_n,
+                       prompt=args.prompt, timeout=args.timeout, json_output=args.json)
+        emit(report, args.json, kind="bench")
+        raise SystemExit(0 if report.get("ok", False) else 1)
 
     if args.command == "smoke":
         report = smoke(ctx, timeout=args.timeout)
