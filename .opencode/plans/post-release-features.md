@@ -1,6 +1,6 @@
 # Plan: Post-Release Features
 
-**Status:** Draft
+**Status:** Implemented (all phases)
 **Order:** 1 → 2 → 4 → 3 → 5 (recommended execution order)
 
 ---
