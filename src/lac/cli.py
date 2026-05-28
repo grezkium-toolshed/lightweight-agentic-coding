@@ -127,6 +127,13 @@ def _install_hint(tool_id, env_var=None):
             "windows": ["py -3 -m pip install --user \"huggingface_hub[cli]\""],
             "docs": "https://huggingface.co/docs/huggingface_hub/guides/cli",
         },
+        "openchamber": {
+            "summary": "Install OpenChamber — web/PWA/desktop interface for OpenCode with mobile/remote access.",
+            "macos": ["curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash", "brew install openchamber/tap/openchamber"],
+            "linux": ["curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"],
+            "windows": ["curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"],
+            "docs": "https://github.com/openchamber/openchamber",
+        },
     }
     if env_var:
         return {
@@ -288,6 +295,7 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
         "llama-server": command_exists("llama-server"),
         "omlx": command_exists("omlx"),
         "python3": command_exists("python3") or command_exists("python"),
+        "openchamber": command_exists("openchamber"),
     }
     active_profile_id = ctx.active_profile_id()
     active_profile = ctx.active_profile()
@@ -509,11 +517,12 @@ def build_parser():
     client_sub = client_parser.add_subparsers(dest="client_command", required=True)
     client_render_parser = client_sub.add_parser("render")
     client_render_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
-    client_render_parser.add_argument("target", choices=["opencode", "claude-code", "codex-reference"])
+    client_render_parser.add_argument("target", choices=["opencode", "claude-code", "codex-reference", "openchamber"])
     client_open_parser = client_sub.add_parser("open")
     client_open_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
-    client_open_parser.add_argument("target", choices=["opencode"])
+    client_open_parser.add_argument("target", choices=["opencode", "openchamber"])
     client_open_parser.add_argument("--desktop", action="store_true")
+    client_open_parser.add_argument("--remote-host", help="Connect to an OpenCode server on a remote host (e.g. http://100.x.x.x:4095 for Tailscale)")
 
     pack_parser = subparsers.add_parser("pack")
     pack_sub = pack_parser.add_subparsers(dest="pack_command", required=True)
@@ -634,7 +643,7 @@ def main():
             emit(render_client(ctx, args.target), args.json)
             return
         if args.client_command == "open":
-            emit(client_open(ctx, args.target, desktop=args.desktop), args.json)
+            emit(client_open(ctx, args.target, desktop=args.desktop, remote_host=getattr(args, "remote_host", None)), args.json)
             return
 
     if args.command == "pack":

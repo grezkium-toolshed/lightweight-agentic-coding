@@ -10,6 +10,10 @@
 2. Use Qwen 3.6 MoE as the main general model.
 3. Use Qwen 3.6 MTP (27B Q4 or 35B-A3B Q6) as the fast coding and architect model.
 4. Add hosted-model fallbacks only when there is a clear quality or speed benefit.
+5. (Optional) Install OpenChamber for phone/tablet access:
+   ```bash
+   lac client open openchamber
+   ```
 
 ## Good first commands
 

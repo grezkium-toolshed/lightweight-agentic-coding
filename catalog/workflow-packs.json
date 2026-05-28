@@ -7,7 +7,7 @@
       "description": "Architecture review, structured execution, and coding workflow support for local-first engineering work.",
       "trust_level": "core",
       "required_tools": ["shell", "git"],
-      "supported_clients": ["opencode", "claude-code", "codex-reference"],
+      "supported_clients": ["opencode", "claude-code", "codex-reference", "openchamber"],
       "recommended_scenarios": ["solo-coder", "team-pilot"],
       "assets": [
         "agent:architecture-reviewer",
@@ -20,7 +20,7 @@
       "description": "Research synthesis workflows for investigations, notes, and evidence-backed summaries.",
       "trust_level": "core",
       "required_tools": ["shell"],
-      "supported_clients": ["opencode", "claude-code", "codex-reference"],
+      "supported_clients": ["opencode", "claude-code", "codex-reference", "openchamber"],
       "recommended_scenarios": ["research-operator", "team-pilot"],
       "assets": [
         "agent:research-synthesizer",
@@ -33,7 +33,7 @@
       "description": "Document, presentation, spreadsheet, and PDF workflows for workstation-style office automation.",
       "trust_level": "core",
       "required_tools": ["python-docx", "python-pptx", "openpyxl", "pdf tooling"],
-      "supported_clients": ["opencode", "claude-code", "codex-reference"],
+      "supported_clients": ["opencode", "claude-code", "codex-reference", "openchamber"],
       "recommended_scenarios": ["office-automation", "team-pilot"],
       "assets": [
         "agent:documentation-generator",
@@ -50,7 +50,7 @@
       "description": "Release and reality-check support for introducing the workstation to a team without prompt sprawl.",
       "trust_level": "core",
       "required_tools": ["shell", "git"],
-      "supported_clients": ["opencode", "codex-reference"],
+      "supported_clients": ["opencode", "codex-reference", "openchamber"],
       "recommended_scenarios": ["team-pilot"],
       "assets": [
         "agent:reality-checker",
@@ -64,7 +64,7 @@
       "trust_level": "reviewed-external",
       "support_tier": "optional",
       "required_tools": ["shell", "network for install or Graph execution", "Microsoft Graph credentials for API calls"],
-      "supported_clients": ["opencode", "claude-code", "codex-reference"],
+      "supported_clients": ["opencode", "claude-code", "codex-reference", "openchamber"],
       "recommended_scenarios": ["office-automation", "team-pilot"],
       "assets": [
         "skill:msgraph"

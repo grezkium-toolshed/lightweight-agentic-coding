@@ -49,6 +49,12 @@ This CLI is the supported control plane for:
 - rendered reference adapter: `state/clients/codex-reference/`
 - treated as a pattern reference rather than a directly integrated runtime path
 
+### OpenChamber
+- web/PWA/desktop interface for OpenCode with mobile/remote access
+- managed through: `lac client open openchamber` (or `--desktop` for macOS app)
+- remote access via Tailscale or Cloudflare tunnel: `lac client open openchamber --remote-host http://<tailscale-ip>:4095`
+- config root: `state/clients/openchamber/`
+
 ## Provider strategy
 
 The default posture is **local always included, cloud as an optional overlay**. Every profile applies a local llama.cpp layer; cloud providers are separate, each gated by its own env var and inert until configured. `lac init` is the on-ramp.

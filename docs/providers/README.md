@@ -23,3 +23,4 @@ Read next:
 - `CODEX_AUTH.md`
 - `ANTHROPIC_API.md`
 - `MICROSOFT_GRAPH.md`
+- `OPENCHAMBER.md`
