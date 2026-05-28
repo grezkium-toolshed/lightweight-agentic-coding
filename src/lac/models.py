@@ -33,7 +33,7 @@ PROFILE_MODELS = {
     "32gb": {
         "gguf": [
             ("qwen3.6", "Qwen3.6-27B-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 17000),
-            ("qwen", "Qwen3-Coder-Next-MXFP4_MOE.gguf", "unsloth/Qwen3-Coder-Next-GGUF", 28000),
+            ("qwen3.6-mtp", "Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-MTP-GGUF", 19000),
         ],
         "mlx": ["unsloth/Qwen3.6-27B-UD-MLX-6bit"],
     },
@@ -41,7 +41,7 @@ PROFILE_MODELS = {
         "gguf": [
             ("qwen3.6", "Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-GGUF", 36000),
             ("qwen3.6", "Qwen3.6-27B-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 17000),
-            ("qwen", "Qwen3-Coder-Next-MXFP4_MOE.gguf", "unsloth/Qwen3-Coder-Next-GGUF", 28000),
+            ("qwen3.6-mtp", "Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-MTP-GGUF", 31000),
         ],
         "mlx": ["unsloth/Qwen3.6-35B-A3B-MLX-8bit", "unsloth/Qwen3.6-27B-UD-MLX-6bit"],
     },
@@ -50,7 +50,8 @@ PROFILE_MODELS = {
             ("qwen3.5", "Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf", "unsloth/Qwen3.5-122B-A10B-GGUF", 100),
             ("qwen3.5", "Qwen3.5-122B-A10B-MXFP4_MOE-00002-of-00003.gguf", "unsloth/Qwen3.5-122B-A10B-GGUF", 42000),
             ("qwen3.5", "Qwen3.5-122B-A10B-MXFP4_MOE-00003-of-00003.gguf", "unsloth/Qwen3.5-122B-A10B-GGUF", 15000),
-            ("qwen", "Qwen3-Coder-Next-MXFP4_MOE.gguf", "unsloth/Qwen3-Coder-Next-GGUF", 28000),
+            ("qwen3.6-mtp", "Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-MTP-GGUF", 19000),
+            ("qwen3.6-mtp", "Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-MTP-GGUF", 31000),
         ],
         "mlx": [],
     },
@@ -58,8 +59,8 @@ PROFILE_MODELS = {
         "gguf": [
             ("qwen3.6", "Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-GGUF", 36000),
             ("qwen3.6", "Qwen3.6-27B-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 17000),
-            ("qwen3.6", "Qwen3.6-27B-UD-Q3_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 14000),
-            ("qwen", "Qwen3-Coder-Next-MXFP4_MOE.gguf", "unsloth/Qwen3-Coder-Next-GGUF", 28000),
+            ("qwen3.6-mtp", "Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-MTP-GGUF", 19000),
+            ("qwen3.6-mtp", "Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-MTP-GGUF", 31000),
         ],
         "mlx": ["unsloth/Qwen3.6-35B-A3B-MLX-8bit", "unsloth/Qwen3.6-27B-UD-MLX-6bit"],
     },
@@ -68,7 +69,8 @@ PROFILE_MODELS = {
             ("minimax", "MiniMax-M2.7-UD-IQ4_XS-00001-of-00003.gguf", os.environ.get("MINIMAX_REPO", "unsloth/MiniMax-M2.7-GGUF"), 5),
             ("minimax", "MiniMax-M2.7-UD-IQ4_XS-00002-of-00003.gguf", os.environ.get("MINIMAX_REPO", "unsloth/MiniMax-M2.7-GGUF"), 30000),
             ("minimax", "MiniMax-M2.7-UD-IQ4_XS-00003-of-00003.gguf", os.environ.get("MINIMAX_REPO", "unsloth/MiniMax-M2.7-GGUF"), 30000),
-            ("qwen", "Qwen3-Coder-Next-MXFP4_MOE.gguf", "unsloth/Qwen3-Coder-Next-GGUF", 28000),
+            ("qwen3.6-mtp", "Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-MTP-GGUF", 19000),
+            ("qwen3.6-mtp", "Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-MTP-GGUF", 31000),
         ],
         "mlx": [],
     },
