@@ -194,6 +194,22 @@
       "supported_clients": ["opencode", "claude-code", "codex-reference"]
     },
     {
+      "id": "agent:devops-reviewer",
+      "type": "agent",
+      "path": ".opencode/agents/devops-reviewer.md",
+      "pack": "devops",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "limited",
+        "network": "ask"
+      },
+      "supported_clients": ["opencode", "codex-reference"]
+    },
+    {
       "id": "skill:msgraph",
       "type": "skill",
       "path": ".opencode/skills/msgraph/SKILL.md",
