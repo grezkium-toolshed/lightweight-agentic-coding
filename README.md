@@ -248,6 +248,11 @@ Still evolving:
 - `CONTRIBUTING.md` — contribution guidelines
 - `CODE_OF_CONDUCT.md` — community expectations
 
+## Acknowledgments
+
+- **OpenChamber** — powers our web, mobile, and desktop remote access. Built by [@btriapitsyn](https://github.com/btriapitsyn) and contributors. https://github.com/openchamber/openchamber
+- **@vava-nessa** — for the free model index tooling used in our cloud model snapshots.
+
 ## Free Model Snapshot Policy
 
 `docs/FREE_CLOUD_MODELS.md` and `docs/free-coding-models.json` are reviewed snapshots of free-model availability. Refresh them before each beta cut. Kudos to **@vava-nessa** for the free model index tooling.
