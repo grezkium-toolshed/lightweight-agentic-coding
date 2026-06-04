@@ -8,7 +8,6 @@ plan, and executes fixes with user confirmation.
 import sys
 import subprocess
 
-from lac.lib.jsonc import load_jsonc
 from lac.profiles import profile_apply
 from lac.models import models_sync
 from lac.runtime import runtime_start
@@ -73,7 +72,10 @@ def _install_hint(tool_id):
         },
         "llama-server": {
             "macos": ["brew install llama.cpp"],
-            "linux": ["echo 'See: https://github.com/ggml-org/llama.cpp'"],
+            "linux": ["git clone --depth 1 https://github.com/ggml-org/llama.cpp",
+                      "cmake -B llama.cpp/build -S llama.cpp -DLLAMA_CURL=ON",
+                      "cmake --build llama.cpp/build --config Release -j $(nproc)",
+                      "sudo cp llama.cpp/build/bin/llama-server /usr/local/bin/"],
             "windows": ["winget install llama.cpp"],
         },
         "python3": {
@@ -241,7 +243,7 @@ def fix_openchamber_render(ctx, yes=False):
     if "openchamber" not in active.get("supported_clients", []):
         return True  # not needed
     try:
-        render_client("openchamber", ctx)
+        render_client(ctx, "openchamber")
         return True
     except Exception as e:
         return False

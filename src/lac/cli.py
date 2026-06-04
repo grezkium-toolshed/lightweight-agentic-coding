@@ -575,7 +575,7 @@ def build_parser():
     bench_parser = subparsers.add_parser("bench")
     bench_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
     bench_parser.add_argument("--model", help="Benchmark a specific model slot (default: all)")
-    bench_parser.add_argument("--draft-n", type=int, help="MTP draft token count (e.g. 6)")
+    bench_parser.add_argument("--draft-n", type=int, help="Experimental: MTP draft token count (requires server support, e.g. 6)")
     bench_parser.add_argument("--prompt", default=None, help="Custom prompt for the benchmark")
     bench_parser.add_argument("--timeout", type=int, default=int(os.environ.get("BENCH_TIMEOUT", "120")),
                               help="Per-request timeout in seconds")

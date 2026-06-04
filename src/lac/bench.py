@@ -4,16 +4,12 @@ Measures tokens/second, time-to-first-token, and peak memory per model.
 Supports slot-specific runs and MTP draft-n sweeps.
 """
 
-import configparser
-import json
 import time
-from pathlib import Path
 
 from lac.runtime import request_json, local_runtime_base_url, selected_local_runtime
 
 
 BENCH_PROMPT = "Write a short poem about artificial intelligence. Keep it under 100 words."
-BENCH_IN_TOKENS = 256
 BENCH_OUT_TOKENS = 512
 
 
@@ -55,6 +51,8 @@ def _bench_one_model(model_id, base_url, timeout, prompt, max_tokens, draft_n=No
         "stream": False,
     }
     if draft_n is not None:
+        # Experimental: some llama-server builds support per-request
+        # speculative decoding. Requires server support to take effect.
         payload["speculative"] = draft_n
 
     start = time.time()
