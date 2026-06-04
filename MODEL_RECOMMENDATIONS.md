@@ -13,7 +13,7 @@ Default quant guidance:
 
 Recommended profile mapping:
 - `16gb`: Qwen 3.6 27B `UD-Q3_K_XL`
-- `macos-16gb`: Qwen3.5 9B `Q4_K_M` + Gemma 4 E4B `Q8_0` for Apple Silicon headroom
+- `macos-16gb`: Gemma 4 12B `UD-Q4_K_XL` + Qwen3.5 9B `Q4_K_M` + Gemma 4 E4B `Q8_0` for Apple Silicon
 - `24gb`: Qwen 3.6 27B `UD-Q4_K_XL`
 - `32gb`: Qwen 3.6 27B `UD-Q4_K_XL` + 27B MTP `UD-Q4_K_XL`
 - `64gb`: Qwen 3.6 35B-A3B `UD-Q8_K_XL` + 35B-A3B MTP `UD-Q6_K_XL`
@@ -48,14 +48,17 @@ Gemma 4 profiles keep the Unsloth-style Gemma defaults: `temperature=1.0`, `top_
 
 | Profile / model | Artifact family | Context | temp / top-p / top-k | Penalties | Source / rationale |
 |---|---|---:|---|---|---|
-| `macos-16gb` / Qwen3.5 9B Q4 | `Q4_K_M` | 32K | `0.7 / 0.8 / 20` | presence `1.5`, repeat `1.0` | Unsloth Qwen small non-thinking baseline; 32K keeps 16GB macOS headroom. |
-| `macos-16gb` / Gemma 4 E4B Q8 | `Q8_0` | 32K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Unsloth Gemma defaults; lighter alternate for local multilingual and office work. |
+| `macos-16gb` / Gemma 4 12B Q4 | `UD-Q4_K_XL` | 256K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Unsloth Gemma defaults; encoder-free text+image+audio default for 16GB Apple Silicon. |
+| `macos-16gb` / Qwen3.5 9B Q4 fallback | `Q4_K_M` | 32K | `0.7 / 0.8 / 20` | presence `1.5`, repeat `1.0` | Unsloth Qwen small non-thinking baseline; 32K keeps 16GB macOS headroom. |
+| `macos-16gb` / Gemma 4 E4B Q8 fallback | `Q8_0` | 32K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Unsloth Gemma defaults; lightest alternate for multilingual and office work. |
 | `16gb` / Qwen 3.6 27B Q3 | `UD-Q3_K_XL` | 64K | `0.6 / 0.9 / 40` | presence `0.2`, repeat `1.05` | Repo coding/agent tuning for constrained non-Mac 16GB experiments. |
 | `24gb` / Qwen 3.6 27B Q4 | `UD-Q4_K_XL` | 128K | `0.7 / 0.9 / 40` | presence `0.4`, repeat `1.05` | Balanced Qwen default with stronger repeat control for agent loops. |
 | `32gb` / Qwen 3.6 27B Q4 | `UD-Q4_K_XL` | 128K | `0.6 / 0.9 / 40` | presence `0.2`, repeat `1.05` | More conservative coding profile, paired with coder specialist. |
 | `64gb` / Qwen 3.6 35B-A3B Q8 | `UD-Q8_K_XL` | 256K | `0.7 / 0.92 / 40` | presence `0.5`, repeat `1.05` | Higher-headroom Qwen default while retaining repeat control. |
 | `64gb` / Qwen 3.6 27B Q4 fallback | `UD-Q4_K_XL` | 128K | `0.6 / 0.9 / 40` | presence `0.2`, repeat `1.05` | Stable fallback when the 35B-A3B path is too heavy. |
-| `gemma-16gb` / Gemma 4 E4B Q8 fallback | `Q8_0` | 128K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Gemma default settings with smaller fallback model. |
+| `gemma-16gb` / Gemma 4 12B Q8 | `UD-Q8_K_XL` | 256K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Unsloth Gemma defaults; encoder-free text+image+audio default for 16GB VRAM. |
+| `gemma-16gb` / Gemma 4 12B Q4 fallback | `UD-Q4_K_XL` | 256K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Lighter 12B slot; same multimodal capability at lower RAM. |
+| `gemma-16gb` / Gemma 4 E4B Q8 fallback | `Q8_0` | 128K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Smallest Gemma fallback for lightweight multilingual work. |
 | `gemma-24gb+` / Gemma 4 26B/31B | `UD-Q4_K_XL`, `Q8_0`, or `BF16` | 256K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Unsloth Gemma defaults; profile chooses quant/context by hardware tier. |
 | `32gb+` / Qwen3.6 27B MTP | `UD-Q4_K_XL` (MTP) | 256K | `0.7 / 0.9 / 40` | presence `0.2`, repeat `1.04` | MTP speculative decoding; 1.4-2.2x faster than baseline. `spec-draft-n-max=6` (tunable 1-6). |
 | `64gb+` / Qwen3.6 35B-A3B MTP | `UD-Q6_K_XL` (MTP) | 256K | `0.7 / 0.92 / 40` | presence `0.4`, repeat `1.04` | MTP speculative decoding; fast architect replacement for coder-next. ~1GB extra headroom vs non-MTP. |
@@ -104,32 +107,36 @@ Use `macos-16gb` for MacBook Air M4 16GB-class machines. It prioritizes OS headr
 
 ## Gemma 4 alternative
 
-Gemma 4 is available as an alternative model family with Apache-2.0 licensing, built-in thinking/reasoning mode (`<|think|>`), multimodal support, and MoE efficiency.
+Gemma 4 is available as an alternative model family with Apache-2.0 licensing, built-in thinking/reasoning mode (`<|think|>`), multimodal support, and MoE efficiency. The 12B model is **encoder-free** — it processes images and audio directly through the LLM without a separate encoder, making it uniquely fast and capable on 16 GB hardware.
 
 ### Gemma 4 profile mapping
 
 | Profile | Models |
 |---|---|
-| `gemma-16gb` | Gemma 4 26B-A4B (Q4) + E4B (Q8) fallback |
+| `gemma-16gb` | Gemma 4 12B (Q8) + 12B (Q4) + E4B (Q8) fallback |
 | `gemma-24gb` | Gemma 4 31B (Q4) + 26B-A4B (Q4) fallback |
 | `gemma-32gb` | Gemma 4 31B (Q8) + 26B-A4B (Q4) fallback |
 | `gemma-64gb` | Gemma 4 31B (BF16) + 31B (Q8) + 26B-A4B (Q4) |
 
 ### Gemma 4 benchmarks
 
-| Variant | MMLU Pro | AIME 2026 | LiveCodeBench v6 | MMMU Pro |
-|---|---|---|---|---|
-| 31B (dense) | 85.2% | 89.2% | 80.0% | 76.9% |
-| 26B-A4B (MoE) | 82.6% | 88.3% | 77.1% | 73.8% |
+| Variant | MMLU Pro | AIME 2026 | LiveCodeBench v6 | Codeforces ELO | MMMU Pro |
+|---|---|---|---|---|---|
+| 31B (dense) | 85.2% | 89.2% | 80.0% | 2150 | 76.9% |
+| 26B-A4B (MoE) | 82.6% | 88.3% | 77.1% | 1718 | 73.8% |
+| **12B (dense, encoder-free)** | **77.2%** | **77.5%** | **72.0%** | **1659** | **69.1%** |
+
+The 12B scores within 2-5% of the 26B-A4B on most benchmarks while running on 16 GB hardware and adding native audio support.
 
 ### When to choose Gemma 4 over Qwen 3.6
 
 - **Apache-2.0 license** — Fully permissive, no commercial restrictions
 - **Multilingual strength** — Strong fit for multilingual workloads, especially EU-language-heavy usage
 - **Thinking mode** — Built-in reasoning with `<|think|>` token control
-- **Multimodal** — Vision support via `--mmproj` clip projector
+- **Encoder-free multimodal (12B only)** — Native image and audio without a separate encoder; faster time-to-first-token for multimodal inference
+- **16 GB friendly** — The 12B model fits 8 GB at UD-Q4_K_XL and 16 GB at UD-Q8_K_XL, enabling 256K context on modest hardware
 - **MoE efficiency** — 26B-A4B activates only 4B params per token
-- **256K context** — Available on 26B-A4B and 31B variants
+- **256K context** — Available on 12B, 26B-A4B, and 31B variants
 
 ### Gemma 4 inference defaults
 

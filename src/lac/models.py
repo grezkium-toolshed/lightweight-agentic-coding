@@ -24,6 +24,7 @@ PROFILE_MODELS = {
     },
     "macos-16gb": {
         "gguf": [
+            ("gemma4", "gemma-4-12b-it-UD-Q4_K_XL.gguf", "unsloth/gemma-4-12b-it-GGUF", 7500),
             ("qwen3.5", "Qwen3.5-9B-Q4_K_M.gguf", "unsloth/Qwen3.5-9B-GGUF", 5000),
             ("gemma4", "gemma-4-E4B-IT-Q8_0.gguf", "unsloth/gemma-4-E4B-IT-GGUF", 4000),
         ],
@@ -82,7 +83,8 @@ PROFILE_MODELS = {
     },
     "gemma-16gb": {
         "gguf": [
-            ("gemma4", "gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf", "unsloth/gemma-4-26B-A4B-IT-GGUF", 15000),
+            ("gemma4", "gemma-4-12b-it-UD-Q8_K_XL.gguf", "unsloth/gemma-4-12b-it-GGUF", 13600),
+            ("gemma4", "gemma-4-12b-it-UD-Q4_K_XL.gguf", "unsloth/gemma-4-12b-it-GGUF", 7500),
             ("gemma4", "gemma-4-E4B-IT-Q8_0.gguf", "unsloth/gemma-4-E4B-IT-GGUF", 4000),
         ],
         "mlx": ["unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit", "unsloth/gemma-4-E4B-it-MLX-8bit"],

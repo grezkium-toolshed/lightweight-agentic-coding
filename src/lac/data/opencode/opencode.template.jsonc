@@ -17,6 +17,12 @@
       "name": "Local llama.cpp Cluster",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
+        "qwen3.5-4b-q4": {
+          "limit": {
+            "context": 8192,
+            "output": 4096
+          }
+        },
         "qwen3.6-27b-q3": {
           "limit": {
             "context": 262144,
@@ -72,6 +78,18 @@
           }
         },
         "gemma-4-26b-a4b-q4": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
+        "gemma-4-12b-q8": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
+        "gemma-4-12b-q4": {
           "limit": {
             "context": 262144,
             "output": 16384

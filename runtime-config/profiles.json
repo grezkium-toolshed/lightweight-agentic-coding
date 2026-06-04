@@ -34,7 +34,7 @@
     "macos-16gb": {
       "id": "macos-16gb",
       "label": "macOS 16 GB Apple Silicon",
-      "description": "Apple Silicon starter profile for MacBook Air-class 16 GB machines, prioritizing OS and context headroom over maximum parameter count.",
+      "description": "Apple Silicon profile for 16 GB machines. Gemma 4 12B Q4 default for strong reasoning + multimodal with Qwen 3.5 fallback.",
       "preset": "runtime-config/presets/macos-16gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -43,7 +43,7 @@
       "primary_workload": "macos-starter",
       "recommended_for": ["solo-coder", "office-automation"],
       "supported_clients": ["opencode", "claude-code", "codex-reference"],
-      "default_model": "local-cluster/qwen3.5-9b-q4",
+      "default_model": "local-cluster/gemma-4-12b-q4",
       "small_model": "local-cluster/gemma-4-e4b-q8"
     },
     "24gb": {
@@ -139,7 +139,7 @@
     "gemma-16gb": {
       "id": "gemma-16gb",
       "label": "16 GB Gemma local",
-      "description": "Gemma-based starter profile for users who prefer the Gemma family at small scale.",
+      "description": "Gemma 4 12B-based profile for 16 GB devices. The encoder-free 12B delivers strong reasoning + image/audio support.",
       "preset": "runtime-config/presets/gemma-16gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -148,8 +148,8 @@
       "primary_workload": "starter-gemma",
       "recommended_for": ["office-automation", "research-operator"],
       "supported_clients": ["opencode", "claude-code", "codex-reference"],
-      "default_model": "local-cluster/gemma-4-26b-a4b-q4",
-      "small_model": "local-cluster/gemma-4-e4b-q8"
+      "default_model": "local-cluster/gemma-4-12b-q8",
+      "small_model": "local-cluster/gemma-4-12b-q4"
     },
     "gemma-24gb": {
       "id": "gemma-24gb",
