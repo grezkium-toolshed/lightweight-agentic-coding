@@ -29,6 +29,8 @@ od:
 
 # FAQ Page Skill
 
+> **Craft references:** Read `.opencode/craft/typography.md`, `.opencode/craft/accessibility-baseline.md`, and `.opencode/craft/state-coverage.md` for interaction and state guidance.
+
 Produce a single FAQ page with collapsible accordion sections, search, and category filtering.
 
 ## Workflow

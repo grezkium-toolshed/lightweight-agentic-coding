@@ -35,6 +35,8 @@ od:
 
 # Impeccable Design Polish
 
+> **Craft references:** Read `.opencode/craft/typography.md`, `.opencode/craft/color.md`, `.opencode/craft/anti-ai-slop.md`, `.opencode/craft/animation-discipline.md`, and `.opencode/craft/accessibility-baseline.md` before polishing.
+
 Use this skill as the post-generation pass for an existing design. It should not restart the project from scratch; it should make the current artifact sharper, more usable, and closer to something a designer would ship.
 
 ## Follow-Up Modes

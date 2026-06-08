@@ -46,6 +46,8 @@ od:
 
 # Research Decision Room Skill
 
+> **Craft references:** Read `.opencode/craft/typography.md`, `.opencode/craft/color.md`, `.opencode/craft/accessibility-baseline.md`, and `.opencode/craft/anti-ai-slop.md` for presentation and accessibility guidance.
+
 Create a single-page HTML decision artifact that helps a product or design team
 turn messy evidence into a clear next move. The output is not a decorative
 research deck. It is a working room for debate: evidence, themes, confidence,
