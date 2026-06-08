@@ -99,3 +99,20 @@ Manual validation:
 - `state/active/profile.txt`: generated selected profile marker
 - `state/clients/opencode/opencode.json`: generated OpenCode runtime config
 - `scripts/`: setup, switch, launch, doctor, and sync scripts
+
+## Open Design Integration
+
+Open Design (nexu-io/open-design) provides design skills, craft rules, and brand design systems curated under:
+- `.opencode/craft/` — 12 brand-agnostic design rulebooks (typography, color, anti-AI-slop, etc.)
+- `.opencode/skills/` — 33 curated design/HTML/image/research skills
+- `.opencode/design-systems/` — 20 brand `DESIGN.md` files (Linear, Vercel, Apple, Stripe, etc.)
+
+These work offline without any daemon — ideal for local models.
+
+For the full 155-skill / 150-design-system catalog, optionally install the MCP server:
+
+```bash
+curl -fsSL https://open-design.ai/install.sh | sh -s opencode
+# Or if od CLI is already installed:
+od mcp install opencode
+```
