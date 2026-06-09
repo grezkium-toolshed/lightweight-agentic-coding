@@ -1,4 +1,4 @@
-# Audit Findings — Local AI Cluster
+# Audit Findings — lac
 
 Generated: 2026-04-26
 

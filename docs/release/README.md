@@ -17,6 +17,6 @@ This folder tracks release-readiness guidance for the public beta.
 
 ## Naming and path policy
 
-- Product and docs name: `local-ai-cluster`
-- Current repository slug/path: `ai-coding-cluster`
+- Product and docs name: `lac` — Lightweight Agentic Coding
+- Repository slug/path: `lightweight-agentic-coding`
 - This split is temporary and acceptable during pre-release hardening.

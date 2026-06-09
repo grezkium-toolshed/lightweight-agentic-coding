@@ -1,6 +1,6 @@
 # Claude Code Templates
 
-This directory contains guidance and starter files for using this repo as a Local AI Cluster with Claude Code.
+This directory contains guidance and starter files for using this lac setup with Claude Code.
 
 Scope:
 - docs and templates only

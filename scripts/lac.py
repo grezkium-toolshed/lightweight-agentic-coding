@@ -845,7 +845,7 @@ def render_client(ctx, target):
     lines = [
       "# Claude Code Adapter",
       "",
-      "This adapter reuses the curated Local AI Cluster workflow packs as references for Claude Code.",
+      "This adapter reuses the curated lac workflow packs as references for Claude Code.",
       "",
       "## Included Packs",
       "",
@@ -2242,7 +2242,7 @@ def render_init_text(result):
   hardware = result["hardware"]
   ram_label = f"{hardware['ram_gb']:.1f} GB" if hardware.get("ram_gb") is not None else "unknown"
   recommendation = result["recommendation"]
-  print("Local AI Cluster init")
+  print("  lac init — Lightweight Agentic Coding")
   print(f"Status: {result['status']}")
   print(f"Detected: {hardware['os']} / {hardware['arch']} / RAM {ram_label}")
   print(f"Selected profile: {result['profile']} ({recommendation['selected_label']})")
@@ -2351,7 +2351,7 @@ def emit(payload, json_mode=False, kind=None):
 
 
 def build_parser():
-  parser = argparse.ArgumentParser(prog="lac", description="Local AI Cluster 2.0 CLI")
+  parser = argparse.ArgumentParser(prog="lac", description="lac — Lightweight Agentic Coding CLI")
   parser.add_argument("--version", action="version", version=f"lac {VERSION}")
   parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
   subparsers = parser.add_subparsers(dest="command", required=True)

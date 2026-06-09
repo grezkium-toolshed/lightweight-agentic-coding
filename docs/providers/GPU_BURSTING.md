@@ -160,7 +160,7 @@ To make the tunnel survive reboots, create a LaunchAgent (macOS) or systemd serv
 **Linux** (`/etc/systemd/system/lac-cloud-tunnel.service`):
 ```
 [Unit]
-Description=Local AI Cluster Cloud GPU Tunnel
+Description=lac Cloud GPU Tunnel
 After=network.target
 
 [Service]

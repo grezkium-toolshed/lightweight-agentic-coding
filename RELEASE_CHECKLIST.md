@@ -3,7 +3,7 @@
 Use this checklist before changing the repo visibility or publishing release notes.
 
 ## Identity and framing
-- [ ] Repository name, description, and README use the `local-ai-cluster` identity consistently.
+- [ ] Repository name, description, and README use the `lac` — Lightweight Agentic Coding identity consistently.
 - [ ] Public beta positioning is explicit: local-first, evolving, and not a stable v1.
 - [ ] Any remaining private-only language is intentional and limited to release-gate docs.
 

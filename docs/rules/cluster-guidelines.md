@@ -1,4 +1,4 @@
-# Local AI Cluster Rules
+# lac Rules
 
 - Keep llama.cpp as the default local runtime.
 - Treat Qwen 3.6 MoE as the baseline local model family for general agentic work.

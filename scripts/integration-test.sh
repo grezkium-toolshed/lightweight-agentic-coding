@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Integration test for Local AI Cluster
+# Integration test for lac
 # Validates the full CLI workflow without starting llama-server.
 # This can run in CI without GPU.
 

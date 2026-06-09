@@ -13,7 +13,7 @@ This repo supports two useful hybrid shapes:
 
 Use this when you have several private repos on the same workstation and want the same client to offer both local and cloud models.
 
-- Keep `local-ai-cluster` as the canonical setup repo.
+- Keep `lightweight-agentic-coding` as the canonical setup repo.
 - Apply one local profile globally, usually `24gb`, `32gb`, or `64gb`.
 - Use `opencode-go` and `openrouter` together when you want reliable hosted coding models plus a free/trial fallback.
 - Keep project-specific rules in each project repo, not in the cluster repo.

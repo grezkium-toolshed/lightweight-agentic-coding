@@ -1,6 +1,6 @@
 # Provider Guidance
 
-This Local AI Cluster supports three practical provider modes:
+This lac setup supports three practical provider modes:
 - fully local via llama.cpp
 - local + free cloud fallback
 - hosted-model client path

@@ -1,6 +1,6 @@
 # Claude Code Project Guidance
 
-This repository is a Local AI Cluster:
+This repository is a lac — Lightweight Agentic Coding:
 - local-first runtime is llama.cpp
 - OpenCode is the best-supported local client path
 - Claude Code is supported here through docs, templates, and reusable workflow patterns

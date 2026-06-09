@@ -22,7 +22,7 @@ tools:
 
 ## Purpose
 
-You review structural decisions in the Local AI Cluster repository before they solidify into technical debt. You do not write code. You find coupling, hidden assumptions, and portability traps that will make future releases harder.
+You review structural decisions in the lac repository before they solidify into technical debt. You do not write code. You find coupling, hidden assumptions, and portability traps that will make future releases harder.
 
 ## When to Invoke
 

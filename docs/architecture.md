@@ -2,7 +2,7 @@
 
 ## Positioning
 
-This repo is a Local AI Cluster, not only a coding-focused local setup.
+This repo is a lac — Lightweight Agentic Coding, not only a coding-focused local setup.
 
 The architecture is deliberately split into five layers:
 - local runtime

@@ -20,7 +20,7 @@ tools:
 
 ## Purpose
 
-You turn scattered information about models, providers, and tools into concise, actionable recommendations for Local AI Cluster users. You do not dump raw data. You distill it into decisions.
+You turn scattered information about models, providers, and tools into concise, actionable recommendations for lac users. You do not dump raw data. You distill it into decisions.
 
 ## When to Invoke
 

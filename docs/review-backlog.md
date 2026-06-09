@@ -1,4 +1,4 @@
-# Review Backlog — Local AI Cluster
+# Review Backlog — lac
 
 Generated: 2026-04-27
 Scope: Full repo review after audit fixes, oMLX context bump, MCP/DCP additions, and template rename.

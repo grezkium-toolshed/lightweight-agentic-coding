@@ -12,5 +12,5 @@ This repo is targeting a public beta, not a stable v1.
 - `RELEASE_CHECKLIST.md` is complete
 - Linux CI checks in `.github/workflows/ci.yml` are green on current default branch
 - live validation has been performed on the documented paths
-- repo naming and public framing are consistent with `local-ai-cluster`
+- repo naming and public framing are consistent with `lac` — Lightweight Agentic Coding
 - no stale or archived branches remain in the active tree

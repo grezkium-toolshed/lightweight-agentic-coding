@@ -1,8 +1,8 @@
-# Confluence Post: Local AI Cluster vNext Migration
+# Confluence Post: lac — Lightweight Agentic Coding vNext Migration
 
 ## Why We Are Migrating
 
-We are broadening our setup from a coding-focused OpenCode cluster into a more general **Local AI Cluster** built around **llama.cpp + the Qwen local baseline**. This improves portability, reduces configuration drift, supports lower-memory devices, and gives teams a stronger baseline for agentic workflows beyond coding alone.
+We are broadening our setup from a coding-focused OpenCode cluster into a more general **lac** setup built around **llama.cpp + the Qwen local baseline**. This improves portability, reduces configuration drift, supports lower-memory devices, and gives teams a stronger baseline for agentic workflows beyond coding alone.
 
 ## What Changed
 

@@ -13,7 +13,7 @@ Release index: `docs/release/README.md`
 
 ### Open Questions
 - [ ] Live validation on all documented hardware tiers (16gb, 24gb, 32gb, 64gb, gemma-*)
-- [ ] Repo naming and public framing aligned with `local-ai-cluster`
+- [ ] Repo naming and public framing aligned with `lac` — Lightweight Agentic Coding
 
 ### Completed
 - [x] Gemma 4 model family added (models, presets, setup scripts, templates)
