@@ -34,9 +34,8 @@ Per-preset additions:
 - `src/lac/data/opencode/opencode.template.jsonc`
 
 ### Update documentation
-- `MODEL_RECOMMENDATIONS.md` — profile mapping, shipped settings, specialist model section
-- `ARCHITECTURE_OVERVIEW.md` — replace coder-next reference with MTP
-- `QWEN.md` — same
+- `docs/model-recommendations.md` — profile mapping, shipped settings, specialist model section
+- `docs/architecture.md` — replace coder-next reference with MTP
 - `docs/rules/cluster-guidelines.md` — same
 - `docs/use-cases/ONBOARDING_32GB_PLUS.md` — same
 - `docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md` — note removal

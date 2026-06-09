@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository provides a private, replicable **Local AI Cluster**.
+This repository provides **lac — Lightweight Agentic Coding**.
 
 Runtime defaults:
 - llama.cpp `llama-server`

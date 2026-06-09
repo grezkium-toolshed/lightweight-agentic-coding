@@ -118,7 +118,7 @@ Structure your findings as:
 ## Anti-Patterns to Flag
 
 - "We'll clean this up later" without a tracked issue
-- Adding a new model without updating `catalog/assets.json` and `MODEL_RECOMMENDATIONS.md`
+- Adding a new model without updating `catalog/assets.json` and `docs/model-recommendations.md`
 - Shell scripts that use `cd` instead of absolute paths or `workdir`
 - Copy-pasting code between `*.sh` and `*.ps1` instead of extracting shared logic
 - Hardcoding ports, paths, or usernames

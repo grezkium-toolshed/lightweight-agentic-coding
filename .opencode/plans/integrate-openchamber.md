@@ -91,7 +91,7 @@ Add `"openchamber"` to pack `supported_clients`:
 | `docs/providers/OPENCHAMBER.md` (new) | Full setup guide |
 | `docs/providers/README.md` | Add link |
 | `docs/use-cases/ONBOARDING_32GB_PLUS.md` | Add optional OpenChamber step |
-| `ARCHITECTURE_OVERVIEW.md` | Add to client integrations |
+| `docs/architecture.md` | Add to client integrations |
 | `docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md` | Note new client |
 
 **New doc: `docs/providers/OPENCHAMBER.md`**

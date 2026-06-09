@@ -4,10 +4,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 required=(
   README.md
-  ARCHITECTURE_OVERVIEW.md
-  MODEL_RECOMMENDATIONS.md
-  CONFIG_SUMMARY.md
-  REVISION_NOTES.md
+  docs/architecture.md
+  docs/model-recommendations.md
+  docs/config-summary.md
   state/README.md
   catalog/assets.json
   catalog/workflow-packs.json

@@ -2,9 +2,9 @@
 
 ## Scope
 
-This repository is a configuration-first template for OpenCode + llama.cpp.
+This repository is a battery-included setup for local agentic coding with OpenCode + llama.cpp.
 Contributions should preserve portability and reproducibility.
-The repo is intentionally private until release gates are complete.
+The repo is still in pre-beta — public contributions welcome once release gates are complete.
 
 ## Local Checks Before PR
 

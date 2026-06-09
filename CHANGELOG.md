@@ -41,7 +41,7 @@ for tagged releases (public beta and beyond).
 ### Added
 
 - Initial public beta preparation.
-- Local AI Cluster runtime with llama.cpp and optional oMLX on macOS.
+- lac runtime with llama.cpp and optional oMLX on macOS.
 - Profile-based model setup (`16gb` through `128gb-multi`, plus cloud-only profiles).
 - Curated OpenCode agents: `architecture-reviewer`, `reality-checker`, `release-reviewer`, `research-synthesizer`, `documentation-generator`.
 - Curated OpenCode skills: `documentation-generator`, `docx-workflow`, `pdf-workflow`, `pptx-workflow`, `xlsx-workflow`, `gsd`, `research-synthesizer`.

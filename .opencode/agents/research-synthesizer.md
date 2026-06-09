@@ -27,7 +27,7 @@ You turn scattered information about models, providers, and tools into concise, 
 - Evaluating a new model family for inclusion in profiles
 - Comparing cloud providers for fallback or cloud-only use
 - Assessing a new tool integration (e.g., a new MCP server, a new client)
-- Updating `MODEL_RECOMMENDATIONS.md` or `docs/providers/`
+- Updating `docs/model-recommendations.md` or `docs/providers/`
 - Responding to user questions about "which model should I use?"
 - Reviewing upstream changelog or release notes for breaking changes
 
