@@ -92,9 +92,9 @@ assert profile_24["profile_id"] == "24gb"
 assert opencode_config["model"] == "local-cluster/qwen3.6-27b-q4"
 assert opencode_config["provider"]["local-cluster"]["options"]["baseURL"] == "http://127.0.0.1:8080/v1"
 assert profile_macos_16gb["profile_id"] == "macos-16gb"
-assert opencode_config_macos_16gb["model"] == "local-cluster/qwen3.5-9b-q4"
+assert opencode_config_macos_16gb["model"] == "local-cluster/gemma-4-12b-q4"
 assert opencode_config_macos_16gb["small_model"] == "local-cluster/gemma-4-e4b-q8"
-assert opencode_config_macos_16gb["provider"]["local-cluster"]["models"]["qwen3.5-9b-q4"]["limit"]["context"] == 32768
+assert opencode_config_macos_16gb["provider"]["local-cluster"]["models"]["qwen3.5-9b-q4"]["limit"]["context"] == 262144
 if omlx_check:
     profile_24_omlx = json.loads((tmp_dir / "profile-24gb-omlx.json").read_text(encoding="utf-8"))
     opencode_config_omlx = json.loads((tmp_dir / "opencode-24gb-omlx.json").read_text(encoding="utf-8"))
@@ -105,7 +105,7 @@ if omlx_check:
     opencode_config_macos_16gb_omlx = json.loads((tmp_dir / "opencode-macos-16gb-omlx.json").read_text(encoding="utf-8"))
     assert profile_macos_16gb_omlx["profile_id"] == "macos-16gb"
     assert opencode_config_macos_16gb_omlx["provider"]["local-cluster"]["options"]["baseURL"] == "http://127.0.0.1:8080/v1"
-    assert opencode_config_macos_16gb_omlx["model"] == "local-cluster/qwen3.5-9b-q4"
+    assert opencode_config_macos_16gb_omlx["model"] == "local-cluster/gemma-4-12b-q4"
     assert opencode_config_macos_16gb_omlx["small_model"] == "local-cluster/gemma-4-e4b-q8"
 assert opencode_manifest["target"] == "opencode"
 assert doctor_24["assets"]["pack_count"] >= 4
