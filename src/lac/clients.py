@@ -48,7 +48,7 @@ def render_client(ctx, target):
         shutil.copytree(template_root, target_root / "templates", dirs_exist_ok=True)
         lines = [
             "# Claude Code Adapter", "",
-            "This adapter reuses the curated Local AI Cluster workflow packs as references for Claude Code.",
+            "This adapter reuses the curated lac workflow packs as references for Claude Code.",
             "", "## Included Packs", "",
         ]
         for pack in packs:

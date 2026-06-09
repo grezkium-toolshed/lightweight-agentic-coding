@@ -1,1 +1,1 @@
-# Shared Local AI Cluster script utilities
+# Shared lac script utilities

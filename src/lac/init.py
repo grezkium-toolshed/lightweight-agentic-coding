@@ -299,7 +299,7 @@ def render_init_text(result):
     hardware = result["hardware"]
     ram_label = f"{hardware['ram_gb']:.1f} GB" if hardware.get("ram_gb") is not None else "unknown"
     recommendation = result["recommendation"]
-    print("Local AI Cluster init")
+    print("  lac init — Lightweight Agentic Coding")
     print(f"Status: {result['status']}")
     print(f"Detected: {hardware['os']} / {hardware['arch']} / RAM {ram_label}")
     print(f"Selected profile: {result['profile']} ({recommendation['selected_label']})")

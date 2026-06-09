@@ -1,4 +1,4 @@
-"""Local AI Cluster CLI — argument parsing, dispatch, and text rendering."""
+"""lac CLI — argument parsing, dispatch, and text rendering."""
 
 import argparse
 import copy
@@ -561,7 +561,7 @@ def emit(payload, json_mode=False, kind=None):
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(prog="lac", description="Local AI Cluster 2.0 CLI")
+    parser = argparse.ArgumentParser(prog="lac", description="lac — Lightweight Agentic Coding CLI")
     parser.add_argument("--version", action="version", version=f"lac {VERSION}")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
     subparsers = parser.add_subparsers(dest="command", required=True)

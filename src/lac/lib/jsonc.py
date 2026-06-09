@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Shared JSONC helpers for Local AI Cluster verify scripts."""
+"""Shared JSONC helpers for lac verify scripts."""
 
 import json
 from pathlib import Path

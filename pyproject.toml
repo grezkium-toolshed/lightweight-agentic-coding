@@ -3,9 +3,9 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "local-ai-cluster"
+name = "lightweight-agentic-coding"
 version = "0.1.0"
-description = "Local AI Cluster CLI — profile management, runtime lifecycle, and provider orchestration"
+description = "lac — Lightweight Agentic Coding CLI. Profile management, runtime lifecycle, and provider orchestration for local AI."
 requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
