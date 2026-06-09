@@ -59,6 +59,19 @@
         "skill:pptx-html-fidelity-audit",
         "skill:research-decision-room",
         "skill:ui-ux-pro-max"
+      ],
+      "label": "Design Pack",
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference",
+        "openchamber"
+      ],
+      "required_tools": [
+        "shell",
+        "html/css skill",
+        "image tooling",
+        "design system references"
       ]
     },
     {
