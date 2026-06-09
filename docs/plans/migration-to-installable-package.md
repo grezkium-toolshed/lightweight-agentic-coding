@@ -31,7 +31,7 @@ No more `.ps1` mirrors of `.sh` scripts. No more parity checks. The `bin/lac` ba
 ### Steps
 
 1. **Create `pyproject.toml`** at repo root
-   - Project name: `local-ai-cluster` (or `lac-cli`)
+   - Project name: `lightweight-agentic-coding` (or `lac`)
    - Version: `0.1.0` (match current `VERSION` in `lac.py`)
    - Python requires: `>=3.10`
    - Console script entry point: `lac = "lac.cli:main"`
@@ -206,7 +206,7 @@ src/lac/
 ### Steps
 
 1. **Publish to PyPI** (optional, private or public)
-   - `pip install local-ai-cluster`
+   - `pip install lightweight-agentic-coding`
    - Requires deciding on public vs. private index
    - Package must include catalog JSON, templates, presets as package data
 
@@ -216,11 +216,11 @@ src/lac/
    - No Python install required on target machine
 
 3. **Homebrew tap** (macOS)
-   - `brew install local-ai-cluster/tap/lac`
+   - `brew install lightweight-agentic-coding/tap/lac`
    - Installs `lac` binary + optionally bundles llama.cpp
 
 4. **Windows installer**
-   - Simple PowerShell one-liner: `py -m pip install local-ai-cluster`
+   - Simple PowerShell one-liner: `py -m pip install lightweight-agentic-coding`
    - Or a `.msi` / winget package if warranted
 
 5. **Update README**
@@ -230,7 +230,7 @@ src/lac/
 
 ### Verification
 
-- [ ] `pip install local-ai-cluster` works on clean machine
+- [ ] `pip install lightweight-agentic-coding` works on clean machine
 - [ ] `lac --version` works without repo checkout
 - [ ] All commands work from arbitrary working directory
 - [ ] Package data (catalogs, presets, templates) accessible at runtime
