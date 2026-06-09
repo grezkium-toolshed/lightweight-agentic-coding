@@ -52,7 +52,7 @@ The three commands above do this:
 
 You're now running a local AI coding agent on your own machine. No data leaves your computer unless you configure a cloud provider.
 
-## Which profile?
+## Which Profile?
 
 | Machine | Profile | What you get |
 |---|---|---|
@@ -63,7 +63,21 @@ You're now running a local AI coding agent on your own machine. No data leaves y
 | 32GB workstation | `32gb` | Stronger local coding with MTP |
 | Cloud-only, free | `openrouter` | Zero downloads, uses free tier models |
 
-> **Power users with 64GB+ RAM:** See the 128GB profiles in the [full profile list](docs/architecture.md#profiles) — `128gb-multi`, `128gb-qwen122b`, `128gb-minimax`.
+<details>
+<summary>All profiles (power users, Gemma, cloud-only)</summary>
+
+| Profile | What you get |
+|---|---|
+| `64gb` | Qwen 3.6 35B-A3B Q8 + MTP |
+| `128gb-multi` | Multi-model Qwen workstation |
+| `128gb-qwen122b` | Large-model Qwen-focused |
+| `128gb-minimax` | MiniMax M2.7 (IQ4_XS) |
+| `gemma-16gb` | Gemma 4 26B-A4B (Q4) |
+| `gemma-24gb` | Gemma 4 31B (Q4) + 26B-A4B (Q4) |
+| `gemma-32gb` | Gemma 4 31B (Q8) + 26B-A4B (Q4) |
+| `gemma-64gb` | Gemma 4 31B (BF16) multi-model |
+| `opencode-go` | Cloud-only, OpenCode Go subscription |
+</details>
 
 macOS is tested most thoroughly. Linux and Windows work well too.
 
