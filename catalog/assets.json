@@ -15,183 +15,10 @@
         "shell": "limited",
         "network": "ask"
       },
-      "supported_clients": ["opencode", "codex-reference"]
-    },
-    {
-      "id": "agent:documentation-generator",
-      "type": "agent",
-      "path": ".opencode/agents/documentation-generator.md",
-      "pack": "office",
-      "trust_level": "core",
-      "support_tier": "supported",
-      "source": "repo-curated",
-      "source_ref": "local-ai-cluster",
-      "review_status": "reviewed",
-      "permission_notes": {
-        "shell": "limited",
-        "network": "ask"
-      },
-      "supported_clients": ["opencode", "claude-code", "codex-reference"]
-    },
-    {
-      "id": "agent:reality-checker",
-      "type": "agent",
-      "path": ".opencode/agents/reality-checker.md",
-      "pack": "team-rollout",
-      "trust_level": "core",
-      "support_tier": "supported",
-      "source": "repo-curated",
-      "source_ref": "local-ai-cluster",
-      "review_status": "reviewed",
-      "permission_notes": {
-        "shell": "limited",
-        "network": "ask"
-      },
-      "supported_clients": ["opencode", "codex-reference"]
-    },
-    {
-      "id": "agent:release-reviewer",
-      "type": "agent",
-      "path": ".opencode/agents/release-reviewer.md",
-      "pack": "team-rollout",
-      "trust_level": "core",
-      "support_tier": "supported",
-      "source": "repo-curated",
-      "source_ref": "local-ai-cluster",
-      "review_status": "reviewed",
-      "permission_notes": {
-        "shell": "limited",
-        "network": "ask"
-      },
-      "supported_clients": ["opencode", "codex-reference"]
-    },
-    {
-      "id": "agent:research-synthesizer",
-      "type": "agent",
-      "path": ".opencode/agents/research-synthesizer.md",
-      "pack": "research",
-      "trust_level": "core",
-      "support_tier": "supported",
-      "source": "repo-curated",
-      "source_ref": "local-ai-cluster",
-      "review_status": "reviewed",
-      "permission_notes": {
-        "shell": "limited",
-        "network": "ask"
-      },
-      "supported_clients": ["opencode", "claude-code", "codex-reference"]
-    },
-    {
-      "id": "skill:documentation-generator",
-      "type": "skill",
-      "path": ".opencode/skills/documentation-generator/SKILL.md",
-      "pack": "office",
-      "trust_level": "core",
-      "support_tier": "supported",
-      "source": "repo-curated",
-      "source_ref": "local-ai-cluster",
-      "review_status": "reviewed",
-      "permission_notes": {
-        "shell": "local tooling only",
-        "network": "not required"
-      },
-      "supported_clients": ["opencode", "claude-code", "codex-reference"]
-    },
-    {
-      "id": "skill:docx-workflow",
-      "type": "skill",
-      "path": ".opencode/skills/docx-workflow/SKILL.md",
-      "pack": "office",
-      "trust_level": "core",
-      "support_tier": "supported",
-      "source": "repo-curated",
-      "source_ref": "local-ai-cluster",
-      "review_status": "reviewed",
-      "permission_notes": {
-        "shell": "python-docx local usage",
-        "network": "not required"
-      },
-      "supported_clients": ["opencode", "claude-code", "codex-reference"]
-    },
-    {
-      "id": "skill:gsd",
-      "type": "skill",
-      "path": ".opencode/skills/gsd/SKILL.md",
-      "pack": "coding",
-      "trust_level": "reviewed-external",
-      "support_tier": "reference",
-      "source": "adapted-external",
-      "source_ref": "gsd-build/get-shit-done",
-      "review_status": "trimmed-and-reviewed",
-      "permission_notes": {
-        "shell": "follows host tool policy",
-        "network": "not required"
-      },
-      "supported_clients": ["opencode", "claude-code", "codex-reference"]
-    },
-    {
-      "id": "skill:pdf-workflow",
-      "type": "skill",
-      "path": ".opencode/skills/pdf-workflow/SKILL.md",
-      "pack": "office",
-      "trust_level": "core",
-      "support_tier": "supported",
-      "source": "repo-curated",
-      "source_ref": "local-ai-cluster",
-      "review_status": "reviewed",
-      "permission_notes": {
-        "shell": "local PDF tooling",
-        "network": "not required"
-      },
-      "supported_clients": ["opencode", "claude-code", "codex-reference"]
-    },
-    {
-      "id": "skill:pptx-workflow",
-      "type": "skill",
-      "path": ".opencode/skills/pptx-workflow/SKILL.md",
-      "pack": "office",
-      "trust_level": "core",
-      "support_tier": "supported",
-      "source": "repo-curated",
-      "source_ref": "local-ai-cluster",
-      "review_status": "reviewed",
-      "permission_notes": {
-        "shell": "local pptx tooling",
-        "network": "not required"
-      },
-      "supported_clients": ["opencode", "claude-code", "codex-reference"]
-    },
-    {
-      "id": "skill:research-synthesizer",
-      "type": "skill",
-      "path": ".opencode/skills/research-synthesizer/SKILL.md",
-      "pack": "research",
-      "trust_level": "core",
-      "support_tier": "supported",
-      "source": "repo-curated",
-      "source_ref": "local-ai-cluster",
-      "review_status": "reviewed",
-      "permission_notes": {
-        "shell": "local text tooling",
-        "network": "optional"
-      },
-      "supported_clients": ["opencode", "claude-code", "codex-reference"]
-    },
-    {
-      "id": "skill:xlsx-workflow",
-      "type": "skill",
-      "path": ".opencode/skills/xlsx-workflow/SKILL.md",
-      "pack": "office",
-      "trust_level": "core",
-      "support_tier": "supported",
-      "source": "repo-curated",
-      "source_ref": "local-ai-cluster",
-      "review_status": "reviewed",
-      "permission_notes": {
-        "shell": "local spreadsheet tooling",
-        "network": "not required"
-      },
-      "supported_clients": ["opencode", "claude-code", "codex-reference"]
+      "supported_clients": [
+        "opencode",
+        "codex-reference"
+      ]
     },
     {
       "id": "agent:devops-reviewer",
@@ -207,7 +34,478 @@
         "shell": "limited",
         "network": "ask"
       },
-      "supported_clients": ["opencode", "codex-reference"]
+      "supported_clients": [
+        "opencode",
+        "codex-reference"
+      ]
+    },
+    {
+      "id": "agent:documentation-generator",
+      "type": "agent",
+      "path": ".opencode/agents/documentation-generator.md",
+      "pack": "office",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "limited",
+        "network": "ask"
+      },
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ]
+    },
+    {
+      "id": "agent:reality-checker",
+      "type": "agent",
+      "path": ".opencode/agents/reality-checker.md",
+      "pack": "team-rollout",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "limited",
+        "network": "ask"
+      },
+      "supported_clients": [
+        "opencode",
+        "codex-reference"
+      ]
+    },
+    {
+      "id": "agent:release-reviewer",
+      "type": "agent",
+      "path": ".opencode/agents/release-reviewer.md",
+      "pack": "team-rollout",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "limited",
+        "network": "ask"
+      },
+      "supported_clients": [
+        "opencode",
+        "codex-reference"
+      ]
+    },
+    {
+      "id": "agent:research-synthesizer",
+      "type": "agent",
+      "path": ".opencode/agents/research-synthesizer.md",
+      "pack": "research",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "limited",
+        "network": "ask"
+      },
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ]
+    },
+    {
+      "id": "skill:agent-browser",
+      "type": "skill",
+      "path": ".opencode/skills/agent-browser/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:algorithmic-art",
+      "type": "skill",
+      "path": ".opencode/skills/algorithmic-art/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:article-magazine",
+      "type": "skill",
+      "path": ".opencode/skills/article-magazine/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:brainstorming",
+      "type": "skill",
+      "path": ".opencode/skills/brainstorming/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:brand-guidelines",
+      "type": "skill",
+      "path": ".opencode/skills/brand-guidelines/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:brandkit",
+      "type": "skill",
+      "path": ".opencode/skills/brandkit/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:canvas-design",
+      "type": "skill",
+      "path": ".opencode/skills/canvas-design/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:card-twitter",
+      "type": "skill",
+      "path": ".opencode/skills/card-twitter/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:color-expert",
+      "type": "skill",
+      "path": ".opencode/skills/color-expert/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:competitive-ads-extractor",
+      "type": "skill",
+      "path": ".opencode/skills/competitive-ads-extractor/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:copywriting",
+      "type": "skill",
+      "path": ".opencode/skills/copywriting/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:creative-director",
+      "type": "skill",
+      "path": ".opencode/skills/creative-director/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:data-report",
+      "type": "skill",
+      "path": ".opencode/skills/data-report/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:deck-open-slide-canvas",
+      "type": "skill",
+      "path": ".opencode/skills/deck-open-slide-canvas/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:deck-swiss-international",
+      "type": "skill",
+      "path": ".opencode/skills/deck-swiss-international/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:design-brief",
+      "type": "skill",
+      "path": ".opencode/skills/design-brief/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:design-consultation",
+      "type": "skill",
+      "path": ".opencode/skills/design-consultation/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:design-review",
+      "type": "skill",
+      "path": ".opencode/skills/design-review/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:doc-kami-parchment",
+      "type": "skill",
+      "path": ".opencode/skills/doc-kami-parchment/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:documentation-generator",
+      "type": "skill",
+      "path": ".opencode/skills/documentation-generator/SKILL.md",
+      "pack": "office",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "local tooling only",
+        "network": "not required"
+      },
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ]
+    },
+    {
+      "id": "skill:docx-workflow",
+      "type": "skill",
+      "path": ".opencode/skills/docx-workflow/SKILL.md",
+      "pack": "office",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "python-docx local usage",
+        "network": "not required"
+      },
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ]
+    },
+    {
+      "id": "skill:faq-page",
+      "type": "skill",
+      "path": ".opencode/skills/faq-page/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:gsap-core",
+      "type": "skill",
+      "path": ".opencode/skills/gsap-core/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:gsd",
+      "type": "skill",
+      "path": ".opencode/skills/gsd/SKILL.md",
+      "pack": "coding",
+      "trust_level": "reviewed-external",
+      "support_tier": "reference",
+      "source": "adapted-external",
+      "source_ref": "gsd-build/get-shit-done",
+      "review_status": "trimmed-and-reviewed",
+      "permission_notes": {
+        "shell": "follows host tool policy",
+        "network": "not required"
+      },
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ]
+    },
+    {
+      "id": "skill:impeccable-design-polish",
+      "type": "skill",
+      "path": ".opencode/skills/impeccable-design-polish/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
     },
     {
       "id": "skill:msgraph",
@@ -224,7 +522,166 @@
         "network": "required for Graph API execution; local index search is offline",
         "auth": "delegated or app-only Microsoft Graph auth; secrets must remain in environment or the upstream auth cache"
       },
-      "supported_clients": ["opencode", "claude-code", "codex-reference"]
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ]
+    },
+    {
+      "id": "skill:pdf",
+      "type": "skill",
+      "path": ".opencode/skills/pdf/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:pdf-workflow",
+      "type": "skill",
+      "path": ".opencode/skills/pdf-workflow/SKILL.md",
+      "pack": "office",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "local PDF tooling",
+        "network": "not required"
+      },
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ]
+    },
+    {
+      "id": "skill:ppt-keynote",
+      "type": "skill",
+      "path": ".opencode/skills/ppt-keynote/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:pptx-html-fidelity-audit",
+      "type": "skill",
+      "path": ".opencode/skills/pptx-html-fidelity-audit/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:pptx-workflow",
+      "type": "skill",
+      "path": ".opencode/skills/pptx-workflow/SKILL.md",
+      "pack": "office",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "local pptx tooling",
+        "network": "not required"
+      },
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ]
+    },
+    {
+      "id": "skill:research-decision-room",
+      "type": "skill",
+      "path": ".opencode/skills/research-decision-room/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:research-synthesizer",
+      "type": "skill",
+      "path": ".opencode/skills/research-synthesizer/SKILL.md",
+      "pack": "research",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "local text tooling",
+        "network": "optional"
+      },
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ]
+    },
+    {
+      "id": "skill:ui-ux-pro-max",
+      "type": "skill",
+      "path": ".opencode/skills/ui-ux-pro-max/SKILL.md",
+      "pack": "design",
+      "trust_level": "community",
+      "support_tier": "optional",
+      "source": "upstream-external",
+      "source_ref": "open-design",
+      "review_status": "not-reviewed",
+      "permission_notes": {},
+      "supported_clients": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "skill:xlsx-workflow",
+      "type": "skill",
+      "path": ".opencode/skills/xlsx-workflow/SKILL.md",
+      "pack": "office",
+      "trust_level": "core",
+      "support_tier": "supported",
+      "source": "repo-curated",
+      "source_ref": "local-ai-cluster",
+      "review_status": "reviewed",
+      "permission_notes": {
+        "shell": "local spreadsheet tooling",
+        "network": "not required"
+      },
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ]
     }
   ]
 }
