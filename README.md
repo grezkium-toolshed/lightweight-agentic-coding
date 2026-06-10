@@ -1,5 +1,7 @@
 # lac — Lightweight Agentic Coding
 
+[![CI](https://github.com/TuukkaTanner/lightweight-agentic-coding/actions/workflows/ci.yml/badge.svg)](https://github.com/TuukkaTanner/lightweight-agentic-coding/actions/workflows/ci.yml)
+
 Clone, run 3 commands, start coding with a local AI model. No cloud required.
 
 Built on [llama.cpp](https://github.com/ggml-org/llama.cpp), [Unsloth](https://unsloth.ai) model quantizations, [OpenCode](https://opencode.ai), and [Open Design](https://open-design.ai). With optional support for [oMLX](https://github.com/danielzgtg/omlx).
