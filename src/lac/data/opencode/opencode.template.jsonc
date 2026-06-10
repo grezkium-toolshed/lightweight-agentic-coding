@@ -285,7 +285,7 @@
   "command": {
     // Run the doctor script to validate the local cluster setup
     "doctor": {
-      "template": "Run `./scripts/doctor.sh` to validate the local AI Cluster setup. Report any issues and suggest fixes.",
+      "template": "Run `./scripts/doctor.sh` to validate the lac setup. Report any issues and suggest fixes.",
       "description": "Validate local cluster setup",
       "agent": "build"
     },
