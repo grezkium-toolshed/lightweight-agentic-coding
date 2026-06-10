@@ -8,6 +8,17 @@ from lac.lib.jsonc import load_jsonc
 from lac import VERSION
 
 
+def _env_or_deprecated(new_key, old_key, default=None):
+    val = os.environ.get(new_key)
+    if val is not None:
+        return val
+    val = os.environ.get(old_key)
+    if val is not None:
+        print(f"Warning: {old_key} is deprecated, use {new_key} instead", file=sys.stderr)
+        return val
+    return default
+
+
 def _find_repo_root() -> Path:
     """Locate the repo root by searching for runtime-config/profiles.json."""
     current = Path.cwd().resolve()
@@ -32,9 +43,9 @@ _REPO_ROOT = _find_repo_root()
 _PACKAGE_DATA = _package_data_dir() if _REPO_ROOT is None else None
 ROOT = _REPO_ROOT or _PACKAGE_DATA
 _STATE_DEFAULT = _REPO_ROOT / "state" if _REPO_ROOT else Path.cwd() / "state"
-STATE_ROOT = Path(os.environ.get("AI_CLUSTER_STATE_ROOT", str(_STATE_DEFAULT)))
-PORT = int(os.environ.get("AI_CLUSTER_PORT", "8080"))
-HOST = os.environ.get("AI_CLUSTER_HOST", "127.0.0.1")
+STATE_ROOT = Path(_env_or_deprecated("LAC_STATE_ROOT", "AI_CLUSTER_STATE_ROOT", str(_STATE_DEFAULT)))
+PORT = int(_env_or_deprecated("LAC_PORT", "AI_CLUSTER_PORT", "8080"))
+HOST = _env_or_deprecated("LAC_HOST", "AI_CLUSTER_HOST", "127.0.0.1")
 OMLX_PORT = int(os.environ.get("AI_OMLX_PORT", os.environ.get("OMLX_PORT", "8000")))
 
 

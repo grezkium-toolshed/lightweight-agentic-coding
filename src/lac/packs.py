@@ -2,6 +2,19 @@
 
 import copy
 import json
+import os
+import sys
+
+
+def _env_or_deprecated(new_key, old_key, default=None):
+    val = os.environ.get(new_key)
+    if val is not None:
+        return val
+    val = os.environ.get(old_key)
+    if val is not None:
+        print(f"Warning: {old_key} is deprecated, use {new_key} instead", file=sys.stderr)
+        return val
+    return default
 
 
 def load_asset_catalog(ctx):
@@ -15,7 +28,7 @@ def load_workflow_catalog(ctx):
 def optional_skill_root(ctx):
     import os
     from pathlib import Path
-    env_dir = os.environ.get("AI_CLUSTER_OPENCODE_SKILLS_DIR")
+    env_dir = _env_or_deprecated("LAC_OPENCODE_SKILLS_DIR", "AI_CLUSTER_OPENCODE_SKILLS_DIR")
     if env_dir:
         return Path(env_dir)
     if ctx._is_repo:

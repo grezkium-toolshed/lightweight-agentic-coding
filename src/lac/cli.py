@@ -12,6 +12,17 @@ from pathlib import Path
 
 from lac import VERSION
 from lac.context import Context, ROOT, STATE_ROOT, HOST, PORT, OMLX_PORT
+
+
+def _env_or_deprecated(new_key, old_key, default=None):
+    val = os.environ.get(new_key)
+    if val is not None:
+        return val
+    val = os.environ.get(old_key)
+    if val is not None:
+        print(f"Warning: {old_key} is deprecated, use {new_key} instead", file=sys.stderr)
+        return val
+    return default
 from lac.lib.jsonc import load_jsonc
 from lac.profiles import (
     profile_list, profile_apply, render_preset,
@@ -185,8 +196,8 @@ def device_setup(ctx, profile_id):
     if dcp_package_json.is_file() and '"version"' in dcp_package_json.read_text(encoding="utf-8") and '"3.1.9"' in dcp_package_json.read_text(encoding="utf-8"):
         print("[setup] Removing stale DCP 3.1.9 package cache before reinstall...")
         shutil.rmtree(dcp_cache_dir, ignore_errors=True)
-    if os.environ.get("AI_CLUSTER_INSTALL_DCP", "1") == "0":
-        print("[setup] DCP plugin install skipped (AI_CLUSTER_INSTALL_DCP=0).")
+    if _env_or_deprecated("LAC_INSTALL_DCP", "AI_CLUSTER_INSTALL_DCP", "1") == "0":
+        print("[setup] DCP plugin install skipped (LAC_INSTALL_DCP=0).")
     elif command_exists("opencode"):
         print(f"[setup] Installing/updating Dynamic Context Pruning plugin: {dcp_plugin}")
         result = subprocess.run(["opencode", "plugin", dcp_plugin, "--global", "--force"], check=False)

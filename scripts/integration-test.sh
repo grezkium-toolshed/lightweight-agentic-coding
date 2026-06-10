@@ -9,7 +9,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-export AI_CLUSTER_STATE_ROOT="$TMP_DIR/state"
+export LAC_STATE_ROOT="$TMP_DIR/state"
 FAILED=0
 
 run() {
@@ -96,31 +96,31 @@ exit 1
 EOF
 chmod +x "$FAKE_MSGRAPH/scripts/run.sh"
 echo "[test] skill status msgraph"
-if ! env AI_CLUSTER_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" skill status msgraph --json > "$TMP_DIR/skill-status-before.json"; then
+if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" skill status msgraph --json > "$TMP_DIR/skill-status-before.json"; then
   echo "[FAIL] skill status msgraph"
   FAILED=1
 fi
 python3 -c "import json; data=json.load(open('$TMP_DIR/skill-status-before.json')); assert data['installed'] is False"
 echo "[test] skill install msgraph"
-if ! env AI_CLUSTER_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" skill install msgraph --source "$FAKE_MSGRAPH" --json > "$TMP_DIR/skill-install.json"; then
+if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" skill install msgraph --source "$FAKE_MSGRAPH" --json > "$TMP_DIR/skill-install.json"; then
   echo "[FAIL] skill install msgraph"
   FAILED=1
 fi
 test -f "$SKILL_ROOT/msgraph/SKILL.md" || { echo "[FAIL] msgraph SKILL.md was not installed"; FAILED=1; }
 echo "[test] skill verify msgraph"
-if ! env AI_CLUSTER_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" skill verify msgraph --json > "$TMP_DIR/skill-verify.json"; then
+if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" skill verify msgraph --json > "$TMP_DIR/skill-verify.json"; then
   echo "[FAIL] skill verify msgraph"
   FAILED=1
 fi
 python3 -c "import json; data=json.load(open('$TMP_DIR/skill-verify.json')); assert data['ok'] is True; assert 'MSGRAPH_CLIENT_SECRET' not in json.dumps(data)"
 echo "[test] client render opencode with msgraph"
-if ! env AI_CLUSTER_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" client render opencode --json > "$TMP_DIR/render-opencode-msgraph.json"; then
+if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" client render opencode --json > "$TMP_DIR/render-opencode-msgraph.json"; then
   echo "[FAIL] client render opencode with msgraph"
   FAILED=1
 fi
 python3 -c "import json; data=json.load(open('$TMP_DIR/render-opencode-msgraph.json')); graph=[p for p in data['packs'] if p['id']=='microsoft-graph'][0]; assert graph['installed'] is True"
 echo "[test] skill remove msgraph"
-if ! env AI_CLUSTER_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" skill remove msgraph --json > "$TMP_DIR/skill-remove.json"; then
+if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" skill remove msgraph --json > "$TMP_DIR/skill-remove.json"; then
   echo "[FAIL] skill remove msgraph"
   FAILED=1
 fi
@@ -128,7 +128,7 @@ test ! -e "$SKILL_ROOT/msgraph" || { echo "[FAIL] msgraph skill directory was no
 
 # 9. Init wizard works with --yes
 INIT_STATE="$TMP_DIR/init-state"
-AI_CLUSTER_STATE_ROOT="$INIT_STATE" run python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --no-cloud --json > "$TMP_DIR/init.json"
+LAC_STATE_ROOT="$INIT_STATE" run python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --no-cloud --json > "$TMP_DIR/init.json"
 
 # 10. Validate generated preset
 if [[ -f "$INIT_STATE/runtime/presets.active.ini" ]]; then

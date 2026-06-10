@@ -24,12 +24,23 @@ if str(_SCRIPT_DIR) not in sys.path:
 from lib.jsonc import load_jsonc  # noqa: E402
 
 
+def _env_or_deprecated(new_key, old_key, default=None):
+    val = os.environ.get(new_key)
+    if val is not None:
+        return val
+    val = os.environ.get(old_key)
+    if val is not None:
+        print(f"Warning: {old_key} is deprecated, use {new_key} instead", file=sys.stderr)
+        return val
+    return default
+
+
 VERSION = "0.1.0"
 
 ROOT = _SCRIPT_DIR.parent
-STATE_ROOT = Path(os.environ.get("AI_CLUSTER_STATE_ROOT", ROOT / "state"))
-PORT = int(os.environ.get("AI_CLUSTER_PORT", "8080"))
-HOST = os.environ.get("AI_CLUSTER_HOST", "127.0.0.1")
+STATE_ROOT = Path(_env_or_deprecated("LAC_STATE_ROOT", "AI_CLUSTER_STATE_ROOT", ROOT / "state"))
+PORT = int(_env_or_deprecated("LAC_PORT", "AI_CLUSTER_PORT", "8080"))
+HOST = _env_or_deprecated("LAC_HOST", "AI_CLUSTER_HOST", "127.0.0.1")
 OMLX_PORT = int(os.environ.get("AI_OMLX_PORT", os.environ.get("OMLX_PORT", "8000")))
 OPTIONAL_SKILLS = {
   "msgraph": {
@@ -634,7 +645,7 @@ def load_workflow_catalog(ctx):
 
 
 def optional_skill_root(ctx):
-  return Path(os.environ.get("AI_CLUSTER_OPENCODE_SKILLS_DIR", str(ctx.root / ".opencode/skills")))
+  return Path(_env_or_deprecated("LAC_OPENCODE_SKILLS_DIR", "AI_CLUSTER_OPENCODE_SKILLS_DIR", str(ctx.root / ".opencode/skills")))
 
 
 def optional_skill_path(ctx, skill_id):

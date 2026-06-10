@@ -6,7 +6,7 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 STATE_ROOT="$TMP_DIR/state"
-export AI_CLUSTER_STATE_ROOT="$STATE_ROOT"
+export LAC_STATE_ROOT="$STATE_ROOT"
 export AI_LOCAL_RUNTIME="llama.cpp"
 
 python3 "$ROOT/scripts/lac.py" profile apply 24gb --json > "$TMP_DIR/profile-24gb.json"
@@ -17,10 +17,10 @@ OMLX_CHECK=0
 if [[ "$(uname -s)" == "Darwin" ]]; then
   OMLX_CHECK=1
   OMLX_STATE_ROOT="$TMP_DIR/omlx-state"
-  AI_CLUSTER_STATE_ROOT="$OMLX_STATE_ROOT" AI_LOCAL_RUNTIME=omlx python3 "$ROOT/scripts/lac.py" profile apply 24gb --json > "$TMP_DIR/profile-24gb-omlx.json"
+  LAC_STATE_ROOT="$OMLX_STATE_ROOT" AI_LOCAL_RUNTIME=omlx python3 "$ROOT/scripts/lac.py" profile apply 24gb --json > "$TMP_DIR/profile-24gb-omlx.json"
   cp "$OMLX_STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-24gb-omlx.json"
   OMLX_MACOS_16GB_STATE_ROOT="$TMP_DIR/omlx-macos-16gb-state"
-  AI_CLUSTER_STATE_ROOT="$OMLX_MACOS_16GB_STATE_ROOT" AI_LOCAL_RUNTIME=omlx python3 "$ROOT/scripts/lac.py" profile apply macos-16gb --json > "$TMP_DIR/profile-macos-16gb-omlx.json"
+  LAC_STATE_ROOT="$OMLX_MACOS_16GB_STATE_ROOT" AI_LOCAL_RUNTIME=omlx python3 "$ROOT/scripts/lac.py" profile apply macos-16gb --json > "$TMP_DIR/profile-macos-16gb-omlx.json"
   cp "$OMLX_MACOS_16GB_STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-macos-16gb-omlx.json"
 fi
 python3 "$ROOT/scripts/lac.py" client render opencode --json > "$TMP_DIR/render-opencode.json"
@@ -45,11 +45,11 @@ python3 "$ROOT/scripts/lac.py" provider list --json > "$TMP_DIR/provider-list.js
 python3 "$ROOT/scripts/lac.py" provider status --json > "$TMP_DIR/provider-status.json"
 
 INIT_STATE_1="$TMP_DIR/init-no-cloud-state"
-AI_CLUSTER_STATE_ROOT="$INIT_STATE_1" python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --no-cloud --json > "$TMP_DIR/init-no-cloud.json"
+LAC_STATE_ROOT="$INIT_STATE_1" python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --no-cloud --json > "$TMP_DIR/init-no-cloud.json"
 INIT_STATE_2="$TMP_DIR/init-cloud-state"
-AI_CLUSTER_STATE_ROOT="$INIT_STATE_2" python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --cloud openrouter,anthropic --json > "$TMP_DIR/init-cloud.json"
+LAC_STATE_ROOT="$INIT_STATE_2" python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --cloud openrouter,anthropic --json > "$TMP_DIR/init-cloud.json"
 INIT_STATE_3="$TMP_DIR/init-default-cloud-state"
-AI_CLUSTER_STATE_ROOT="$INIT_STATE_3" python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --json > "$TMP_DIR/init-default-cloud.json"
+LAC_STATE_ROOT="$INIT_STATE_3" python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --json > "$TMP_DIR/init-default-cloud.json"
 
 unset OPENROUTER_API_KEY ANTHROPIC_API_KEY OPENCODE_GO_API_KEY OPENCODE_ZEN_API_KEY OPENAI_API_KEY ANTIGRAVITY_API_KEY ZAI_API_KEY NVIDIA_API_KEY NVIDIA_NIM_API_KEY 2>/dev/null || true
 python3 "$ROOT/scripts/lac.py" provider verify openrouter --json > "$TMP_DIR/verify-openrouter.json"
