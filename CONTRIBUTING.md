@@ -28,8 +28,8 @@ bash -n runtime-config/launch/*.sh
 3. Regenerate profile config and run doctor:
 
 ```bash
-./scripts/setup-config-device.sh --profile 24gb
-./scripts/doctor.sh --bootstrap-hint
+./bin/lac profile apply 24gb
+./bin/lac doctor --bootstrap-hint
 ```
 
 ## Contribution Rules
