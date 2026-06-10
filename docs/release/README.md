@@ -6,7 +6,6 @@ This folder tracks release-readiness guidance for the public beta.
 
 - `docs/release/STATE.md`: current release phase, open questions, and next-session focus
 - `docs/release/BETA_RELEASE_CRITERIA.md`: definition of beta quality for this repo
-- `docs/release/PRIVATE_UNTIL_RELEASE.md`: privacy and release-gate policy
 - `RELEASE_CHECKLIST.md`: operational release gate checklist
 
 ## Current release posture

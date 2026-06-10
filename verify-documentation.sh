@@ -33,7 +33,6 @@ required=(
   docs/use-cases/ONBOARDING_32GB_PLUS.md
   docs/use-cases/ONBOARDING_CLAUDE_CODE.md
   docs/release/README.md
-  docs/release/PRIVATE_UNTIL_RELEASE.md
   docs/release/BETA_RELEASE_CRITERIA.md
   RELEASE_CHECKLIST.md
 )
