@@ -68,5 +68,3 @@ Monitor with:
 - Windows: `Get-Content state/logs/llama-server.log -Wait -Tail 50`
 
 ## Release posture
-
-This repo is still private by design. Public release should happen only after the release-gate checklist is complete.

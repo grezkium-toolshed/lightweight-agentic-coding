@@ -8,7 +8,7 @@ Built on [llama.cpp](https://github.com/ggml-org/llama.cpp), [Unsloth](https://u
 
 ```bash
 # 1. Lightweight Agentic Coding
-git clone https://github.com/<user>/lightweight-agentic-coding
+git clone https://github.com/TuukkaTanner/lightweight-agentic-coding.git
 python3 -m pip install ./lightweight-agentic-coding
 
 # 2. Set up your hardware profile (detects and recommends)

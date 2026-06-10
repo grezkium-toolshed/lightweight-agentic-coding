@@ -16,6 +16,4 @@ Include:
 - affected files and profile(s)
 - suggested remediation if available
 
-## Public beta requirement
-
-Do not make the repository public until a real private reporting path is active.
+To report a security vulnerability, use [GitHub Security Advisories](https://github.com/TuukkaTanner/lightweight-agentic-coding/security/advisories).

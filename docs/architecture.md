@@ -81,5 +81,3 @@ Instead it ships a curated asset catalog plus workflow packs:
 Pack metadata lives in `catalog/workflow-packs.json`, and individual asset trust/support metadata lives in `catalog/assets.json`.
 
 ## Release posture
-
-The repo should remain private until the release gates in `docs/release/PRIVATE_UNTIL_RELEASE.md` are complete.

@@ -12,8 +12,6 @@ Runtime defaults:
 - curated OpenCode agents under `.opencode/agents/`
 - curated OpenCode skills under `.opencode/skills/`
 
-This repo is intentionally private until the release gates in `docs/release/PRIVATE_UNTIL_RELEASE.md` are complete.
-
 ## BuildAndDevelopmentCommands
 
 ### Launch

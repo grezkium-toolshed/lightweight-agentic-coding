@@ -12,7 +12,6 @@ This repository is a lac — Lightweight Agentic Coding:
 
 ## Repository expectations
 - Validate commands against the actual scripts in `scripts/`.
-- Do not assume public-release readiness; the repo is intentionally private until release gates are met.
 - When proposing agents or skills, optimize for reproducibility and maintenance cost.
 
 ## Good uses for this setup
