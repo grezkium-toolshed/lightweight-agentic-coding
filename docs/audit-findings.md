@@ -9,6 +9,7 @@ Generated: 2026-04-26
 - **File:** `.github/workflows/ci.yml`, line 17
 - **Problem:** `bash -n runtime-config/launch/*.sh` fails on Linux if the glob expands to nothing — the entire pipeline breaks with an unhelpful error.
 - **Fix:** Replace with a loop guard: `for f in runtime-config/launch/*.sh; do [ -f "$f" ] && bash -n "$f"; done`
+- **Status:** Resolved 2026-06-09 — guarded for loop in ci.yml
 
 ### C4. Plugin `opencode-antigravity-auth` has no docs
 
@@ -37,6 +38,7 @@ Generated: 2026-04-26
 - **File:** `RELEASE_CHECKLIST.md`
 - **Problem:** All gates unmet. No fresh-clone validation, no Windows PowerShell validation, no real OpenCode session testing, no PVR (Private Vulnerability Reporting) enabled.
 - **Fix:** Prioritize last 3 unchecked items: enable GitHub PVR, run `./scripts/doctor.sh` on a fresh clone, validate Windows PowerShell scripts.
+- **Status:** Resolved 2026-06-09 — lac rebranded (identity, positioning, private-language, and stale-doc gates closed). Remaining gates: PVR, fresh-clone, Windows validation, session testing, CI pass.
 
 ---
 

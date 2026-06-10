@@ -1,11 +1,13 @@
 # Public Beta Release Checklist
 
+This document tracks release readiness. Items marked [x] are complete; open items are gating factors.
+
 Use this checklist before changing the repo visibility or publishing release notes.
 
 ## Identity and framing
-- [ ] Repository name, description, and README use the `lac` — Lightweight Agentic Coding identity consistently.
-- [ ] Public beta positioning is explicit: local-first, evolving, and not a stable v1.
-- [ ] Any remaining private-only language is intentional and limited to release-gate docs.
+- [x] Repository name, description, and README use the `lac` — Lightweight Agentic Coding identity consistently.
+- [x] Public beta positioning is explicit: local-first, evolving, and not a stable v1.
+- [x] Any remaining private-only language is intentional and limited to release-gate docs.
 
 ## Runtime validation
 - [ ] macOS or Linux path validated from a fresh clone:
@@ -34,4 +36,4 @@ Use this checklist before changing the repo visibility or publishing release not
 - [ ] `SECURITY.md` contains a real public reporting path or explicitly requires GitHub private vulnerability reporting.
 - [ ] No model binaries or machine-specific files are tracked.
 - [ ] Linux CI passes on the release branch.
-- [ ] No stale docs or deleted-path references remain in the tree.
+- [x] No stale docs or deleted-path references remain in the tree.

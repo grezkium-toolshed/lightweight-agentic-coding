@@ -40,7 +40,7 @@ for tagged releases (public beta and beyond).
 
 ### Added
 
-- Initial public beta preparation.
+- First public release with lac — Lightweight Agentic Coding rebrand. *(Corresponds to initial codebase versioning.)*
 - lac runtime with llama.cpp and optional oMLX on macOS.
 - Profile-based model setup (`16gb` through `128gb-multi`, plus cloud-only profiles).
 - Curated OpenCode agents: `architecture-reviewer`, `reality-checker`, `release-reviewer`, `research-synthesizer`, `documentation-generator`.
