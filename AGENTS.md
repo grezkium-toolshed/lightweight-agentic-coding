@@ -102,7 +102,7 @@ Manual validation:
 
 Open Design (nexu-io/open-design) provides design skills, craft rules, and brand design systems curated under:
 - `.opencode/craft/` — 12 brand-agnostic design rulebooks (typography, color, anti-AI-slop, etc.)
-- `.opencode/skills/` — 33 curated design/HTML/image/research skills
+- `.opencode/skills/` — 35 curated skills
 - `.opencode/design-systems/` — 20 brand `DESIGN.md` files (Linear, Vercel, Apple, Stripe, etc.)
 
 These work offline without any daemon — ideal for local models.

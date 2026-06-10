@@ -26,6 +26,7 @@ Naming overlap policy:
 | `architecture-reviewer` | Review architecture, boundaries, tradeoffs, and long-term maintainability | subagent | deny |
 | `release-reviewer` | Check whether the repo is ready for an internal or public release | subagent | deny |
 | `reality-checker` | Stress-test plans and claims for weak assumptions or operational gaps | subagent | deny |
+| `devops-reviewer` | Review infrastructure-as-code, Dockerfiles, CI/CD pipelines, and deployment configs for correctness and security | subagent | deny |
 | `documentation-generator` | Produce or refactor clear docs for setup, workflows, and onboarding | subagent | ask |
 | `research-synthesizer` | Summarize external model, provider, or tooling options into practical recommendations | subagent | deny |
 
