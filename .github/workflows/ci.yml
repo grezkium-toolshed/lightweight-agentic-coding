@@ -8,34 +8,36 @@ jobs:
   validate-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Bash Syntax Check
         run: |
+          set -x
           bash -n scripts/*.sh
           bash -n verify-*.sh
           for f in runtime-config/launch/*.sh; do [ -f "$f" ] && bash -n "$f"; done
 
       - name: Config Schema Check
-        run: ./scripts/verify-config-schema.sh
+        run: set -x && ./scripts/verify-config-schema.sh
 
       - name: Profile and Preset Parity Check
-        run: ./scripts/verify-profiles-sync.sh
+        run: set -x && ./scripts/verify-profiles-sync.sh
 
       - name: Documentation Consistency Check
-        run: ./verify-documentation.sh
+        run: set -x && ./verify-documentation.sh
 
       - name: OpenCode Asset Schema Check
-        run: ./scripts/verify-opencode-assets.sh
+        run: set -x && ./scripts/verify-opencode-assets.sh
 
       - name: Provider Catalog Validation
-        run: ./scripts/verify-provider-catalog.sh
+        run: set -x && ./scripts/verify-provider-catalog.sh
 
       - name: V2 CLI Contract Check
-        run: ./scripts/verify-v2-contract.sh
+        run: set -x && ./scripts/verify-v2-contract.sh
 
       - name: OpenCode Agent and Skill Presence Check
         run: |
+          set -x
           test -f .opencode/agents/architecture-reviewer.md
           test -f .opencode/agents/release-reviewer.md
           test -f .opencode/agents/reality-checker.md
@@ -45,6 +47,7 @@ jobs:
 
       - name: Public Beta Asset Presence Check
         run: |
+          set -x
           test -f RELEASE_CHECKLIST.md
           test -f state/README.md
           test -f catalog/assets.json
