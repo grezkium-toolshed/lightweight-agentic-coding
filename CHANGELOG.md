@@ -19,7 +19,7 @@ for tagged releases (public beta and beyond).
 - Packaged `.opencode` asset mirror under `src/lac/data/opencode`, covering tracked agents, skills, craft rulebooks, design systems, and DCP config.
 - `THIRD_PARTY_NOTICES.md` for bundled external assets, optional runtimes, and ds4 model-source attribution.
 - Wheel/package verification via `scripts/verify-package-build.sh`.
-- Package metadata now declares `THIRD_PARTY_NOTICES.md`, package data ships it for installed users, and wheel verification checks both.
+- Package metadata now declares `THIRD_PARTY_NOTICES.md`, package data ships it for installed users, and wheel/sdist verification checks both.
 - MCP server configuration for GitHub API (`disabled` by default; requires `GITHUB_TOKEN`).
 - Custom commands `/doctor` and `/health` for runtime validation.
 - Dynamic Context Pruning (DCP) plugin configuration at `.opencode/dcp.jsonc`.

@@ -15,6 +15,7 @@ setup(
     license="MIT",
     license_files=["LICENSE", "THIRD_PARTY_NOTICES.md"],
     author="Lightweight Agentic Coding contributors",
+    url="https://github.com/TuukkaTanner/lightweight-agentic-coding",
     keywords=[
         "agentic-coding",
         "llama.cpp",

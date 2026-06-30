@@ -6,8 +6,9 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 WHEEL_DIR="$TMP_DIR/wheel"
+SDIST_DIR="$TMP_DIR/sdist"
 INSTALL_DIR="$TMP_DIR/install"
-mkdir -p "$WHEEL_DIR"
+mkdir -p "$WHEEL_DIR" "$SDIST_DIR"
 
 PYTHON_BIN=""
 COMPATIBLE_WITHOUT_BACKEND=""
@@ -154,6 +155,102 @@ if skill_count < 35 or agent_count < 6:
 
 print(f"[ok] wheel: {wheel.name}")
 print(f"[ok] packaged assets: {skill_count} skills, {agent_count} agents")
+PY
+
+if "$PYTHON_BIN" -c 'import setuptools' >/dev/null 2>&1; then
+  SDIST_LOG="$TMP_DIR/sdist.log"
+  if ! (cd "$ROOT" && "$PYTHON_BIN" setup.py sdist --dist-dir "$SDIST_DIR" >"$SDIST_LOG" 2>&1); then
+    cat "$SDIST_LOG" >&2
+    exit 1
+  fi
+elif command -v uv >/dev/null 2>&1; then
+  uv build --sdist --cache-dir "${UV_CACHE_DIR:-$TMP_DIR/uv-cache}" --out-dir "$SDIST_DIR" --no-create-gitignore "$ROOT" >/dev/null
+else
+  echo "setuptools or uv is required for sdist verification." >&2
+  exit 1
+fi
+
+"$PYTHON_BIN" - "$SDIST_DIR" "$ROOT" <<'PY'
+import sys
+import tarfile
+from pathlib import Path
+
+sdist_dir = Path(sys.argv[1])
+root = Path(sys.argv[2])
+sdists = sorted(sdist_dir.glob("lightweight-agentic-coding-*.tar.gz"))
+if len(sdists) != 1:
+    raise SystemExit(f"Expected one lightweight-agentic-coding sdist, found: {[p.name for p in sdist_dir.glob('*.tar.gz')]}")
+
+sdist = sdists[0]
+required_suffixes = {
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "THIRD_PARTY_NOTICES.md",
+    "src/lac/data/THIRD_PARTY_NOTICES.md",
+    "src/lac/data/catalog/assets.json",
+    "src/lac/data/opencode/opencode.template.jsonc",
+    "src/lac/data/opencode/skills/agent-browser/SKILL.md",
+    "src/lac/data/runtime-config/presets/128gb-ds4-flash.ini",
+}
+
+with tarfile.open(sdist, "r:gz") as archive:
+    members = archive.getmembers()
+    names = [member.name for member in members]
+    missing = [
+        suffix
+        for suffix in sorted(required_suffixes)
+        if not any(name.endswith(suffix) for name in names)
+    ]
+    if missing:
+        raise SystemExit("Sdist is missing required files:\n  - " + "\n  - ".join(missing))
+
+    def read_member(suffix: str) -> str:
+        matches = [member for member in members if member.name.endswith(suffix)]
+        if len(matches) != 1:
+            raise SystemExit(f"Expected one sdist member ending with {suffix}, found: {[member.name for member in matches]}")
+        extracted = archive.extractfile(matches[0])
+        if extracted is None:
+            raise SystemExit(f"Could not read sdist member {matches[0].name}")
+        return extracted.read().decode("utf-8")
+
+    def read_root_member(file_name: str) -> str:
+        matches = [member for member in members if member.name.endswith(f"/{file_name}") and member.name.count("/") == 1]
+        if len(matches) != 1:
+            raise SystemExit(f"Expected one root sdist member named {file_name}, found: {[member.name for member in matches]}")
+        extracted = archive.extractfile(matches[0])
+        if extracted is None:
+            raise SystemExit(f"Could not read sdist member {matches[0].name}")
+        return extracted.read().decode("utf-8")
+
+    root_pkg_info = [member for member in members if member.name.endswith("/PKG-INFO") and member.name.count("/") == 1]
+    if len(root_pkg_info) != 1:
+        raise SystemExit(f"Expected one root sdist PKG-INFO, found: {[member.name for member in root_pkg_info]}")
+    extracted_pkg_info = archive.extractfile(root_pkg_info[0])
+    if extracted_pkg_info is None:
+        raise SystemExit(f"Could not read sdist member {root_pkg_info[0].name}")
+    pkg_info = extracted_pkg_info.read().decode("utf-8")
+    root_notice = read_root_member("THIRD_PARTY_NOTICES.md")
+    packaged_notice = read_member("src/lac/data/THIRD_PARTY_NOTICES.md")
+
+repo_notice = (root / "THIRD_PARTY_NOTICES.md").read_text(encoding="utf-8")
+if root_notice != repo_notice:
+    raise SystemExit("Sdist root THIRD_PARTY_NOTICES.md does not match repo copy")
+if packaged_notice != repo_notice:
+    raise SystemExit("Sdist packaged THIRD_PARTY_NOTICES.md does not match repo copy")
+
+if "Name: lightweight-agentic-coding" not in pkg_info:
+    raise SystemExit("Sdist PKG-INFO has the wrong package name")
+if "Version: 0.1.0" not in pkg_info:
+    raise SystemExit("Sdist PKG-INFO has the wrong package version")
+if "Home-page: UNKNOWN" in pkg_info:
+    raise SystemExit("Sdist PKG-INFO is missing Home-page metadata")
+for file_name in ("LICENSE", "THIRD_PARTY_NOTICES.md"):
+    if f"License-File: {file_name}" not in pkg_info:
+        raise SystemExit(f"Sdist PKG-INFO missing License-File entry for {file_name}")
+
+print(f"[ok] sdist: {sdist.name}")
+print("[ok] sdist notice/package-data files present")
 PY
 
 wheel_path=("$WHEEL_DIR"/lightweight_agentic_coding-*.whl)
