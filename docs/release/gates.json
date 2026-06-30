@@ -228,25 +228,24 @@
       "id": "provider-live-freshness",
       "owner": "maintainer",
       "summary": "Probe configured providers with release credentials or document intentional skips.",
-      "evidence_required": "Run live provider probes with release credentials or document why each configured provider is intentionally skipped. Attach `lac provider verify --all --json` output and any catalog refresh result.",
+      "evidence_required": "Run `./scripts/release-provider-freshness.sh --refresh-catalog` with release credentials, or document why each configured provider is intentionally skipped. Attach the generated evidence summary, `provider-verify.json`, and any OpenRouter catalog refresh result.",
       "environment": [
         "Release credential shell",
         "No secrets pasted into evidence"
       ],
       "commands": [
-        "lac provider list --json",
-        "lac provider verify --all --json > provider-verify.json",
-        "lac provider verify openrouter --refresh-catalog --json > openrouter-refresh.json"
+        "./scripts/release-provider-freshness.sh --refresh-catalog"
       ],
       "evidence": [
         "provider-verify.json with secrets redacted by lac",
+        "Evidence summary path from scripts/release-provider-freshness.sh",
         "openrouter-refresh.json or documented skip reason",
         "List of providers intentionally skipped and why"
       ],
       "checklist_refs": [
         {
           "section": "Providers and docs",
-          "item": "Live provider freshness probes are complete with release credentials, or every skipped provider has a documented release skip reason."
+          "item": "Live provider freshness probes are complete with release credentials via `./scripts/release-provider-freshness.sh --refresh-catalog`, or every skipped provider has a documented release skip reason."
         }
       ]
     },

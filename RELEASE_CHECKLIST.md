@@ -35,7 +35,7 @@ Use `./scripts/verify-public-beta-local.sh` to run the local automated public-be
 
 ## Providers and docs
 - [x] Provider auth docs are current for Antigravity, z.ai, NVIDIA NIM, OpenRouter, Anthropic, Codex auth, and OpenCode Go/Zen.
-- [ ] Live provider freshness probes are complete with release credentials, or every skipped provider has a documented release skip reason.
+- [ ] Live provider freshness probes are complete with release credentials via `./scripts/release-provider-freshness.sh --refresh-catalog`, or every skipped provider has a documented release skip reason.
 - [x] Free cloud snapshot policy is explicit and still correct.
 - [x] Onboarding scenarios are accurate for low-end, higher-end, and hosted-model workflows.
 - [x] Claude Code template docs are complete and not misleading.

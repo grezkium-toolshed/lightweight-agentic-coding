@@ -45,6 +45,7 @@ required=(
   docs/release/MANUAL_VALIDATION.md
   scripts/release-evidence.sh
   scripts/release-fresh-clone-unix.sh
+  scripts/release-provider-freshness.sh
   scripts/release-gate-report.sh
   scripts/release-manual-next-steps.sh
   scripts/test-release-gate-report.sh
@@ -211,6 +212,7 @@ for text, path in (
     require("./scripts/release-evidence.sh" in text, f"{path} must point to the release evidence helper")
 release_evidence = (root / "scripts/release-evidence.sh").read_text(encoding="utf-8")
 fresh_clone_unix = (root / "scripts/release-fresh-clone-unix.sh").read_text(encoding="utf-8")
+provider_freshness = (root / "scripts/release-provider-freshness.sh").read_text(encoding="utf-8")
 require("Status: open" in release_evidence, "scripts/release-evidence.sh must generate open evidence stubs")
 require("Keep this stub at Status: open" in release_evidence, "scripts/release-evidence.sh must tell testers not to close gates early")
 require("Transcript capture helper" in release_evidence, "scripts/release-evidence.sh must print transcript capture guidance")
@@ -221,6 +223,11 @@ require("state/release-evidence" in fresh_clone_unix, "scripts/release-fresh-clo
 fresh_clone_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "fresh-clone-unix")
 require("./scripts/release-fresh-clone-unix.sh --full-runtime" in json.dumps(fresh_clone_gate), "fresh-clone-unix gate must point to the Unix smoke helper")
 require("./scripts/release-fresh-clone-unix.sh --full-runtime" in release_checklist, "release checklist must point to the Unix smoke helper")
+require("--refresh-catalog" in provider_freshness, "scripts/release-provider-freshness.sh must expose catalog refresh mode")
+require("state/release-evidence" in provider_freshness, "scripts/release-provider-freshness.sh must write evidence under ignored state/release-evidence")
+provider_freshness_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "provider-live-freshness")
+require("./scripts/release-provider-freshness.sh --refresh-catalog" in json.dumps(provider_freshness_gate), "provider-live-freshness gate must point to the provider freshness helper")
+require("./scripts/release-provider-freshness.sh --refresh-catalog" in release_checklist, "release checklist must point to the provider freshness helper")
 require(
     "./scripts/release-manual-next-steps.sh" in release_index,
     "docs/release/README.md must point to the manual next-steps helper",

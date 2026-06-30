@@ -25,6 +25,7 @@ run_check "V2 CLI contract" ./scripts/verify-v2-contract.sh
 run_check "Integration test" ./scripts/integration-test.sh
 run_check "Fresh-clone Unix no-download smoke" ./scripts/release-fresh-clone-unix.sh --allow-unsupported-python
 run_check "Package build" ./scripts/verify-package-build.sh
+run_check "Provider freshness evidence smoke" ./scripts/release-provider-freshness.sh
 run_check "Release local audit" ./scripts/release-local-audit.sh
 run_check "Release gate report self-test" ./scripts/test-release-gate-report.sh
 

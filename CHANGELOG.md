@@ -15,6 +15,7 @@ for tagged releases (public beta and beyond).
 - Paste-ready manual evidence stubs from `scripts/release-evidence.sh`, kept at `Status: open` until external evidence is complete.
 - Transcript capture guidance for manual release gates, writing local evidence logs under ignored `state/release-evidence/`.
 - Fresh-clone Unix onboarding smoke helper at `scripts/release-fresh-clone-unix.sh`, with no-download rehearsal mode and `--full-runtime` release evidence mode.
+- Provider freshness evidence helper at `scripts/release-provider-freshness.sh`, capturing provider verify JSON, OpenRouter refresh/check output, and skipped-provider reasons without secrets.
 - Gate-to-checklist cross-references in release helpers and release-gate reports, including diagnostics for closed gates whose checklist item remains open.
 - ds4/DwarfStar local runtime support for the `128gb-ds4-flash` profile, targeting 128GB+ Apple Silicon validation for DeepSeek V4 Flash.
 - Packaged `.opencode` asset mirror under `src/lac/data/opencode`, covering tracked agents, skills, craft rulebooks, design systems, and DCP config.
