@@ -27,7 +27,9 @@ For gate-specific command bundles and evidence prompts, run:
 ./scripts/release-evidence.sh fresh-clone-unix
 ```
 
-The helper also prints a paste-ready evidence stub with `Status: open` so you can capture notes in `docs/release/MANUAL_VALIDATION.md` without closing the gate early.
+The helper also prints matching `RELEASE_CHECKLIST.md` item(s) and a paste-ready evidence stub with `Status: open` so you can capture notes in `docs/release/MANUAL_VALIDATION.md` without closing the gate early.
+
+For command-line gates, the helper also prints a transcript capture command that writes under ignored `state/release-evidence/`.
 
 For a quick handoff view of the currently open manual gates, run:
 

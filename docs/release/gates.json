@@ -21,6 +21,12 @@
         "Date enabled",
         "Repository settings confirmation or screenshot reference",
         "SECURITY.md wording reviewed after enabling"
+      ],
+      "checklist_refs": [
+        {
+          "section": "Trust and repo hygiene",
+          "item": "GitHub Private Vulnerability Reporting is enabled. `SECURITY.md` intentionally keeps this as a release gate until repo settings are updated."
+        }
       ]
     },
     {
@@ -52,6 +58,12 @@
         "Command transcript summary",
         "Generated OpenCode config path from client render",
         "Runtime status JSON showing the selected local runtime"
+      ],
+      "checklist_refs": [
+        {
+          "section": "Runtime validation",
+          "item": "macOS or Linux path validated from a fresh clone:"
+        }
       ]
     },
     {
@@ -79,6 +91,12 @@
         "Date, Windows version, PowerShell version, Python version",
         "Command transcript summary",
         "doctor and smoke result summaries"
+      ],
+      "checklist_refs": [
+        {
+          "section": "Runtime validation",
+          "item": "Windows PowerShell path validated from a fresh clone with `bin/lac.ps1 init`, `bin/lac.ps1 doctor`, and `bin/lac.ps1 smoke`."
+        }
       ]
     },
     {
@@ -100,6 +118,12 @@
         "HTTP status from /health",
         "Model id list from /v1/models",
         "Smoke JSON result"
+      ],
+      "checklist_refs": [
+        {
+          "section": "Runtime validation",
+          "item": "llama.cpp smoke validates `curl http://127.0.0.1:8080/health` and `curl http://127.0.0.1:8080/v1/models`."
+        }
       ]
     },
     {
@@ -135,6 +159,12 @@
         "Model filename downloaded",
         "Runtime status JSON showing ds4 state paths and port 8000",
         "OpenCode session summary with ds4 model selected"
+      ],
+      "checklist_refs": [
+        {
+          "section": "Runtime validation",
+          "item": "ds4/DwarfStar 128GB-class path validated manually: build `antirez/ds4`, run `lac models sync 128gb-ds4-flash`, `lac runtime start`, and verify `curl http://127.0.0.1:8000/v1/models`."
+        }
       ]
     },
     {
@@ -158,6 +188,20 @@
         "Rendered config path",
         "Agent and skill counts observed in the real OpenCode session",
         "Screenshot reference or transcript summary"
+      ],
+      "checklist_refs": [
+        {
+          "section": "Runtime validation",
+          "item": "OpenCode desktop launch validated on the platforms where it is documented."
+        },
+        {
+          "section": "OpenCode integration",
+          "item": "`.opencode/agents/*.md` are discoverable in a real OpenCode session."
+        },
+        {
+          "section": "OpenCode integration",
+          "item": "`.opencode/skills/*/SKILL.md` are discoverable in a real OpenCode session."
+        }
       ]
     },
     {
@@ -177,6 +221,12 @@
         "Provider docs covered by release-local-audit",
         "Provider list JSON count and configured provider ids",
         "Provider verify JSON summary with skipped/error reasons separated from live freshness"
+      ],
+      "checklist_refs": [
+        {
+          "section": "Providers and docs",
+          "item": "Provider auth docs are current for Antigravity, z.ai, NVIDIA NIM, OpenRouter, Anthropic, Codex auth, and OpenCode Go/Zen."
+        }
       ]
     },
     {
@@ -197,6 +247,12 @@
         "provider-verify.json with secrets redacted by lac",
         "openrouter-refresh.json or documented skip reason",
         "List of providers intentionally skipped and why"
+      ],
+      "checklist_refs": [
+        {
+          "section": "Providers and docs",
+          "item": "Live provider freshness probes are complete with release credentials, or every skipped provider has a documented release skip reason."
+        }
       ]
     },
     {
@@ -215,6 +271,12 @@
         "Asset trust summary from release-local-audit",
         "Trust model notes for bundled Open Design and optional Microsoft Graph assets",
         "Confirmation that optional/not-reviewed assets remain labelled as optional community assets"
+      ],
+      "checklist_refs": [
+        {
+          "section": "Trust and repo hygiene",
+          "item": "Third-party agent and skill guidance matches the current trust model."
+        }
       ]
     },
     {
@@ -233,6 +295,12 @@
         "release-local-audit tracked_model_artifacts is empty",
         ".gitignore keeps models/**, state/**, .qwen/, and .claude/ ignored",
         "Allowed tracked placeholders/docs are limited to models/.gitkeep, models/README.md, and state/README.md"
+      ],
+      "checklist_refs": [
+        {
+          "section": "Trust and repo hygiene",
+          "item": "No model binaries or machine-specific files are tracked."
+        }
       ]
     },
     {
@@ -253,6 +321,12 @@
         "Commit SHA",
         "Run conclusion",
         "Failed log excerpt if not green"
+      ],
+      "checklist_refs": [
+        {
+          "section": "Trust and repo hygiene",
+          "item": "Linux CI passes on the release branch."
+        }
       ]
     }
   ]

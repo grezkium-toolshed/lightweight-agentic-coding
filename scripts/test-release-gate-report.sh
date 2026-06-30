@@ -82,6 +82,49 @@ assert payload["release_state"]["open_question_count"] == 0, payload
 PY
 
 python3 - "$TMP_DIR" <<'PY'
+import sys
+from pathlib import Path
+
+checklist_path = Path(sys.argv[1]) / "RELEASE_CHECKLIST.md"
+checklist = checklist_path.read_text(encoding="utf-8")
+checklist = checklist.replace(
+    "- [x] GitHub Private Vulnerability Reporting is enabled. `SECURITY.md` intentionally keeps this as a release gate until repo settings are updated.",
+    "- [ ] GitHub Private Vulnerability Reporting is enabled. `SECURITY.md` intentionally keeps this as a release gate until repo settings are updated.",
+    1,
+)
+checklist_path.write_text(checklist, encoding="utf-8")
+PY
+
+if "$TMP_DIR/scripts/release-gate-report.sh" --json > "$TMP_DIR/checklist-mismatch.json"; then
+  echo "[FAIL] release-gate-report passed despite closed gate with open checklist item" >&2
+  exit 1
+fi
+
+python3 - "$TMP_DIR/checklist-mismatch.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+mismatches = payload["release_checklist"]["gate_checklist_mismatches"]
+assert any("security-pvr" in mismatch for mismatch in mismatches), payload
+PY
+
+python3 - "$TMP_DIR" <<'PY'
+import sys
+from pathlib import Path
+
+checklist_path = Path(sys.argv[1]) / "RELEASE_CHECKLIST.md"
+checklist = checklist_path.read_text(encoding="utf-8")
+checklist = checklist.replace(
+    "- [ ] GitHub Private Vulnerability Reporting is enabled. `SECURITY.md` intentionally keeps this as a release gate until repo settings are updated.",
+    "- [x] GitHub Private Vulnerability Reporting is enabled. `SECURITY.md` intentionally keeps this as a release gate until repo settings are updated.",
+    1,
+)
+checklist_path.write_text(checklist, encoding="utf-8")
+PY
+
+python3 - "$TMP_DIR" <<'PY'
 import re
 import sys
 from pathlib import Path

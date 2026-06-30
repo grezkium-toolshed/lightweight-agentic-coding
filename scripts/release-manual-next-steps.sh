@@ -42,6 +42,7 @@ for line in manual_path.read_text(encoding="utf-8").splitlines():
             "owner": metadata.get("owner", owner),
             "summary": metadata.get("summary", ""),
             "evidence_required": metadata.get("evidence_required", evidence),
+            "checklist_refs": metadata.get("checklist_refs", []),
         })
 
 payload = {
@@ -58,5 +59,7 @@ else:
     print(f"- Open manual gates: {len(open_gates)}")
     for gate in open_gates:
         print(f"  - {gate['gate_id']} ({gate['owner']}): {gate['evidence_required']}")
+        for ref in gate["checklist_refs"]:
+            print(f"    checklist: {ref['section']}: {ref['item']}")
     print("Use ./scripts/release-evidence.sh <gate-id> for command bundles, update docs/release/MANUAL_VALIDATION.md, then rerun ./scripts/release-gate-report.sh.")
 PY

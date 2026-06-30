@@ -55,6 +55,23 @@ def print_gate(gate_id: str) -> None:
     for item in gate["evidence"]:
         print(f"- {item}")
     print()
+    if gate.get("checklist_refs"):
+        print("Matching RELEASE_CHECKLIST.md item(s):")
+        for ref in gate["checklist_refs"]:
+            print(f"- {ref['section']}: {ref['item']}")
+        print()
+    print("Transcript capture helper:")
+    if gate_id == "security-pvr":
+        print("- No shell transcript is expected. Record the date, repo settings confirmation, and screenshot/reference in the evidence stub.")
+    elif gate_id == "windows-powershell":
+        print("- `New-Item -ItemType Directory -Force state/release-evidence`")
+        print(f"- `Start-Transcript -Path \"state/release-evidence/{gate_id}-$(Get-Date -Format yyyyMMddTHHmmssZ).log\"`")
+        print("- Run the commands above, then run `Stop-Transcript`.")
+    else:
+        print("- `mkdir -p state/release-evidence`")
+        print(f"- `script -q state/release-evidence/{gate_id}-$(date -u +%Y%m%dT%H%M%SZ).log`")
+        print("- Run the commands above, then type `exit` to close the transcript shell.")
+    print()
     print("Paste-ready evidence stub:")
     print("```markdown")
     print(f"### Gate: {gate_id}")

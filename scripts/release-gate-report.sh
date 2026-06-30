@@ -31,6 +31,7 @@ state_text = state_path.read_text(encoding="utf-8") if state_path.is_file() else
 required_gate_ids = {gate.get("id") for gate in gates_manifest.get("gates", []) if gate.get("id")}
 if not required_gate_ids:
     errors.append("release gate manifest has no gates")
+gate_records = {gate.get("id"): gate for gate in gates_manifest.get("gates", []) if gate.get("id")}
 
 gate_status = {}
 for line in manual_text.splitlines():
@@ -112,17 +113,45 @@ for gate_id in closed_manual_gates:
 errors.extend(closed_gate_evidence_errors)
 
 open_checklist = []
+checklist_status = {}
 current_section = ""
 for line in checklist_text.splitlines():
     heading = re.match(r"^##\s+(.+)$", line)
     if heading:
         current_section = heading.group(1).strip()
+    item = re.match(r"^- \[([ xX])\]\s+(.+)$", line)
+    if item:
+        is_checked = item.group(1).lower() == "x"
+        item_text = item.group(2).strip()
+        checklist_status[(current_section, item_text)] = is_checked
     item = re.match(r"^- \[ \]\s+(.+)$", line)
     if item:
         open_checklist.append({
             "section": current_section,
             "item": item.group(1).strip(),
         })
+
+gate_checklist_errors = []
+gate_checklist_mismatches = []
+for gate_id, gate in sorted(gate_records.items()):
+    refs = gate.get("checklist_refs")
+    if not isinstance(refs, list) or not refs:
+        gate_checklist_errors.append(f"release gate `{gate_id}` is missing checklist_refs")
+        continue
+    for ref in refs:
+        section = ref.get("section") if isinstance(ref, dict) else None
+        item = ref.get("item") if isinstance(ref, dict) else None
+        if not section or not item:
+            gate_checklist_errors.append(f"release gate `{gate_id}` has malformed checklist_ref")
+            continue
+        key = (section, item)
+        if key not in checklist_status:
+            gate_checklist_errors.append(f"release gate `{gate_id}` references missing checklist item `{section}: {item}`")
+            continue
+        if gate_id in closed_manual_gates and not checklist_status[key]:
+            gate_checklist_mismatches.append(f"closed gate `{gate_id}` still has open checklist item `{section}: {item}`")
+errors.extend(gate_checklist_errors)
+errors.extend(gate_checklist_mismatches)
 
 open_state_questions = []
 in_open_questions = False
@@ -154,6 +183,10 @@ payload = {
         "path": str(checklist_path.relative_to(root)),
         "open_item_count": len(open_checklist),
         "open_items": open_checklist,
+        "gate_checklist_error_count": len(gate_checklist_errors),
+        "gate_checklist_errors": gate_checklist_errors,
+        "gate_checklist_mismatch_count": len(gate_checklist_mismatches),
+        "gate_checklist_mismatches": gate_checklist_mismatches,
     },
     "release_state": {
         "path": str(state_path.relative_to(root)),
@@ -176,6 +209,12 @@ else:
     print(f"- Release checklist items open: {len(open_checklist)}")
     for item in open_checklist:
         print(f"  - {item['section']}: {item['item']}")
+    print(f"- Gate/checklist metadata errors: {len(gate_checklist_errors)}")
+    for error in gate_checklist_errors:
+        print(f"  - {error}")
+    print(f"- Closed gate/checklist mismatches: {len(gate_checklist_mismatches)}")
+    for error in gate_checklist_mismatches:
+        print(f"  - {error}")
     print(f"- Release state questions open: {len(open_state_questions)}")
     for question in open_state_questions:
         print(f"  - {question}")

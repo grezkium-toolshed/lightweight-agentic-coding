@@ -204,6 +204,8 @@ for text, path in (
 release_evidence = (root / "scripts/release-evidence.sh").read_text(encoding="utf-8")
 require("Status: open" in release_evidence, "scripts/release-evidence.sh must generate open evidence stubs")
 require("Keep this stub at Status: open" in release_evidence, "scripts/release-evidence.sh must tell testers not to close gates early")
+require("Transcript capture helper" in release_evidence, "scripts/release-evidence.sh must print transcript capture guidance")
+require("state/release-evidence" in release_evidence, "scripts/release-evidence.sh must write transcript guidance under ignored state/release-evidence")
 require(
     "./scripts/release-manual-next-steps.sh" in release_index,
     "docs/release/README.md must point to the manual next-steps helper",
@@ -214,7 +216,7 @@ for text, path in (
 ):
     require("./scripts/verify-public-beta-local.sh" in text, f"{path} must point to the public beta local verifier")
 require("docs/release/gates.json" in release_index, "docs/release/README.md must document the release gate manifest")
-required_gate_fields = {"id", "owner", "summary", "evidence_required", "environment", "commands", "evidence"}
+required_gate_fields = {"id", "owner", "summary", "evidence_required", "environment", "commands", "evidence", "checklist_refs"}
 gate_records = release_gates.get("gates", [])
 require(release_gates.get("schema_version") == 1, "docs/release/gates.json schema_version must be 1")
 require(gate_records, "docs/release/gates.json must contain gates")
@@ -229,10 +231,24 @@ for line in manual_validation.splitlines():
             "owner": match.group(3).strip(),
             "evidence_required": match.group(4).strip(),
         }
+checklist_items = set()
+current_checklist_section = ""
+for line in release_checklist.splitlines():
+    heading = re.match(r"^##\s+(.+)$", line)
+    if heading:
+        current_checklist_section = heading.group(1).strip()
+        continue
+    item = re.match(r"^- \[[ xX]\]\s+(.+)$", line)
+    if item:
+        checklist_items.add((current_checklist_section, item.group(1).strip()))
 for gate in gate_records:
     missing = sorted(required_gate_fields - set(gate))
     require(not missing, f"docs/release/gates.json gate {gate.get('id', '<unknown>')} missing fields {missing}")
     require(gate["environment"] and gate["commands"] and gate["evidence"], f"docs/release/gates.json gate {gate['id']} must include environment, commands, and evidence")
+    require(isinstance(gate["checklist_refs"], list) and gate["checklist_refs"], f"docs/release/gates.json gate {gate['id']} must include checklist_refs")
+    for ref in gate["checklist_refs"]:
+        require(isinstance(ref, dict) and ref.get("section") and ref.get("item"), f"docs/release/gates.json gate {gate['id']} has malformed checklist_ref")
+        require((ref["section"], ref["item"]) in checklist_items, f"docs/release/gates.json gate {gate['id']} references missing checklist item {ref['section']}: {ref['item']}")
     require(gate["id"] in manual_gate_rows, f"docs/release/MANUAL_VALIDATION.md must track gate {gate['id']}")
     manual_row = manual_gate_rows[gate["id"]]
     require(manual_row["owner"] == gate["owner"], f"{gate['id']}: manual owner must match docs/release/gates.json")

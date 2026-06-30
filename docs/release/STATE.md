@@ -26,6 +26,8 @@ Release gate report: `./scripts/release-gate-report.sh` intentionally fails unti
 - [x] Public project metadata updated for public beta: `CHANGELOG.md` records ds4/package/release-gate work, and `CONTRIBUTING.md` points contributors at `scripts/verify-public-beta-local.sh` with current generated state paths
 - [x] Public support surface added: `SUPPORT.md` documents issue routing, validation commands, security routing, and public-beta no-SLA expectations
 - [x] Manual evidence helper hardened: `scripts/release-evidence.sh` prints paste-ready `Status: open` stubs so testers can record evidence without closing gates early
+- [x] Manual gate transcript guidance added: command-line evidence can be captured under ignored `state/release-evidence/` and referenced from the gate notes
+- [x] Manual gates now cross-reference matching `RELEASE_CHECKLIST.md` items, and release-gate reporting flags closed gates whose checklist items remain open
 - [x] Historical audit/backlog notes marked as superseded snapshots so current public-beta work routes through `docs/release/gates.json`, `docs/release/MANUAL_VALIDATION.md`, and `RELEASE_CHECKLIST.md`
 - [x] Local automated public-beta wrapper passed on 2026-06-30: `scripts/verify-public-beta-local.sh` completed and summarized the 8 remaining manual gates without metadata or closed-gate evidence errors
 - [x] Repo naming/public framing audit passed: README, package metadata, release docs, and local release audit align on `lac` — Lightweight Agentic Coding, `lightweight-agentic-coding` package slug, and public beta/not stable v1 positioning

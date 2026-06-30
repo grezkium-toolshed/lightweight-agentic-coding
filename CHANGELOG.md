@@ -13,6 +13,8 @@ for tagged releases (public beta and beyond).
 - Public beta release gate flow: `docs/release/gates.json`, `docs/release/MANUAL_VALIDATION.md`, `scripts/release-gate-report.sh`, `scripts/release-evidence.sh`, `scripts/release-manual-next-steps.sh`, `scripts/test-release-gate-report.sh`, and `scripts/verify-public-beta-local.sh`.
 - Public beta support policy in `SUPPORT.md`, including issue routing, validation commands, and no-SLA beta expectations.
 - Paste-ready manual evidence stubs from `scripts/release-evidence.sh`, kept at `Status: open` until external evidence is complete.
+- Transcript capture guidance for manual release gates, writing local evidence logs under ignored `state/release-evidence/`.
+- Gate-to-checklist cross-references in release helpers and release-gate reports, including diagnostics for closed gates whose checklist item remains open.
 - ds4/DwarfStar local runtime support for the `128gb-ds4-flash` profile, targeting 128GB+ Apple Silicon validation for DeepSeek V4 Flash.
 - Packaged `.opencode` asset mirror under `src/lac/data/opencode`, covering tracked agents, skills, craft rulebooks, design systems, and DCP config.
 - Wheel/package verification via `scripts/verify-package-build.sh`.

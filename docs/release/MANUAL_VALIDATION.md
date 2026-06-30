@@ -18,7 +18,9 @@ Use the evidence helper to print the exact command bundle and evidence fields fo
 ./scripts/release-evidence.sh <gate-id>
 ```
 
-It also prints a paste-ready markdown stub with `Status: open` so you can record the evidence in this file without closing the gate until the checklist item is complete.
+It also prints matching `RELEASE_CHECKLIST.md` item(s) and a paste-ready markdown stub with `Status: open` so you can record the evidence in this file without closing the gate until the checklist item is complete.
+
+For command-line gates, the helper also prints a transcript capture command that writes under ignored `state/release-evidence/`. Reference that transcript in the gate evidence instead of pasting secrets or long terminal output into this file.
 
 For a tester-friendly summary of the currently open manual gates, run:
 
