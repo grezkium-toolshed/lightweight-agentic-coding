@@ -17,6 +17,7 @@ for tagged releases (public beta and beyond).
 - Gate-to-checklist cross-references in release helpers and release-gate reports, including diagnostics for closed gates whose checklist item remains open.
 - ds4/DwarfStar local runtime support for the `128gb-ds4-flash` profile, targeting 128GB+ Apple Silicon validation for DeepSeek V4 Flash.
 - Packaged `.opencode` asset mirror under `src/lac/data/opencode`, covering tracked agents, skills, craft rulebooks, design systems, and DCP config.
+- `THIRD_PARTY_NOTICES.md` for bundled external assets, optional runtimes, and ds4 model-source attribution.
 - Wheel/package verification via `scripts/verify-package-build.sh`.
 - MCP server configuration for GitHub API (`disabled` by default; requires `GITHUB_TOKEN`).
 - Custom commands `/doctor` and `/health` for runtime validation.
@@ -37,6 +38,7 @@ for tagged releases (public beta and beyond).
 - Bumped all model context limits to `262144` and output limits to `16384` for consistency.
 - Expanded `state/README.md` with env-var override and git-ignore notes.
 - Added `docs/providers/FREE_CLOUD_FALLBACKS.md` to documentation verification checks.
+- Release local audit now verifies third-party notice coverage for cataloged external source refs and ds4 runtime/model sources.
 - Added Contributing section to `README.md`.
 - Device setup now installs or refreshes `@tarquinen/opencode-dcp@latest` so `/dcp` is available after restarting OpenCode.
 

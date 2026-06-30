@@ -127,9 +127,13 @@ lac is a thin orchestration layer standing on the shoulders of:
 - **[OpenCode](https://opencode.ai)** — the agentic coding client
 - **[Open Design](https://open-design.ai)** by nexu-io — design skills, craft rulebooks, and brand design systems
 - **[oMLX](https://github.com/danielzgtg/omlx)** — optional macOS MLX inference backend
+- **[ds4/DwarfStar](https://github.com/antirez/ds4)** by Salvatore Sanfilippo — optional 128GB+ Apple Silicon DeepSeek V4 Flash runtime path
 - **[OpenChamber](https://github.com/openchamber/openchamber)** by @btriapitsyn — web/mobile/desktop remote access
 - **[free-coding-models](https://github.com/vava-nessa/free-coding-models)** by @vava-nessa — free cloud model index and NIM helper tooling
 - **[Qwen](https://github.com/QwenLM/Qwen)** and **[Gemma](https://ai.google.dev/gemma)** model families
+
+See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) for bundled asset
+attribution and runtime/model source notes.
 
 ## Contributing
 

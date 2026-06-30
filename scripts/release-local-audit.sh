@@ -40,6 +40,7 @@ pyproject = read_text("pyproject.toml")
 gitignore = read_text(".gitignore")
 trust_model = read_text("docs/security/TRUST_MODEL.md")
 third_party_intake = read_text("docs/security/THIRD_PARTY_AGENT_INTAKE.md")
+third_party_notices = read_text("THIRD_PARTY_NOTICES.md")
 agency_review = read_text("docs/security/AGENCY_AGENTS_REVIEW.md")
 provider_auth = read_text("docs/providers/AUTHENTICATION.md")
 providers_readme = read_text("docs/providers/README.md")
@@ -126,6 +127,17 @@ for text, path in (
 ):
     for term in ("Open Design", "optional", "Microsoft Graph"):
         require(term in text, f"{path} must mention {term}")
+external_source_refs = sorted({
+    asset.get("source_ref")
+    for asset in assets
+    if asset.get("source") != "repo-curated" and asset.get("source_ref")
+})
+for source_ref in external_source_refs:
+    require(source_ref in third_party_notices, f"THIRD_PARTY_NOTICES.md must mention catalog source_ref {source_ref}")
+for runtime_ref in ("antirez/ds4", "antirez/deepseek-v4-gguf"):
+    require(runtime_ref in third_party_notices, f"THIRD_PARTY_NOTICES.md must mention {runtime_ref}")
+require("THIRD_PARTY_NOTICES.md" in readme, "README.md must link THIRD_PARTY_NOTICES.md")
+require("THIRD_PARTY_NOTICES.md" in third_party_intake, "third-party intake docs must require notices updates")
 require("agency-agents" in agency_review, "docs/security/AGENCY_AGENTS_REVIEW.md must preserve the agency-agents review")
 
 # Provider docs structural coverage. This does not replace live provider probes.
@@ -197,6 +209,7 @@ payload = {
         "support_tier": dict(Counter(asset.get("support_tier") for asset in assets)),
         "source": dict(Counter(asset.get("source") for asset in assets)),
         "review_status": dict(Counter(asset.get("review_status") for asset in assets)),
+        "external_source_refs": external_source_refs,
     },
     "tracked_artifact_check": {
         "tracked_file_count": len(tracked),

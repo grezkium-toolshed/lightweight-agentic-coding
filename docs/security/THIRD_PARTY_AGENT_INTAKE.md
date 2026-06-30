@@ -10,6 +10,8 @@ Do not import external agent or skill packs directly into the default runtime pa
 5. Review whether the pack adds real workflow value or just catalog size.
 6. Add attribution and source links.
 7. Keep imported content optional unless it is core to the repo.
+8. For any public-release addition of externally sourced skills, agents, or assets, update the asset catalog, trust model, and `THIRD_PARTY_NOTICES.md`.
+9. Do not claim upstream validation, review, or licensing status unless you have direct evidence for it.
 
 ## Red flags
 - `ignore previous instructions`
@@ -21,6 +23,8 @@ Do not import external agent or skill packs directly into the default runtime pa
 
 ## Default policy
 Curate. Do not bulk import.
+Public-release additions of externally sourced skills, agents, or assets must be reflected in the asset catalog, trust model, and `THIRD_PARTY_NOTICES.md` before they are treated as shippable.
+Never imply that upstream validated, reviewed, or licensed the addition unless the repository has direct evidence of that claim.
 
 ## Optional external packs
 

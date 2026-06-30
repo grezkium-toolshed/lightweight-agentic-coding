@@ -9,6 +9,7 @@ required=(
   CODE_OF_CONDUCT.md
   LICENSE
   SUPPORT.md
+  THIRD_PARTY_NOTICES.md
   models/README.md
   docs/architecture.md
   docs/model-recommendations.md
@@ -102,6 +103,7 @@ require(openrouter_entry.get("live") is True, "docs/free-coding-models.json open
 require(openrouter_entry.get("list_command") == "./bin/lac provider models openrouter", "docs/free-coding-models.json must point to the provider models command")
 
 changelog = (root / "CHANGELOG.md").read_text(encoding="utf-8")
+third_party_notices = (root / "THIRD_PARTY_NOTICES.md").read_text(encoding="utf-8")
 contributing = (root / "CONTRIBUTING.md").read_text(encoding="utf-8")
 support = (root / "SUPPORT.md").read_text(encoding="utf-8")
 pyproject = (root / "pyproject.toml").read_text(encoding="utf-8")
@@ -110,6 +112,9 @@ audit_findings = (root / "docs/audit-findings.md").read_text(encoding="utf-8")
 review_backlog = (root / "docs/review-backlog.md").read_text(encoding="utf-8")
 confluence_migration = (root / "docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md").read_text(encoding="utf-8")
 require("128gb-ds4-flash" in changelog and "DwarfStar" in changelog, "CHANGELOG.md must mention ds4/DwarfStar public beta work")
+require("THIRD_PARTY_NOTICES.md" in changelog, "CHANGELOG.md must mention third-party notices")
+require("antirez/ds4" in third_party_notices and "antirez/deepseek-v4-gguf" in third_party_notices, "THIRD_PARTY_NOTICES.md must include ds4 runtime and model sources")
+require("open-design" in third_party_notices and "merill/msgraph" in third_party_notices and "gsd-build/get-shit-done" in third_party_notices, "THIRD_PARTY_NOTICES.md must include cataloged external source refs")
 require("verify-public-beta-local.sh" in changelog, "CHANGELOG.md must mention the public beta local gate wrapper")
 require("First public release" not in changelog, "CHANGELOG.md must not claim a first public release while public beta gates remain open")
 require("public beta remains gated" in changelog, "CHANGELOG.md must keep historical version notes honest about gated public beta")
