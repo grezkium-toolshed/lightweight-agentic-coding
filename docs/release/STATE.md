@@ -29,6 +29,7 @@ Release gate report: `./scripts/release-gate-report.sh` intentionally fails unti
 - [x] Manual gate transcript guidance added: command-line evidence can be captured under ignored `state/release-evidence/` and referenced from the gate notes
 - [x] Fresh-clone Unix helper added: `scripts/release-fresh-clone-unix.sh` records no-download smoke evidence by default and `--full-runtime` evidence for the manual release gate
 - [x] Provider freshness helper added: `scripts/release-provider-freshness.sh` captures provider verify JSON, OpenRouter refresh/check output, and skipped-provider reasons for the manual release gate
+- [x] llama.cpp smoke helper added: `scripts/release-llama-smoke.sh` captures runtime status, curl health/models probes, and `lac smoke --json` for the manual release gate
 - [x] Manual gates now cross-reference matching `RELEASE_CHECKLIST.md` items, and release-gate reporting flags closed gates whose checklist items remain open
 - [x] Third-party notices added for bundled external assets, optional runtimes, and ds4 model-source attribution; local release audit now checks catalog source-ref coverage
 - [x] Package metadata declares `THIRD_PARTY_NOTICES.md`, package data ships it for installed users, and package-build verification checks wheel and sdist artifacts

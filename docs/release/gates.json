@@ -98,17 +98,15 @@
       "id": "llama-smoke",
       "owner": "release tester",
       "summary": "Validate the llama.cpp OpenAI-compatible endpoint after the runtime is running.",
-      "evidence_required": "With llama.cpp runtime running, `curl http://127.0.0.1:8080/health` and `curl http://127.0.0.1:8080/v1/models` return expected local runtime responses.",
+      "evidence_required": "With llama.cpp runtime running, `./scripts/release-llama-smoke.sh` confirms `curl http://127.0.0.1:8080/health`, `curl http://127.0.0.1:8080/v1/models`, and `lac smoke --json` return expected local runtime responses.",
       "environment": [
         "Machine with llama-server and selected model available"
       ],
       "commands": [
-        "lac runtime status --json",
-        "curl -i http://127.0.0.1:8080/health",
-        "curl -s http://127.0.0.1:8080/v1/models",
-        "lac smoke --json"
+        "./scripts/release-llama-smoke.sh"
       ],
       "evidence": [
+        "Evidence summary path from scripts/release-llama-smoke.sh",
         "Runtime status JSON",
         "HTTP status from /health",
         "Model id list from /v1/models",
@@ -117,7 +115,7 @@
       "checklist_refs": [
         {
           "section": "Runtime validation",
-          "item": "llama.cpp smoke validates `curl http://127.0.0.1:8080/health` and `curl http://127.0.0.1:8080/v1/models`."
+          "item": "llama.cpp smoke validates `./scripts/release-llama-smoke.sh`, including `curl http://127.0.0.1:8080/health`, `curl http://127.0.0.1:8080/v1/models`, and `lac smoke --json`."
         }
       ]
     },

@@ -25,7 +25,7 @@ Use `./scripts/verify-public-beta-local.sh` to run the local automated public-be
   - `lac client render opencode`
 - [ ] Windows PowerShell path validated from a fresh clone with `bin/lac.ps1 init`, `bin/lac.ps1 doctor`, and `bin/lac.ps1 smoke`.
 - [ ] OpenCode desktop launch validated on the platforms where it is documented.
-- [ ] llama.cpp smoke validates `curl http://127.0.0.1:8080/health` and `curl http://127.0.0.1:8080/v1/models`.
+- [ ] llama.cpp smoke validates `./scripts/release-llama-smoke.sh`, including `curl http://127.0.0.1:8080/health`, `curl http://127.0.0.1:8080/v1/models`, and `lac smoke --json`.
 - [ ] ds4/DwarfStar 128GB-class path validated manually: build `antirez/ds4`, run `lac models sync 128gb-ds4-flash`, `lac runtime start`, and verify `curl http://127.0.0.1:8000/v1/models`.
 
 ## OpenCode integration
