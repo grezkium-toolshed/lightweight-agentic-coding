@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/TuukkaTanner/lightweight-agentic-coding/actions/workflows/ci.yml/badge.svg)](https://github.com/TuukkaTanner/lightweight-agentic-coding/actions/workflows/ci.yml)
 
-Clone, run 3 commands, start coding with a local AI model. No cloud required.
+Clone, initialize, and start coding with a local AI model. No cloud required.
 
 Built on [llama.cpp](https://github.com/ggml-org/llama.cpp), [Unsloth](https://unsloth.ai) model quantizations, [OpenCode](https://opencode.ai), and [Open Design](https://open-design.ai). With optional support for [oMLX](https://github.com/danielzgtg/omlx).
 
@@ -11,7 +11,8 @@ Built on [llama.cpp](https://github.com/ggml-org/llama.cpp), [Unsloth](https://u
 ```bash
 # 1. Lightweight Agentic Coding
 git clone https://github.com/TuukkaTanner/lightweight-agentic-coding.git
-python3 -m pip install ./lightweight-agentic-coding
+cd lightweight-agentic-coding
+python3 -m pip install .
 
 # 2. Set up your hardware profile (detects and recommends)
 lac init
@@ -22,7 +23,7 @@ lac runtime start
 lac client open opencode
 ```
 
-That's it. Three commands and you're coding with a local model.
+That's it. `lac init` writes the active profile, and `lac models sync` uses that profile by default.
 
 <details>
 <summary>New to Python or pip? (click to expand)</summary>
@@ -49,7 +50,7 @@ The `python3 -m pip` form always works — it doesn't depend on `pip` being on y
 The three commands above do this:
 
 1. **`lac init`** — detects your hardware (RAM, GPU) and picks the best model profile for your machine. Generates config for OpenCode and llama.cpp.
-2. **`lac models sync`** — downloads model weights for your profile (resumable, shows progress).
+2. **`lac models sync`** — downloads model weights for the active profile (resumable, shows progress).
 3. **`lac runtime start` + `lac client open opencode`** — starts the local AI server (`llama-server` on port 8080) and opens OpenCode connected to it.
 
 You're now running a local AI coding agent on your own machine. No data leaves your computer unless you configure a cloud provider.
@@ -74,6 +75,7 @@ You're now running a local AI coding agent on your own machine. No data leaves y
 | `128gb-multi` | Multi-model Qwen workstation |
 | `128gb-qwen122b` | Large-model Qwen-focused |
 | `128gb-minimax` | MiniMax M2.7 (IQ4_XS) |
+| `128gb-ds4-flash` | DeepSeek V4 Flash via ds4/DwarfStar |
 | `gemma-16gb` | Gemma 4 26B-A4B (Q4) |
 | `gemma-24gb` | Gemma 4 31B (Q4) + 26B-A4B (Q4) |
 | `gemma-32gb` | Gemma 4 31B (Q8) + 26B-A4B (Q4) |
@@ -133,3 +135,4 @@ lac is a thin orchestration layer standing on the shoulders of:
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, coding style, and submission guidelines.
 See [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) for community expectations.
+See [`SUPPORT.md`](SUPPORT.md) for issue routing and public-beta support expectations.

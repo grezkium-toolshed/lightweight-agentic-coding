@@ -112,6 +112,8 @@ def _init_recommendation(profile_id, profile, hardware):
     recommended_profile = recommend_profile(ram_gb)
     if profile["runtime_mode"] == "cloud":
         recommended_path = "cloud-only zero-download profile"
+    elif profile.get("preferred_runtime") == "ds4":
+        recommended_path = "ds4 local runtime for 128 GB+ DeepSeek V4 Flash"
     else:
         recommended_path = "local-first with optional OpenCode Go and OpenRouter overlays"
     return {
@@ -157,11 +159,19 @@ def _init_prerequisites(ctx, profile, cloud_ids, load_json, command_exists, _hos
     ]
     if profile.get("local_runtime_required"):
         runtime = selected_local_runtime(profile)
-        runtime_command = "omlx" if runtime == "omlx" else "llama-server"
+        if runtime == "omlx":
+            runtime_id = "omlx"
+            runtime_command = "omlx"
+        elif runtime == "ds4":
+            runtime_id = "ds4"
+            runtime_command = os.environ.get("DS4_BIN", "ds4-server")
+        else:
+            runtime_id = "llama-server"
+            runtime_command = "llama-server"
         required.append(
-            _status_item(runtime_command, "Local runtime", command_exists(runtime_command),
+            _status_item(runtime_id, "Local runtime", command_exists(runtime_command),
                          f"Required to start the selected local runtime ({runtime}).",
-                         command=f"{runtime_command} --help", install_hint=_install_hint(runtime_command)))
+                         command=f"{runtime_command} --help", install_hint=_install_hint(runtime_id)))
     provider_catalog = {p["id"]: p for p in load_json(ctx.paths["provider_catalog"])["providers"]}
     for provider_id in _init_required_provider_ids(ctx, profile, cloud_ids, load_json):
         provider = provider_catalog[provider_id]

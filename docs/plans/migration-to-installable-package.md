@@ -175,9 +175,9 @@ src/lac/
    - `launch-llama.sh` → `exec lac runtime start`
    - `launch-opencode.sh` → `exec lac client open opencode`
 
-6. **Remove `.ps1` duplicates entirely**
-   - `doctor.ps1`, `smoke-test.ps1`, `setup-config-device.ps1`, etc. — all deleted
-   - Windows users run `lac` directly after `pip install`
+6. **Remove stale `.ps1` duplicates**
+   - Deleted script-level duplicates stay removed; Windows uses `bin/lac.ps1` for repo-local development or `lac` directly after `pip install`
+   - Runtime launch helpers that still exist under `runtime-config/launch/*.ps1` must be covered by integration checks
 
 7. **Keep `bin/lac` and `bin/lac.ps1` as repo-local dev wrappers**
    - `bin/lac` → `exec python3 -m lac "$@"` (uses repo source, not installed)
@@ -192,7 +192,7 @@ src/lac/
 
 - [ ] `lac models sync 24gb` downloads models (same as old `setup-models-device.sh`)
 - [ ] `lac setup 24gb` configures device (same as old `setup-config-device.sh`)
-- [ ] All `.ps1` files removed from repo
+- [ ] Stale script-level `.ps1` files stay removed; `bin/lac.ps1` and current launch helpers validate cleanly
 - [ ] `.sh` scripts are thin shims or removed
 - [ ] CI passes without `verify-profiles-sync.sh`
 - [ ] Windows: `py -m pip install .` then `lac doctor` works

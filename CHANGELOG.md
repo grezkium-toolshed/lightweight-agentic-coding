@@ -10,6 +10,12 @@ for tagged releases (public beta and beyond).
 
 ### Added
 
+- Public beta release gate flow: `docs/release/gates.json`, `docs/release/MANUAL_VALIDATION.md`, `scripts/release-gate-report.sh`, `scripts/release-evidence.sh`, `scripts/release-manual-next-steps.sh`, `scripts/test-release-gate-report.sh`, and `scripts/verify-public-beta-local.sh`.
+- Public beta support policy in `SUPPORT.md`, including issue routing, validation commands, and no-SLA beta expectations.
+- Paste-ready manual evidence stubs from `scripts/release-evidence.sh`, kept at `Status: open` until external evidence is complete.
+- ds4/DwarfStar local runtime support for the `128gb-ds4-flash` profile, targeting 128GB+ Apple Silicon validation for DeepSeek V4 Flash.
+- Packaged `.opencode` asset mirror under `src/lac/data/opencode`, covering tracked agents, skills, craft rulebooks, design systems, and DCP config.
+- Wheel/package verification via `scripts/verify-package-build.sh`.
 - MCP server configuration for GitHub API (`disabled` by default; requires `GITHUB_TOKEN`).
 - Custom commands `/doctor` and `/health` for runtime validation.
 - Dynamic Context Pruning (DCP) plugin configuration at `.opencode/dcp.jsonc`.
@@ -17,6 +23,14 @@ for tagged releases (public beta and beyond).
 
 ### Changed
 
+- README quick start now uses the public clone/install flow: `git clone`, `cd lightweight-agentic-coding`, `python3 -m pip install .`, then `lac init`.
+- Python package metadata now includes public beta classifiers, project URLs, keywords, and maintainer attribution for package-index readiness.
+- Historical audit/backlog docs now identify themselves as superseded snapshots and point current release work at the canonical manual-gate system.
+- `models/README.md` now documents `lac models sync` / `lac profile apply` instead of retired setup scripts, including the ds4 model directory.
+- Migration and hybrid-workspace docs now frame `./bin/lac` / `./bin/lac.ps1` as the primary operational path, with `scripts/` reserved for compatibility and verification helpers.
+- Repo-local Unix and PowerShell wrappers now work from a clean checkout without manually exporting `PYTHONPATH=src`.
+- CI now runs the integration test, package build check, release local audit, and release gate report self-test.
+- `scripts/integration-test.sh` validates current `bin/lac.ps1` and `runtime-config/launch/*.ps1` paths instead of removed setup scripts.
 - Renamed `opencode.jsonc` to `opencode.template.jsonc` to prevent OpenCode auto-discovery conflict.
 - Bumped all model context limits to `262144` and output limits to `16384` for consistency.
 - Expanded `state/README.md` with env-var override and git-ignore notes.
@@ -26,6 +40,11 @@ for tagged releases (public beta and beyond).
 
 ### Fixed
 
+- Package-mode `client render opencode` writes generated manifests to state instead of package data.
+- OpenCode `/doctor` command and model verification docs now point at current `./bin/lac doctor` / `./bin/lac smoke` commands instead of retired script paths.
+- Root and packaged catalogs now have parity checks to prevent silent drift.
+- Installed-wheel profile application now references packaged chat templates.
+- `SECURITY.md` keeps GitHub Private Vulnerability Reporting as an explicit public-beta release gate until enabled.
 - CI glob fragility in `.github/workflows/ci.yml` (loop guard for empty globs).
 - Missing documentation for `opencode-antigravity-auth` plugin in `docs/providers/AUTHENTICATION.md`.
 - Example template (`templates/opencode/opencode.example.jsonc`) missing 7 model IDs and 4 provider blocks.
@@ -40,7 +59,7 @@ for tagged releases (public beta and beyond).
 
 ### Added
 
-- First public release with lac — Lightweight Agentic Coding rebrand. *(Corresponds to initial codebase versioning.)*
+- Initial versioned codebase with the lac — Lightweight Agentic Coding rebrand. *(Pre-public codebase versioning; public beta remains gated by the release checklist.)*
 - lac runtime with llama.cpp and optional oMLX on macOS.
 - Profile-based model setup (`16gb` through `128gb-multi`, plus cloud-only profiles).
 - Curated OpenCode agents: `architecture-reviewer`, `reality-checker`, `release-reviewer`, `research-synthesizer`, `documentation-generator`.

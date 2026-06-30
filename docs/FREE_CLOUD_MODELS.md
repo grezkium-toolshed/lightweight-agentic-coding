@@ -6,6 +6,8 @@ Source: [vava-nessa/free-coding-models](https://github.com/vava-nessa/free-codin
 
 Kudos to **@vava-nessa** for the free model index and NIM helper tooling.
 
+Free cloud model availability drifts frequently. Treat this page as a snapshot and refresh provider/model availability before each beta cut; OpenRouter is intentionally handled through the live provider catalog commands rather than a frozen table.
+
 ## nvidiaNim
 
 | Model ID | Label | Tier | SWE | Context |

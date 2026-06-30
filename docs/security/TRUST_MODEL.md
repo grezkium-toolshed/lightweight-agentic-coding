@@ -1,17 +1,23 @@
 # Trust Model for Curated Agents and Skills
 
-This repo ships a small curated set of OpenCode agents and skills. It does not bulk import large external prompt catalogs.
+This repo ships a curated set of OpenCode agents and skills. It does not bulk import arbitrary external prompt catalogs into privileged workflows.
 
 ## What is curated here
 - project-local OpenCode subagents under `.opencode/agents/`
 - project-local office and workflow skills under `.opencode/skills/`
+- Open Design skills, craft rules, and design systems that are cataloged as community or optional assets
 - provider guidance written specifically for this repo
 - optional workflow packs that must be installed explicitly, such as the Microsoft Graph skill pack
 
 ## What is only referenced externally
 - larger third-party agent catalogs
-- broader skill collections used as design references
 - community-maintained free model indexes
+
+## Open Design catalog assets
+
+Open Design content is bundled for offline design and prototyping workflows, but it is not treated as core trusted automation. The asset catalog marks these imports as `trust_level: community`, `support_tier: optional`, `source: upstream-external`, and `review_status: not-reviewed` until a maintainer performs a deeper review.
+
+That means they may be useful references for local models, but they should not be presented as fully audited agent behaviors. When a community design asset graduates to core support, update `catalog/assets.json` with a reviewed status and document the review evidence.
 
 ## Optional Microsoft Graph pack
 

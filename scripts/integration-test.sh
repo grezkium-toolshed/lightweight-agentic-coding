@@ -6,6 +6,7 @@ set -euo pipefail
 # This can run in CI without GPU.
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LAC="$ROOT/bin/lac"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
@@ -24,7 +25,7 @@ echo "=== Integration Test ==="
 echo "Temp dir: $TMP_DIR"
 
 # 1. Profile apply generates config
-run python3 "$ROOT/scripts/lac.py" profile apply 24gb --json > "$TMP_DIR/profile-24gb.json"
+run "$LAC" profile apply 24gb --json > "$TMP_DIR/profile-24gb.json"
 
 # 2. Generated OpenCode config exists and is valid JSON
 if [[ -f "$TMP_DIR/state/clients/opencode/opencode.json" ]]; then
@@ -36,19 +37,19 @@ else
 fi
 
 # 3. Doctor runs without error
-run python3 "$ROOT/scripts/lac.py" doctor --bootstrap-hint --json > "$TMP_DIR/doctor.json"
+run "$LAC" doctor --bootstrap-hint --json > "$TMP_DIR/doctor.json"
 
 # 4. Client render works for all supported clients
 for client in opencode claude-code codex-reference; do
-  run python3 "$ROOT/scripts/lac.py" client render "$client" --json > "$TMP_DIR/render-$client.json"
+  run "$LAC" client render "$client" --json > "$TMP_DIR/render-$client.json"
 done
 
 # 5. Provider list works
-run python3 "$ROOT/scripts/lac.py" provider list --json > "$TMP_DIR/providers.json"
+run "$LAC" provider list --json > "$TMP_DIR/providers.json"
 
 # 6. Pack and scenario lists work
-run python3 "$ROOT/scripts/lac.py" pack list --json > "$TMP_DIR/packs.json"
-run python3 "$ROOT/scripts/lac.py" scenario list --json > "$TMP_DIR/scenarios.json"
+run "$LAC" pack list --json > "$TMP_DIR/packs.json"
+run "$LAC" scenario list --json > "$TMP_DIR/scenarios.json"
 
 # 7. DCP plugin setup stays on the supported install path
 python3 - <<'PY' "$ROOT"
@@ -58,16 +59,23 @@ from pathlib import Path
 
 root = Path(sys.argv[1])
 template = (root / "opencode.template.jsonc").read_text(encoding="utf-8")
-setup_sh = (root / "scripts/setup-config-device.sh").read_text(encoding="utf-8")
-setup_ps1 = (root / "scripts/setup-config-device.ps1").read_text(encoding="utf-8")
+bin_lac = (root / "bin/lac").read_text(encoding="utf-8")
+bin_lac_ps1 = (root / "bin/lac.ps1").read_text(encoding="utf-8")
+launch_cli_ps1 = (root / "runtime-config/launch/launch-local-cli.ps1").read_text(encoding="utf-8")
+launch_desktop_ps1 = (root / "runtime-config/launch/launch-local-desktop.ps1").read_text(encoding="utf-8")
 dcp_config = (root / ".opencode/dcp.jsonc").read_text(encoding="utf-8")
 
 assert "@tarquinen/opencode-dcp@latest" in template
-assert "opencode plugin list" not in setup_sh
-assert "Removing stale DCP 3.1.9 package cache" in setup_sh
-assert "opencode plugin \"$DCP_PLUGIN\" --global --force" in setup_sh
-assert "Removing stale DCP 3.1.9 package cache" in setup_ps1
-assert "opencode plugin $DcpPlugin --global --force" in setup_ps1
+assert "PYTHONPATH" in bin_lac
+assert "Python 3.10+" in bin_lac
+assert "-m lac" in bin_lac
+assert "PYTHONPATH" in bin_lac_ps1
+assert "Python 3.10+" in bin_lac_ps1
+assert "-m lac" in bin_lac_ps1
+assert "launch-llama.ps1" in launch_cli_ps1
+assert "launch-opencode.ps1" in launch_cli_ps1
+assert "launch-llama.ps1" in launch_desktop_ps1
+assert "launch-opencode-desktop.ps1" in launch_desktop_ps1
 assert '"commands"' in dcp_config and '"enabled": true' in dcp_config
 PY
 
@@ -96,31 +104,31 @@ exit 1
 EOF
 chmod +x "$FAKE_MSGRAPH/scripts/run.sh"
 echo "[test] skill status msgraph"
-if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" skill status msgraph --json > "$TMP_DIR/skill-status-before.json"; then
+if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" "$LAC" skill status msgraph --json > "$TMP_DIR/skill-status-before.json"; then
   echo "[FAIL] skill status msgraph"
   FAILED=1
 fi
 python3 -c "import json; data=json.load(open('$TMP_DIR/skill-status-before.json')); assert data['installed'] is False"
 echo "[test] skill install msgraph"
-if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" skill install msgraph --source "$FAKE_MSGRAPH" --json > "$TMP_DIR/skill-install.json"; then
+if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" "$LAC" skill install msgraph --source "$FAKE_MSGRAPH" --json > "$TMP_DIR/skill-install.json"; then
   echo "[FAIL] skill install msgraph"
   FAILED=1
 fi
 test -f "$SKILL_ROOT/msgraph/SKILL.md" || { echo "[FAIL] msgraph SKILL.md was not installed"; FAILED=1; }
 echo "[test] skill verify msgraph"
-if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" skill verify msgraph --json > "$TMP_DIR/skill-verify.json"; then
+if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" "$LAC" skill verify msgraph --json > "$TMP_DIR/skill-verify.json"; then
   echo "[FAIL] skill verify msgraph"
   FAILED=1
 fi
 python3 -c "import json; data=json.load(open('$TMP_DIR/skill-verify.json')); assert data['ok'] is True; assert 'MSGRAPH_CLIENT_SECRET' not in json.dumps(data)"
 echo "[test] client render opencode with msgraph"
-if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" client render opencode --json > "$TMP_DIR/render-opencode-msgraph.json"; then
+if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" "$LAC" client render opencode --json > "$TMP_DIR/render-opencode-msgraph.json"; then
   echo "[FAIL] client render opencode with msgraph"
   FAILED=1
 fi
 python3 -c "import json; data=json.load(open('$TMP_DIR/render-opencode-msgraph.json')); graph=[p for p in data['packs'] if p['id']=='microsoft-graph'][0]; assert graph['installed'] is True"
 echo "[test] skill remove msgraph"
-if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" python3 "$ROOT/scripts/lac.py" skill remove msgraph --json > "$TMP_DIR/skill-remove.json"; then
+if ! env LAC_OPENCODE_SKILLS_DIR="$SKILL_ROOT" "$LAC" skill remove msgraph --json > "$TMP_DIR/skill-remove.json"; then
   echo "[FAIL] skill remove msgraph"
   FAILED=1
 fi
@@ -128,7 +136,7 @@ test ! -e "$SKILL_ROOT/msgraph" || { echo "[FAIL] msgraph skill directory was no
 
 # 9. Init wizard works with --yes
 INIT_STATE="$TMP_DIR/init-state"
-LAC_STATE_ROOT="$INIT_STATE" run python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --no-cloud --json > "$TMP_DIR/init.json"
+LAC_STATE_ROOT="$INIT_STATE" run "$LAC" init --yes --profile 24gb --no-cloud --json > "$TMP_DIR/init.json"
 
 # 10. Validate generated preset
 if [[ -f "$INIT_STATE/runtime/presets.active.ini" ]]; then

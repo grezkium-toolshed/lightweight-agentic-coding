@@ -25,3 +25,7 @@ Curate. Do not bulk import.
 ## Optional external packs
 
 External packs that add real authenticated capability should stay opt-in even when they are broadly useful. Microsoft Graph is the model case: the `msgraph` skill can run offline endpoint searches, but it can also call tenant APIs after delegated or app-only authentication. Keep it outside the tracked default skill tree, document least-privilege setup, and verify local installs without printing secret values.
+
+## Open Design imports
+
+Open Design is bundled as a community design/reference layer, not as a fully reviewed core automation pack. Keep those assets cataloged as optional/community until a maintainer records a review. Do not give imported design skills broader shell, network, or secret-handling assumptions just because they ship in the offline bundle.

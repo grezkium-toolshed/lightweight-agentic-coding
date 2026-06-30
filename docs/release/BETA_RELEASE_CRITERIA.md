@@ -10,6 +10,8 @@ This repo is targeting a public beta, not a stable v1.
 
 ## What must be true before release
 - `RELEASE_CHECKLIST.md` is complete
+- `docs/release/MANUAL_VALIDATION.md` has every gate marked closed with evidence
+- `./scripts/release-gate-report.sh` exits successfully
 - Linux CI checks in `.github/workflows/ci.yml` are green on current default branch
 - live validation has been performed on the documented paths
 - repo naming and public framing are consistent with `lac` — Lightweight Agentic Coding

@@ -13,8 +13,10 @@ The architecture is deliberately split into five layers:
 
 ## Local runtime
 
-The runtime stays llama.cpp-first:
+The runtime stays llama.cpp-first, with explicit specialist runtimes:
 - `llama-server` is the default local API surface
+- `ds4-server` is the explicit 128 GB+ DeepSeek V4 Flash path for users who need DwarfStar instead of oMLX/MTP
+- oMLX remains an optional macOS MLX serving path for compatible Qwen/Gemma profiles
 - profile presets live under `runtime-config/presets/`
 - `state/runtime/presets.active.ini` is generated from the chosen hardware profile
 - Qwen 3.6 MoE is the target baseline model family for general work
@@ -57,7 +59,7 @@ This CLI is the supported control plane for:
 
 ## Provider strategy
 
-The default posture is **local always included, cloud as an optional overlay**. Every profile applies a local llama.cpp layer; cloud providers are separate, each gated by its own env var and inert until configured. `lac init` is the on-ramp.
+The default posture is **local always included, cloud as an optional overlay**. Most local profiles apply a llama.cpp layer; specialist profiles can select another local runtime such as ds4. Cloud providers are separate, each gated by its own env var and inert until configured. `lac init` is the on-ramp.
 
 Supported cloud overlays in `opencode.template.jsonc`:
 - OpenRouter free tier
@@ -74,9 +76,12 @@ The repo deliberately avoids a large built-in persona catalog.
 
 Instead it ships a curated asset catalog plus workflow packs:
 - `coding`
+- `design`
+- `devops`
 - `research`
 - `office`
 - `team-rollout`
+- `microsoft-graph`
 
 Pack metadata lives in `catalog/workflow-packs.json`, and individual asset trust/support metadata lives in `catalog/assets.json`.
 

@@ -208,12 +208,19 @@ def build_pack_summary(ctx):
     asset_catalog = load_asset_catalog(ctx)
     workflow_catalog = load_workflow_catalog(ctx)
     asset_by_id = {asset["id"]: asset for asset in asset_catalog["assets"]}
+
+    def bundled_asset_path(asset):
+        asset_path = asset["path"]
+        if ctx._is_repo or not asset_path.startswith(".opencode/"):
+            return ctx.root / asset_path
+        return ctx.root / "opencode" / asset_path.removeprefix(".opencode/")
+
     packs = []
     for pack in workflow_catalog["packs"]:
         pack_assets = []
         for asset_id in pack["assets"]:
             asset = copy.deepcopy(asset_by_id[asset_id])
-            asset_path = ctx.root / asset["path"]
+            asset_path = bundled_asset_path(asset)
             if asset_id == "skill:msgraph":
                 asset_path = optional_skill_path(ctx, "msgraph") / "SKILL.md"
             asset["installed"] = asset_path.is_file()

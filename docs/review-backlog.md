@@ -3,6 +3,12 @@
 Generated: 2026-04-27
 Scope: Full repo review after audit fixes, oMLX context bump, MCP/DCP additions, and template rename.
 
+> Historical note: this backlog records the April/June hardening batches and
+> may mention migration-era script names in completed entries. Current
+> public-beta blockers are canonical in `docs/release/gates.json`,
+> `docs/release/MANUAL_VALIDATION.md`, and `RELEASE_CHECKLIST.md`.
+> Use `./scripts/release-gate-report.sh` for the authoritative release status.
+
 ## How to Use This File
 
 - Pick an issue by priority (Critical → High → Medium → Low).
@@ -16,14 +22,14 @@ Scope: Full repo review after audit fixes, oMLX context bump, MCP/DCP additions,
 
 | # | Issue | Where | Fix | Status | Notes |
 |---|-------|-------|-----|--------|-------|
-| C1 | **Enable GitHub Private Vulnerability Reporting** | Repo Settings → Security → Private vulnerability reporting | Toggle ON. Update `SECURITY.md` line 9 to remove "once it is enabled" and replace with the active reporting URL. Update `docs/release/PRIVATE_UNTIL_RELEASE.md` to mark this gate complete. | [ ] | Requires repo owner access |
+| C1 | **Enable GitHub Private Vulnerability Reporting** | Repo Settings → Security → Private vulnerability reporting | Toggle ON. Update `SECURITY.md` with the active reporting path or GitHub reporting instruction, then close `security-pvr` in `docs/release/MANUAL_VALIDATION.md` with evidence and check the matching `RELEASE_CHECKLIST.md` item. | [ ] | Requires repo owner access |
 | C2 | **Stale local branch** | `git branch` shows `codex-fix-cli-runtime-drift` | `git branch -d codex-fix-cli-runtime-drift` (already merged in commit `fbc7ac2`). | [x] | Done in `5053244` |
 | C3 | **Machine-specific file tracked** | `.qwen/settings.json.orig` is in `git ls-files` | `git rm --cached .qwen/settings.json.orig` | [x] | Done in `5053244` |
 | C4 | **Gemma model mappings are wrong** | `scripts/lac.py` lines 32–34 | `gemma-4-31b-q8` → map to `gemma-4-31b-it-UD-MLX-8bit` (not 4bit). `gemma-4-31b-bf16` → map to `gemma-4-31b-it-UD-MLX-bf16` (not 4bit). If those MLX quant names don't exist, use the correct path or add a TODO comment. | [x] | Done in `5053244` |
 | C5 | **`qwen3.5-9b-q4` context limit inconsistent** | `opencode.template.jsonc` lines 38–42 | Change `context` from `32768` to `262144` to match every other model. If intentionally smaller, add a comment explaining why. | [x] | Done in `5053244` |
 | C6 | **oMLX settings are user-local only** | `~/.omlx/settings.json` (outside repo) | Add a step to `scripts/setup-config-device.sh` that: (1) detects oMLX install, (2) writes `max_context_window: 262144` and `max_tokens: 16384` to `~/.omlx/settings.json` if the file exists, or (3) prints a warning with the exact values to set manually. | [x] | Done in `5053244` |
-| C7 | **Windows PowerShell path never validated** | `bin/lac.ps1`, `scripts/*.ps1` | On a Windows machine (or VM), clone fresh and run: ` .\\bin\\lac.ps1 init --yes --profile 24gb`, ` .\\scripts\\doctor.ps1`, ` .\\scripts\\smoke-test.ps1`. Fix any errors. Document results in `docs/release/STATE.md` under "Completed". | [ ] | Deferred per `STATE.md`. If still deferred, update `RELEASE_CHECKLIST.md` to say "validated manually on [date]" |
-| C8 | **Fresh-clone validation incomplete** | `RELEASE_CHECKLIST.md` lines 11–20 | Clone to `/tmp/test-lac`, run: `./bin/lac init --yes --profile 24gb`, `./scripts/doctor.sh`, `./scripts/smoke-test.sh`, `curl http://127.0.0.1:8080/health`, `curl http://127.0.0.1:8080/v1/models`. Fix any errors. Mark checklist items complete. | [ ] | Do NOT commit the test clone |
+| C7 | **Windows PowerShell path never validated** | `bin/lac.ps1`, `runtime-config/launch/*.ps1` | On a Windows machine (or VM), run `./scripts/release-evidence.sh windows-powershell` and follow the printed command bundle. Record evidence in `docs/release/MANUAL_VALIDATION.md` before closing the gate. | [ ] | Deferred per `STATE.md`; keep the gate open until real Windows evidence exists |
+| C8 | **Fresh-clone validation incomplete** | `docs/release/MANUAL_VALIDATION.md`, `RELEASE_CHECKLIST.md` | Run `./scripts/release-evidence.sh fresh-clone-unix` and follow the printed command bundle from a clean macOS or Linux clone. Close only after evidence is recorded and the matching checklist item is checked. | [ ] | Do NOT commit the test clone |
 
 ---
 
@@ -49,7 +55,7 @@ Scope: Full repo review after audit fixes, oMLX context bump, MCP/DCP additions,
 |---|-------|-------|-----|--------|-------|
 | M1 | **README is 589 lines and overwhelming** | `README.md` | Add a "Quick Start" section at the very top (before "Deployment Path") with: 3 commands to go from clone to running. Move the full hardware profile table to `docs/use-cases/SCENARIO_GUIDE.md` or collapse it behind a `<details>` block. | [x] | Done in this session — README is now 175 lines with Quick Start at top, concise tables, and full profile list in collapsed `<details>` block |
 | M2 | **Missing CHANGELOG** | No `CHANGELOG.md` exists | Create `CHANGELOG.md` with entries for commits since last tagged state: `2194947` (template rename + MCP/DCP), `9713fdb` (model sync improvements), `969f8f1` (audit fixes). Use [Keep a Changelog](https://keepachangelog.com/) format. | [x] | Done in `5053244` |
-| M3 | **`/health` command only checks port 8080** | `opencode.template.jsonc` line 525 | Change the `health` command template to check the active runtime port. `lac.py` knows the port from `AI_CLUSTER_PORT` or `AI_OMLX_PORT`. Add a helper command or document that users should run `./bin/lac runtime status` instead of raw curl. | [x] | Done in this session — health command now tries 8080 first, then 8000, and suggests `./bin/lac runtime status` if neither responds |
+| M3 | **`/health` command only checks port 8080** | `opencode.template.jsonc` line 525 | Change the `health` command template to check the active runtime port. `lac runtime status` reports the selected runtime endpoint. Add a helper command or document that users should run `./bin/lac runtime status` instead of raw curl. | [x] | Done in this session — health command now tries 8080 first, then 8000, and suggests `./bin/lac runtime status` if neither responds |
 | M4 | **`FREE_CLOUD_FALLBACKS.md` not verified** | `docs/providers/FREE_CLOUD_FALLBACKS.md` exists but `verify-documentation.sh` doesn't check it | Add `"docs/providers/FREE_CLOUD_FALLBACKS.md"` to the `required` array in `verify-documentation.sh`. | [x] | Done in `5053244` |
 | M5 | **No CONTRIBUTING/CODE_OF_CONDUCT links in README** | `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` exist but README doesn't reference them | Add a "Contributing" section at the bottom of `README.md` with links to both files. | [x] | Done in `5053244` |
 | M6 | **`state/README.md` is minimal** | 13 lines | Expand to mention: `AI_CLUSTER_STATE_ROOT` env var override, that `state/` is in `.gitignore`, and that `state/clients/` contains per-client rendered configs. | [x] | Done in `5053244` |

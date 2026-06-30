@@ -81,6 +81,18 @@ PROFILE_MODELS = {
         ],
         "mlx": [],
     },
+    "128gb-ds4-flash": {
+        "gguf": [
+            (
+                "ds4",
+                "ds4flash.gguf",
+                os.environ.get("DS4_REPO", "antirez/deepseek-v4-gguf"),
+                75000,
+                "DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix.gguf",
+            ),
+        ],
+        "mlx": [],
+    },
     "gemma-16gb": {
         "gguf": [
             ("gemma4", "gemma-4-12b-it-UD-Q8_K_XL.gguf", "unsloth/gemma-4-12b-it-GGUF", 13600),
@@ -284,8 +296,12 @@ def models_sync(profile_id, models_dir=None, root=None):
     if stage_mlx and profile["mlx"]:
         print("MLX staging: enabled for macOS")
     failures = 0
-    for subdir, filename, repo, min_mb in profile["gguf"]:
-        remote = filename
+    for item in profile["gguf"]:
+        if len(item) == 4:
+            subdir, filename, repo, min_mb = item
+            remote = filename
+        else:
+            subdir, filename, repo, min_mb, remote = item
         if not _download_one(subdir, filename, repo, remote, min_mb, models_dir):
             failures += 1
     if stage_mlx:

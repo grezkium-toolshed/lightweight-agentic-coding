@@ -2,6 +2,12 @@
 
 Generated: 2026-04-26
 
+> Historical note: this was an April audit snapshot. It is kept for traceability,
+> but the current public-beta release blockers are tracked in
+> `docs/release/gates.json`, `docs/release/MANUAL_VALIDATION.md`, and
+> `RELEASE_CHECKLIST.md`. Use `./scripts/release-gate-report.sh` and
+> `./scripts/release-evidence.sh <gate-id>` for current release work.
+
 ## CRITICAL
 
 ### C2. CI launch/*.sh glob is fragile
@@ -37,8 +43,8 @@ Generated: 2026-04-26
 
 - **File:** `RELEASE_CHECKLIST.md`
 - **Problem:** All gates unmet. No fresh-clone validation, no Windows PowerShell validation, no real OpenCode session testing, no PVR (Private Vulnerability Reporting) enabled.
-- **Fix:** Prioritize last 3 unchecked items: enable GitHub PVR, run `./scripts/doctor.sh` on a fresh clone, validate Windows PowerShell scripts.
-- **Status:** Resolved 2026-06-09 — lac rebranded (identity, positioning, private-language, and stale-doc gates closed). Remaining gates: PVR, fresh-clone, Windows validation, session testing, CI pass.
+- **Fix:** Prioritize the remaining release-blocking evidence gates: enable GitHub PVR, validate `python3 -m pip install .` plus `lac init` from a fresh clone, validate Windows PowerShell wrappers, collect llama.cpp and ds4 runtime smoke evidence, confirm real OpenCode discovery, and verify Linux CI.
+- **Status:** Partially resolved 2026-06-30 — release gates are now tracked in `docs/release/gates.json`, `docs/release/MANUAL_VALIDATION.md`, and `RELEASE_CHECKLIST.md`. Keep this item open until `./scripts/release-gate-report.sh` exits successfully.
 
 ---
 
@@ -88,8 +94,13 @@ Generated: 2026-04-26
 
 ## Immediate Pre-Beta Actions
 
-1. Enable GitHub **Private Vulnerability Reporting** (unblocks SECURITY.md gate)
-2. Fix CI launch glob fragility in `.github/workflows/ci.yml`
-3. Document or remove the undocumented plugin dependency
-4. Sync example template models/providers or add disclaimer
-5. Run `./scripts/doctor.sh` on a fresh clone to validate
+Current release blockers live in `docs/release/MANUAL_VALIDATION.md`. Run:
+
+```bash
+./scripts/release-gate-report.sh
+./scripts/release-manual-next-steps.sh
+./scripts/release-evidence.sh <gate-id>
+```
+
+Keep gates open until the requested evidence is captured and the matching
+`RELEASE_CHECKLIST.md` item is checked.

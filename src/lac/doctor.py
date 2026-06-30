@@ -5,6 +5,7 @@ and fix function. The dispatch loop runs checks in priority order, shows the
 plan, and executes fixes with user confirmation.
 """
 
+import os
 import sys
 import subprocess
 
@@ -93,6 +94,11 @@ def _install_hint(tool_id):
             "linux": [],
             "windows": [],
         },
+        "ds4": {
+            "macos": ["git clone https://github.com/antirez/ds4", "cd ds4 && make", "export DS4_BIN=$PWD/ds4-server"],
+            "linux": ["git clone https://github.com/antirez/ds4", "cd ds4 && make cuda-generic", "export DS4_BIN=$PWD/ds4-server"],
+            "windows": [],
+        },
     }
     return hints.get(tool_id, {}).get(_host_install_platform(), [])
 
@@ -169,7 +175,7 @@ def fix_opencode(ctx, yes=False):
     return _command_exists("opencode")
 
 
-@register("P1", "Install llama-server", needs_sudo=False, needs_confirm=True)
+@register("P1", "Install local runtime", needs_sudo=False, needs_confirm=True)
 def fix_llama_server(ctx, yes=False):
     active = ctx.active_profile()
     if active and active.get("runtime_mode") == "cloud":
@@ -186,6 +192,15 @@ def fix_llama_server(ctx, yes=False):
             if not _run_cmd(cmd, "Installing oMLX..."):
                 return False
         return _command_exists("omlx")
+    if runtime == "ds4":
+        ds4_bin = os.environ.get("DS4_BIN", "ds4-server")
+        if _command_exists(ds4_bin):
+            return True
+        cmds = _install_hint("ds4")
+        for cmd in cmds:
+            if not _run_cmd(cmd, "Installing ds4..."):
+                return False
+        return _command_exists(ds4_bin)
     if _command_exists("llama-server"):
         return True
     cmds = _install_hint("llama-server")

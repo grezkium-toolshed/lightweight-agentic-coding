@@ -3,4 +3,20 @@ set -euo pipefail
 
 # Repo-local dev wrapper: runs from source tree.
 # After `pip install .`, users can just run `lac` directly.
-exec python3 -m lac "$@"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ -n "${PYTHONPATH:-}" ]]; then
+  export PYTHONPATH="$ROOT/src:$PYTHONPATH"
+else
+  export PYTHONPATH="$ROOT/src"
+fi
+
+for candidate in "${PYTHON:-}" python3.14 python3.13 python3.12 python3.11 python3.10 python3; do
+  [[ -n "$candidate" ]] || continue
+  command -v "$candidate" >/dev/null 2>&1 || continue
+  if "$candidate" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1; then
+    exec "$candidate" -m lac "$@"
+  fi
+done
+
+echo "Python 3.10+ is required to run lac. Install Python 3.10 or newer, or set PYTHON=/path/to/python." >&2
+exit 1

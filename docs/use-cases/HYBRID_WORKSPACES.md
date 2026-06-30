@@ -102,7 +102,7 @@ Keep these in the cluster repo:
 - shared profile definitions
 - shared provider catalog
 - general-purpose agents and skills
-- setup scripts and validation checks
+- `lac` CLI wrappers, compatibility scripts, and validation checks
 - onboarding docs
 
 ## Operational Checks

@@ -28,18 +28,21 @@ def render_client(ctx, target):
         "packs": packs,
     }
     if target == "opencode":
-        path = ctx.root / ".opencode/render-manifest.json"
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
         out_path = ctx.state_root / "clients/opencode/manifest.json"
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+        manifest_path = out_path
+        if ctx._is_repo:
+            repo_manifest = ctx.root / ".opencode/render-manifest.json"
+            repo_manifest.parent.mkdir(parents=True, exist_ok=True)
+            repo_manifest.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+            manifest_path = repo_manifest
         return {
             "target": target,
-            "manifest_path": str(path),
+            "manifest_path": str(manifest_path),
             "pack_count": len(packs),
             "packs": packs,
-            "runtime_asset_root": str(ctx.root / ".opencode"),
+            "runtime_asset_root": str(ctx.paths["opencode_agents_dir"].parent),
         }
     if target == "claude-code":
         target_root = ctx.state_root / "clients/claude-code"

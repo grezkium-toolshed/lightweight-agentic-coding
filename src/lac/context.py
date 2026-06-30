@@ -47,6 +47,7 @@ STATE_ROOT = Path(_env_or_deprecated("LAC_STATE_ROOT", "AI_CLUSTER_STATE_ROOT", 
 PORT = int(_env_or_deprecated("LAC_PORT", "AI_CLUSTER_PORT", "8080"))
 HOST = _env_or_deprecated("LAC_HOST", "AI_CLUSTER_HOST", "127.0.0.1")
 OMLX_PORT = int(os.environ.get("AI_OMLX_PORT", os.environ.get("OMLX_PORT", "8000")))
+DS4_PORT = int(os.environ.get("DS4_PORT", "8000"))
 
 
 class Context:
@@ -73,6 +74,10 @@ class Context:
             "omlx_pid": self.state_root / "runtime/omlx.pid",
             "omlx_state": self.state_root / "runtime/omlx.json",
             "omlx_log": self.state_root / "logs/omlx.log",
+            "ds4_pid": self.state_root / "runtime/ds4.pid",
+            "ds4_state": self.state_root / "runtime/ds4.json",
+            "ds4_log": self.state_root / "logs/ds4.log",
+            "ds4_kv": self.state_root / "runtime/ds4-kv",
             "doctor_report": self.state_root / "reports/doctor.json",
             "smoke_report": self.state_root / "reports/smoke.json",
         }

@@ -1,4 +1,4 @@
-"""Runtime lifecycle: start, stop, status for llama.cpp and oMLX."""
+"""Runtime lifecycle: start, stop, status for llama.cpp, oMLX, and ds4."""
 
 import os
 import signal
@@ -7,7 +7,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from lac.context import HOST, PORT, OMLX_PORT, ROOT, STATE_ROOT
+from lac.context import HOST, PORT, OMLX_PORT, DS4_PORT, ROOT, STATE_ROOT
 
 
 def log_info(message):
@@ -61,16 +61,21 @@ def _normalize_local_runtime(value):
         return "auto"
     if normalized in {"omlx", "mlx"}:
         return "omlx"
+    if normalized in {"ds4", "dwarfstar"}:
+        return "ds4"
     if normalized in {"llama", "llama.cpp", "llamacpp", "llama-server"}:
         return "llama.cpp"
-    raise SystemExit(f"Unsupported AI_LOCAL_RUNTIME: {value}. Use auto, omlx, or llama.cpp.")
+    raise SystemExit(f"Unsupported AI_LOCAL_RUNTIME: {value}. Use auto, ds4, omlx, or llama.cpp.")
 
 
 def selected_local_runtime(profile=None, verbose=False):
     import sys
     requested = _normalize_local_runtime(os.environ.get("AI_LOCAL_RUNTIME", "auto"))
     if requested != "auto":
-        if requested == "omlx" and sys.platform != "darwin":
+        if requested == "ds4" and profile and profile.get("runtime_mode") != "local":
+            if verbose:
+                log_info("[runtime] Requested ds4 runtime is only compatible with local profiles. Falling back to llama.cpp.")
+        elif requested == "omlx" and sys.platform != "darwin":
             if verbose:
                 log_info(f"[runtime] oMLX is only supported on macOS. Ignoring AI_LOCAL_RUNTIME=omlx.")
         elif requested == "omlx" and not _profile_supports_omlx(profile, verbose=verbose):
@@ -80,6 +85,10 @@ def selected_local_runtime(profile=None, verbose=False):
             if verbose:
                 log_info(f"[runtime] Using requested runtime: {requested}")
             return requested
+    if profile and profile.get("preferred_runtime") == "ds4":
+        if verbose:
+            log_info("[runtime] Auto-selected ds4 runtime from profile preference")
+        return "ds4"
     if sys.platform == "darwin" and _profile_supports_omlx(profile, verbose=False):
         omlx_bin = os.environ.get("OMLX_BIN", "omlx")
         if not command_exists(omlx_bin):
@@ -104,6 +113,13 @@ def runtime_paths(ctx, runtime):
             "log": ctx.paths["omlx_log"],
             "label": "oMLX",
         }
+    if runtime == "ds4":
+        return {
+            "pid": ctx.paths["ds4_pid"],
+            "state": ctx.paths["ds4_state"],
+            "log": ctx.paths["ds4_log"],
+            "label": "ds4",
+        }
     return {
         "pid": ctx.paths["llama_pid"],
         "state": ctx.paths["llama_state"],
@@ -113,6 +129,8 @@ def runtime_paths(ctx, runtime):
 
 
 def local_runtime_port(runtime):
+    if runtime == "ds4":
+        return DS4_PORT
     return OMLX_PORT if runtime == "omlx" else PORT
 
 
@@ -149,7 +167,7 @@ def collect_runtime_status(ctx):
     profile = ctx.active_profile()
     runtime = selected_local_runtime(profile)
     port = local_runtime_port(runtime)
-    health_path = "/v1/models" if runtime == "omlx" else "/health"
+    health_path = "/v1/models" if runtime in {"omlx", "ds4"} else "/health"
     paths = runtime_paths(ctx, runtime)
     pid_path = paths["pid"]
     state_path = paths["state"]
@@ -233,6 +251,32 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
         env["OMLX_HOST"] = HOST
         env["OMLX_PORT"] = str(port)
         command = [os.environ.get("OMLX_BIN", "omlx"), "serve", "--model-dir", str(models_dir)]
+        ready_url = f"{base_url}/v1/models"
+    elif runtime == "ds4":
+        ds4_bin = os.environ.get("DS4_BIN", "ds4-server")
+        if not command_exists(ds4_bin):
+            raise SystemExit("ds4 runtime selected but `ds4-server` is not in PATH. Build antirez/ds4 and set DS4_BIN, or set AI_LOCAL_RUNTIME=llama.cpp.")
+        models_dir = Path(os.environ.get("AI_MODELS_DIR", str(ctx.root / "models")))
+        model_path = Path(os.environ.get("DS4_MODEL", str(models_dir / "ds4" / "ds4flash.gguf")))
+        if not model_path.is_file():
+            raise SystemExit(f"Missing ds4 model file: {model_path}\nRun ./bin/lac models sync 128gb-ds4-flash first, or set DS4_MODEL.")
+        kv_dir = ctx.paths["ds4_kv"]
+        kv_dir.mkdir(parents=True, exist_ok=True)
+        command = [
+            ds4_bin,
+            "-m",
+            str(model_path),
+            "--ctx",
+            os.environ.get("DS4_CTX", "100000"),
+            "--kv-disk-dir",
+            str(kv_dir),
+            "--kv-disk-space-mb",
+            os.environ.get("DS4_KV_DISK_SPACE_MB", "8192"),
+            "--host",
+            HOST,
+            "--port",
+            str(port),
+        ]
         ready_url = f"{base_url}/v1/models"
     else:
         env["LLAMA_ARG_JINJA"] = "true"
@@ -350,6 +394,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
     result = {
         "ok": True,
         "running": True,
+        "runtime": runtime,
         "url": base_url,
         "log_path": str(log_path),
         "launch_latency_ms": payload["launch_latency_ms"],

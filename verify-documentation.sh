@@ -4,6 +4,12 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 required=(
   README.md
+  CHANGELOG.md
+  CONTRIBUTING.md
+  CODE_OF_CONDUCT.md
+  LICENSE
+  SUPPORT.md
+  models/README.md
   docs/architecture.md
   docs/model-recommendations.md
   docs/config-summary.md
@@ -34,6 +40,13 @@ required=(
   docs/use-cases/ONBOARDING_CLAUDE_CODE.md
   docs/release/README.md
   docs/release/BETA_RELEASE_CRITERIA.md
+  docs/release/gates.json
+  docs/release/MANUAL_VALIDATION.md
+  scripts/release-evidence.sh
+  scripts/release-gate-report.sh
+  scripts/release-manual-next-steps.sh
+  scripts/test-release-gate-report.sh
+  scripts/verify-public-beta-local.sh
   RELEASE_CHECKLIST.md
 )
 
@@ -50,6 +63,8 @@ export PYTHONPATH="${ROOT}/scripts:${PYTHONPATH:-}"
 
 python3 - <<'PY' "$ROOT"
 import json
+import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -66,6 +81,10 @@ def require(cond: bool, msg: str):
 opencode = load_jsonc(root / "opencode.template.jsonc")
 openrouter_models = opencode["provider"]["openrouter"]["models"]
 require(isinstance(openrouter_models, dict) and openrouter_models, "opencode.template.jsonc openrouter models must keep starter defaults")
+require("./bin/lac doctor" in json.dumps(opencode.get("command", {})), "opencode.template.jsonc doctor command must use ./bin/lac doctor")
+
+packaged_opencode = load_jsonc(root / "src/lac/data/opencode/opencode.template.jsonc")
+require(opencode == packaged_opencode, "packaged opencode.template.jsonc must match repo template")
 
 openrouter_doc = (root / "docs/providers/OPENROUTER_FREE.md").read_text(encoding="utf-8")
 require("./bin/lac provider models openrouter" in openrouter_doc, "docs/providers/OPENROUTER_FREE.md must point to the provider models command")
@@ -82,7 +101,85 @@ require(isinstance(openrouter_entry, dict), "docs/free-coding-models.json openro
 require(openrouter_entry.get("live") is True, "docs/free-coding-models.json openrouter entry must mark live catalog usage")
 require(openrouter_entry.get("list_command") == "./bin/lac provider models openrouter", "docs/free-coding-models.json must point to the provider models command")
 
+changelog = (root / "CHANGELOG.md").read_text(encoding="utf-8")
+contributing = (root / "CONTRIBUTING.md").read_text(encoding="utf-8")
+support = (root / "SUPPORT.md").read_text(encoding="utf-8")
+pyproject = (root / "pyproject.toml").read_text(encoding="utf-8")
+model_recommendations = (root / "docs/model-recommendations.md").read_text(encoding="utf-8")
+audit_findings = (root / "docs/audit-findings.md").read_text(encoding="utf-8")
+review_backlog = (root / "docs/review-backlog.md").read_text(encoding="utf-8")
+confluence_migration = (root / "docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md").read_text(encoding="utf-8")
+require("128gb-ds4-flash" in changelog and "DwarfStar" in changelog, "CHANGELOG.md must mention ds4/DwarfStar public beta work")
+require("verify-public-beta-local.sh" in changelog, "CHANGELOG.md must mention the public beta local gate wrapper")
+require("First public release" not in changelog, "CHANGELOG.md must not claim a first public release while public beta gates remain open")
+require("public beta remains gated" in changelog, "CHANGELOG.md must keep historical version notes honest about gated public beta")
+require("verify-public-beta-local.sh" in contributing, "CONTRIBUTING.md must point contributors at the public beta local gate wrapper")
+require("Development Status :: 4 - Beta" in pyproject, "pyproject.toml must include beta classifier")
+require("https://github.com/TuukkaTanner/lightweight-agentic-coding/issues" in pyproject, "pyproject.toml must include public issue URL")
+require("SECURITY.md" in support and "verify-public-beta-local.sh" in support, "SUPPORT.md must route security and public-beta validation")
+require("./scripts/doctor.sh" not in model_recommendations, "docs/model-recommendations.md must not point users at retired doctor.sh")
+require("./bin/lac doctor" in confluence_migration, "docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md must point to ./bin/lac doctor")
+require("Use `./bin/lac` on macOS/Linux" in confluence_migration, "docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md must prefer bin/lac over legacy scripts")
+for text, path in (
+    (audit_findings, "docs/audit-findings.md"),
+    (review_backlog, "docs/review-backlog.md"),
+):
+    require("Historical note" in text, f"{path} must be labelled as historical before public beta")
+    require("docs/release/gates.json" in text and "./scripts/release-gate-report.sh" in text, f"{path} must point readers at current release gates")
+for stale_path in (
+    "runtime-config/presets.active.ini",
+    "runtime-config/active-profile.txt",
+    "runtime-config/opencode.active.json",
+):
+    require(stale_path not in contributing, f"CONTRIBUTING.md still references stale generated path {stale_path}")
+
+current_guidance_files = [
+    "README.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "SUPPORT.md",
+    "RELEASE_CHECKLIST.md",
+    "SECURITY.md",
+    "AGENTS.md",
+    "models/README.md",
+    "opencode.template.jsonc",
+    "docs/architecture.md",
+    "docs/config-summary.md",
+    "docs/model-recommendations.md",
+    "docs/release/README.md",
+    "docs/release/BETA_RELEASE_CRITERIA.md",
+    "docs/release/STATE.md",
+    "docs/release/MANUAL_VALIDATION.md",
+    "docs/security/TRUST_MODEL.md",
+    "docs/security/THIRD_PARTY_AGENT_INTAKE.md",
+    "docs/use-cases/BENCHMARKING.md",
+    "docs/use-cases/SCENARIO_GUIDE.md",
+    "docs/use-cases/STARTUP_HOME_TEAM.md",
+    "docs/use-cases/HYBRID_WORKSPACES.md",
+    "docs/use-cases/ONBOARDING_16GB_24GB.md",
+    "docs/use-cases/ONBOARDING_32GB_PLUS.md",
+    "docs/use-cases/ONBOARDING_CLAUDE_CODE.md",
+    "src/lac/data/opencode/opencode.template.jsonc",
+]
+retired_command_patterns = (
+    "./scripts/doctor.sh",
+    "./scripts/smoke-test.sh",
+    "scripts/setup-config-device.sh",
+    "scripts/setup-models-device.sh",
+    "runtime-config/presets.active.ini",
+    "runtime-config/active-profile.txt",
+    "runtime-config/opencode.active.json",
+)
+for rel_path in current_guidance_files:
+    text = (root / rel_path).read_text(encoding="utf-8")
+    for pattern in retired_command_patterns:
+        require(pattern not in text, f"{rel_path} must not reference retired path `{pattern}`")
+
 release_state = (root / "docs/release/STATE.md").read_text(encoding="utf-8")
+release_index = (root / "docs/release/README.md").read_text(encoding="utf-8")
+release_gates = json.loads((root / "docs/release/gates.json").read_text(encoding="utf-8"))
+manual_validation = (root / "docs/release/MANUAL_VALIDATION.md").read_text(encoding="utf-8")
+release_checklist = (root / "RELEASE_CHECKLIST.md").read_text(encoding="utf-8")
 require(
     "- CI pipeline" not in release_state,
     "docs/release/STATE.md still marks CI pipeline as deferred, but CI exists",
@@ -90,6 +187,80 @@ require(
 require(
     "Free model availability on OpenRouter" not in release_state.split("### Open Questions", 1)[1].split("### Completed", 1)[0],
     "docs/release/STATE.md must not keep OpenRouter free-model availability under Open Questions",
+)
+for text, path in (
+    (release_index, "docs/release/README.md"),
+    (manual_validation, "docs/release/MANUAL_VALIDATION.md"),
+    (release_state, "docs/release/STATE.md"),
+    (release_checklist, "RELEASE_CHECKLIST.md"),
+):
+    require("./scripts/release-gate-report.sh" in text, f"{path} must point to the release gate report command")
+for text, path in (
+    (release_index, "docs/release/README.md"),
+    (manual_validation, "docs/release/MANUAL_VALIDATION.md"),
+    (release_checklist, "RELEASE_CHECKLIST.md"),
+):
+    require("./scripts/release-evidence.sh" in text, f"{path} must point to the release evidence helper")
+release_evidence = (root / "scripts/release-evidence.sh").read_text(encoding="utf-8")
+require("Status: open" in release_evidence, "scripts/release-evidence.sh must generate open evidence stubs")
+require("Keep this stub at Status: open" in release_evidence, "scripts/release-evidence.sh must tell testers not to close gates early")
+require(
+    "./scripts/release-manual-next-steps.sh" in release_index,
+    "docs/release/README.md must point to the manual next-steps helper",
+)
+for text, path in (
+    (release_index, "docs/release/README.md"),
+    (release_checklist, "RELEASE_CHECKLIST.md"),
+):
+    require("./scripts/verify-public-beta-local.sh" in text, f"{path} must point to the public beta local verifier")
+require("docs/release/gates.json" in release_index, "docs/release/README.md must document the release gate manifest")
+required_gate_fields = {"id", "owner", "summary", "evidence_required", "environment", "commands", "evidence"}
+gate_records = release_gates.get("gates", [])
+require(release_gates.get("schema_version") == 1, "docs/release/gates.json schema_version must be 1")
+require(gate_records, "docs/release/gates.json must contain gates")
+gate_ids = [gate.get("id") for gate in gate_records]
+require(len(gate_ids) == len(set(gate_ids)), "docs/release/gates.json gate ids must be unique")
+manual_gate_rows = {}
+for line in manual_validation.splitlines():
+    match = re.match(r"\|\s*`([^`]+)`\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(.+?)\s*\|", line)
+    if match:
+        manual_gate_rows[match.group(1)] = {
+            "status": match.group(2).strip().lower(),
+            "owner": match.group(3).strip(),
+            "evidence_required": match.group(4).strip(),
+        }
+for gate in gate_records:
+    missing = sorted(required_gate_fields - set(gate))
+    require(not missing, f"docs/release/gates.json gate {gate.get('id', '<unknown>')} missing fields {missing}")
+    require(gate["environment"] and gate["commands"] and gate["evidence"], f"docs/release/gates.json gate {gate['id']} must include environment, commands, and evidence")
+    require(gate["id"] in manual_gate_rows, f"docs/release/MANUAL_VALIDATION.md must track gate {gate['id']}")
+    manual_row = manual_gate_rows[gate["id"]]
+    require(manual_row["owner"] == gate["owner"], f"{gate['id']}: manual owner must match docs/release/gates.json")
+    require(manual_row["evidence_required"] == gate["evidence_required"], f"{gate['id']}: manual evidence text must match docs/release/gates.json")
+for gate_id in manual_gate_rows:
+    require(gate_id in gate_ids, f"docs/release/MANUAL_VALIDATION.md has gate {gate_id} missing from docs/release/gates.json")
+for gate_id in gate_ids:
+    require(f"`{gate_id}`" in manual_validation, f"docs/release/MANUAL_VALIDATION.md must track gate {gate_id}")
+release_evidence = json.loads(subprocess.check_output(
+    [str(root / "scripts/release-evidence.sh"), "--json", "list"],
+    cwd=root,
+    text=True,
+))
+require(
+    sorted(release_evidence["gates"]) == sorted(gate_ids),
+    "scripts/release-evidence.sh must cover every manual validation gate",
+)
+release_gate_report = subprocess.run(
+    [str(root / "scripts/release-gate-report.sh"), "--json"],
+    cwd=root,
+    text=True,
+    capture_output=True,
+)
+require(release_gate_report.returncode in (0, 1), "release-gate-report must exit with release status, not a script/runtime error")
+release_gate_payload = json.loads(release_gate_report.stdout)
+require(
+    release_gate_payload["manual_validation"]["closed_gate_evidence_error_count"] == 0,
+    "closed manual validation gates must have complete evidence sections",
 )
 
 gitignore = (root / ".gitignore").read_text(encoding="utf-8")

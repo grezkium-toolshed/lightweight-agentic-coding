@@ -136,6 +136,22 @@
       "default_model": "local-cluster/minimax-m2.7",
       "small_model": "local-cluster/minimax-m2.7"
     },
+    "128gb-ds4-flash": {
+      "id": "128gb-ds4-flash",
+      "label": "128 GB ds4 DeepSeek V4 Flash",
+      "description": "Experimental DwarfStar ds4 profile for DeepSeek V4 Flash on 128 GB+ Apple Silicon machines where oMLX/MTP reliability or speed is not enough.",
+      "preset": "runtime-config/presets/128gb-ds4-flash.ini",
+      "runtime_mode": "local",
+      "preferred_runtime": "ds4",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "verification_tier": "extended",
+      "primary_workload": "max-ds4",
+      "recommended_for": ["solo-coder", "team-pilot"],
+      "supported_clients": ["opencode", "codex-reference", "openchamber"],
+      "default_model": "ds4/deepseek-v4-flash",
+      "small_model": "ds4/deepseek-v4-flash"
+    },
     "gemma-16gb": {
       "id": "gemma-16gb",
       "label": "16 GB Gemma local",

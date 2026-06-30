@@ -77,7 +77,7 @@ def profile_apply(ctx, profile_id, render_target="opencode", verbose_runtime=Tru
 
 
 RAM_BUCKETS = [
-    (120, ["128gb-multi", "128gb-qwen122b", "128gb-minimax"], "gemma-64gb"),
+    (120, ["128gb-ds4-flash", "128gb-multi", "128gb-qwen122b", "128gb-minimax"], "gemma-64gb"),
     (60, ["64gb"], "gemma-64gb"),
     (30, ["32gb"], "gemma-32gb"),
     (22, ["24gb"], "gemma-24gb"),

@@ -4,6 +4,7 @@ import argparse
 import copy
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -132,6 +133,21 @@ def _install_hint(tool_id, env_var=None):
             "linux": ["oMLX is macOS/Apple Silicon only; use llama.cpp on Linux."],
             "windows": ["oMLX is macOS/Apple Silicon only; use llama.cpp on Windows."],
             "docs": "https://github.com/jundot/omlx",
+        },
+        "ds4": {
+            "summary": "Build DwarfStar ds4 for DeepSeek V4 Flash and make ds4-server available via PATH or DS4_BIN.",
+            "macos": [
+                "git clone https://github.com/antirez/ds4",
+                "cd ds4 && make",
+                "export DS4_BIN=$PWD/ds4-server",
+            ],
+            "linux": [
+                "git clone https://github.com/antirez/ds4",
+                "cd ds4 && make cuda-generic",
+                "export DS4_BIN=$PWD/ds4-server",
+            ],
+            "windows": ["ds4 is not currently documented for native Windows; use a supported macOS or Linux host."],
+            "docs": "https://github.com/antirez/ds4",
         },
         "hf": {
             "summary": "Install the Hugging Face CLI if you want authenticated model downloads or MLX repo staging.",
@@ -394,6 +410,7 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
         "opencode": command_exists("opencode"),
         "llama-server": command_exists("llama-server"),
         "omlx": command_exists("omlx"),
+        "ds4": command_exists(os.environ.get("DS4_BIN", "ds4-server")),
         "python3": command_exists("python3") or command_exists("python"),
         "openchamber": command_exists("openchamber"),
     }
@@ -402,7 +419,7 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
     required_command_names = {"opencode", "python3"}
     if active_profile and active_profile.get("runtime_mode") != "cloud":
         runtime = selected_local_runtime(active_profile)
-        required_command_names.add("omlx" if runtime == "omlx" else "llama-server")
+        required_command_names.add("omlx" if runtime == "omlx" else ("ds4" if runtime == "ds4" else "llama-server"))
     command_install_hints = {
         name: _install_hint("python" if name == "python3" else name)
         for name, exists in commands.items()
@@ -436,7 +453,7 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
         if active_profile and active_profile["runtime_mode"] != "cloud" and not runtime_status_data["health_reachable"]:
             failures.append("runtime health endpoint")
         required_runtime = runtime_status_data.get("runtime", "llama.cpp")
-        required_commands = {"opencode", "omlx" if required_runtime == "omlx" else "llama-server"}
+        required_commands = {"opencode", "omlx" if required_runtime == "omlx" else ("ds4" if required_runtime == "ds4" else "llama-server")}
         for name, exists in commands.items():
             if name in required_commands and not exists:
                 failures.append(name)
@@ -471,7 +488,7 @@ def smoke(ctx, timeout):
         return report
     started = time.time()
     health = {}
-    if runtime != "omlx":
+    if runtime not in {"omlx", "ds4"}:
         try:
             health, _ = request_json(f"{base_url}/health", timeout=timeout)
         except Exception as exc:
@@ -557,7 +574,7 @@ def emit(payload, json_mode=False, kind=None):
             print(f"Generated OpenCode config: {payload['generated']['opencode_config']}")
             return
         if payload.get("running") and payload.get("url"):
-            print(f"llama-server ready at {payload['url']}")
+            print(f"{payload.get('runtime', 'llama-server')} ready at {payload['url']}")
             print(f"Log file: {payload['log_path']}")
             if payload.get("tail_hint"):
                 print(f"Tail logs: {payload['tail_hint']}")
@@ -608,7 +625,7 @@ def build_parser():
     models_sub = models_parser.add_subparsers(dest="models_command", required=True)
     models_sync_parser = models_sub.add_parser("sync")
     models_sync_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
-    models_sync_parser.add_argument("profile_id")
+    models_sync_parser.add_argument("profile_id", nargs="?")
 
     runtime_parser = subparsers.add_parser("runtime")
     runtime_sub = runtime_parser.add_subparsers(dest="runtime_command", required=True)
@@ -751,7 +768,10 @@ def main():
 
     if args.command == "models":
         if args.models_command == "sync":
-            raise SystemExit(run_models_sync(args.profile_id))
+            profile_id = args.profile_id or ctx.active_profile_id()
+            if not profile_id:
+                raise SystemExit("No profile specified and no active profile found. Run `lac init` first, or pass `lac models sync <profile>`.")
+            raise SystemExit(run_models_sync(profile_id))
 
     if args.command == "runtime":
         if args.runtime_command == "start":

@@ -8,6 +8,16 @@ Contributions are welcome — please follow the checks below before submitting a
 
 ## Local Checks Before PR
 
+For public-beta work, prefer the one-command local gate:
+
+```bash
+./scripts/verify-public-beta-local.sh
+```
+
+This runs the local automated checks and summarizes any manual release gates that still require external evidence.
+
+For smaller changes, run the relevant focused checks below.
+
 1. Run shell syntax checks:
 
 ```bash
@@ -22,6 +32,7 @@ bash -n runtime-config/launch/*.sh
 ./scripts/verify-config-schema.sh
 ./scripts/verify-profiles-sync.sh
 ./scripts/verify-opencode-assets.sh
+./scripts/verify-provider-catalog.sh
 ./verify-documentation.sh
 ```
 
@@ -35,9 +46,9 @@ bash -n runtime-config/launch/*.sh
 ## Contribution Rules
 
 - Do not commit model binaries (`*.gguf`) or local caches.
-- Do not commit generated runtime state (`runtime-config/presets.active.ini`, `runtime-config/active-profile.txt`, `runtime-config/opencode.active.json`).
+- Do not commit generated runtime state (`state/runtime/presets.active.ini`, `state/active/profile.txt`, `state/clients/opencode/opencode.json`, logs, PID files, or reports).
 - Do not commit local tool state from `.qwen/` or `.claude/`.
 - Keep both Unix (`.sh`) and Windows (`.ps1`) parity when changing workflows.
-- Keep llama.cpp as default runtime path.
+- Keep llama.cpp as the default runtime path; specialist profiles may opt into runtimes such as oMLX or ds4 explicitly.
 - Prefer additive profile changes over hardcoded machine-specific paths.
 - Keep `.opencode/agents/` and `.opencode/skills/` intentionally small and task-focused.

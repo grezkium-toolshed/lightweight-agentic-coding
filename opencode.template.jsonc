@@ -126,6 +126,25 @@
         "chunkTimeout": 30000
       }
     },
+    "ds4": {
+      "name": "DwarfStar ds4 local",
+      "npm": "@ai-sdk/openai-compatible",
+      "models": {
+        "deepseek-v4-flash": {
+          "name": "DeepSeek V4 Flash (ds4 local)",
+          "limit": {
+            "context": 100000,
+            "output": 384000
+          }
+        }
+      },
+      "options": {
+        "baseURL": "http://127.0.0.1:8000/v1",
+        "apiKey": "dsv4-local",
+        "timeout": 600000,
+        "chunkTimeout": 30000
+      }
+    },
     "antigravity": {
       "name": "Antigravity Cloud",
       "npm": "@ai-sdk/openai-compatible",
@@ -283,15 +302,15 @@
     }
   },
   "command": {
-    // Run the doctor script to validate the local cluster setup
+    // Run lac doctor to validate the local setup
     "doctor": {
-      "template": "Run `./scripts/doctor.sh` to validate the lac setup. Report any issues and suggest fixes.",
-      "description": "Validate local cluster setup",
+      "template": "Run `./bin/lac doctor` to validate the lac setup. Report any issues and suggest fixes.",
+      "description": "Validate lac setup",
       "agent": "build"
     },
-    // Check runtime health on the active port (llama.cpp 8080 or oMLX 8000)
+    // Check runtime health on the active port (llama.cpp 8080, oMLX/ds4 8000)
     "health": {
-      "template": "Check if the local runtime is healthy. Try `curl -s http://127.0.0.1:8080/health` first (llama.cpp default). If that fails, try `curl -s http://127.0.0.1:8000/health` (oMLX default). Report which port responded and the status. If neither responds, suggest running `./bin/lac runtime status` to see which runtime is configured.",
+      "template": "Check if the local runtime is healthy. Try `curl -s http://127.0.0.1:8080/health` first (llama.cpp default). If that fails, try `curl -s http://127.0.0.1:8000/v1/models` (oMLX or ds4 default). Report which port responded and the status. If neither responds, suggest running `./bin/lac runtime status` to see which runtime is configured.",
       "description": "Check runtime health",
       "agent": "build"
     }

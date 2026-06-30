@@ -28,7 +28,7 @@ The supported v2 interface is:
 - `./bin/lac init` (interactive onboarding; `--yes --profile <id> [--cloud <ids>] [--no-cloud]` for non-interactive)
 - `./bin/lac profile list`
 - `./bin/lac profile apply <profile>`
-- `./bin/lac models sync <profile>`
+- `./bin/lac models sync [profile]`
 - `./bin/lac runtime start|status|stop`
 - `./bin/lac client render <target>`
 - `./bin/lac pack list|show <pack>`
@@ -60,11 +60,15 @@ Maintainer index directories:
 
 ## Logging and monitoring
 
-llama-server launch logs go to:
+Runtime launch logs go to:
 - `state/logs/llama-server.log`
+- `state/logs/omlx.log`
+- `state/logs/ds4.log`
 
 Monitor with:
 - Unix: `tail -f state/logs/llama-server.log`
 - Windows: `Get-Content state/logs/llama-server.log -Wait -Tail 50`
+
+The ds4/DwarfStar runtime also uses `state/runtime/ds4.pid`, `state/runtime/ds4.json`, and `state/runtime/ds4-kv/` for local process state and disk KV cache.
 
 ## Release posture

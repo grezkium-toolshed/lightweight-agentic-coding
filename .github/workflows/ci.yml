@@ -17,6 +17,12 @@ jobs:
           bash -n verify-*.sh
           for f in runtime-config/launch/*.sh; do [ -f "$f" ] && bash -n "$f"; done
 
+      - name: Integration Test
+        run: set -x && ./scripts/integration-test.sh
+
+      - name: Package Build Check
+        run: set -x && ./scripts/verify-package-build.sh
+
       - name: Config Schema Check
         run: set -x && ./scripts/verify-config-schema.sh
 
@@ -31,6 +37,12 @@ jobs:
 
       - name: Provider Catalog Validation
         run: set -x && ./scripts/verify-provider-catalog.sh
+
+      - name: Release Local Audit
+        run: set -x && ./scripts/release-local-audit.sh
+
+      - name: Release Gate Report Self-Test
+        run: set -x && ./scripts/test-release-gate-report.sh
 
       - name: V2 CLI Contract Check
         run: set -x && ./scripts/verify-v2-contract.sh

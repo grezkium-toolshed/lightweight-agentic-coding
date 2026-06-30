@@ -161,7 +161,7 @@
     "reserved": 12000
   },
   "watcher": {
-    "ignore": [".git/**", ".sisyphus/**", "models/**", "runtime-config/logs/**", "**/*.gguf"]
+    "ignore": [".git/**", ".sisyphus/**", "models/**", "state/logs/**", "**/*.gguf"]
   },
   "instructions": ["AGENTS.md", "docs/rules/*.md", "docs/release/*.md"],
   "permission": {

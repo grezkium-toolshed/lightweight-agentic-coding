@@ -78,7 +78,7 @@ Common issues:
 ## TestingStrategy
 
 Manual validation:
-1. `./scripts/doctor.sh`
+1. `./bin/lac doctor`
 2. `curl http://127.0.0.1:8080/health`
 3. `curl http://127.0.0.1:8080/v1/models`
 4. run `./bin/lac profile apply <profile>` to generate runtime config
@@ -96,7 +96,7 @@ Manual validation:
 - `state/runtime/presets.active.ini`: generated active preset
 - `state/active/profile.txt`: generated selected profile marker
 - `state/clients/opencode/opencode.json`: generated OpenCode runtime config
-- `scripts/`: setup, switch, launch, doctor, and sync scripts
+- `scripts/`: compatibility wrappers, release helpers, and verification scripts
 
 ## Open Design Integration
 

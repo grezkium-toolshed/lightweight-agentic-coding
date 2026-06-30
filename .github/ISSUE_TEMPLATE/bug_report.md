@@ -22,6 +22,6 @@ labels: bug
 ## Actual behavior
 
 ## Relevant output
-- `./scripts/doctor.sh` or `./scripts/doctor.ps1`
+- `bin/lac doctor` or `bin/lac.ps1 doctor`
 - `curl http://127.0.0.1:8080/health`
-- relevant log excerpts from `runtime-config/logs/llama-server.log`
+- relevant log excerpts from `state/logs/llama-server.log`

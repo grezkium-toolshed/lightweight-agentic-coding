@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LAC="$ROOT/bin/lac"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
@@ -9,56 +10,60 @@ STATE_ROOT="$TMP_DIR/state"
 export LAC_STATE_ROOT="$STATE_ROOT"
 export AI_LOCAL_RUNTIME="llama.cpp"
 
-python3 "$ROOT/scripts/lac.py" profile apply 24gb --json > "$TMP_DIR/profile-24gb.json"
+"$LAC" profile apply 24gb --json > "$TMP_DIR/profile-24gb.json"
 cp "$STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-24gb.json"
-python3 "$ROOT/scripts/lac.py" profile apply macos-16gb --json > "$TMP_DIR/profile-macos-16gb.json"
+"$LAC" profile apply macos-16gb --json > "$TMP_DIR/profile-macos-16gb.json"
 cp "$STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-macos-16gb.json"
+DS4_STATE_ROOT="$TMP_DIR/ds4-state"
+LAC_STATE_ROOT="$DS4_STATE_ROOT" AI_LOCAL_RUNTIME=auto "$LAC" profile apply 128gb-ds4-flash --json > "$TMP_DIR/profile-128gb-ds4-flash.json"
+cp "$DS4_STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-128gb-ds4-flash.json"
+LAC_STATE_ROOT="$DS4_STATE_ROOT" AI_LOCAL_RUNTIME=auto "$LAC" runtime status --json > "$TMP_DIR/runtime-status-ds4.json"
 OMLX_CHECK=0
 if [[ "$(uname -s)" == "Darwin" ]]; then
   OMLX_CHECK=1
   OMLX_STATE_ROOT="$TMP_DIR/omlx-state"
-  LAC_STATE_ROOT="$OMLX_STATE_ROOT" AI_LOCAL_RUNTIME=omlx python3 "$ROOT/scripts/lac.py" profile apply 24gb --json > "$TMP_DIR/profile-24gb-omlx.json"
+  LAC_STATE_ROOT="$OMLX_STATE_ROOT" AI_LOCAL_RUNTIME=omlx "$LAC" profile apply 24gb --json > "$TMP_DIR/profile-24gb-omlx.json"
   cp "$OMLX_STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-24gb-omlx.json"
   OMLX_MACOS_16GB_STATE_ROOT="$TMP_DIR/omlx-macos-16gb-state"
-  LAC_STATE_ROOT="$OMLX_MACOS_16GB_STATE_ROOT" AI_LOCAL_RUNTIME=omlx python3 "$ROOT/scripts/lac.py" profile apply macos-16gb --json > "$TMP_DIR/profile-macos-16gb-omlx.json"
+  LAC_STATE_ROOT="$OMLX_MACOS_16GB_STATE_ROOT" AI_LOCAL_RUNTIME=omlx "$LAC" profile apply macos-16gb --json > "$TMP_DIR/profile-macos-16gb-omlx.json"
   cp "$OMLX_MACOS_16GB_STATE_ROOT/clients/opencode/opencode.json" "$TMP_DIR/opencode-macos-16gb-omlx.json"
 fi
-python3 "$ROOT/scripts/lac.py" client render opencode --json > "$TMP_DIR/render-opencode.json"
-python3 "$ROOT/scripts/lac.py" client render claude-code --json > "$TMP_DIR/render-claude.json"
-python3 "$ROOT/scripts/lac.py" client render codex-reference --json > "$TMP_DIR/render-codex.json"
-python3 "$ROOT/scripts/lac.py" doctor --bootstrap-hint --json > "$TMP_DIR/doctor-24gb.json"
-python3 "$ROOT/scripts/lac.py" --json provider list > "$TMP_DIR/provider-list-top.json"
-python3 "$ROOT/scripts/lac.py" provider list --json > "$TMP_DIR/provider-list-sub.json"
-python3 "$ROOT/scripts/lac.py" provider models openrouter --json > "$TMP_DIR/provider-models-openrouter.json"
-python3 "$ROOT/scripts/lac.py" provider status --json > "$TMP_DIR/provider-status-24gb.json"
+"$LAC" client render opencode --json > "$TMP_DIR/render-opencode.json"
+"$LAC" client render claude-code --json > "$TMP_DIR/render-claude.json"
+"$LAC" client render codex-reference --json > "$TMP_DIR/render-codex.json"
+"$LAC" doctor --bootstrap-hint --json > "$TMP_DIR/doctor-24gb.json"
+"$LAC" --json provider list > "$TMP_DIR/provider-list-top.json"
+"$LAC" provider list --json > "$TMP_DIR/provider-list-sub.json"
+"$LAC" provider models openrouter --json > "$TMP_DIR/provider-models-openrouter.json"
+"$LAC" provider status --json > "$TMP_DIR/provider-status-24gb.json"
 
-python3 "$ROOT/scripts/lac.py" profile apply openrouter --json > "$TMP_DIR/profile-openrouter.json"
-python3 "$ROOT/scripts/lac.py" doctor --bootstrap-hint --json > "$TMP_DIR/doctor-openrouter.json"
-python3 "$ROOT/scripts/lac.py" provider list --json > "$TMP_DIR/provider-list-openrouter.json"
-python3 "$ROOT/scripts/lac.py" provider status --json > "$TMP_DIR/provider-status-openrouter.json"
-python3 "$ROOT/scripts/lac.py" smoke --json > "$TMP_DIR/smoke-openrouter.json"
+"$LAC" profile apply openrouter --json > "$TMP_DIR/profile-openrouter.json"
+"$LAC" doctor --bootstrap-hint --json > "$TMP_DIR/doctor-openrouter.json"
+"$LAC" provider list --json > "$TMP_DIR/provider-list-openrouter.json"
+"$LAC" provider status --json > "$TMP_DIR/provider-status-openrouter.json"
+"$LAC" smoke --json > "$TMP_DIR/smoke-openrouter.json"
 
-python3 "$ROOT/scripts/lac.py" pack list --json > "$TMP_DIR/pack-list.json"
-python3 "$ROOT/scripts/lac.py" pack show coding --json > "$TMP_DIR/pack-coding.json"
-python3 "$ROOT/scripts/lac.py" scenario list --json > "$TMP_DIR/scenario-list.json"
-python3 "$ROOT/scripts/lac.py" provider list --json > "$TMP_DIR/provider-list.json"
-python3 "$ROOT/scripts/lac.py" provider status --json > "$TMP_DIR/provider-status.json"
+"$LAC" pack list --json > "$TMP_DIR/pack-list.json"
+"$LAC" pack show coding --json > "$TMP_DIR/pack-coding.json"
+"$LAC" scenario list --json > "$TMP_DIR/scenario-list.json"
+"$LAC" provider list --json > "$TMP_DIR/provider-list.json"
+"$LAC" provider status --json > "$TMP_DIR/provider-status.json"
 
 INIT_STATE_1="$TMP_DIR/init-no-cloud-state"
-LAC_STATE_ROOT="$INIT_STATE_1" python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --no-cloud --json > "$TMP_DIR/init-no-cloud.json"
+LAC_STATE_ROOT="$INIT_STATE_1" "$LAC" init --yes --profile 24gb --no-cloud --json > "$TMP_DIR/init-no-cloud.json"
 INIT_STATE_2="$TMP_DIR/init-cloud-state"
-LAC_STATE_ROOT="$INIT_STATE_2" python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --cloud openrouter,anthropic --json > "$TMP_DIR/init-cloud.json"
+LAC_STATE_ROOT="$INIT_STATE_2" "$LAC" init --yes --profile 24gb --cloud openrouter,anthropic --json > "$TMP_DIR/init-cloud.json"
 INIT_STATE_3="$TMP_DIR/init-default-cloud-state"
-LAC_STATE_ROOT="$INIT_STATE_3" python3 "$ROOT/scripts/lac.py" init --yes --profile 24gb --json > "$TMP_DIR/init-default-cloud.json"
+LAC_STATE_ROOT="$INIT_STATE_3" "$LAC" init --yes --profile 24gb --json > "$TMP_DIR/init-default-cloud.json"
 
 unset OPENROUTER_API_KEY ANTHROPIC_API_KEY OPENCODE_GO_API_KEY OPENCODE_ZEN_API_KEY OPENAI_API_KEY ANTIGRAVITY_API_KEY ZAI_API_KEY NVIDIA_API_KEY NVIDIA_NIM_API_KEY 2>/dev/null || true
-python3 "$ROOT/scripts/lac.py" provider verify openrouter --json > "$TMP_DIR/verify-openrouter.json"
+"$LAC" provider verify openrouter --json > "$TMP_DIR/verify-openrouter.json"
 set +e
-python3 "$ROOT/scripts/lac.py" provider verify --all --json > "$TMP_DIR/verify-all.json"
+"$LAC" provider verify --all --json > "$TMP_DIR/verify-all.json"
 VERIFY_ALL_EXIT=$?
 set -e
 set +e
-python3 "$ROOT/scripts/lac.py" provider verify bogus-id > "$TMP_DIR/verify-bogus.out" 2>&1
+"$LAC" provider verify bogus-id > "$TMP_DIR/verify-bogus.out" 2>&1
 VERIFY_BOGUS_EXIT=$?
 set -e
 
@@ -76,11 +81,14 @@ omlx_check = sys.argv[6] == "1"
 
 profile_24 = json.loads((tmp_dir / "profile-24gb.json").read_text(encoding="utf-8"))
 profile_macos_16gb = json.loads((tmp_dir / "profile-macos-16gb.json").read_text(encoding="utf-8"))
+profile_ds4 = json.loads((tmp_dir / "profile-128gb-ds4-flash.json").read_text(encoding="utf-8"))
 doctor_24 = json.loads((tmp_dir / "doctor-24gb.json").read_text(encoding="utf-8"))
 doctor_openrouter = json.loads((tmp_dir / "doctor-openrouter.json").read_text(encoding="utf-8"))
 smoke_openrouter = json.loads((tmp_dir / "smoke-openrouter.json").read_text(encoding="utf-8"))
 opencode_config = json.loads((tmp_dir / "opencode-24gb.json").read_text(encoding="utf-8"))
 opencode_config_macos_16gb = json.loads((tmp_dir / "opencode-macos-16gb.json").read_text(encoding="utf-8"))
+opencode_config_ds4 = json.loads((tmp_dir / "opencode-128gb-ds4-flash.json").read_text(encoding="utf-8"))
+runtime_status_ds4 = json.loads((tmp_dir / "runtime-status-ds4.json").read_text(encoding="utf-8"))
 opencode_manifest = json.loads((root / ".opencode/render-manifest.json").read_text(encoding="utf-8"))
 provider_list_top = json.loads((tmp_dir / "provider-list-top.json").read_text(encoding="utf-8"))
 provider_list_sub = json.loads((tmp_dir / "provider-list-sub.json").read_text(encoding="utf-8"))
@@ -95,6 +103,16 @@ assert profile_macos_16gb["profile_id"] == "macos-16gb"
 assert opencode_config_macos_16gb["model"] == "local-cluster/gemma-4-12b-q4"
 assert opencode_config_macos_16gb["small_model"] == "local-cluster/gemma-4-e4b-q8"
 assert opencode_config_macos_16gb["provider"]["local-cluster"]["models"]["qwen3.5-9b-q4"]["limit"]["context"] == 262144
+assert profile_ds4["profile_id"] == "128gb-ds4-flash"
+assert opencode_config_ds4["model"] == "ds4/deepseek-v4-flash"
+assert opencode_config_ds4["small_model"] == "ds4/deepseek-v4-flash"
+assert opencode_config_ds4["provider"]["ds4"]["options"]["baseURL"] == "http://127.0.0.1:8000/v1"
+assert opencode_config_ds4["provider"]["ds4"]["models"]["deepseek-v4-flash"]["limit"]["context"] == 100000
+assert opencode_config_ds4["provider"]["ds4"]["models"]["deepseek-v4-flash"]["limit"]["output"] == 384000
+assert runtime_status_ds4["runtime"] == "ds4"
+assert runtime_status_ds4["port"] == 8000
+assert runtime_status_ds4["pid_path"].endswith("runtime/ds4.pid")
+assert runtime_status_ds4["log_path"].endswith("logs/ds4.log")
 if omlx_check:
     profile_24_omlx = json.loads((tmp_dir / "profile-24gb-omlx.json").read_text(encoding="utf-8"))
     opencode_config_omlx = json.loads((tmp_dir / "opencode-24gb-omlx.json").read_text(encoding="utf-8"))
