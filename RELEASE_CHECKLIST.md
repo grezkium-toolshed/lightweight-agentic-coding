@@ -17,6 +17,7 @@ Use `./scripts/verify-public-beta-local.sh` to run the local automated public-be
 
 ## Runtime validation
 - [ ] macOS or Linux path validated from a fresh clone:
+  - `./scripts/release-fresh-clone-unix.sh --full-runtime`
   - `python3 -m pip install .`
   - `lac init --yes --profile 24gb --no-cloud`
   - `lac models sync 24gb`

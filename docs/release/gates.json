@@ -33,7 +33,7 @@
       "id": "fresh-clone-unix",
       "owner": "release tester",
       "summary": "Validate the public onboarding path from a clean clone.",
-      "evidence_required": "Fresh macOS or Linux clone runs `python3 -m pip install .`, `lac init --yes --profile 24gb --no-cloud`, `lac models sync 24gb`, `lac runtime start`, and `lac client render opencode`. Attach date, OS, Python version, lac version, and command transcript summary.",
+      "evidence_required": "Fresh macOS or Linux clone runs `./scripts/release-fresh-clone-unix.sh --full-runtime`, which performs `python3 -m pip install .`, `lac init --yes --profile 24gb --no-cloud`, `lac models sync 24gb`, `lac runtime start`, runtime status, and `lac client render opencode`. Attach date, OS, Python version, lac version, evidence summary path, and command transcript summary.",
       "environment": [
         "macOS or Linux",
         "Python 3.10+",
@@ -45,17 +45,12 @@
         "python3 --version",
         "git clone <repo-url> /tmp/lac-public-beta",
         "cd /tmp/lac-public-beta",
-        "python3 -m pip install .",
-        "lac --version",
-        "lac init --yes --profile 24gb --no-cloud",
-        "lac models sync 24gb",
-        "lac runtime start",
-        "lac runtime status --json",
-        "lac client render opencode --json"
+        "./scripts/release-fresh-clone-unix.sh --full-runtime"
       ],
       "evidence": [
         "Date, OS, Python version, lac version",
         "Command transcript summary",
+        "Evidence summary path from scripts/release-fresh-clone-unix.sh",
         "Generated OpenCode config path from client render",
         "Runtime status JSON showing the selected local runtime"
       ],
