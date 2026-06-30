@@ -9,6 +9,7 @@ description = "lac — Lightweight Agentic Coding CLI. Profile management, runti
 requires-python = ">=3.10"
 readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 authors = [
   { name = "Lightweight Agentic Coding contributors" }
 ]

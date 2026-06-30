@@ -101,6 +101,7 @@ with zipfile.ZipFile(wheel) as archive:
 required = {
     "lac/cli.py",
     "lac/runtime.py",
+    "lac/data/THIRD_PARTY_NOTICES.md",
     "lac/data/catalog/assets.json",
     "lac/data/catalog/workflow-packs.json",
     "lac/data/opencode/opencode.template.jsonc",
@@ -121,10 +122,30 @@ missing = sorted(required - names)
 if missing:
     raise SystemExit("Wheel is missing required package files:\n  - " + "\n  - ".join(missing))
 
+required_license_files = {"LICENSE", "THIRD_PARTY_NOTICES.md"}
+missing_license_files = [
+    file_name
+    for file_name in sorted(required_license_files)
+    if not any(
+        name.endswith(f".dist-info/licenses/{file_name}") or name.endswith(f".dist-info/{file_name}")
+        or name == f"lac/data/{file_name}"
+        for name in names
+    )
+]
+if missing_license_files:
+    raise SystemExit(
+        "Wheel is missing required license/notice files:\n  - "
+        + "\n  - ".join(missing_license_files)
+    )
+
 if "Name: lightweight-agentic-coding" not in metadata:
     raise SystemExit("Wheel metadata has the wrong package name")
 if "Version: 0.1.0" not in metadata:
     raise SystemExit("Wheel metadata has the wrong package version")
+for file_name in sorted(required_license_files):
+    if f"License-File: {file_name}" not in metadata:
+        raise SystemExit(f"Wheel metadata missing License-File entry for {file_name}")
+print("[ok] packaged license/notice files present")
 
 skill_count = sum(1 for name in names if name.startswith("lac/data/opencode/skills/") and name.endswith("/SKILL.md"))
 agent_count = sum(1 for name in names if name.startswith("lac/data/opencode/agents/") and name.endswith(".md"))

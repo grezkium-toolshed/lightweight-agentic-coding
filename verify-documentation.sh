@@ -104,6 +104,7 @@ require(openrouter_entry.get("list_command") == "./bin/lac provider models openr
 
 changelog = (root / "CHANGELOG.md").read_text(encoding="utf-8")
 third_party_notices = (root / "THIRD_PARTY_NOTICES.md").read_text(encoding="utf-8")
+packaged_third_party_notices = (root / "src/lac/data/THIRD_PARTY_NOTICES.md").read_text(encoding="utf-8")
 contributing = (root / "CONTRIBUTING.md").read_text(encoding="utf-8")
 support = (root / "SUPPORT.md").read_text(encoding="utf-8")
 pyproject = (root / "pyproject.toml").read_text(encoding="utf-8")
@@ -115,6 +116,7 @@ require("128gb-ds4-flash" in changelog and "DwarfStar" in changelog, "CHANGELOG.
 require("THIRD_PARTY_NOTICES.md" in changelog, "CHANGELOG.md must mention third-party notices")
 require("antirez/ds4" in third_party_notices and "antirez/deepseek-v4-gguf" in third_party_notices, "THIRD_PARTY_NOTICES.md must include ds4 runtime and model sources")
 require("open-design" in third_party_notices and "merill/msgraph" in third_party_notices and "gsd-build/get-shit-done" in third_party_notices, "THIRD_PARTY_NOTICES.md must include cataloged external source refs")
+require(packaged_third_party_notices == third_party_notices, "src/lac/data/THIRD_PARTY_NOTICES.md must match root THIRD_PARTY_NOTICES.md")
 require("verify-public-beta-local.sh" in changelog, "CHANGELOG.md must mention the public beta local gate wrapper")
 require("First public release" not in changelog, "CHANGELOG.md must not claim a first public release while public beta gates remain open")
 require("public beta remains gated" in changelog, "CHANGELOG.md must keep historical version notes honest about gated public beta")
