@@ -24,13 +24,13 @@ Use `./scripts/verify-public-beta-local.sh` to run the local automated public-be
   - `lac runtime start`
   - `lac client render opencode`
 - [ ] Windows PowerShell path validated from a fresh clone with `bin/lac.ps1 init`, `bin/lac.ps1 doctor`, and `bin/lac.ps1 smoke`.
-- [ ] OpenCode desktop launch validated on the platforms where it is documented.
+- [ ] OpenCode desktop launch validated on the platforms where it is documented with `./scripts/release-opencode-discovery.sh --open`, backed by generated evidence under `state/release-evidence/` plus screenshot, transcript, or manual session notes.
 - [ ] llama.cpp smoke validates `./scripts/release-llama-smoke.sh`, including `curl http://127.0.0.1:8080/health`, `curl http://127.0.0.1:8080/v1/models`, and `lac smoke --json`.
 - [ ] ds4/DwarfStar 128GB-class path validated manually: build `antirez/ds4`, run `lac models sync 128gb-ds4-flash`, `lac runtime start`, and verify `curl http://127.0.0.1:8000/v1/models`.
 
 ## OpenCode integration
-- [ ] `.opencode/agents/*.md` are discoverable in a real OpenCode session.
-- [ ] `.opencode/skills/*/SKILL.md` are discoverable in a real OpenCode session.
+- [ ] `.opencode/agents/*.md` are discoverable in a real OpenCode session, with OpenCode version, rendered config path, and repo/package agent counts recorded.
+- [ ] `.opencode/skills/*/SKILL.md` are discoverable in a real OpenCode session, with repo/package skill counts recorded.
 - [x] Config regeneration preserves compaction, watcher ignores, instructions, permission policy, and provider blocks.
 
 ## Providers and docs

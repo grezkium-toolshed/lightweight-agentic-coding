@@ -46,6 +46,7 @@ required=(
   scripts/release-evidence.sh
   scripts/release-fresh-clone-unix.sh
   scripts/release-llama-smoke.sh
+  scripts/release-opencode-discovery.sh
   scripts/release-provider-freshness.sh
   scripts/release-gate-report.sh
   scripts/release-manual-next-steps.sh
@@ -214,6 +215,7 @@ for text, path in (
 release_evidence = (root / "scripts/release-evidence.sh").read_text(encoding="utf-8")
 fresh_clone_unix = (root / "scripts/release-fresh-clone-unix.sh").read_text(encoding="utf-8")
 llama_smoke = (root / "scripts/release-llama-smoke.sh").read_text(encoding="utf-8")
+opencode_discovery = (root / "scripts/release-opencode-discovery.sh").read_text(encoding="utf-8")
 provider_freshness = (root / "scripts/release-provider-freshness.sh").read_text(encoding="utf-8")
 require("Status: open" in release_evidence, "scripts/release-evidence.sh must generate open evidence stubs")
 require("Keep this stub at Status: open" in release_evidence, "scripts/release-evidence.sh must tell testers not to close gates early")
@@ -230,6 +232,14 @@ require("state/release-evidence" in llama_smoke, "scripts/release-llama-smoke.sh
 llama_smoke_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "llama-smoke")
 require("./scripts/release-llama-smoke.sh" in json.dumps(llama_smoke_gate), "llama-smoke gate must point to the llama smoke helper")
 require("./scripts/release-llama-smoke.sh" in release_checklist, "release checklist must point to the llama smoke helper")
+require("--open" in opencode_discovery, "scripts/release-opencode-discovery.sh must expose real-session launch mode")
+require("--skip-open" in opencode_discovery, "scripts/release-opencode-discovery.sh must expose automated rehearsal mode")
+require("--allow-missing-opencode" in opencode_discovery, "scripts/release-opencode-discovery.sh must make missing OpenCode opt-in")
+require("state/release-evidence" in opencode_discovery, "scripts/release-opencode-discovery.sh must write evidence under ignored state/release-evidence")
+opencode_discovery_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "opencode-discovery")
+require("./scripts/release-opencode-discovery.sh --open" in json.dumps(opencode_discovery_gate), "opencode-discovery gate must point to the OpenCode discovery helper")
+require("./scripts/release-opencode-discovery.sh --skip-open --allow-missing-opencode" in json.dumps(opencode_discovery_gate), "opencode-discovery gate must document rehearsal mode")
+require("./scripts/release-opencode-discovery.sh --open" in release_checklist, "release checklist must point to the OpenCode discovery helper")
 require("--refresh-catalog" in provider_freshness, "scripts/release-provider-freshness.sh must expose catalog refresh mode")
 require("state/release-evidence" in provider_freshness, "scripts/release-provider-freshness.sh must write evidence under ignored state/release-evidence")
 provider_freshness_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "provider-live-freshness")

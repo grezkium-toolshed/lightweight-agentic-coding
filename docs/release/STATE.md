@@ -19,6 +19,7 @@ Release gate report: `./scripts/release-gate-report.sh` intentionally fails unti
 - [ ] Live validation on all documented hardware tiers (16gb, 24gb, 32gb, 64gb, gemma-*)
 - [ ] Manual 128GB-class Apple Silicon validation for `128gb-ds4-flash` with `antirez/ds4`
 - [ ] Windows PowerShell fresh-clone validation for `bin/lac.ps1`
+- [ ] Real OpenCode discovery validation with `./scripts/release-opencode-discovery.sh --open` and screenshot, transcript, or manual session notes
 - [ ] Live provider freshness probes with release credentials or documented skips
 - [ ] Linux CI green on release branch
 
@@ -30,6 +31,7 @@ Release gate report: `./scripts/release-gate-report.sh` intentionally fails unti
 - [x] Fresh-clone Unix helper added: `scripts/release-fresh-clone-unix.sh` records no-download smoke evidence by default and `--full-runtime` evidence for the manual release gate
 - [x] Provider freshness helper added: `scripts/release-provider-freshness.sh` captures provider verify JSON, OpenRouter refresh/check output, and skipped-provider reasons for the manual release gate
 - [x] llama.cpp smoke helper added: `scripts/release-llama-smoke.sh` captures runtime status, curl health/models probes, and `lac smoke --json` for the manual release gate
+- [x] OpenCode discovery helper documentation wired: `scripts/release-opencode-discovery.sh --skip-open --allow-missing-opencode` is documented for automated rehearsal, while `--open` plus OpenCode version, rendered config path, repo/package agent and skill counts, generated `state/release-evidence/` summary, and screenshot/transcript/manual notes remain required to close the gate
 - [x] Manual gates now cross-reference matching `RELEASE_CHECKLIST.md` items, and release-gate reporting flags closed gates whose checklist items remain open
 - [x] Third-party notices added for bundled external assets, optional runtimes, and ds4 model-source attribution; local release audit now checks catalog source-ref coverage
 - [x] Package metadata declares `THIRD_PARTY_NOTICES.md`, package data ships it for installed users, and package-build verification checks wheel and sdist artifacts

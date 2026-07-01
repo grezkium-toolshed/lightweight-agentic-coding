@@ -17,6 +17,7 @@ for tagged releases (public beta and beyond).
 - Fresh-clone Unix onboarding smoke helper at `scripts/release-fresh-clone-unix.sh`, with no-download rehearsal mode and `--full-runtime` release evidence mode.
 - Provider freshness evidence helper at `scripts/release-provider-freshness.sh`, capturing provider verify JSON, OpenRouter refresh/check output, and skipped-provider reasons without secrets.
 - llama.cpp smoke evidence helper at `scripts/release-llama-smoke.sh`, capturing runtime status, curl health/models probes, and `lac smoke --json`.
+- OpenCode discovery evidence helper wiring for `scripts/release-opencode-discovery.sh`, documenting automated rehearsal, real-session proof, generated evidence under `state/release-evidence/`, OpenCode version, rendered config path, repo/package agent and skill counts, and screenshot/transcript/manual session notes.
 - Gate-to-checklist cross-references in release helpers and release-gate reports, including diagnostics for closed gates whose checklist item remains open.
 - ds4/DwarfStar local runtime support for the `128gb-ds4-flash` profile, targeting 128GB+ Apple Silicon validation for DeepSeek V4 Flash.
 - Packaged `.opencode` asset mirror under `src/lac/data/opencode`, covering tracked agents, skills, craft rulebooks, design systems, and DCP config.

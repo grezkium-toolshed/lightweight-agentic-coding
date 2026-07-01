@@ -164,36 +164,36 @@
       "id": "opencode-discovery",
       "owner": "release tester",
       "summary": "Confirm real OpenCode discovery of generated agents and skills.",
-      "evidence_required": "Real OpenCode session discovers `.opencode/agents/*.md` and `.opencode/skills/*/SKILL.md` from the generated config. Attach OpenCode version and screenshot or transcript summary.",
+      "evidence_required": "Automated rehearsal runs `./scripts/release-opencode-discovery.sh --skip-open --allow-missing-opencode` and writes repeatable evidence under `state/release-evidence/`. The gate remains open until a real OpenCode session runs `./scripts/release-opencode-discovery.sh --open` and proves discovery of generated `.opencode/agents/*.md` and `.opencode/skills/*/SKILL.md`. Attach OpenCode version, rendered config path, repo/package agent and skill counts, evidence summary path, and screenshot, transcript, or manual session notes from the real OpenCode session.",
       "environment": [
         "OpenCode installed",
         "lac profile already rendered"
       ],
       "commands": [
-        "opencode --version",
-        "lac client render opencode --json",
-        "find .opencode/agents -name '*.md' | sort",
-        "find .opencode/skills -name SKILL.md | sort",
-        "lac client open opencode"
+        "./scripts/release-opencode-discovery.sh --skip-open --allow-missing-opencode",
+        "./scripts/release-opencode-discovery.sh --open"
       ],
       "evidence": [
+        "Evidence summary path under state/release-evidence from scripts/release-opencode-discovery.sh",
         "OpenCode version",
         "Rendered config path",
-        "Agent and skill counts observed in the real OpenCode session",
-        "Screenshot reference or transcript summary"
+        "Repo and packaged agent counts",
+        "Repo and packaged skill counts",
+        "Agent and skill counts or names observed in the real OpenCode session",
+        "Screenshot reference, transcript summary, or manual session notes from OpenCode"
       ],
       "checklist_refs": [
         {
           "section": "Runtime validation",
-          "item": "OpenCode desktop launch validated on the platforms where it is documented."
+          "item": "OpenCode desktop launch validated on the platforms where it is documented with `./scripts/release-opencode-discovery.sh --open`, backed by generated evidence under `state/release-evidence/` plus screenshot, transcript, or manual session notes."
         },
         {
           "section": "OpenCode integration",
-          "item": "`.opencode/agents/*.md` are discoverable in a real OpenCode session."
+          "item": "`.opencode/agents/*.md` are discoverable in a real OpenCode session, with OpenCode version, rendered config path, and repo/package agent counts recorded."
         },
         {
           "section": "OpenCode integration",
-          "item": "`.opencode/skills/*/SKILL.md` are discoverable in a real OpenCode session."
+          "item": "`.opencode/skills/*/SKILL.md` are discoverable in a real OpenCode session, with repo/package skill counts recorded."
         }
       ]
     },
