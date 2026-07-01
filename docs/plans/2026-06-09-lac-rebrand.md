@@ -1,5 +1,11 @@
 # lac Rebrand Implementation Plan
 
+> Historical note: this plan is kept for traceability and may mention
+> superseded script names, release goals, or implementation sequencing.
+> Current public-beta blockers are canonical in `docs/release/gates.json`,
+> `docs/release/MANUAL_VALIDATION.md`, and `RELEASE_CHECKLIST.md`.
+> Use `./scripts/release-gate-report.sh` for authoritative release status.
+
 > **For the implementer:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Rebrand the repo from "local-ai-cluster / ai-coding-cluster" to "lac — Lightweight Agentic Coding", consolidate root docs from 14 to 7 files, rewrite README for beginners, and add prominent upstream attribution.

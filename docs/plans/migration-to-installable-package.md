@@ -1,5 +1,11 @@
 # Migration Plan: From Scripts to Installable Package
 
+> Historical note: this plan is kept for traceability and may mention
+> superseded script names, release goals, or implementation sequencing.
+> Current public-beta blockers are canonical in `docs/release/gates.json`,
+> `docs/release/MANUAL_VALIDATION.md`, and `RELEASE_CHECKLIST.md`.
+> Use `./scripts/release-gate-report.sh` for authoritative release status.
+
 ## Context
 
 The repo currently relies on `scripts/lac.py` (2631 lines) plus 14 `.sh`/`.ps1` script pairs for setup, verification, model downloads, and runtime management. Nothing is installable — users must `git clone` and run from the repo root.

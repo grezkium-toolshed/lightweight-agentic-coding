@@ -1,5 +1,11 @@
 # Phase 2 Completion Plan: Extract init.py and render.py
 
+> Historical note: this plan is kept for traceability and may mention
+> superseded script names, release goals, or implementation sequencing.
+> Current public-beta blockers are canonical in `docs/release/gates.json`,
+> `docs/release/MANUAL_VALIDATION.md`, and `RELEASE_CHECKLIST.md`.
+> Use `./scripts/release-gate-report.sh` for authoritative release status.
+
 ## Current State
 
 `cli.py`: 1197 lines. Already extracted: context, profiles, config, runtime, providers, packs, scenarios, clients, models, catalog.

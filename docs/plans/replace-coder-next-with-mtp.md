@@ -1,5 +1,11 @@
 # Plan: Replace Qwen Coder Next with Qwen 3.6 MTP Models
 
+> Historical note: this plan is kept for traceability and may mention
+> superseded script names, release goals, or implementation sequencing.
+> Current public-beta blockers are canonical in `docs/release/gates.json`,
+> `docs/release/MANUAL_VALIDATION.md`, and `RELEASE_CHECKLIST.md`.
+> Use `./scripts/release-gate-report.sh` for authoritative release status.
+
 **Date:** 2026-05-19
 **Rationale:** Qwen Coder Next tends to fail with tool calls. Qwen 3.6 27B (best architect) and 35B-A3B (fast coder) with MTP speculative decoding provide better reliability and sufficient speed. MTP was merged into llama.cpp and delivers 1.4-2.2x faster inference with no accuracy loss.
 

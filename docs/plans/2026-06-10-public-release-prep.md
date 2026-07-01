@@ -1,5 +1,11 @@
 # Public Release Preparation Plan
 
+> Historical note: this plan is kept for traceability and may mention
+> superseded script names, release goals, or implementation sequencing.
+> Current public-beta blockers are canonical in `docs/release/gates.json`,
+> `docs/release/MANUAL_VALIDATION.md`, and `RELEASE_CHECKLIST.md`.
+> Use `./scripts/release-gate-report.sh` for authoritative release status.
+
 > **For the implementer:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Prepare the repo for public release — fix failing Linux CI, rename env vars, remove all private-repo language, fix incomplete indexes, sync package data, and polish for first public impression.
@@ -554,4 +560,3 @@ cd /tmp && rm -rf lac-fresh-test
 **Step 7: Mark RELEASE_CHECKLIST C8 as done**
 
 Update `RELEASE_CHECKLIST.md` to mark fresh-clone validation complete.
-

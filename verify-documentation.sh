@@ -120,6 +120,7 @@ pyproject = (root / "pyproject.toml").read_text(encoding="utf-8")
 model_recommendations = (root / "docs/model-recommendations.md").read_text(encoding="utf-8")
 audit_findings = (root / "docs/audit-findings.md").read_text(encoding="utf-8")
 review_backlog = (root / "docs/review-backlog.md").read_text(encoding="utf-8")
+plan_docs = sorted((root / "docs/plans").glob("*.md"))
 confluence_migration = (root / "docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md").read_text(encoding="utf-8")
 require("128gb-ds4-flash" in changelog and "DwarfStar" in changelog, "CHANGELOG.md must mention ds4/DwarfStar public beta work")
 require("THIRD_PARTY_NOTICES.md" in changelog, "CHANGELOG.md must mention third-party notices")
@@ -142,6 +143,18 @@ for text, path in (
 ):
     require("Historical note" in text, f"{path} must be labelled as historical before public beta")
     require("docs/release/gates.json" in text and "./scripts/release-gate-report.sh" in text, f"{path} must point readers at current release gates")
+require(plan_docs, "docs/plans must contain tracked historical plan docs")
+for plan_path in plan_docs:
+    plan_text = plan_path.read_text(encoding="utf-8")
+    plan_rel = plan_path.relative_to(root).as_posix()
+    require("Historical note" in plan_text, f"{plan_rel} must be labelled as historical before public beta")
+    require("docs/release/gates.json" in plan_text and "./scripts/release-gate-report.sh" in plan_text, f"{plan_rel} must point readers at current release gates")
+for helper in (
+    "./scripts/release-security-pvr.sh --confirm-enabled --screenshot <reference>",
+    "scripts/release-windows-powershell.ps1 -FullRuntime",
+    "./scripts/release-fresh-clone-unix.sh --full-runtime",
+):
+    require(helper in review_backlog, f"docs/review-backlog.md must point open beta backlog items at {helper}")
 for stale_path in (
     "runtime-config/presets.active.ini",
     "runtime-config/active-profile.txt",
