@@ -23,6 +23,7 @@ run_check "OpenCode asset parity" ./scripts/verify-opencode-assets.sh
 run_check "Provider catalog" ./scripts/verify-provider-catalog.sh
 run_check "V2 CLI contract" ./scripts/verify-v2-contract.sh
 run_check "Integration test" ./scripts/integration-test.sh
+run_check "Security PVR evidence rehearsal" ./scripts/release-security-pvr.sh --allow-unavailable
 run_check "ds4 128GB evidence rehearsal" ./scripts/release-ds4-128gb.sh --dry-run --allow-missing-ds4
 run_check "OpenCode discovery evidence rehearsal" ./scripts/release-opencode-discovery.sh --skip-open --allow-missing-opencode
 run_check "Fresh-clone Unix no-download smoke" ./scripts/release-fresh-clone-unix.sh --allow-unsupported-python

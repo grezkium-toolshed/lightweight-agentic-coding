@@ -82,16 +82,22 @@ assert payload["release_state"]["open_question_count"] == 0, payload
 PY
 
 python3 - "$TMP_DIR" <<'PY'
+import json
 import sys
 from pathlib import Path
 
-checklist_path = Path(sys.argv[1]) / "RELEASE_CHECKLIST.md"
+root = Path(sys.argv[1])
+checklist_path = root / "RELEASE_CHECKLIST.md"
+gates_path = root / "docs/release/gates.json"
+gates = json.loads(gates_path.read_text(encoding="utf-8"))["gates"]
+security_pvr = next(gate for gate in gates if gate["id"] == "security-pvr")
+pvr_item = security_pvr["checklist_refs"][0]["item"]
 checklist = checklist_path.read_text(encoding="utf-8")
-checklist = checklist.replace(
-    "- [x] GitHub Private Vulnerability Reporting is enabled. `SECURITY.md` intentionally keeps this as a release gate until repo settings are updated.",
-    "- [ ] GitHub Private Vulnerability Reporting is enabled. `SECURITY.md` intentionally keeps this as a release gate until repo settings are updated.",
-    1,
-)
+closed_item = f"- [x] {pvr_item}"
+open_item = f"- [ ] {pvr_item}"
+if closed_item not in checklist:
+    raise SystemExit(f"expected closed security-pvr checklist item not found: {closed_item}")
+checklist = checklist.replace(closed_item, open_item, 1)
 checklist_path.write_text(checklist, encoding="utf-8")
 PY
 
@@ -111,16 +117,22 @@ assert any("security-pvr" in mismatch for mismatch in mismatches), payload
 PY
 
 python3 - "$TMP_DIR" <<'PY'
+import json
 import sys
 from pathlib import Path
 
-checklist_path = Path(sys.argv[1]) / "RELEASE_CHECKLIST.md"
+root = Path(sys.argv[1])
+checklist_path = root / "RELEASE_CHECKLIST.md"
+gates_path = root / "docs/release/gates.json"
+gates = json.loads(gates_path.read_text(encoding="utf-8"))["gates"]
+security_pvr = next(gate for gate in gates if gate["id"] == "security-pvr")
+pvr_item = security_pvr["checklist_refs"][0]["item"]
 checklist = checklist_path.read_text(encoding="utf-8")
-checklist = checklist.replace(
-    "- [ ] GitHub Private Vulnerability Reporting is enabled. `SECURITY.md` intentionally keeps this as a release gate until repo settings are updated.",
-    "- [x] GitHub Private Vulnerability Reporting is enabled. `SECURITY.md` intentionally keeps this as a release gate until repo settings are updated.",
-    1,
-)
+open_item = f"- [ ] {pvr_item}"
+closed_item = f"- [x] {pvr_item}"
+if open_item not in checklist:
+    raise SystemExit(f"expected open security-pvr checklist item not found: {open_item}")
+checklist = checklist.replace(open_item, closed_item, 1)
 checklist_path.write_text(checklist, encoding="utf-8")
 PY
 

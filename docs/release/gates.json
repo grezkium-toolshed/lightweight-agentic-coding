@@ -7,25 +7,34 @@
       "id": "security-pvr",
       "owner": "repo owner",
       "summary": "Enable GitHub Private Vulnerability Reporting before public beta.",
-      "evidence_required": "GitHub Private Vulnerability Reporting enabled in repository settings; `SECURITY.md` updated with the active reporting path or clear GitHub reporting instruction.",
+      "evidence_required": "Automated/local rehearsal runs `./scripts/release-security-pvr.sh --allow-unavailable` and writes generated evidence under `state/release-evidence/`, but this gate remains open until a repo owner/admin enables GitHub Private Vulnerability Reporting in GitHub repository settings. Manual release evidence runs `./scripts/release-security-pvr.sh --confirm-enabled --screenshot <reference>` after enabling. Attach generated evidence summary path, GitHub docs/settings path (`Settings > Code security and analysis > Private vulnerability reporting` or repository `Settings > Advanced Security`), `gh repo view` metadata, security policy URL, `SECURITY.md` wording check, repo owner/admin confirmation, date enabled, and screenshot/reference from repository Settings > Advanced Security showing Private vulnerability reporting enabled.",
       "environment": [
-        "GitHub repository settings"
+        "GitHub repository settings",
+        "GitHub CLI authenticated for repository metadata",
+        "Repo owner/admin access"
       ],
       "commands": [
+        "./scripts/release-security-pvr.sh --allow-unavailable",
         "Open GitHub repository settings",
-        "Go to Security > Code security and analysis",
+        "Go to Settings > Code security and analysis > Private vulnerability reporting, or repository Settings > Advanced Security",
         "Enable Private vulnerability reporting",
+        "./scripts/release-security-pvr.sh --confirm-enabled --screenshot <reference>",
         "Confirm SECURITY.md points reporters at the active GitHub reporting path"
       ],
       "evidence": [
+        "Generated evidence summary path under state/release-evidence from scripts/release-security-pvr.sh",
+        "GitHub docs/settings path used to enable Private vulnerability reporting",
+        "gh repo view metadata",
+        "Security policy URL",
+        "SECURITY.md wording check",
+        "Repo owner/admin confirmation",
         "Date enabled",
-        "Repository settings confirmation or screenshot reference",
-        "SECURITY.md wording reviewed after enabling"
+        "Screenshot/reference from repository Settings > Advanced Security showing Private vulnerability reporting enabled"
       ],
       "checklist_refs": [
         {
           "section": "Trust and repo hygiene",
-          "item": "GitHub Private Vulnerability Reporting is enabled. `SECURITY.md` intentionally keeps this as a release gate until repo settings are updated."
+          "item": "GitHub Private Vulnerability Reporting is enabled with `./scripts/release-security-pvr.sh --confirm-enabled --screenshot <reference>` evidence under `state/release-evidence/`, repo owner/admin confirmation, date enabled, `gh repo view` metadata, security policy URL, `SECURITY.md` wording check, and screenshot/reference from repository Settings > Advanced Security showing Private vulnerability reporting enabled."
         }
       ]
     },

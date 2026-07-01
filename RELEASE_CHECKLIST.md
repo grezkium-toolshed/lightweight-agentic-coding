@@ -51,7 +51,7 @@ Use `./scripts/verify-public-beta-local.sh` to run the local automated public-be
 
 ## Trust and repo hygiene
 - [x] Third-party agent and skill guidance matches the current trust model.
-- [ ] GitHub Private Vulnerability Reporting is enabled. `SECURITY.md` intentionally keeps this as a release gate until repo settings are updated.
+- [ ] GitHub Private Vulnerability Reporting is enabled with `./scripts/release-security-pvr.sh --confirm-enabled --screenshot <reference>` evidence under `state/release-evidence/`, repo owner/admin confirmation, date enabled, `gh repo view` metadata, security policy URL, `SECURITY.md` wording check, and screenshot/reference from repository Settings > Advanced Security showing Private vulnerability reporting enabled.
 - [x] No model binaries or machine-specific files are tracked.
 - [ ] Linux CI passes on the release branch.
 - [x] No stale docs or deleted-path references remain in the tree.

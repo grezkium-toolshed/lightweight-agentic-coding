@@ -49,6 +49,7 @@ required=(
   scripts/release-llama-smoke.sh
   scripts/release-opencode-discovery.sh
   scripts/release-provider-freshness.sh
+  scripts/release-security-pvr.sh
   scripts/release-windows-powershell.ps1
   scripts/release-gate-report.sh
   scripts/release-manual-next-steps.sh
@@ -221,6 +222,7 @@ fresh_clone_unix = (root / "scripts/release-fresh-clone-unix.sh").read_text(enco
 llama_smoke = (root / "scripts/release-llama-smoke.sh").read_text(encoding="utf-8")
 opencode_discovery = (root / "scripts/release-opencode-discovery.sh").read_text(encoding="utf-8")
 provider_freshness = (root / "scripts/release-provider-freshness.sh").read_text(encoding="utf-8")
+security_pvr = (root / "scripts/release-security-pvr.sh").read_text(encoding="utf-8")
 windows_powershell = (root / "scripts/release-windows-powershell.ps1").read_text(encoding="utf-8")
 require("Status: open" in release_evidence, "scripts/release-evidence.sh must generate open evidence stubs")
 require("Keep this stub at Status: open" in release_evidence, "scripts/release-evidence.sh must tell testers not to close gates early")
@@ -258,6 +260,15 @@ require("state/release-evidence" in provider_freshness, "scripts/release-provide
 provider_freshness_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "provider-live-freshness")
 require("./scripts/release-provider-freshness.sh --refresh-catalog" in json.dumps(provider_freshness_gate), "provider-live-freshness gate must point to the provider freshness helper")
 require("./scripts/release-provider-freshness.sh --refresh-catalog" in release_checklist, "release checklist must point to the provider freshness helper")
+require("--confirm-enabled" in security_pvr, "scripts/release-security-pvr.sh must expose owner/admin confirmation mode")
+require("--screenshot" in security_pvr, "scripts/release-security-pvr.sh must require a settings screenshot/reference")
+require("--allow-unavailable" in security_pvr, "scripts/release-security-pvr.sh must expose local rehearsal mode")
+require("gh repo view" in security_pvr, "scripts/release-security-pvr.sh must capture GitHub repo metadata")
+require("state/release-evidence" in security_pvr, "scripts/release-security-pvr.sh must write evidence under ignored state/release-evidence")
+security_pvr_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "security-pvr")
+require("./scripts/release-security-pvr.sh --allow-unavailable" in json.dumps(security_pvr_gate), "security-pvr gate must document rehearsal mode")
+require("./scripts/release-security-pvr.sh --confirm-enabled --screenshot <reference>" in json.dumps(security_pvr_gate), "security-pvr gate must point to the PVR confirmation helper")
+require("./scripts/release-security-pvr.sh --confirm-enabled --screenshot <reference>" in release_checklist, "release checklist must point to the PVR confirmation helper")
 require("-FullRuntime" in windows_powershell, "scripts/release-windows-powershell.ps1 must expose full runtime mode")
 require("-NoRuntime" in windows_powershell, "scripts/release-windows-powershell.ps1 must expose no-runtime rehearsal mode")
 require("Start-Transcript" in windows_powershell, "scripts/release-windows-powershell.ps1 must capture a transcript")
