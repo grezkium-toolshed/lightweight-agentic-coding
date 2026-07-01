@@ -123,7 +123,7 @@
       "id": "ds4-128gb",
       "owner": "128GB Apple Silicon tester",
       "summary": "Validate DeepSeek V4 Flash through antirez/ds4 on the target hardware tier.",
-      "evidence_required": "On a 128GB+ M3/M4/M5-class Apple Silicon machine, build `antirez/ds4`, run `lac models sync 128gb-ds4-flash`, `lac runtime start`, `curl http://127.0.0.1:8000/v1/models`, then launch OpenCode with the ds4 model. Attach date, hardware, macOS version, ds4 commit, model filename, and transcript summary.",
+      "evidence_required": "Automated/local rehearsal runs `./scripts/release-ds4-128gb.sh --dry-run --allow-missing-ds4` and writes generated evidence under `state/release-evidence/`, but this gate remains open until real 128GB+ hardware proof exists. On a 128GB+ M3/M4/M5-class Apple Silicon machine with `antirez/ds4` built and the model synced, run `./scripts/release-ds4-128gb.sh --full-runtime`. Attach generated evidence summary path, hardware/RAM/macOS details, ds4 binary path plus version or commit, `lac profile apply 128gb-ds4-flash --json` output, runtime status showing ds4 paths and port 8000, `lac models sync 128gb-ds4-flash` evidence from the manual full-runtime run, `curl http://127.0.0.1:8000/v1/models` output, and OpenCode ds4 model selection/session notes.",
       "environment": [
         "128GB+ M3/M4/M5-class Apple Silicon",
         "macOS",
@@ -139,24 +139,23 @@
         "make",
         "export DS4_BIN=$PWD/ds4-server",
         "cd <lac-clone>",
-        "lac models sync 128gb-ds4-flash",
-        "lac profile apply 128gb-ds4-flash --json",
-        "lac runtime start",
-        "lac runtime status --json",
-        "curl -s http://127.0.0.1:8000/v1/models",
-        "lac client open opencode"
+        "./scripts/release-ds4-128gb.sh --dry-run --allow-missing-ds4",
+        "./scripts/release-ds4-128gb.sh --full-runtime"
       ],
       "evidence": [
+        "Evidence summary path under state/release-evidence from scripts/release-ds4-128gb.sh",
         "Date, hardware, RAM, macOS version",
-        "ds4 commit SHA",
-        "Model filename downloaded",
+        "ds4 binary path and ds4 version or commit SHA",
+        "`lac profile apply 128gb-ds4-flash --json` output",
+        "`lac models sync 128gb-ds4-flash` evidence from the manual full-runtime run",
         "Runtime status JSON showing ds4 state paths and port 8000",
-        "OpenCode session summary with ds4 model selected"
+        "`curl http://127.0.0.1:8000/v1/models` output",
+        "OpenCode session notes showing ds4 model selected"
       ],
       "checklist_refs": [
         {
           "section": "Runtime validation",
-          "item": "ds4/DwarfStar 128GB-class path validated manually: build `antirez/ds4`, run `lac models sync 128gb-ds4-flash`, `lac runtime start`, and verify `curl http://127.0.0.1:8000/v1/models`."
+          "item": "ds4/DwarfStar 128GB-class path validated manually with `./scripts/release-ds4-128gb.sh --full-runtime`, backed by generated evidence under `state/release-evidence/`, hardware/RAM/macOS details, ds4 binary path/version or commit, `lac profile apply 128gb-ds4-flash --json`, runtime status showing ds4 paths and port 8000, `lac models sync 128gb-ds4-flash`, `curl http://127.0.0.1:8000/v1/models`, and OpenCode ds4 model selection/session notes."
         }
       ]
     },

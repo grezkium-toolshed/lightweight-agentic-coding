@@ -44,6 +44,7 @@ required=(
   docs/release/gates.json
   docs/release/MANUAL_VALIDATION.md
   scripts/release-evidence.sh
+  scripts/release-ds4-128gb.sh
   scripts/release-fresh-clone-unix.sh
   scripts/release-llama-smoke.sh
   scripts/release-opencode-discovery.sh
@@ -213,6 +214,7 @@ for text, path in (
 ):
     require("./scripts/release-evidence.sh" in text, f"{path} must point to the release evidence helper")
 release_evidence = (root / "scripts/release-evidence.sh").read_text(encoding="utf-8")
+ds4_128gb = (root / "scripts/release-ds4-128gb.sh").read_text(encoding="utf-8")
 fresh_clone_unix = (root / "scripts/release-fresh-clone-unix.sh").read_text(encoding="utf-8")
 llama_smoke = (root / "scripts/release-llama-smoke.sh").read_text(encoding="utf-8")
 opencode_discovery = (root / "scripts/release-opencode-discovery.sh").read_text(encoding="utf-8")
@@ -221,6 +223,14 @@ require("Status: open" in release_evidence, "scripts/release-evidence.sh must ge
 require("Keep this stub at Status: open" in release_evidence, "scripts/release-evidence.sh must tell testers not to close gates early")
 require("Transcript capture helper" in release_evidence, "scripts/release-evidence.sh must print transcript capture guidance")
 require("state/release-evidence" in release_evidence, "scripts/release-evidence.sh must write transcript guidance under ignored state/release-evidence")
+require("--dry-run" in ds4_128gb, "scripts/release-ds4-128gb.sh must expose dry-run rehearsal mode")
+require("--full-runtime" in ds4_128gb, "scripts/release-ds4-128gb.sh must expose full runtime mode")
+require("--allow-missing-ds4" in ds4_128gb, "scripts/release-ds4-128gb.sh must make missing ds4 opt-in")
+require("state/release-evidence" in ds4_128gb, "scripts/release-ds4-128gb.sh must write evidence under ignored state/release-evidence")
+ds4_128gb_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "ds4-128gb")
+require("./scripts/release-ds4-128gb.sh --dry-run --allow-missing-ds4" in json.dumps(ds4_128gb_gate), "ds4-128gb gate must document dry-run rehearsal mode")
+require("./scripts/release-ds4-128gb.sh --full-runtime" in json.dumps(ds4_128gb_gate), "ds4-128gb gate must point to the ds4 full-runtime helper")
+require("./scripts/release-ds4-128gb.sh --full-runtime" in release_checklist, "release checklist must point to the ds4 full-runtime helper")
 require("--full-runtime" in fresh_clone_unix, "scripts/release-fresh-clone-unix.sh must expose full runtime mode")
 require("--allow-unsupported-python" in fresh_clone_unix, "scripts/release-fresh-clone-unix.sh must make unsupported Python opt-in")
 require("state/release-evidence" in fresh_clone_unix, "scripts/release-fresh-clone-unix.sh must write evidence under ignored state/release-evidence")

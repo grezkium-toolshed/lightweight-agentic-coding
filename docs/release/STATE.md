@@ -17,7 +17,7 @@ Release gate report: `./scripts/release-gate-report.sh` intentionally fails unti
 ### Open Questions
 - [ ] GitHub Private Vulnerability Reporting enabled in repo settings
 - [ ] Live validation on all documented hardware tiers (16gb, 24gb, 32gb, 64gb, gemma-*)
-- [ ] Manual 128GB-class Apple Silicon validation for `128gb-ds4-flash` with `antirez/ds4`
+- [ ] Manual 128GB-class Apple Silicon validation with `./scripts/release-ds4-128gb.sh --full-runtime`, including generated `state/release-evidence/` output, hardware/RAM/macOS details, ds4 binary path/version or commit, `lac profile apply 128gb-ds4-flash --json`, runtime status showing ds4 paths and port 8000, `lac models sync 128gb-ds4-flash`, `curl http://127.0.0.1:8000/v1/models`, and OpenCode ds4 model selection/session notes
 - [ ] Windows PowerShell fresh-clone validation for `bin/lac.ps1`
 - [ ] Real OpenCode discovery validation with `./scripts/release-opencode-discovery.sh --open` and screenshot, transcript, or manual session notes
 - [ ] Live provider freshness probes with release credentials or documented skips
@@ -32,6 +32,7 @@ Release gate report: `./scripts/release-gate-report.sh` intentionally fails unti
 - [x] Provider freshness helper added: `scripts/release-provider-freshness.sh` captures provider verify JSON, OpenRouter refresh/check output, and skipped-provider reasons for the manual release gate
 - [x] llama.cpp smoke helper added: `scripts/release-llama-smoke.sh` captures runtime status, curl health/models probes, and `lac smoke --json` for the manual release gate
 - [x] OpenCode discovery helper documentation wired: `scripts/release-opencode-discovery.sh --skip-open --allow-missing-opencode` is documented for automated rehearsal, while `--open` plus OpenCode version, rendered config path, repo/package agent and skill counts, generated `state/release-evidence/` summary, and screenshot/transcript/manual notes remain required to close the gate
+- [x] ds4 128GB helper documentation wired: `scripts/release-ds4-128gb.sh --dry-run --allow-missing-ds4` is documented for automated/local rehearsal, while `--full-runtime` on real 128GB+ Apple Silicon hardware remains required to close the gate
 - [x] Manual gates now cross-reference matching `RELEASE_CHECKLIST.md` items, and release-gate reporting flags closed gates whose checklist items remain open
 - [x] Third-party notices added for bundled external assets, optional runtimes, and ds4 model-source attribution; local release audit now checks catalog source-ref coverage
 - [x] Package metadata declares `THIRD_PARTY_NOTICES.md`, package data ships it for installed users, and package-build verification checks wheel and sdist artifacts
