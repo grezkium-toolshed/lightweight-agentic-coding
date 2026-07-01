@@ -49,6 +49,7 @@ required=(
   scripts/release-llama-smoke.sh
   scripts/release-opencode-discovery.sh
   scripts/release-provider-freshness.sh
+  scripts/release-windows-powershell.ps1
   scripts/release-gate-report.sh
   scripts/release-manual-next-steps.sh
   scripts/test-release-gate-report.sh
@@ -70,6 +71,7 @@ export PYTHONPATH="${ROOT}/scripts:${PYTHONPATH:-}"
 python3 - <<'PY' "$ROOT"
 import json
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -219,6 +221,7 @@ fresh_clone_unix = (root / "scripts/release-fresh-clone-unix.sh").read_text(enco
 llama_smoke = (root / "scripts/release-llama-smoke.sh").read_text(encoding="utf-8")
 opencode_discovery = (root / "scripts/release-opencode-discovery.sh").read_text(encoding="utf-8")
 provider_freshness = (root / "scripts/release-provider-freshness.sh").read_text(encoding="utf-8")
+windows_powershell = (root / "scripts/release-windows-powershell.ps1").read_text(encoding="utf-8")
 require("Status: open" in release_evidence, "scripts/release-evidence.sh must generate open evidence stubs")
 require("Keep this stub at Status: open" in release_evidence, "scripts/release-evidence.sh must tell testers not to close gates early")
 require("Transcript capture helper" in release_evidence, "scripts/release-evidence.sh must print transcript capture guidance")
@@ -255,6 +258,19 @@ require("state/release-evidence" in provider_freshness, "scripts/release-provide
 provider_freshness_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "provider-live-freshness")
 require("./scripts/release-provider-freshness.sh --refresh-catalog" in json.dumps(provider_freshness_gate), "provider-live-freshness gate must point to the provider freshness helper")
 require("./scripts/release-provider-freshness.sh --refresh-catalog" in release_checklist, "release checklist must point to the provider freshness helper")
+require("-FullRuntime" in windows_powershell, "scripts/release-windows-powershell.ps1 must expose full runtime mode")
+require("-NoRuntime" in windows_powershell, "scripts/release-windows-powershell.ps1 must expose no-runtime rehearsal mode")
+require("Start-Transcript" in windows_powershell, "scripts/release-windows-powershell.ps1 must capture a transcript")
+require("state/release-evidence" in windows_powershell, "scripts/release-windows-powershell.ps1 must write evidence under ignored state/release-evidence")
+require("bin/lac.ps1" in windows_powershell, "scripts/release-windows-powershell.ps1 must exercise the repo-local PowerShell wrapper")
+windows_powershell_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "windows-powershell")
+require("scripts/release-windows-powershell.ps1 -FullRuntime" in json.dumps(windows_powershell_gate), "windows-powershell gate must point to the PowerShell helper")
+require("scripts/release-windows-powershell.ps1 -NoRuntime" in json.dumps(windows_powershell_gate), "windows-powershell gate must document no-runtime rehearsal mode")
+require("scripts/release-windows-powershell.ps1 -FullRuntime" in release_checklist, "release checklist must point to the PowerShell helper")
+pwsh = shutil.which("pwsh")
+if pwsh:
+    parser = "$errors = $null; [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath 'scripts/release-windows-powershell.ps1'), [ref]$errors) | Out-Null; if ($errors.Count) { $errors | Format-List *; exit 1 }"
+    subprocess.run([pwsh, "-NoProfile", "-Command", parser], cwd=root, check=True)
 require(
     "./scripts/release-manual-next-steps.sh" in release_index,
     "docs/release/README.md must point to the manual next-steps helper",

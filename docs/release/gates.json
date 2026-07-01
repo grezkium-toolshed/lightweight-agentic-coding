@@ -65,7 +65,7 @@
       "id": "windows-powershell",
       "owner": "Windows tester",
       "summary": "Validate the repo-local PowerShell wrapper from a clean Windows clone.",
-      "evidence_required": "Fresh Windows clone runs `bin/lac.ps1 init --yes --profile 24gb --no-cloud`, `bin/lac.ps1 doctor`, and `bin/lac.ps1 smoke`. Attach PowerShell version, Python version, and transcript summary.",
+      "evidence_required": "Manual release evidence runs `pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/release-windows-powershell.ps1 -FullRuntime` from a fresh Windows clone and writes generated evidence under `state/release-evidence/`. Optional no-runtime Windows rehearsal may run the same helper with `-NoRuntime`, but this gate remains open until real Windows fresh-clone proof exists. Attach Windows OS details, PowerShell version, Python version/path, git commit, `bin/lac.ps1 --version`, `bin/lac.ps1 init --yes --profile 24gb --no-cloud --json`, `bin/lac.ps1 doctor --bootstrap-hint --json`, `bin/lac.ps1 smoke --json`, transcript/summary path, and, when `-FullRuntime` is used, model sync/runtime start/status evidence captured by the helper.",
       "environment": [
         "Windows",
         "PowerShell",
@@ -73,24 +73,27 @@
       ],
       "commands": [
         "Get-Date -AsUTC",
+        "Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsHardwareAbstractionLayer, OsArchitecture",
         "$PSVersionTable.PSVersion",
-        "py -3 --version",
         "git clone <repo-url> $env:TEMP\\lac-public-beta",
         "cd $env:TEMP\\lac-public-beta",
-        ".\\bin\\lac.ps1 --version",
-        ".\\bin\\lac.ps1 init --yes --profile 24gb --no-cloud",
-        ".\\bin\\lac.ps1 doctor",
-        ".\\bin\\lac.ps1 smoke"
+        "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/release-windows-powershell.ps1 -FullRuntime",
+        "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/release-windows-powershell.ps1 -NoRuntime"
       ],
       "evidence": [
-        "Date, Windows version, PowerShell version, Python version",
-        "Command transcript summary",
-        "doctor and smoke result summaries"
+        "Generated evidence summary path under state/release-evidence from scripts/release-windows-powershell.ps1",
+        "Date, Windows OS details, PowerShell version, Python version/path, and git commit",
+        "`bin/lac.ps1 --version` output",
+        "`bin/lac.ps1 init --yes --profile 24gb --no-cloud --json` result summary",
+        "`bin/lac.ps1 doctor --bootstrap-hint --json` result summary",
+        "`bin/lac.ps1 smoke --json` result summary",
+        "Transcript path and summary path",
+        "If -FullRuntime was used: model sync, runtime start, and runtime status evidence captured by the helper"
       ],
       "checklist_refs": [
         {
           "section": "Runtime validation",
-          "item": "Windows PowerShell path validated from a fresh clone with `bin/lac.ps1 init`, `bin/lac.ps1 doctor`, and `bin/lac.ps1 smoke`."
+          "item": "Windows PowerShell path validated from a fresh clone with `pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/release-windows-powershell.ps1 -FullRuntime`, backed by generated evidence under `state/release-evidence/`, Windows OS details, PowerShell version, Python version/path, git commit, `bin/lac.ps1 --version`, `bin/lac.ps1 init --yes --profile 24gb --no-cloud --json`, `bin/lac.ps1 doctor --bootstrap-hint --json`, `bin/lac.ps1 smoke --json`, transcript/summary path, and model sync/runtime start/status evidence when captured by the helper."
         }
       ]
     },
