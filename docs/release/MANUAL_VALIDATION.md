@@ -42,7 +42,7 @@ For a tester-friendly summary of the currently open manual gates, run:
 | `provider-live-freshness` | open | maintainer | Run `./scripts/release-provider-freshness.sh --refresh-catalog` with release credentials, or document why each configured provider is intentionally skipped. Attach the generated evidence summary, `provider-verify.json`, and any OpenRouter catalog refresh result. |
 | `trust-docs` | closed | maintainer | Third-party agent/skill guidance reviewed against `docs/security/TRUST_MODEL.md`, `docs/security/THIRD_PARTY_AGENT_INTAKE.md`, and catalog trust metadata. Evidence recorded below. |
 | `repo-binary-hygiene` | closed | maintainer | Confirm no model binaries or machine-specific files are tracked. Evidence recorded below. |
-| `linux-ci` | open | maintainer | Confirm Linux CI is green on the release branch. Attach workflow URL, commit SHA, and run result. |
+| `linux-ci` | open | maintainer | Automated/local rehearsal runs `./scripts/release-linux-ci.sh --allow-unavailable` and writes generated evidence under `state/release-evidence/`, but this gate remains open until GitHub Actions evidence proves `.github/workflows/ci.yml` completed successfully for the release commit. Manual release evidence runs `./scripts/release-linux-ci.sh --run-id <run-id>` after CI finishes. Attach generated evidence summary path, workflow URL, commit SHA, run status/conclusion, selected run ID, branch, workflow name, and confirmation that `.github/workflows/ci.yml` includes the Linux integration/package/docs/schema checks. |
 
 ## Evidence Template
 

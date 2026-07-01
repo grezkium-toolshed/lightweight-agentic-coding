@@ -310,25 +310,34 @@
       "id": "linux-ci",
       "owner": "maintainer",
       "summary": "Confirm Linux CI is green on the release branch commit.",
-      "evidence_required": "Confirm Linux CI is green on the release branch. Attach workflow URL, commit SHA, and run result.",
+      "evidence_required": "Automated/local rehearsal runs `./scripts/release-linux-ci.sh --allow-unavailable` and writes generated evidence under `state/release-evidence/`, but this gate remains open until GitHub Actions evidence proves `.github/workflows/ci.yml` completed successfully for the release commit. Manual release evidence runs `./scripts/release-linux-ci.sh --run-id <run-id>` after CI finishes. Attach generated evidence summary path, workflow URL, commit SHA, run status/conclusion, selected run ID, branch, workflow name, and confirmation that `.github/workflows/ci.yml` includes the Linux integration/package/docs/schema checks.",
       "environment": [
-        "GitHub Actions or gh CLI"
+        "GitHub Actions",
+        "GitHub CLI authenticated for workflow metadata",
+        "Release branch commit pushed to GitHub"
       ],
       "commands": [
         "git rev-parse HEAD",
+        "./scripts/release-linux-ci.sh --allow-unavailable",
         "gh run list --workflow ci.yml --limit 5",
-        "gh run view <run-id> --log-failed"
+        "./scripts/release-linux-ci.sh --run-id <run-id>"
       ],
       "evidence": [
+        "Generated evidence summary path under state/release-evidence from scripts/release-linux-ci.sh",
         "Workflow URL",
         "Commit SHA",
+        "Selected run ID",
+        "Branch",
+        "Workflow name",
+        "Run status",
         "Run conclusion",
+        ".github/workflows/ci.yml coverage confirmation",
         "Failed log excerpt if not green"
       ],
       "checklist_refs": [
         {
           "section": "Trust and repo hygiene",
-          "item": "Linux CI passes on the release branch."
+          "item": "Linux CI passes on the release branch with `./scripts/release-linux-ci.sh --run-id <run-id>` evidence under `state/release-evidence/`, workflow URL, commit SHA, run status/conclusion, and confirmation that `.github/workflows/ci.yml` includes the Linux integration/package/docs/schema checks for the release commit."
         }
       ]
     }

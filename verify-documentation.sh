@@ -46,6 +46,7 @@ required=(
   scripts/release-evidence.sh
   scripts/release-ds4-128gb.sh
   scripts/release-fresh-clone-unix.sh
+  scripts/release-linux-ci.sh
   scripts/release-llama-smoke.sh
   scripts/release-opencode-discovery.sh
   scripts/release-provider-freshness.sh
@@ -219,6 +220,7 @@ for text, path in (
 release_evidence = (root / "scripts/release-evidence.sh").read_text(encoding="utf-8")
 ds4_128gb = (root / "scripts/release-ds4-128gb.sh").read_text(encoding="utf-8")
 fresh_clone_unix = (root / "scripts/release-fresh-clone-unix.sh").read_text(encoding="utf-8")
+linux_ci = (root / "scripts/release-linux-ci.sh").read_text(encoding="utf-8")
 llama_smoke = (root / "scripts/release-llama-smoke.sh").read_text(encoding="utf-8")
 opencode_discovery = (root / "scripts/release-opencode-discovery.sh").read_text(encoding="utf-8")
 provider_freshness = (root / "scripts/release-provider-freshness.sh").read_text(encoding="utf-8")
@@ -242,6 +244,19 @@ require("state/release-evidence" in fresh_clone_unix, "scripts/release-fresh-clo
 fresh_clone_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "fresh-clone-unix")
 require("./scripts/release-fresh-clone-unix.sh --full-runtime" in json.dumps(fresh_clone_gate), "fresh-clone-unix gate must point to the Unix smoke helper")
 require("./scripts/release-fresh-clone-unix.sh --full-runtime" in release_checklist, "release checklist must point to the Unix smoke helper")
+require("--run-id" in linux_ci, "scripts/release-linux-ci.sh must expose explicit GitHub Actions run validation")
+require("--allow-unavailable" in linux_ci, "scripts/release-linux-ci.sh must expose local rehearsal mode")
+require("gh run list" in linux_ci and "gh run view" in linux_ci, "scripts/release-linux-ci.sh must capture GitHub Actions run metadata")
+require(".github/workflows/ci.yml" in linux_ci, "scripts/release-linux-ci.sh must validate the Linux CI workflow file")
+require("./scripts/integration-test.sh" in linux_ci, "scripts/release-linux-ci.sh must verify CI includes the integration test")
+require("./scripts/verify-package-build.sh" in linux_ci, "scripts/release-linux-ci.sh must verify CI includes package build checks")
+require("./verify-documentation.sh" in linux_ci, "scripts/release-linux-ci.sh must verify CI includes documentation checks")
+require("./scripts/verify-config-schema.sh" in linux_ci, "scripts/release-linux-ci.sh must verify CI includes schema checks")
+require("state/release-evidence" in linux_ci, "scripts/release-linux-ci.sh must write evidence under ignored state/release-evidence")
+linux_ci_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "linux-ci")
+require("./scripts/release-linux-ci.sh --allow-unavailable" in json.dumps(linux_ci_gate), "linux-ci gate must document rehearsal mode")
+require("./scripts/release-linux-ci.sh --run-id <run-id>" in json.dumps(linux_ci_gate), "linux-ci gate must point to the GitHub Actions run helper")
+require("./scripts/release-linux-ci.sh --run-id <run-id>" in release_checklist, "release checklist must point to the Linux CI helper")
 require("--allow-unavailable" in llama_smoke, "scripts/release-llama-smoke.sh must expose local rehearsal mode")
 require("state/release-evidence" in llama_smoke, "scripts/release-llama-smoke.sh must write evidence under ignored state/release-evidence")
 llama_smoke_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "llama-smoke")

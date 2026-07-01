@@ -53,5 +53,5 @@ Use `./scripts/verify-public-beta-local.sh` to run the local automated public-be
 - [x] Third-party agent and skill guidance matches the current trust model.
 - [ ] GitHub Private Vulnerability Reporting is enabled with `./scripts/release-security-pvr.sh --confirm-enabled --screenshot <reference>` evidence under `state/release-evidence/`, repo owner/admin confirmation, date enabled, `gh repo view` metadata, security policy URL, `SECURITY.md` wording check, and screenshot/reference from repository Settings > Advanced Security showing Private vulnerability reporting enabled.
 - [x] No model binaries or machine-specific files are tracked.
-- [ ] Linux CI passes on the release branch.
+- [ ] Linux CI passes on the release branch with `./scripts/release-linux-ci.sh --run-id <run-id>` evidence under `state/release-evidence/`, workflow URL, commit SHA, run status/conclusion, and confirmation that `.github/workflows/ci.yml` includes the Linux integration/package/docs/schema checks for the release commit.
 - [x] No stale docs or deleted-path references remain in the tree.
