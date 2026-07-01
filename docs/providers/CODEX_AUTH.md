@@ -37,3 +37,8 @@ Before each beta cut:
 1. Check the helper repo for open issues about broken auth.
 2. Confirm the helper's install steps still match ours.
 3. Bump `last_verified_at` in `catalog/providers.json` for `codex-auth`.
+
+## See Also
+
+- [Provider authentication overview](AUTHENTICATION.md)
+- [Claude Code onboarding](../use-cases/ONBOARDING_CLAUDE_CODE.md)

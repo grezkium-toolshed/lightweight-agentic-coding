@@ -27,4 +27,17 @@ Version 2 starts from jobs-to-be-done first, then maps you to a profile, provide
 - Best client target: OpenCode
 - Hybrid and multi-workspace guidance: `docs/use-cases/HYBRID_WORKSPACES.md`
 
-The canonical machine-readable mapping lives in `catalog/scenarios.json`.
+## Workflow Packs
+
+The canonical machine-readable scenario mapping lives in `catalog/scenarios.json`.
+Workflow pack definitions, assets, supported clients, and trust metadata live in `catalog/workflow-packs.json`.
+
+| Pack | Label | Use |
+|---|---|---|
+| `coding` | Coding Pack | Architecture review, structured execution, and coding workflows. |
+| `research` | Research Pack | Evidence-backed research synthesis and investigation workflows. |
+| `office` | Office Pack | Document, presentation, spreadsheet, and PDF workflows. |
+| `team-rollout` | Team Rollout Pack | Release and reality-check support for team adoption. |
+| `design` | Design Pack | Optional Open Design skills, brand systems, and prototyping workflows. |
+| `devops` | DevOps Pack | Infrastructure, Dockerfile, and CI/CD review workflows. |
+| `microsoft-graph` | Microsoft Graph Pack | Optional Microsoft Graph skill workflows for authorized API use. |

@@ -188,6 +188,10 @@ for scenario in scenario_catalog.get("scenarios", []):
         require(pack_id in pack_ids, f"{scenario_id}: unknown recommended pack {pack_id}")
 require({"solo-coder", "research-operator", "office-automation", "team-pilot"}.issubset(scenario_ids), "scenario catalog missing required public onboarding scenarios")
 require("catalog/scenarios.json" in scenario_guide, "scenario guide must point to canonical scenario catalog")
+require("catalog/workflow-packs.json" in scenario_guide, "scenario guide must point to canonical workflow pack catalog")
+for pack in workflow_catalog.get("packs", []):
+    label = pack.get("label") or pack.get("name")
+    require(label and label in scenario_guide, f"scenario guide must include workflow pack label {label}")
 
 # Claude Code docs are intentionally docs/templates only, not a mirrored runtime.
 for text, path in (

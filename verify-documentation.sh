@@ -120,6 +120,7 @@ pyproject = (root / "pyproject.toml").read_text(encoding="utf-8")
 model_recommendations = (root / "docs/model-recommendations.md").read_text(encoding="utf-8")
 audit_findings = (root / "docs/audit-findings.md").read_text(encoding="utf-8")
 review_backlog = (root / "docs/review-backlog.md").read_text(encoding="utf-8")
+codex_auth_doc = (root / "docs/providers/CODEX_AUTH.md").read_text(encoding="utf-8")
 plan_docs = sorted((root / "docs/plans").glob("*.md"))
 confluence_migration = (root / "docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md").read_text(encoding="utf-8")
 require("128gb-ds4-flash" in changelog and "DwarfStar" in changelog, "CHANGELOG.md must mention ds4/DwarfStar public beta work")
@@ -134,6 +135,8 @@ require("verify-public-beta-local.sh" in contributing, "CONTRIBUTING.md must poi
 require("Development Status :: 4 - Beta" in pyproject, "pyproject.toml must include beta classifier")
 require("https://github.com/TuukkaTanner/lightweight-agentic-coding/issues" in pyproject, "pyproject.toml must include public issue URL")
 require("SECURITY.md" in support and "verify-public-beta-local.sh" in support, "SUPPORT.md must route security and public-beta validation")
+require("[Provider authentication overview](AUTHENTICATION.md)" in codex_auth_doc, "docs/providers/CODEX_AUTH.md must link provider authentication overview")
+require("[Claude Code onboarding](../use-cases/ONBOARDING_CLAUDE_CODE.md)" in codex_auth_doc, "docs/providers/CODEX_AUTH.md must link Claude Code onboarding")
 require("./scripts/doctor.sh" not in model_recommendations, "docs/model-recommendations.md must not point users at retired doctor.sh")
 require("./bin/lac doctor" in confluence_migration, "docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md must point to ./bin/lac doctor")
 require("Use `./bin/lac` on macOS/Linux" in confluence_migration, "docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md must prefer bin/lac over legacy scripts")
@@ -153,6 +156,8 @@ for helper in (
     "./scripts/release-security-pvr.sh --confirm-enabled --screenshot <reference>",
     "scripts/release-windows-powershell.ps1 -FullRuntime",
     "./scripts/release-fresh-clone-unix.sh --full-runtime",
+    "[x] | Done in this session — added provider/auth and Claude Code onboarding cross-links",
+    "[x] | Done in this session — scenario guide now points to the canonical workflow-pack catalog",
 ):
     require(helper in review_backlog, f"docs/review-backlog.md must point open beta backlog items at {helper}")
 for stale_path in (
