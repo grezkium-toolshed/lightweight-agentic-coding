@@ -15,7 +15,7 @@ for tagged releases (public beta and beyond).
 - Paste-ready manual evidence stubs from `scripts/release-evidence.sh`, kept at `Status: open` until external evidence is complete.
 - Transcript capture guidance for manual release gates, writing local evidence logs under ignored `state/release-evidence/`.
 - Fresh-clone Unix onboarding smoke helper at `scripts/release-fresh-clone-unix.sh`, with no-download rehearsal mode and `--full-runtime` release evidence mode.
-- Provider freshness evidence helper at `scripts/release-provider-freshness.sh`, capturing provider verify JSON, OpenRouter refresh/check output, and skipped-provider reasons without secrets.
+- Provider freshness evidence helper at `scripts/release-provider-freshness.sh`, capturing provider verify JSON, OpenRouter refresh/check output, and explicit skipped-provider reasons without secrets.
 - llama.cpp smoke evidence helper at `scripts/release-llama-smoke.sh`, capturing runtime status, curl health/models probes, and `lac smoke --json`.
 - GitHub Private Vulnerability Reporting evidence helper wiring for `scripts/release-security-pvr.sh`, documenting local rehearsal with `--allow-unavailable` while keeping the gate open until repo owner/admin `--confirm-enabled --screenshot <reference>` evidence is captured after enabling PVR in repository settings.
 - Linux CI evidence helper wiring for `scripts/release-linux-ci.sh`, documenting local rehearsal with `--allow-unavailable` while keeping the gate open until GitHub Actions evidence proves `.github/workflows/ci.yml` completed successfully for the release commit.

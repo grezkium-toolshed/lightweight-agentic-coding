@@ -289,6 +289,10 @@ require(
     "close or explicitly defer live validation for each documented hardware tier" not in release_open_questions,
     "docs/release/STATE.md must resolve hardware-tier validation scope instead of keeping it open-ended",
 )
+require(
+    "provider-skip-reasons.json" in release_completed and "--skip-reason <provider-id=reason>" in release_completed,
+    "docs/release/STATE.md must record explicit provider skip reason evidence support",
+)
 for needle in (
     "Hardware validation scope resolved for public beta",
     "release-blocking live proof is limited",
@@ -384,9 +388,14 @@ require("./scripts/release-opencode-discovery.sh --open" in json.dumps(opencode_
 require("./scripts/release-opencode-discovery.sh --skip-open --allow-missing-opencode" in json.dumps(opencode_discovery_gate), "opencode-discovery gate must document rehearsal mode")
 require("./scripts/release-opencode-discovery.sh --open" in release_checklist, "release checklist must point to the OpenCode discovery helper")
 require("--refresh-catalog" in provider_freshness, "scripts/release-provider-freshness.sh must expose catalog refresh mode")
+require("--skip-reason" in provider_freshness, "scripts/release-provider-freshness.sh must expose per-provider skip reasons")
+require("--skip-reasons-file" in provider_freshness, "scripts/release-provider-freshness.sh must expose skip reason file input")
+require("provider-skip-reasons.json" in provider_freshness, "scripts/release-provider-freshness.sh must write provider skip reasons evidence")
 require("state/release-evidence" in provider_freshness, "scripts/release-provider-freshness.sh must write evidence under ignored state/release-evidence")
 provider_freshness_gate = next(gate for gate in release_gates.get("gates", []) if gate.get("id") == "provider-live-freshness")
 require("./scripts/release-provider-freshness.sh --refresh-catalog" in json.dumps(provider_freshness_gate), "provider-live-freshness gate must point to the provider freshness helper")
+require("--skip-reason <provider-id=reason>" in json.dumps(provider_freshness_gate), "provider-live-freshness gate must document skip reasons")
+require("provider-skip-reasons.json" in json.dumps(provider_freshness_gate), "provider-live-freshness gate must require skip reason evidence")
 require("./scripts/release-provider-freshness.sh --refresh-catalog" in release_checklist, "release checklist must point to the provider freshness helper")
 require("--confirm-enabled" in security_pvr, "scripts/release-security-pvr.sh must expose owner/admin confirmation mode")
 require("--screenshot" in security_pvr, "scripts/release-security-pvr.sh must require a settings screenshot/reference")

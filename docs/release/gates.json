@@ -237,16 +237,19 @@
       "id": "provider-live-freshness",
       "owner": "maintainer",
       "summary": "Probe configured providers with release credentials or document intentional skips.",
-      "evidence_required": "Run `./scripts/release-provider-freshness.sh --refresh-catalog` with release credentials, or document why each configured provider is intentionally skipped. Attach the generated evidence summary, `provider-verify.json`, and any OpenRouter catalog refresh result.",
+      "evidence_required": "Run `./scripts/release-provider-freshness.sh --refresh-catalog` with release credentials, or document why each configured provider is intentionally skipped with `--skip-reason <provider-id=reason>` or `--skip-reasons-file <path>`. Attach the generated evidence summary, `provider-verify.json`, `provider-skip-reasons.json`, and any OpenRouter catalog refresh result.",
       "environment": [
         "Release credential shell",
         "No secrets pasted into evidence"
       ],
       "commands": [
-        "./scripts/release-provider-freshness.sh --refresh-catalog"
+        "./scripts/release-provider-freshness.sh --refresh-catalog",
+        "./scripts/release-provider-freshness.sh --skip-reason <provider-id=reason>",
+        "./scripts/release-provider-freshness.sh --skip-reasons-file <path>"
       ],
       "evidence": [
         "provider-verify.json with secrets redacted by lac",
+        "provider-skip-reasons.json for any intentionally skipped providers",
         "Evidence summary path from scripts/release-provider-freshness.sh",
         "openrouter-refresh.json or documented skip reason",
         "List of providers intentionally skipped and why"
@@ -254,7 +257,7 @@
       "checklist_refs": [
         {
           "section": "Providers and docs",
-          "item": "Live provider freshness probes are complete with release credentials via `./scripts/release-provider-freshness.sh --refresh-catalog`, or every skipped provider has a documented release skip reason."
+          "item": "Live provider freshness probes are complete with release credentials via `./scripts/release-provider-freshness.sh --refresh-catalog`, or every skipped provider has a documented release skip reason recorded in `provider-skip-reasons.json`."
         }
       ]
     },
