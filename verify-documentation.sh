@@ -302,10 +302,18 @@ opencode_discovery = (root / "scripts/release-opencode-discovery.sh").read_text(
 provider_freshness = (root / "scripts/release-provider-freshness.sh").read_text(encoding="utf-8")
 security_pvr = (root / "scripts/release-security-pvr.sh").read_text(encoding="utf-8")
 windows_powershell = (root / "scripts/release-windows-powershell.ps1").read_text(encoding="utf-8")
+manual_next_steps = (root / "scripts/release-manual-next-steps.sh").read_text(encoding="utf-8")
 require("Status: open" in release_evidence, "scripts/release-evidence.sh must generate open evidence stubs")
 require("Keep this stub at Status: open" in release_evidence, "scripts/release-evidence.sh must tell testers not to close gates early")
 require("Transcript capture helper" in release_evidence, "scripts/release-evidence.sh must print transcript capture guidance")
 require("state/release-evidence" in release_evidence, "scripts/release-evidence.sh must write transcript guidance under ignored state/release-evidence")
+require("evidence_helper" in manual_next_steps, "scripts/release-manual-next-steps.sh must expose the evidence-helper command for each open gate")
+require("commands" in manual_next_steps and "environment" in manual_next_steps and "evidence" in manual_next_steps, "scripts/release-manual-next-steps.sh JSON must expose gate command bundles and evidence fields")
+for text, path in (
+    (release_index, "docs/release/README.md"),
+    (manual_validation, "docs/release/MANUAL_VALIDATION.md"),
+):
+    require("./scripts/release-evidence.sh <gate-id>" in text and "--json" in text, f"{path} must document manual next-step helper evidence commands and JSON mode")
 require("--dry-run" in ds4_128gb, "scripts/release-ds4-128gb.sh must expose dry-run rehearsal mode")
 require("--full-runtime" in ds4_128gb, "scripts/release-ds4-128gb.sh must expose full runtime mode")
 require("--allow-missing-ds4" in ds4_128gb, "scripts/release-ds4-128gb.sh must make missing ds4 opt-in")

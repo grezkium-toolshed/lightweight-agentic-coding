@@ -41,7 +41,11 @@ for line in manual_path.read_text(encoding="utf-8").splitlines():
             "status": status,
             "owner": metadata.get("owner", owner),
             "summary": metadata.get("summary", ""),
+            "evidence_helper": f"./scripts/release-evidence.sh {gate_id}",
             "evidence_required": metadata.get("evidence_required", evidence),
+            "environment": metadata.get("environment", []),
+            "commands": metadata.get("commands", []),
+            "evidence": metadata.get("evidence", []),
             "checklist_refs": metadata.get("checklist_refs", []),
         })
 
@@ -58,8 +62,12 @@ else:
     print("Public beta manual validation next steps")
     print(f"- Open manual gates: {len(open_gates)}")
     for gate in open_gates:
-        print(f"  - {gate['gate_id']} ({gate['owner']}): {gate['evidence_required']}")
+        print(f"  - {gate['gate_id']} ({gate['owner']})")
+        if gate["summary"]:
+            print(f"    summary: {gate['summary']}")
+        print(f"    evidence helper: {gate['evidence_helper']}")
+        print(f"    evidence required: {gate['evidence_required']}")
         for ref in gate["checklist_refs"]:
             print(f"    checklist: {ref['section']}: {ref['item']}")
-    print("Use ./scripts/release-evidence.sh <gate-id> for command bundles, update docs/release/MANUAL_VALIDATION.md, then rerun ./scripts/release-gate-report.sh.")
+    print("Run the evidence helper for command bundles and paste-ready stubs, update docs/release/MANUAL_VALIDATION.md and RELEASE_CHECKLIST.md, then rerun ./scripts/release-gate-report.sh.")
 PY

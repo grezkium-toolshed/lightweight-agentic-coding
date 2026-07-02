@@ -23,6 +23,7 @@ for tagged releases (public beta and beyond).
 - Release state open questions now carry explicit owners and target conditions, with `verify-documentation.sh` coverage preventing ownerless or targetless public-beta blockers.
 - OpenCode template schema validation is explicitly tracked in CI, the local beta wrapper, and documentation verification.
 - Contributor script-style guidance now standardizes public helper entrypoints as shell/PowerShell wrappers with inline Python for small validators and standalone Python reserved for the CLI/shared libraries.
+- Manual release next-step handoffs now show exact evidence-helper commands and expose gate command bundles in JSON for external testers.
 - Public docs navigation now links Codex auth back to provider onboarding and Claude Code guidance, and the scenario guide documents `catalog/workflow-packs.json` as the canonical workflow-pack source.
 - Provider/free-model freshness age warnings via `scripts/check-provider-doc-freshness.sh`, wired into CI and the local public-beta suite without auto-refreshing live catalogs.
 - Windows PowerShell release evidence helper wiring for `scripts/release-windows-powershell.ps1`, documenting manual `-FullRuntime` evidence from a fresh Windows clone, optional `-NoRuntime` Windows rehearsal, generated evidence under `state/release-evidence/`, wrapper JSON command outputs, environment details, and transcript/summary paths while keeping the gate open until real Windows proof exists.

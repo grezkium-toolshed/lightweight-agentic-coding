@@ -28,6 +28,8 @@ For a tester-friendly summary of the currently open manual gates, run:
 ./scripts/release-manual-next-steps.sh
 ```
 
+The summary includes the owner, short gate summary, exact `./scripts/release-evidence.sh <gate-id>` command, and matching checklist item(s). Use `--json` to inspect the full command bundle and evidence fields for automation.
+
 ## Gates
 
 | Gate ID | Status | Owner | Evidence Required |

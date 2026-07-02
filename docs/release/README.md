@@ -37,6 +37,8 @@ For a quick handoff view of the currently open manual gates, run:
 ./scripts/release-manual-next-steps.sh
 ```
 
+The handoff helper lists each open gate owner, summary, exact `./scripts/release-evidence.sh <gate-id>` command, and matching checklist item(s). Pass `--json` when another tool needs the full command bundle from `docs/release/gates.json`.
+
 To run the local automated beta gate suite in one command, run:
 
 ```bash
