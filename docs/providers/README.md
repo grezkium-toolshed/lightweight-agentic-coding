@@ -9,6 +9,8 @@ Provider freshness and risk metadata now live in `catalog/providers.json`.
 
 Run `./bin/lac provider verify --all` for a live reachability probe — each configured provider gets a real HTTP request to its baseURL and reports `ok`, `skipped`, or `error`. Pass `--refresh-catalog` to bump `last_verified_at` on success.
 
+Run `./scripts/check-provider-doc-freshness.sh` for a non-network warning when free-model snapshots or OpenRouter freshness markers are older than the release threshold. Use `--strict` only when you intentionally want stale freshness markers to fail a release check.
+
 Local baseline guidance:
 - target default family: Qwen 3.6 MoE
 - target default quant class: Unsloth `UD-Q4_K_XL`

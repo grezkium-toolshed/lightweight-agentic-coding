@@ -38,6 +38,9 @@ jobs:
       - name: Provider Catalog Validation
         run: set -x && ./scripts/verify-provider-catalog.sh
 
+      - name: Provider Doc Freshness Warning
+        run: set -x && ./scripts/check-provider-doc-freshness.sh
+
       - name: Release Local Audit
         run: set -x && ./scripts/release-local-audit.sh
 

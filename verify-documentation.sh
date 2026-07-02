@@ -43,6 +43,8 @@ required=(
   docs/release/BETA_RELEASE_CRITERIA.md
   docs/release/gates.json
   docs/release/MANUAL_VALIDATION.md
+  .github/workflows/ci.yml
+  scripts/check-provider-doc-freshness.sh
   scripts/release-evidence.sh
   scripts/release-ds4-128gb.sh
   scripts/release-fresh-clone-unix.sh
@@ -97,6 +99,7 @@ packaged_opencode = load_jsonc(root / "src/lac/data/opencode/opencode.template.j
 require(opencode == packaged_opencode, "packaged opencode.template.jsonc must match repo template")
 
 openrouter_doc = (root / "docs/providers/OPENROUTER_FREE.md").read_text(encoding="utf-8")
+provider_readme = (root / "docs/providers/README.md").read_text(encoding="utf-8")
 require("./bin/lac provider models openrouter" in openrouter_doc, "docs/providers/OPENROUTER_FREE.md must point to the provider models command")
 require("./bin/lac provider verify openrouter --refresh-catalog" in openrouter_doc, "docs/providers/OPENROUTER_FREE.md must document the refresh command")
 require("Last verified:" in openrouter_doc, "docs/providers/OPENROUTER_FREE.md must include a 'Last verified:' line")
@@ -111,6 +114,20 @@ require(isinstance(openrouter_entry, dict), "docs/free-coding-models.json openro
 require(openrouter_entry.get("live") is True, "docs/free-coding-models.json openrouter entry must mark live catalog usage")
 require(openrouter_entry.get("list_command") == "./bin/lac provider models openrouter", "docs/free-coding-models.json must point to the provider models command")
 
+workflow_ci = (root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+public_beta_local = (root / "scripts/verify-public-beta-local.sh").read_text(encoding="utf-8")
+provider_doc_freshness = (root / "scripts/check-provider-doc-freshness.sh").read_text(encoding="utf-8")
+require("--strict" in provider_doc_freshness, "scripts/check-provider-doc-freshness.sh must expose strict mode")
+require("--max-age-days" in provider_doc_freshness, "scripts/check-provider-doc-freshness.sh must expose max-age threshold")
+require("--as-of" in provider_doc_freshness, "scripts/check-provider-doc-freshness.sh must expose deterministic as-of date")
+require("docs/free-coding-models.json" in provider_doc_freshness, "scripts/check-provider-doc-freshness.sh must check free-coding models snapshot")
+require("docs/providers/OPENROUTER_FREE.md" in provider_doc_freshness, "scripts/check-provider-doc-freshness.sh must check OpenRouter doc freshness")
+require("catalog/providers.json" in provider_doc_freshness and "openrouter" in provider_doc_freshness, "scripts/check-provider-doc-freshness.sh must check OpenRouter provider catalog freshness")
+require("::warning" in provider_doc_freshness, "scripts/check-provider-doc-freshness.sh must emit GitHub warning annotations by default")
+require("./scripts/check-provider-doc-freshness.sh" in public_beta_local, "scripts/verify-public-beta-local.sh must run provider doc freshness warning")
+require("./scripts/check-provider-doc-freshness.sh" in workflow_ci, ".github/workflows/ci.yml must run provider doc freshness warning")
+require("./scripts/check-provider-doc-freshness.sh" in provider_readme, "docs/providers/README.md must document provider doc freshness warning")
+
 changelog = (root / "CHANGELOG.md").read_text(encoding="utf-8")
 third_party_notices = (root / "THIRD_PARTY_NOTICES.md").read_text(encoding="utf-8")
 packaged_third_party_notices = (root / "src/lac/data/THIRD_PARTY_NOTICES.md").read_text(encoding="utf-8")
@@ -123,6 +140,8 @@ review_backlog = (root / "docs/review-backlog.md").read_text(encoding="utf-8")
 codex_auth_doc = (root / "docs/providers/CODEX_AUTH.md").read_text(encoding="utf-8")
 plan_docs = sorted((root / "docs/plans").glob("*.md"))
 confluence_migration = (root / "docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md").read_text(encoding="utf-8")
+m7_backlog_line = next((line for line in review_backlog.splitlines() if line.startswith("| M7 |")), "")
+require("[x]" in m7_backlog_line and "scripts/check-provider-doc-freshness.sh" in m7_backlog_line, "docs/review-backlog.md must close M7 with the provider doc freshness warning")
 require("128gb-ds4-flash" in changelog and "DwarfStar" in changelog, "CHANGELOG.md must mention ds4/DwarfStar public beta work")
 require("THIRD_PARTY_NOTICES.md" in changelog, "CHANGELOG.md must mention third-party notices")
 require("antirez/ds4" in third_party_notices and "antirez/deepseek-v4-gguf" in third_party_notices, "THIRD_PARTY_NOTICES.md must include ds4 runtime and model sources")

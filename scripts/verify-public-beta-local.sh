@@ -21,6 +21,7 @@ run_check "Profile and preset parity" ./scripts/verify-profiles-sync.sh
 run_check "Config schema" ./scripts/verify-config-schema.sh
 run_check "OpenCode asset parity" ./scripts/verify-opencode-assets.sh
 run_check "Provider catalog" ./scripts/verify-provider-catalog.sh
+run_check "Provider doc freshness warning" ./scripts/check-provider-doc-freshness.sh
 run_check "V2 CLI contract" ./scripts/verify-v2-contract.sh
 run_check "Integration test" ./scripts/integration-test.sh
 run_check "Security PVR evidence rehearsal" ./scripts/release-security-pvr.sh --allow-unavailable
