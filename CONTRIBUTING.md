@@ -52,3 +52,10 @@ bash -n runtime-config/launch/*.sh
 - Keep llama.cpp as the default runtime path; specialist profiles may opt into runtimes such as oMLX or ds4 explicitly.
 - Prefer additive profile changes over hardcoded machine-specific paths.
 - Keep `.opencode/agents/` and `.opencode/skills/` intentionally small and task-focused.
+
+## Script Style
+
+- Keep public helper entrypoints as shell or PowerShell wrappers: `./scripts/*.sh`, `./bin/lac`, and `./bin/lac.ps1` should be directly runnable from a clean checkout.
+- For small validation and release helpers, prefer inline Python in the wrapper (`python3 - <<'PY'`) and shared imports from `scripts/lib/`. This keeps the command surface portable while avoiding duplicated parsers.
+- Reserve standalone Python files for the main CLI (`scripts/lac.py`) and shared library modules under `scripts/lib/`.
+- Inline Python used by local verification helpers should avoid syntax newer than the macOS system Python used by the public-beta smoke path.

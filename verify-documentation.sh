@@ -159,6 +159,15 @@ require(
     and "scripts/verify-public-beta-local.sh" in l4_backlog_line,
     "docs/review-backlog.md must close L4 with schema/CI/local verifier evidence",
 )
+l1_backlog_line = next((line for line in review_backlog.splitlines() if line.startswith("| L1 |")), "")
+require("[x]" in l1_backlog_line and "CONTRIBUTING" in l1_backlog_line and "inline Python" in l1_backlog_line, "docs/review-backlog.md must close L1 with contributor script-style guidance")
+for needle in (
+    "Keep public helper entrypoints as shell or PowerShell wrappers",
+    "prefer inline Python in the wrapper",
+    "Reserve standalone Python files for the main CLI",
+    "avoid syntax newer than the macOS system Python",
+):
+    require(needle in contributing, f"CONTRIBUTING.md must document script style rule: {needle}")
 require("128gb-ds4-flash" in changelog and "DwarfStar" in changelog, "CHANGELOG.md must mention ds4/DwarfStar public beta work")
 require("THIRD_PARTY_NOTICES.md" in changelog, "CHANGELOG.md must mention third-party notices")
 require("antirez/ds4" in third_party_notices and "antirez/deepseek-v4-gguf" in third_party_notices, "THIRD_PARTY_NOTICES.md must include ds4 runtime and model sources")
