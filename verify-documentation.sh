@@ -116,7 +116,13 @@ require(openrouter_entry.get("list_command") == "./bin/lac provider models openr
 
 workflow_ci = (root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
 public_beta_local = (root / "scripts/verify-public-beta-local.sh").read_text(encoding="utf-8")
+verify_config_schema = (root / "scripts/verify-config-schema.sh").read_text(encoding="utf-8")
 provider_doc_freshness = (root / "scripts/check-provider-doc-freshness.sh").read_text(encoding="utf-8")
+require("load_jsonc" in verify_config_schema, "scripts/verify-config-schema.sh must parse JSONC config files")
+require('root / "opencode.template.jsonc"' in verify_config_schema, "scripts/verify-config-schema.sh must cover opencode.template.jsonc")
+require('root / "templates/opencode/opencode.example.jsonc"' in verify_config_schema, "scripts/verify-config-schema.sh must cover the OpenCode example template")
+require("./scripts/verify-config-schema.sh" in public_beta_local, "scripts/verify-public-beta-local.sh must run config schema checks")
+require("./scripts/verify-config-schema.sh" in workflow_ci, ".github/workflows/ci.yml must run config schema checks")
 require("--strict" in provider_doc_freshness, "scripts/check-provider-doc-freshness.sh must expose strict mode")
 require("--max-age-days" in provider_doc_freshness, "scripts/check-provider-doc-freshness.sh must expose max-age threshold")
 require("--as-of" in provider_doc_freshness, "scripts/check-provider-doc-freshness.sh must expose deterministic as-of date")
@@ -144,6 +150,15 @@ m7_backlog_line = next((line for line in review_backlog.splitlines() if line.sta
 require("[x]" in m7_backlog_line and "scripts/check-provider-doc-freshness.sh" in m7_backlog_line, "docs/review-backlog.md must close M7 with the provider doc freshness warning")
 l3_backlog_line = next((line for line in review_backlog.splitlines() if line.startswith("| L3 |")), "")
 require("[x]" in l3_backlog_line and "owner" in l3_backlog_line and "target" in l3_backlog_line, "docs/review-backlog.md must close L3 with owner/target release-state coverage")
+l4_backlog_line = next((line for line in review_backlog.splitlines() if line.startswith("| L4 |")), "")
+require(
+    "[x]" in l4_backlog_line
+    and "scripts/verify-config-schema.sh" in l4_backlog_line
+    and "opencode.template.jsonc" in l4_backlog_line
+    and ".github/workflows/ci.yml" in l4_backlog_line
+    and "scripts/verify-public-beta-local.sh" in l4_backlog_line,
+    "docs/review-backlog.md must close L4 with schema/CI/local verifier evidence",
+)
 require("128gb-ds4-flash" in changelog and "DwarfStar" in changelog, "CHANGELOG.md must mention ds4/DwarfStar public beta work")
 require("THIRD_PARTY_NOTICES.md" in changelog, "CHANGELOG.md must mention third-party notices")
 require("antirez/ds4" in third_party_notices and "antirez/deepseek-v4-gguf" in third_party_notices, "THIRD_PARTY_NOTICES.md must include ds4 runtime and model sources")
