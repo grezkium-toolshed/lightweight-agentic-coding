@@ -263,6 +263,8 @@ release_gates = json.loads((root / "docs/release/gates.json").read_text(encoding
 manual_validation = (root / "docs/release/MANUAL_VALIDATION.md").read_text(encoding="utf-8")
 release_checklist = (root / "RELEASE_CHECKLIST.md").read_text(encoding="utf-8")
 release_open_questions = release_state.split("### Open Questions", 1)[1].split("### Completed", 1)[0]
+release_completed = release_state.split("### Completed", 1)[1].split("### Deferred", 1)[0]
+release_deferred = release_state.split("### Deferred", 1)[1].split("### Next Session", 1)[0]
 open_question_lines = [
     line
     for line in release_open_questions.splitlines()
@@ -283,6 +285,30 @@ require(
     "Free model availability on OpenRouter" not in release_state.split("### Open Questions", 1)[1].split("### Completed", 1)[0],
     "docs/release/STATE.md must not keep OpenRouter free-model availability under Open Questions",
 )
+require(
+    "close or explicitly defer live validation for each documented hardware tier" not in release_open_questions,
+    "docs/release/STATE.md must resolve hardware-tier validation scope instead of keeping it open-ended",
+)
+for needle in (
+    "Hardware validation scope resolved for public beta",
+    "release-blocking live proof is limited",
+    "`24gb` Unix fresh-clone gate",
+    "`128gb-ds4-flash` gate",
+    "not marketed as hardware-validated",
+):
+    require(needle in release_completed, f"docs/release/STATE.md must record completed hardware-scope decision: {needle}")
+for needle in (
+    "Live hardware validation for non-gating local profiles",
+    "`16gb`",
+    "`macos-16gb`",
+    "`32gb`",
+    "`64gb`",
+    "`gemma-*`",
+    "`128gb-multi`",
+    "`128gb-qwen122b`",
+    "`128gb-minimax`",
+):
+    require(needle in release_deferred, f"docs/release/STATE.md must defer non-gating hardware validation scope: {needle}")
 for text, path in (
     (release_index, "docs/release/README.md"),
     (manual_validation, "docs/release/MANUAL_VALIDATION.md"),

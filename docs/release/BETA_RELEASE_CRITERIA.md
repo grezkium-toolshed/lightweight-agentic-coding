@@ -13,6 +13,6 @@ This repo is targeting a public beta, not a stable v1.
 - `docs/release/MANUAL_VALIDATION.md` has every gate marked closed with evidence
 - `./scripts/release-gate-report.sh` exits successfully
 - Linux CI checks in `.github/workflows/ci.yml` are green on current default branch
-- live validation has been performed on the documented paths
+- live validation has been performed on the release-blocking documented paths in `docs/release/gates.json`; non-gating profiles remain identified by verification tier and are not marketed as hardware-validated until evidence exists
 - repo naming and public framing are consistent with `lac` — Lightweight Agentic Coding
 - no stale or archived branches remain in the active tree
