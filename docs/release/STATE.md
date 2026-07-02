@@ -71,6 +71,7 @@ Release gate report: `./scripts/release-gate-report.sh` intentionally fails unti
 
 ### Deferred (post-beta)
 - Windows CI lane restoration; for now, validate Windows via local/manual checks until native PowerShell verification coverage exists
+- `scripts/lac.py` module split into focused command modules; the current 2642-line CLI is tested and beta-usable, while a pre-beta extraction would carry unnecessary regression risk
 - Performance telemetry
 - Profile composition (mix local + cloud in one profile)
 - Structured feedback loop

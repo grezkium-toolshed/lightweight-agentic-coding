@@ -161,6 +161,9 @@ require(
 )
 l1_backlog_line = next((line for line in review_backlog.splitlines() if line.startswith("| L1 |")), "")
 require("[x]" in l1_backlog_line and "CONTRIBUTING" in l1_backlog_line and "inline Python" in l1_backlog_line, "docs/review-backlog.md must close L1 with contributor script-style guidance")
+m9_backlog_line = next((line for line in review_backlog.splitlines() if line.startswith("| M9 |")), "")
+require("[x]" in m9_backlog_line and "Deferred to post-beta technical debt" in m9_backlog_line and "scripts/lac.py" in m9_backlog_line, "docs/review-backlog.md must defer M9 as post-beta technical debt")
+require("scripts/lac.py` module split" in (root / "docs/release/STATE.md").read_text(encoding="utf-8"), "docs/release/STATE.md must track the lac.py module split as post-beta deferred work")
 for needle in (
     "Keep public helper entrypoints as shell or PowerShell wrappers",
     "prefer inline Python in the wrapper",
