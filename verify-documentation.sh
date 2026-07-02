@@ -142,6 +142,8 @@ plan_docs = sorted((root / "docs/plans").glob("*.md"))
 confluence_migration = (root / "docs/CONFLUENCE_QWEN35_MIGRATION_GUIDE.md").read_text(encoding="utf-8")
 m7_backlog_line = next((line for line in review_backlog.splitlines() if line.startswith("| M7 |")), "")
 require("[x]" in m7_backlog_line and "scripts/check-provider-doc-freshness.sh" in m7_backlog_line, "docs/review-backlog.md must close M7 with the provider doc freshness warning")
+l3_backlog_line = next((line for line in review_backlog.splitlines() if line.startswith("| L3 |")), "")
+require("[x]" in l3_backlog_line and "owner" in l3_backlog_line and "target" in l3_backlog_line, "docs/review-backlog.md must close L3 with owner/target release-state coverage")
 require("128gb-ds4-flash" in changelog and "DwarfStar" in changelog, "CHANGELOG.md must mention ds4/DwarfStar public beta work")
 require("THIRD_PARTY_NOTICES.md" in changelog, "CHANGELOG.md must mention third-party notices")
 require("antirez/ds4" in third_party_notices and "antirez/deepseek-v4-gguf" in third_party_notices, "THIRD_PARTY_NOTICES.md must include ds4 runtime and model sources")
@@ -233,6 +235,19 @@ release_index = (root / "docs/release/README.md").read_text(encoding="utf-8")
 release_gates = json.loads((root / "docs/release/gates.json").read_text(encoding="utf-8"))
 manual_validation = (root / "docs/release/MANUAL_VALIDATION.md").read_text(encoding="utf-8")
 release_checklist = (root / "RELEASE_CHECKLIST.md").read_text(encoding="utf-8")
+release_open_questions = release_state.split("### Open Questions", 1)[1].split("### Completed", 1)[0]
+open_question_lines = [
+    line
+    for line in release_open_questions.splitlines()
+    if line.startswith("- [ ] ")
+]
+require(open_question_lines, "docs/release/STATE.md must list still-open release questions before public beta")
+for line in open_question_lines:
+    owner = re.search(r"Owner:\s*([^;]+)", line)
+    target = re.search(r"Target condition:\s*(.+)$", line)
+    require(owner and owner.group(1).strip(), "docs/release/STATE.md open questions must include an explicit Owner")
+    require(target and target.group(1).strip(), "docs/release/STATE.md open questions must include an explicit Target condition")
+    require("TBD" not in owner.group(1) and "TBD" not in target.group(1), "docs/release/STATE.md open question owner/target must not be TBD")
 require(
     "- CI pipeline" not in release_state,
     "docs/release/STATE.md still marks CI pipeline as deferred, but CI exists",
