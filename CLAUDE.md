@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-`lac` (Lightweight Agentic Coding) is a Python CLI that orchestrates a fully local AI coding setup: it detects hardware, picks a model profile, downloads GGUF weights, manages a local inference runtime (llama.cpp `llama-server`, with optional oMLX / ds4 backends), and renders config for clients like OpenCode and OpenChamber. Cloud providers (OpenRouter, Anthropic, NVIDIA NIM) are optional overlays/fallbacks. Nothing leaves the machine unless a cloud provider is configured.
+`lac` (Lightweight Agentic Coding) is a Python CLI that sets up **private, on-device AI for everyday work** — aimed at people who want a local assistant (proofreading, drafting, document edits, and coding) without sending data to the cloud, often on locked-down corporate laptops. It detects hardware, picks a model profile, downloads GGUF weights, manages a local inference runtime (llama.cpp `llama-server`, with optional oMLX / ds4 backends), and renders config for clients — OpenChamber (chat UI, the default front door) and OpenCode (coding agent). Cloud providers (OpenRouter, Anthropic, NVIDIA NIM, OpenCode Go) are optional overlays/fallbacks. Nothing leaves the machine unless a cloud provider is configured. Best on Apple Silicon; runs on ordinary laptops too (slower on CPU).
 
 The package is `lac` (import name), distributed as `lightweight-agentic-coding`. Console entry point: `lac = lac.cli:main`. Runs on Python 3.10+.
 

@@ -47,10 +47,10 @@ Windows:
 
 ## RepositoryIntent
 
-The repo is broader than a coding-focused local setup. It should support:
+The primary goal is the easiest possible **private, on-device AI setup for everyday work** — for people (often on corporate laptops where cloud AI is blocked) who want a local assistant that keeps their data on the machine. Best on Apple Silicon; runs on ordinary laptops too. Beyond that, the same engine supports:
+- everyday knowledge work: proofreading, drafting, editing documents, summarizing
+- office automation: spreadsheets, decks, docs
 - coding and refactoring
-- documentation generation
-- spreadsheets, decks, and office automation
 - research and synthesis
 - startup, home, and team agent workflows
 

@@ -8,11 +8,22 @@ for tagged releases (public beta and beyond).
 
 ## [Unreleased]
 
-Public-release cleanup pass focused on making the project lightweight to maintain and
-correctly attributed.
+Re-aimed the project around **private, on-device AI for everyday work** (for people on machines
+where cloud AI is blocked), plus a lightweight-to-maintain, correctly-attributed cleanup pass.
+
+### Added
+
+- `scripts/bootstrap.sh` (macOS-first) + `scripts/bootstrap.ps1` — one command from nothing to a
+  running private assistant: installs prerequisites (llama.cpp, OpenCode, OpenChamber, Python),
+  then downloads a small model and opens the OpenChamber chat UI. Idempotent.
+- README re-positioned around private on-device AI for work, OpenChamber-first, with honest
+  "Will this run on my work laptop?" and "What your IT needs to allow" sections; big-memory
+  profiles moved to an "Advanced" section.
 
 ### Changed
 
+- Onboarding is OpenChamber-first (chat UI) with OpenCode as the coding option; `lac init` now
+  lists OpenChamber in prerequisites and next-steps.
 - Single source of truth for bundled data: the top-level `runtime-config/`, `catalog/`,
   `opencode.template.jsonc`, and `.opencode/` trees are canonical. `src/lac/data/` is now
   generated at build time by `scripts/stage_data.py` (invoked from `setup.py`) and gitignored.
@@ -26,6 +37,8 @@ correctly attributed.
 
 - `lac doctor --fix` no longer runs installs/downloads/runtime-start before the consent prompt
   (detection is now side-effect-free), and no longer crashes in text mode.
+- `lac init` no longer offers cloud providers that were removed from the catalog (the wizard
+  used to list `opencode-zen`/`codex-auth`/`antigravity`/`z-ai` and crash if one was selected).
 - Removed the phantom `nomic-embed-text-v1.5` model slot that 12 presets declared but no profile
   ever downloaded.
 - MiniMax profile now uses the model's embedded chat template instead of the Qwen template.

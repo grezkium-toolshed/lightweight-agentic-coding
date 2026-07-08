@@ -9,12 +9,8 @@ from lac.runtime import selected_local_runtime
 CLOUD_PROVIDER_HINTS = {
     "opencode-go": "$10/mo subscription. Curated model list. Recommended hosted overlay. Uses OPENCODE_GO_API_KEY.",
     "openrouter": "Free tier, rate-limited. Good trial fallback. Uses OPENROUTER_API_KEY.",
-    "opencode-zen": "Pay-per-request (beta). Broader catalog than Go. Uses OPENCODE_ZEN_API_KEY.",
-    "codex-auth": "Reuse ChatGPT Plus/Pro/Team via third-party OAuth helper. Uses OPENAI_API_KEY.",
-    "anthropic": "Claude 4.x family (API key only — subscription does NOT work). Uses ANTHROPIC_API_KEY.",
-    "antigravity": "Hosted fallback for frontier-grade cloud coding. Uses ANTIGRAVITY_API_KEY.",
-    "z-ai": "Z.AI GLM family. Uses ZAI_API_KEY.",
     "nvidia-nim": "NVIDIA free/trial OpenAI-compatible endpoints. Uses NVIDIA_API_KEY.",
+    "anthropic": "Claude 4.x family (API key only — subscription does NOT work). Uses ANTHROPIC_API_KEY.",
 }
 
 
@@ -182,6 +178,9 @@ def _init_prerequisites(ctx, profile, cloud_ids, load_json, command_exists, _hos
                          bool(os.environ.get(env_var)), f"Set {env_var} to use {provider_id}.",
                          command=env_command, install_hint=_install_hint(f"{provider_id}-api-key", env_var=env_var)))
     optional = [
+        _status_item("openchamber", "OpenChamber UI", command_exists("openchamber"),
+                     "Recommended chat UI (web/desktop) — the front door for non-coding use.",
+                     command="openchamber --version", optional=True, install_hint=_install_hint("openchamber")),
         _status_item("hf", "Hugging Face CLI", command_exists("hf") or command_exists("huggingface-cli"),
                      "Optional helper for `lac models sync`.", command="hf --version",
                      optional=True, install_hint=_install_hint("hf")),
@@ -230,7 +229,8 @@ def _next_steps(ctx, profile_id, cloud_ids, load_json):
         required_providers = _init_required_provider_ids(ctx, profile, cloud_ids, load_json)
         for provider_id in required_providers:
             steps.append(f"Verify {provider_id}: lac provider verify {provider_id}")
-    steps.append("Open client: lac client open opencode")
+    steps.append("Open the chat UI (recommended): lac client open openchamber")
+    steps.append("Or the coding agent: lac client open opencode")
     return steps
 
 

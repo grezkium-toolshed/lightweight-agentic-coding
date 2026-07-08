@@ -1,138 +1,117 @@
-# lac — Lightweight Agentic Coding
+# lac — private, on-device AI for your work machine
 
 [![CI](https://github.com/TuukkaTanner/lightweight-agentic-coding/actions/workflows/ci.yml/badge.svg)](https://github.com/TuukkaTanner/lightweight-agentic-coding/actions/workflows/ci.yml)
 
-Clone, initialize, and start coding with a local AI model. No cloud required.
+**When your company won't let you put work into ChatGPT or Copilot, `lac` sets up a private AI assistant that runs entirely on your own machine — one command, and nothing leaves the device.** Useful for proofreading, drafting, editing documents, and small local automations, plus coding if that's your thing.
 
-Built on [llama.cpp](https://github.com/ggml-org/llama.cpp), [Unsloth](https://unsloth.ai) model quantizations, [OpenCode](https://opencode.ai), and [Open Design](https://open-design.ai). With optional support for [oMLX](https://github.com/danielzgtg/omlx).
+It's best on Apple Silicon Macs (fast, and they usually keep local admin); it runs on ordinary Windows/Linux work laptops too — slower, but private.
 
-## Quick Start
+Built on [llama.cpp](https://github.com/ggml-org/llama.cpp), [Unsloth](https://unsloth.ai) model quantizations, [OpenCode](https://opencode.ai), and [OpenChamber](https://github.com/openchamber/openchamber). Optional [oMLX](https://github.com/danielzgtg/omlx) on Apple Silicon.
+
+> `lac` stands for "lightweight agentic coding" — it began as a local coding setup and still does that well. The engine is the same; this page just leads with the everyday-work use.
+
+## Get started (one command)
+
+On a Mac, this installs everything you need (Homebrew, llama.cpp, OpenCode, OpenChamber, a small model) and opens a private chat window — nothing leaves your machine:
 
 ```bash
-# 1. Lightweight Agentic Coding
 git clone https://github.com/TuukkaTanner/lightweight-agentic-coding.git
 cd lightweight-agentic-coding
-python3 -m pip install .
-
-# 2. Set up your hardware profile (detects and recommends)
-lac init
-
-# 3. Download models and start coding
-lac models sync
-lac runtime start
-lac client open opencode
+./scripts/bootstrap.sh
 ```
 
-That's it. `lac init` writes the active profile, and `lac models sync` uses that profile by default.
+It's idempotent — re-running skips anything already installed. When it finishes, the [OpenChamber](https://github.com/openchamber/openchamber) chat UI opens at `http://localhost:3000`, backed by a small local model. That's your private assistant.
 
-### Just want to try it fast?
-
-```bash
-lac demo --local    # download a tiny 2.5 GB model and chat locally
-lac demo            # or use the OpenRouter free tier (needs an API key, zero downloads)
-```
-
-`lac demo` opens the [OpenChamber](https://github.com/openchamber/openchamber) UI, so install that first; `--local` also needs `llama-server` on your PATH. `lac doctor` tells you what's missing.
+> A hosted `curl … | bash` one-liner will come with the first tagged release. Windows: `./scripts/bootstrap.ps1` (secondary — WSL is smoother). `lac doctor` tells you what, if anything, is missing.
 
 <details>
-<summary>New to Python or pip? (click to expand)</summary>
+<summary>Prefer to set it up by hand? (click to expand)</summary>
 
-Make sure Python 3.10+ is installed:
+Install [llama.cpp](https://github.com/ggml-org/llama.cpp), [OpenCode](https://opencode.ai), and [OpenChamber](https://github.com/openchamber/openchamber) yourself (see their docs), make sure Python 3.10+ is present, then:
 
-| OS | Check version | If missing |
-|---|---|---|
-| macOS | `python3 --version` | `brew install python` |
-| Linux | `python3 --version` | `sudo apt install python3 python3-pip` |
-| Windows | `py -3 --version` | `winget install Python.Python.3.12` |
+```bash
+python3 -m pip install .          # installs the `lac` command
+lac init                          # detects your RAM, recommends a profile
+lac models sync                   # downloads weights for the active profile
+lac runtime start                 # starts the local server (llama-server on :8080)
+lac client open openchamber       # opens the chat UI  (or: lac client open opencode)
+```
 
-Then install lac:
-
-**macOS / Linux:** `python3 -m pip install --user ./lightweight-agentic-coding`
-
-**Windows:** `py -3 -m pip install ./lightweight-agentic-coding`
-
-The `python3 -m pip` form always works — it doesn't depend on `pip` being on your PATH.
+`lac demo --local` is the quick path: it downloads a tiny 2.5 GB model and opens the chat UI in one step.
 </details>
 
-## What just happened?
+## What you get
 
-The three commands above do this:
+A local AI assistant running on **your** machine:
 
-1. **`lac init`** — detects your hardware (RAM, GPU) and picks the best model profile for your machine. Generates config for OpenCode and llama.cpp.
-2. **`lac models sync`** — downloads model weights for the active profile (resumable, shows progress).
-3. **`lac runtime start` + `lac client open opencode`** — starts the local AI server (`llama-server` on port 8080) and opens OpenCode connected to it.
+- **Private by default** — the model runs on `localhost`; your documents and prompts never leave the device unless you deliberately add a cloud provider.
+- **A chat window** (OpenChamber) for everyday work — proofreading, drafting, rewriting, summarizing, small edits — plus an agentic coding CLI (OpenCode) if you want it.
+- **Matched to your hardware** — `lac init` detects your RAM and picks a model that fits, from a tiny 4B on a 16 GB laptop up to larger models on a 128 GB MacBook Pro.
 
-You're now running a local AI coding agent on your own machine. No data leaves your computer unless you configure a cloud provider.
+## Will this run on my work laptop?
 
-## Which Profile?
+Probably — but speed depends heavily on your hardware. Local models use whatever memory and compute you have; Apple Silicon's unified memory is the sweet spot, and a CPU-only laptop works but is slower.
+
+| Your machine | Model it runs well | What it feels like | Best for |
+|---|---|---|---|
+| 16 GB Windows/Linux laptop (CPU/iGPU) | 4B (`micro`) | A few tokens/sec — usable, not snappy | Short single-shot tasks: proofread a paragraph, rewrite an email |
+| 16 GB Apple Silicon Mac | 4–12B (`macos-16gb`) | Comfortably interactive | Everyday drafting, editing, summarizing |
+| 24–32 GB Mac / workstation | up to ~27B (`24gb`, `32gb`) | Fast, strong quality | The sweet spot — daily driver |
+| 64–128 GB MacBook Pro (M-series Max) | large MoE models | Near-frontier local quality | Heavier agentic work, big context |
+
+Rule of thumb: **single-shot help (proofreading, drafting) works on almost anything; multi-step _agentic_ automation wants Apple Silicon or a real GPU** — each step is another model call, and CPU latency adds up fast.
+
+## What your IT needs to allow
+
+lac keeps everything local, but it does install and run software. If you need to clear it with IT, here's the honest list — forward this:
+
+- **Installing a few developer tools**: a local model runtime (llama.cpp), the OpenCode/OpenChamber clients, and Python 3.10+. On managed Macs, users usually have the local admin this needs.
+- **Running a local server on `localhost`** — a model server on port 8080 and the chat UI on port 3000. Nothing listens on the public network by default.
+- **Downloading model weights once** from Hugging Face (a few GB). After that it works fully offline.
+- **No cloud egress of your data.** Prompts and documents stay on the device; lac reaches the internet only to download models/tools — and only talks to a cloud AI provider if you explicitly configure one.
+
+## Which profile / model?
+
+`lac init` picks one of these based on detected RAM; you can also choose explicitly.
 
 | Machine | Profile | What you get |
 |---|---|---|
-| Any machine, demo | `micro` | Tiny CPU-only model (~2.5 GB), instant chat |
-| MacBook Air M4 16GB | `macos-16gb` | Balanced Apple Silicon profile |
-| 16GB laptop | `16gb` | Qwen 3.6 27B starter |
-| 24GB laptop/workstation | `24gb` | The sweet spot — recommended starting point |
-| 32GB workstation | `32gb` | Stronger local coding with MTP |
-| Cloud-only, free | `openrouter` | Zero downloads, uses free tier models |
+| Any machine, instant demo | `micro` | Tiny 4B model (~2.5 GB), runs on CPU, instant chat |
+| 16 GB Apple Silicon Mac | `macos-16gb` | Balanced Apple Silicon default |
+| 16 GB Windows/Linux laptop | `16gb` | 27B starter (tight — expect slower CPU speeds) |
+| 24 GB Mac / workstation | `24gb` | The sweet spot — recommended daily driver |
+| 32 GB workstation | `32gb` | Stronger, with MTP speculative decoding |
+| Cloud-only, free | `openrouter` | Zero downloads, free-tier hosted models |
 
 <details>
-<summary>All profiles (power users, Gemma, cloud-only)</summary>
+<summary>Advanced: big-memory & power-user profiles</summary>
+
+For 64 GB+ machines, the Gemma family, and specialist runtimes. These are power-user options — the mid-tier above is the daily driver for most people.
 
 | Profile | What you get |
 |---|---|
 | `64gb` | Qwen 3.6 35B-A3B Q8 + MTP |
-| `128gb-multi` | Multi-model Qwen workstation |
-| `128gb-qwen122b` | Large-model Qwen-focused |
+| `128gb-multi` | Multi-model Qwen workstation (llama.cpp) |
+| `128gb-qwen122b` | Large-model Qwen-focused (llama.cpp) |
 | `128gb-minimax` | MiniMax M2.7 (IQ4_XS) |
-| `128gb-ds4-flash` | DeepSeek V4 Flash via ds4/DwarfStar (see below) |
-| `gemma-16gb` | Gemma 4 26B-A4B (Q4) |
-| `gemma-24gb` | Gemma 4 31B (Q4) + 26B-A4B (Q4) |
-| `gemma-32gb` | Gemma 4 31B (Q8) + 26B-A4B (Q4) |
-| `gemma-64gb` | Gemma 4 31B (BF16) multi-model |
+| `128gb-ds4-flash` | DeepSeek V4 Flash via [antirez's ds4/DwarfStar](https://github.com/antirez/ds4). Needs a separately-built `ds4-server` (`git clone https://github.com/antirez/ds4 && make`; set `DS4_BIN`). The ceiling of what a top-spec 128 GB MacBook Pro runs locally; the CUDA build (`make cuda-generic`) is community-validated. |
+| `gemma-16gb` … `gemma-64gb` | Gemma 4 family, various sizes |
 | `opencode-go` | Cloud-only, OpenCode Go subscription |
+
 </details>
-
-### 128GB machines (Mac Studio, DGX Spark)
-
-The flagship large-memory profile is **`128gb-ds4-flash`** — DeepSeek V4 Flash served through
-[antirez's ds4/DwarfStar](https://github.com/antirez/ds4) runtime, aimed at 128GB+ unified-memory
-machines. lac invokes `ds4-server` but does not install it; build it first and put it on your PATH:
-
-```bash
-git clone https://github.com/antirez/ds4
-# Mac Studio / Apple Silicon:
-cd ds4 && make
-# DGX Spark / CUDA:
-cd ds4 && make cuda-generic
-export DS4_BIN="$PWD/ds4-server"
-
-lac models sync 128gb-ds4-flash   # ~80 GB download
-lac profile apply 128gb-ds4-flash
-lac runtime start
-```
-
-> **Platform notes.** The Apple Silicon path (Mac Studio / Mac Pro, 128GB+) is the maintainer's
-> own target hardware. The DGX Spark / CUDA path is spec'd from published details and welcomes
-> community validation — CI can't exercise the external `ds4-server` binary on either. If you run
-> one, [hardware profile reports](.github/ISSUE_TEMPLATE/hardware_profile_request.md) are welcome.
-> The Qwen-based `128gb-multi` / `128gb-qwen122b` profiles run on the default llama.cpp path and
-> don't need ds4.
 
 ## Platform support
 
-macOS (Apple Silicon) is the primary tested platform. Linux is exercised by CI for config,
-schema, and packaging (not GPU runtime). Windows is best-effort: PowerShell wrappers are provided
-and kept in parity, but there is no Windows CI yet. `lac doctor` reports what your platform is
-missing.
+**macOS (Apple Silicon) is the primary, tested platform** — best performance (unified memory + Metal) and the fewest install hurdles. Linux is CI-checked for config, schema, and packaging (not GPU runtime). Windows is best-effort: PowerShell wrappers are provided and kept in parity, but there's no Windows CI yet, and WSL2 is the smoothest Windows path. `lac doctor` reports what your platform is missing.
 
 ## Daily use
 
 ```bash
 lac runtime start                  # Start local server
-lac runtime stop                   # Stop local server
+lac client open openchamber        # Open the chat UI (http://localhost:3000)
+lac client open opencode           # Or the coding agent CLI
 lac runtime status                 # Check runtime state
-lac client open opencode           # Launch OpenCode CLI
-lac client open openchamber        # Launch web UI (http://localhost:3000)
+lac runtime stop                   # Stop local server
 lac doctor                         # Validate setup
 ```
 
@@ -179,4 +158,4 @@ attribution and runtime/model source notes.
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, coding style, and submission guidelines.
 See [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) for community expectations.
-See [`SUPPORT.md`](SUPPORT.md) for issue routing and public-beta support expectations.
+See [`SUPPORT.md`](SUPPORT.md) for issue routing and best-effort community support expectations.
