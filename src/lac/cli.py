@@ -304,6 +304,37 @@ def run_models_sync(profile_id):
     return models_sync(profile_id)
 
 
+def _shell_profile_path():
+    """Best-effort path to the user's shell rc for persisting an env var (POSIX shells)."""
+    if sys.platform.startswith("win"):
+        return None
+    shell = os.environ.get("SHELL", "")
+    home = Path.home()
+    if shell.endswith("zsh"):
+        return home / ".zshrc"
+    if shell.endswith("bash"):
+        return home / ".bashrc"
+    return None
+
+
+def _offer_persist_env(name, value):
+    """Persist an env var to the user's shell profile if possible, else print the export line."""
+    export_line = f'export {name}="{value}"'
+    rc = _shell_profile_path()
+    if rc is not None and rc.is_file():
+        save = input(f"Save to {rc} for future sessions? [Y/n]: ").strip().lower()
+        if save in ("", "y", "yes"):
+            existing = rc.read_text(encoding="utf-8")
+            if name in existing:
+                print(f"{name} already present in {rc.name} — skipping.")
+            else:
+                rc.write_text(existing.rstrip("\n") + f"\n{export_line}\n", encoding="utf-8")
+                print(f"Saved to {rc}. Restart your shell or run 'source {rc}'.")
+            return
+    print("To persist it for future sessions, add this to your shell profile:")
+    print(f"  {export_line}")
+
+
 def _demo_cloud(ctx, yes=False):
     """Cloud demo: OpenRouter free tier, zero downloads."""
     api_key = os.environ.get("OPENROUTER_API_KEY", "")
@@ -317,17 +348,8 @@ def _demo_cloud(ctx, yes=False):
         if not api_key:
             print("No API key entered. Try: lac demo --local")
             return {"status": "error", "message": "No API key provided"}
-        shell_rc = Path.home() / ".zshrc"
-        if shell_rc.is_file():
-            save = input(f"Save to {shell_rc} for future sessions? [Y/n]: ").strip().lower()
-            if save in ("", "y", "yes"):
-                existing = shell_rc.read_text(encoding="utf-8")
-                if "OPENROUTER_API_KEY" not in existing:
-                    shell_rc.write_text(f"{existing}\nexport OPENROUTER_API_KEY=\"{api_key}\"\n", encoding="utf-8")
-                    print(f"Saved to {shell_rc}. Restart your shell or run 'source {shell_rc}'.")
-                else:
-                    print("OPENROUTER_API_KEY already found in .zshrc — skipping.")
         os.environ["OPENROUTER_API_KEY"] = api_key
+        _offer_persist_env("OPENROUTER_API_KEY", api_key)
     else:
         print("Using OPENROUTER_API_KEY from environment.")
 
@@ -740,8 +762,9 @@ def main():
 
     if args.command == "doctor":
         if getattr(args, "fix", False):
-            report = run_fixes(ctx, yes=False)
-            emit(report, args.json, kind="doctor")
+            report = run_fixes(ctx, yes=False)  # prints its own human-readable progress
+            if args.json:
+                print(json.dumps(report, indent=2))
             raise SystemExit(0 if report["ok"] else 1)
         report = doctor(ctx, strict=args.strict, bootstrap_hint=args.bootstrap_hint)
         emit(report, args.json, kind="doctor")

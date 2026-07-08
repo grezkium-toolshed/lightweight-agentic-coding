@@ -25,7 +25,6 @@ classifiers = [
   "Development Status :: 4 - Beta",
   "Environment :: Console",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: MacOS",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX :: Linux",
@@ -43,8 +42,8 @@ classifiers = [
 Homepage = "https://github.com/TuukkaTanner/lightweight-agentic-coding"
 Repository = "https://github.com/TuukkaTanner/lightweight-agentic-coding"
 Issues = "https://github.com/TuukkaTanner/lightweight-agentic-coding/issues"
-Changelog = "https://github.com/TuukkaTanner/lightweight-agentic-coding/blob/main/CHANGELOG.md"
-Documentation = "https://github.com/TuukkaTanner/lightweight-agentic-coding/tree/main/docs"
+Changelog = "https://github.com/TuukkaTanner/lightweight-agentic-coding/blob/master/CHANGELOG.md"
+Documentation = "https://github.com/TuukkaTanner/lightweight-agentic-coding/tree/master/docs"
 
 [project.scripts]
 lac = "lac.cli:main"

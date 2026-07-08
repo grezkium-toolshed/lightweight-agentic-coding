@@ -2,14 +2,13 @@
 
 ## Supported Versions
 
-The repository follows rolling updates on `main` until a tagged public beta process is introduced.
-Public beta release remains gated until GitHub Private Vulnerability Reporting is enabled for this repository.
+The repository follows rolling updates on the `master` branch. Only the latest state is supported.
 
 ## Reporting a Vulnerability
 
-For the public beta, use GitHub Private Vulnerability Reporting for this repository. If it is not enabled yet, the public beta checklist stays open.
+Use GitHub Private Vulnerability Reporting for this repository where available.
 
-Until that is enabled, do not post exploit details in public issues. Coordinate privately with the maintainers before disclosure.
+Do not post exploit details in public issues. Coordinate privately with the maintainers before disclosure.
 
 Include:
 - impact summary

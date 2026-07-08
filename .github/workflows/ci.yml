@@ -10,67 +10,13 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Bash Syntax Check
-        run: |
-          set -x
-          bash -n scripts/*.sh
-          bash -n verify-*.sh
-          for f in runtime-config/launch/*.sh; do [ -f "$f" ] && bash -n "$f"; done
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-      - name: Integration Test
-        run: set -x && ./scripts/integration-test.sh
+      - name: Offline contract check
+        run: ./scripts/verify.sh
 
-      - name: Package Build Check
-        run: set -x && ./scripts/verify-package-build.sh
-
-      - name: Config Schema Check
-        run: set -x && ./scripts/verify-config-schema.sh
-
-      - name: Profile and Preset Parity Check
-        run: set -x && ./scripts/verify-profiles-sync.sh
-
-      - name: Documentation Consistency Check
-        run: set -x && ./verify-documentation.sh
-
-      - name: OpenCode Asset Schema Check
-        run: set -x && ./scripts/verify-opencode-assets.sh
-
-      - name: Provider Catalog Validation
-        run: set -x && ./scripts/verify-provider-catalog.sh
-
-      - name: Provider Doc Freshness Warning
-        run: set -x && ./scripts/check-provider-doc-freshness.sh
-
-      - name: Release Local Audit
-        run: set -x && ./scripts/release-local-audit.sh
-
-      - name: Release Gate Report Self-Test
-        run: set -x && ./scripts/test-release-gate-report.sh
-
-      - name: V2 CLI Contract Check
-        run: set -x && ./scripts/verify-v2-contract.sh
-
-      - name: OpenCode Agent and Skill Presence Check
-        run: |
-          set -x
-          test -f .opencode/agents/architecture-reviewer.md
-          test -f .opencode/agents/release-reviewer.md
-          test -f .opencode/agents/reality-checker.md
-          test -f .opencode/skills/docx-workflow/SKILL.md
-          test -f .opencode/skills/pptx-workflow/SKILL.md
-          test -f .opencode/skills/xlsx-workflow/SKILL.md
-
-      - name: Public Beta Asset Presence Check
-        run: |
-          set -x
-          test -f RELEASE_CHECKLIST.md
-          test -f state/README.md
-          test -f catalog/assets.json
-          test -f catalog/workflow-packs.json
-          test -f catalog/providers.json
-          test -f catalog/scenarios.json
-          test -f .github/ISSUE_TEMPLATE/config.yml
-          test -f .github/ISSUE_TEMPLATE/bug_report.md
-          test -f .github/ISSUE_TEMPLATE/docs_mismatch.md
-          test -f .github/ISSUE_TEMPLATE/provider_model_drift.md
-          test -f .github/ISSUE_TEMPLATE/hardware_profile_request.md
+      - name: Integration test (CLI workflow, no GPU)
+        run: ./scripts/integration-test.sh

@@ -1,6 +1,7 @@
 # Support
 
-lac is preparing for a public beta. Support is best-effort until the release gates in `docs/release/MANUAL_VALIDATION.md` are closed.
+lac is a community project maintained on a best-effort basis. It works today, but it is a
+small side project, not a supported product — please set expectations accordingly.
 
 ## Where to Ask
 
@@ -20,15 +21,8 @@ lac runtime status --json
 lac provider verify --all --json
 ```
 
-For public-beta validation work, run:
-
-```bash
-./scripts/verify-public-beta-local.sh
-./scripts/release-manual-next-steps.sh
-```
-
 Include your OS, hardware profile, selected runtime, relevant logs under `state/logs/`, and whether you installed from a checkout or wheel.
 
 ## Response Expectations
 
-There is no production support SLA during public beta. Maintainers prioritize security reports, release-blocking onboarding failures, reproducible runtime regressions, and provider/model drift.
+There is no support SLA. Maintainer attention, when available, prioritizes security reports, reproducible onboarding failures, runtime regressions, and provider/model drift.

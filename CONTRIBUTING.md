@@ -8,35 +8,14 @@ Contributions are welcome — please follow the checks below before submitting a
 
 ## Local Checks Before PR
 
-For public-beta work, prefer the one-command local gate:
+Two commands cover CI:
 
 ```bash
-./scripts/verify-public-beta-local.sh
+./scripts/verify.sh            # shell syntax, config/provider schema, package staging, licensing guard
+./scripts/integration-test.sh  # full CLI workflow, no GPU or network
 ```
 
-This runs the local automated checks and summarizes any manual release gates that still require external evidence.
-
-For smaller changes, run the relevant focused checks below.
-
-1. Run shell syntax checks:
-
-```bash
-bash -n scripts/*.sh
-bash -n verify-*.sh
-bash -n runtime-config/launch/*.sh
-```
-
-2. Run offline contract checks:
-
-```bash
-./scripts/verify-config-schema.sh
-./scripts/verify-profiles-sync.sh
-./scripts/verify-opencode-assets.sh
-./scripts/verify-provider-catalog.sh
-./verify-documentation.sh
-```
-
-3. Regenerate profile config and run doctor:
+Then regenerate profile config and run doctor:
 
 ```bash
 ./bin/lac profile apply 24gb
@@ -48,14 +27,22 @@ bash -n runtime-config/launch/*.sh
 - Do not commit model binaries (`*.gguf`) or local caches.
 - Do not commit generated runtime state (`state/runtime/presets.active.ini`, `state/active/profile.txt`, `state/clients/opencode/opencode.json`, logs, PID files, or reports).
 - Do not commit local tool state from `.qwen/` or `.claude/`.
+- Do not edit `src/lac/data/` — it is generated from the top-level trees at build time (see below). Edit the canonical top-level files instead.
 - Keep both Unix (`.sh`) and Windows (`.ps1`) parity when changing workflows.
 - Keep llama.cpp as the default runtime path; specialist profiles may opt into runtimes such as oMLX or ds4 explicitly.
 - Prefer additive profile changes over hardcoded machine-specific paths.
-- Keep `.opencode/agents/` and `.opencode/skills/` intentionally small and task-focused.
+- Keep `.opencode/agents/` and first-party `.opencode/skills/` intentionally small and task-focused. Third-party design skills/systems are opt-in fetch (`od mcp install opencode`), not vendored here.
+
+## Data staging (one source of truth)
+
+The canonical config/asset trees live at the repo top level: `runtime-config/`, `catalog/`,
+`opencode.template.jsonc`, and `.opencode/`. The installed package needs a copy under
+`src/lac/data/`, so `scripts/stage_data.py` regenerates that copy at build time (invoked from
+`setup.py`). `src/lac/data/` is gitignored — never hand-edit or commit it. To refresh it locally,
+run `./scripts/stage-data.sh` (or `python3 scripts/stage_data.py`).
 
 ## Script Style
 
 - Keep public helper entrypoints as shell or PowerShell wrappers: `./scripts/*.sh`, `./bin/lac`, and `./bin/lac.ps1` should be directly runnable from a clean checkout.
-- For small validation and release helpers, prefer inline Python in the wrapper (`python3 - <<'PY'`) and shared imports from `scripts/lib/`. This keeps the command surface portable while avoiding duplicated parsers.
-- Reserve standalone Python files for the main CLI (`scripts/lac.py`) and shared library modules under `scripts/lib/`.
-- Inline Python used by local verification helpers should avoid syntax newer than the macOS system Python used by the public-beta smoke path.
+- The CLI lives in `src/lac/` (entry point `lac.cli:main`). For small validation helpers, prefer inline Python in the wrapper (`python3 - <<'PY'`) and shared imports from `scripts/lib/`.
+- Inline Python in verification helpers should avoid syntax newer than the macOS system Python.

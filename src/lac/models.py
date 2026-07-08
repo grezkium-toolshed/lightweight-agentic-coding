@@ -154,13 +154,26 @@ def _should_stage_mlx():
     raise SystemExit(f"Unsupported AI_INCLUDE_MLX value: {value}")
 
 
-def _verify_checksum(file_path, models_dir):
-    checksums_file = Path(models_dir) / "checksums.json"
-    if not checksums_file.is_file():
-        return True
+def _load_known_checksums(models_dir, root=None):
+    """Merge bundled checksums (catalog/checksums.json) with any local models_dir/checksums.json."""
+    if root is None:
+        from lac.context import ROOT as DEFAULT_ROOT
+        root = DEFAULT_ROOT
+    merged = {}
+    for path in (Path(root) / "catalog" / "checksums.json", Path(models_dir) / "checksums.json"):
+        if path.is_file():
+            try:
+                merged.update(json.loads(path.read_text(encoding="utf-8")).get("checksums", {}))
+            except (ValueError, OSError):
+                continue
+    return merged
+
+
+def _verify_checksum(file_path, models_dir, known_checksums=None):
+    if known_checksums is None:
+        known_checksums = _load_known_checksums(models_dir)
     rel_path = str(Path(file_path).relative_to(models_dir))
-    checksums = json.loads(checksums_file.read_text(encoding="utf-8"))
-    expected = checksums.get("checksums", {}).get(rel_path, "")
+    expected = known_checksums.get(rel_path, "")
     if not expected:
         return True
     actual = hashlib.sha256(Path(file_path).read_bytes()).hexdigest()
@@ -186,7 +199,7 @@ def _get_expected_bytes(url):
     return 0
 
 
-def _download_one(subdir, filename, repo, remote, min_mb, models_dir):
+def _download_one(subdir, filename, repo, remote, min_mb, models_dir, known_checksums=None):
     target_dir = Path(models_dir) / subdir
     target_file = target_dir / filename
     tmp_file = target_file.with_name(filename + ".downloading")
@@ -253,7 +266,7 @@ def _download_one(subdir, filename, repo, remote, min_mb, models_dir):
     elif new_mb < min_mb:
         print(f"[fail] Download too small for {filename} ({new_mb}MB < {min_mb}MB); keeping file for inspection/resume", file=sys.stderr)
         return False
-    _verify_checksum(str(target_file), models_dir)
+    _verify_checksum(str(target_file), models_dir, known_checksums)
     print(f"[ ok ] {target_file} ({new_mb}MB{' of ~' + str(expected_mb) + 'MB' if expected_mb else ''})")
     return True
 
@@ -295,6 +308,7 @@ def models_sync(profile_id, models_dir=None, root=None):
     stage_mlx = _should_stage_mlx()
     if stage_mlx and profile["mlx"]:
         print("MLX staging: enabled for macOS")
+    known_checksums = _load_known_checksums(models_dir, root)
     failures = 0
     for item in profile["gguf"]:
         if len(item) == 4:
@@ -302,7 +316,7 @@ def models_sync(profile_id, models_dir=None, root=None):
             remote = filename
         else:
             subdir, filename, repo, min_mb, remote = item
-        if not _download_one(subdir, filename, repo, remote, min_mb, models_dir):
+        if not _download_one(subdir, filename, repo, remote, min_mb, models_dir, known_checksums):
             failures += 1
     if stage_mlx:
         for repo in profile["mlx"]:

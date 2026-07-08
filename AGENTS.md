@@ -96,21 +96,20 @@ Manual validation:
 - `state/runtime/presets.active.ini`: generated active preset
 - `state/active/profile.txt`: generated selected profile marker
 - `state/clients/opencode/opencode.json`: generated OpenCode runtime config
-- `scripts/`: compatibility wrappers, release helpers, and verification scripts
+- `scripts/`: compatibility wrappers, `verify.sh`/`integration-test.sh` checks, and the build-time data stager (`stage_data.py`)
 
-## Open Design Integration
+## Open Design Integration (opt-in)
 
-Open Design (nexu-io/open-design) provides design skills, craft rules, and brand design systems curated under:
-- `.opencode/craft/` — 12 brand-agnostic design rulebooks (typography, color, anti-AI-slop, etc.)
-- `.opencode/skills/` — 35 curated skills
-- `.opencode/design-systems/` — 20 brand `DESIGN.md` files (Linear, Vercel, Apple, Stripe, etc.)
-
-These work offline without any daemon — ideal for local models.
-
-For the full 155-skill / 150-design-system catalog, optionally install the MCP server:
+lac bundles only its own first-party agents and workflow skills. The Open Design
+(nexu-io/open-design) catalog — design skills, craft rulebooks, and brand design-system
+references — is **not** vendored here; it is fetched on demand so lac does not redistribute
+third-party/proprietary content. Install it yourself:
 
 ```bash
 curl -fsSL https://open-design.ai/install.sh | sh -s opencode
-# Or if od CLI is already installed:
+# Or if the od CLI is already installed:
 od mcp install opencode
 ```
+
+Once installed it works offline without a daemon — ideal for local models. See
+`THIRD_PARTY_NOTICES.md` for attribution and license notes on that catalog.

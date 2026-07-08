@@ -63,10 +63,9 @@ The default posture is **local always included, cloud as an optional overlay**. 
 
 Supported cloud overlays in `opencode.template.jsonc`:
 - OpenRouter free tier
-- OpenCode Go (flat subscription) and OpenCode Zen (pay-per-request)
-- Codex via ChatGPT subscription (third-party OAuth helper)
+- OpenCode Go (flat subscription)
+- NVIDIA NIM (free / trial)
 - Anthropic API (API-key only; Claude.ai subscription does not apply)
-- Antigravity, z.ai, NVIDIA NIM
 
 There is no dedicated "hybrid profile" tier — hybridness comes from enabling overlays on top of any local profile.
 

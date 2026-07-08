@@ -111,8 +111,8 @@ Use free or trial-backed cloud providers when:
 Recommended fallback order:
 1. NVIDIA NIM
 2. OpenRouter free models
-3. z.ai
-4. Antigravity
+3. OpenCode Go (subscription)
+4. Anthropic API
 
 ## Office and documentation workloads
 

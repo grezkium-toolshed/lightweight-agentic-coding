@@ -1,9 +1,20 @@
+import sys
 from pathlib import Path
 
 from setuptools import find_packages, setup
 
 
 ROOT = Path(__file__).parent
+
+# Regenerate src/lac/data/ (gitignored) from the canonical top-level trees before the
+# build collects package data. When building from an unpacked sdist, scripts/ is not shipped
+# and src/lac/data is already staged, so the import fails harmlessly and we skip.
+sys.path.insert(0, str(ROOT / "scripts"))
+try:
+    import stage_data  # noqa: E402
+    stage_data.stage()
+except ImportError:
+    pass
 
 
 setup(
@@ -28,7 +39,6 @@ setup(
         "Development Status :: 4 - Beta",
         "Environment :: Console",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
         "Operating System :: MacOS",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: POSIX :: Linux",
@@ -45,8 +55,8 @@ setup(
         "Homepage": "https://github.com/TuukkaTanner/lightweight-agentic-coding",
         "Repository": "https://github.com/TuukkaTanner/lightweight-agentic-coding",
         "Issues": "https://github.com/TuukkaTanner/lightweight-agentic-coding/issues",
-        "Changelog": "https://github.com/TuukkaTanner/lightweight-agentic-coding/blob/main/CHANGELOG.md",
-        "Documentation": "https://github.com/TuukkaTanner/lightweight-agentic-coding/tree/main/docs",
+        "Changelog": "https://github.com/TuukkaTanner/lightweight-agentic-coding/blob/master/CHANGELOG.md",
+        "Documentation": "https://github.com/TuukkaTanner/lightweight-agentic-coding/tree/master/docs",
     },
     python_requires=">=3.10",
     package_dir={"": "src"},

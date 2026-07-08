@@ -1,6 +1,6 @@
 # Generated State
 
-This directory is the v2 generated-state root for lac.
+This directory is the generated-state root for lac.
 
 Generated files live here so users can distinguish source inputs from rendered runtime state:
 
@@ -9,7 +9,6 @@ Generated files live here so users can distinguish source inputs from rendered r
 - `clients/`: rendered client configs and adapter manifests
 - `logs/`: runtime logs
 - `reports/`: doctor and smoke-test JSON reports
-- `release-evidence/`: optional manual release-gate transcripts from `scripts/release-evidence.sh`
 
 ## Important notes
 

@@ -25,6 +25,15 @@ lac client open opencode
 
 That's it. `lac init` writes the active profile, and `lac models sync` uses that profile by default.
 
+### Just want to try it fast?
+
+```bash
+lac demo --local    # download a tiny 2.5 GB model and chat locally
+lac demo            # or use the OpenRouter free tier (needs an API key, zero downloads)
+```
+
+`lac demo` opens the [OpenChamber](https://github.com/openchamber/openchamber) UI, so install that first; `--local` also needs `llama-server` on your PATH. `lac doctor` tells you what's missing.
+
 <details>
 <summary>New to Python or pip? (click to expand)</summary>
 
@@ -75,7 +84,7 @@ You're now running a local AI coding agent on your own machine. No data leaves y
 | `128gb-multi` | Multi-model Qwen workstation |
 | `128gb-qwen122b` | Large-model Qwen-focused |
 | `128gb-minimax` | MiniMax M2.7 (IQ4_XS) |
-| `128gb-ds4-flash` | DeepSeek V4 Flash via ds4/DwarfStar |
+| `128gb-ds4-flash` | DeepSeek V4 Flash via ds4/DwarfStar (see below) |
 | `gemma-16gb` | Gemma 4 26B-A4B (Q4) |
 | `gemma-24gb` | Gemma 4 31B (Q4) + 26B-A4B (Q4) |
 | `gemma-32gb` | Gemma 4 31B (Q8) + 26B-A4B (Q4) |
@@ -83,7 +92,38 @@ You're now running a local AI coding agent on your own machine. No data leaves y
 | `opencode-go` | Cloud-only, OpenCode Go subscription |
 </details>
 
-macOS is tested most thoroughly. Linux and Windows work well too.
+### 128GB machines (Mac Studio, DGX Spark)
+
+The flagship large-memory profile is **`128gb-ds4-flash`** — DeepSeek V4 Flash served through
+[antirez's ds4/DwarfStar](https://github.com/antirez/ds4) runtime, aimed at 128GB+ unified-memory
+machines. lac invokes `ds4-server` but does not install it; build it first and put it on your PATH:
+
+```bash
+git clone https://github.com/antirez/ds4
+# Mac Studio / Apple Silicon:
+cd ds4 && make
+# DGX Spark / CUDA:
+cd ds4 && make cuda-generic
+export DS4_BIN="$PWD/ds4-server"
+
+lac models sync 128gb-ds4-flash   # ~80 GB download
+lac profile apply 128gb-ds4-flash
+lac runtime start
+```
+
+> **Platform notes.** The Apple Silicon path (Mac Studio / Mac Pro, 128GB+) is the maintainer's
+> own target hardware. The DGX Spark / CUDA path is spec'd from published details and welcomes
+> community validation — CI can't exercise the external `ds4-server` binary on either. If you run
+> one, [hardware profile reports](.github/ISSUE_TEMPLATE/hardware_profile_request.md) are welcome.
+> The Qwen-based `128gb-multi` / `128gb-qwen122b` profiles run on the default llama.cpp path and
+> don't need ds4.
+
+## Platform support
+
+macOS (Apple Silicon) is the primary tested platform. Linux is exercised by CI for config,
+schema, and packaging (not GPU runtime). Windows is best-effort: PowerShell wrappers are provided
+and kept in parity, but there is no Windows CI yet. `lac doctor` reports what your platform is
+missing.
 
 ## Daily use
 
@@ -102,8 +142,8 @@ All commands support `--json` for scripting.
 
 - **Cloud providers** — add OpenRouter, Anthropic API, or OpenCode Go as fallbacks: [`docs/providers/AUTHENTICATION.md`](docs/providers/AUTHENTICATION.md)
 - **Advanced profiles** — MTP speculative decoding, oMLX on macOS, hybrid local+cloud: [`docs/architecture.md`](docs/architecture.md)
-- **Curated skills** — 30+ skills for design, office automation, research, and brainstorming: [`.opencode/skills/`](.opencode/skills/)
-- **Curated agents** — architecture review, documentation, research synthesis: [`.opencode/agents/`](.opencode/agents/)
+- **Bundled agents & skills** — architecture/release review, documentation, research synthesis, and office workflows (docx/pptx/xlsx/pdf): [`.opencode/agents/`](.opencode/agents/), [`.opencode/skills/`](.opencode/skills/)
+- **Design skills & brand systems (opt-in)** — lac does not bundle these; add the [Open Design](https://open-design.ai) catalog yourself: `curl -fsSL https://open-design.ai/install.sh | sh -s opencode`
 - **Free cloud model catalog** — `lac catalog sync-free`, see [`docs/free-coding-models.json`](docs/free-coding-models.json)
 - **Model deep dive** — tuning rationale, profile details: [`docs/model-recommendations.md`](docs/model-recommendations.md)
 

@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Support policy
-    url: https://github.com/TuukkaTanner/lightweight-agentic-coding/blob/main/SUPPORT.md
+    url: https://github.com/TuukkaTanner/lightweight-agentic-coding/blob/master/SUPPORT.md
     about: Read what belongs in issues and what evidence to include during public beta.
   - name: Security issue
     url: https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/about-coordinated-disclosure-of-security-vulnerabilities

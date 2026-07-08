@@ -39,6 +39,12 @@ dist/
 build/
 *.egg
 
+# Generated at build time from the canonical top-level trees (see scripts/stage_data.py)
+src/lac/data/
+
+# Internal working notes (kept locally, never shipped in the public tree)
+dev/
+
 # Virtual environments
 .venv/
 venv/
