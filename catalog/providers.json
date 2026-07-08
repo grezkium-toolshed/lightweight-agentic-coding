@@ -37,7 +37,7 @@
       "id": "opencode-go",
       "label": "OpenCode Go",
       "env_var": "OPENCODE_GO_API_KEY",
-      "docs_path": "docs/providers/OPENCODE_ZEN_GO.md",
+      "docs_path": "docs/providers/OPENCODE_GO.md",
       "risk_level": "low",
       "models": [
         { "id": "opencode-go/qwen3.6-plus", "risk_level": "low" },

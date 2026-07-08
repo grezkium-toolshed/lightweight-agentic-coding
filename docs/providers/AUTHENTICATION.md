@@ -30,7 +30,7 @@ The probe sends a real request to each provider's baseURL with your key. `--all`
 - endpoint in repo config: `https://opencode.ai/zen/go/v1`
 - prerequisite: OpenCode Go subscription at https://opencode.ai
 - recommended usage: flat-rate subscription with a curated model list, matched to OpenCode's agentic flows
-- details: `OPENCODE_ZEN_GO.md`
+- details: `OPENCODE_GO.md`
 
 ## Anthropic API
 - recommended repo env var convention: `ANTHROPIC_API_KEY`

@@ -1,8 +1,8 @@
-# OpenCode Zen and OpenCode Go
+# OpenCode Go
 
-OpenCode ships two first-party hosted offerings that integrate natively with the OpenCode client. They are a useful cloud overlay when you want a curated set of models without assembling credentials from multiple vendors.
+lac configures **OpenCode Go**, a first-party hosted offering that integrates natively with the OpenCode client — a useful cloud overlay when you want a curated set of models without assembling credentials from multiple vendors. Its sibling **OpenCode Zen** (pay-per-request) is described below for context but is not a configured provider in lac.
 
-**Last verified:** 2026-04-23 — cross-check https://opencode.ai/docs/zen/ and https://opencode.ai/docs/go/ before each beta cut.
+Cross-check https://opencode.ai/docs/go/ (and https://opencode.ai/docs/zen/) for current model lists.
 
 ## Quick comparison
 

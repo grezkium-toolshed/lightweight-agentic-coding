@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lightweight-agentic-coding"
-version = "0.1.0"
+dynamic = ["version"]
 description = "lac — Lightweight Agentic Coding CLI. Profile management, runtime lifecycle, and provider orchestration for local AI."
 requires-python = ">=3.10"
 readme = "README.md"
@@ -47,6 +47,9 @@ Documentation = "https://github.com/TuukkaTanner/lightweight-agentic-coding/tree
 
 [project.scripts]
 lac = "lac.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "lac.VERSION" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
