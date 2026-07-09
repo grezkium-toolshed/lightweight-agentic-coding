@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PYTHON_BIN=""
-for candidate in "${PYTHON:-}" python3.14 python3.13 python3.12 python3.11 python3.10 python3 python; do
+for candidate in "${PYTHON:-}" python python3 python3.14 python3.13 python3.12 python3.11 python3.10; do
   [[ -n "$candidate" ]] || continue
   command -v "$candidate" >/dev/null 2>&1 || continue
   if "$candidate" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1; then
