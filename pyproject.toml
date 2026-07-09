@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "lightweight-agentic-coding"
 dynamic = ["version"]
-description = "lac — Lightweight Agentic Coding CLI. Profile management, runtime lifecycle, and provider orchestration for local AI."
+description = "Private, on-device AI setup and orchestration for everyday work and coding."
 requires-python = ">=3.10"
 readme = "README.md"
 license = "MIT"
@@ -15,9 +15,12 @@ authors = [
 ]
 keywords = [
   "agentic-coding",
+  "private-ai",
   "llama.cpp",
   "opencode",
   "local-ai",
+  "on-device-ai",
+  "office-automation",
   "apple-silicon",
   "ds4"
 ]
@@ -25,6 +28,7 @@ classifiers = [
   "Development Status :: 4 - Beta",
   "Environment :: Console",
   "Intended Audience :: Developers",
+  "Intended Audience :: End Users/Desktop",
   "Operating System :: MacOS",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX :: Linux",
@@ -35,6 +39,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Topic :: Software Development",
+  "Topic :: Office/Business",
   "Topic :: System :: Systems Administration"
 ]
 

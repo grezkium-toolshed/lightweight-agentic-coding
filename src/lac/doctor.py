@@ -73,7 +73,7 @@ def _install_hint(tool_id):
             "windows": ["winget install Python.Python.3.12"],
         },
         "openchamber": {
-            "macos": ["curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"],
+            "macos": ["brew install node pnpm", "curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"],
             "linux": ["curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"],
             "windows": ["curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"],
         },
@@ -239,7 +239,7 @@ def _check_model_files(ctx):
     profile = PROFILE_MODELS.get(profile_id)
     if not profile:
         return True
-    models_dir = Path(os.environ.get("AI_MODELS_DIR", str(ctx.root / "models")))
+    models_dir = ctx.models_root
     for item in profile["gguf"]:
         subdir, filename = item[0], item[1]
         if not (models_dir / subdir / filename).is_file():
@@ -256,7 +256,7 @@ def _fix_model_files(ctx, yes=False):
     if active and active.get("runtime_mode") == "cloud":
         print("  Cloud profile — no local models needed.")
         return True
-    return models_sync(profile_id, root=ctx.root) == 0
+    return models_sync(profile_id, models_dir=ctx.models_root, root=ctx.root) == 0
 
 
 # P3 — local runtime responding

@@ -19,6 +19,8 @@ where cloud AI is blocked), plus a lightweight-to-maintain, correctly-attributed
 - README re-positioned around private on-device AI for work, OpenChamber-first, with honest
   "Will this run on my work laptop?" and "What your IT needs to allow" sections; big-memory
   profiles moved to an "Advanced" section.
+- A compact public-release checklist and installed wheel/sdist verification across Python
+  3.10-3.13, plus a native Windows PowerShell CI smoke test.
 
 ### Changed
 
@@ -27,8 +29,8 @@ where cloud AI is blocked), plus a lightweight-to-maintain, correctly-attributed
 - Single source of truth for bundled data: the top-level `runtime-config/`, `catalog/`,
   `opencode.template.jsonc`, and `.opencode/` trees are canonical. `src/lac/data/` is now
   generated at build time by `scripts/stage_data.py` (invoked from `setup.py`) and gitignored.
-- CI collapsed to two scripts: `scripts/verify.sh` (syntax, schema, staging, licensing guard)
-  and `scripts/integration-test.sh`.
+- CI uses the offline verifier and integration suite on Linux/macOS, plus clean artifact
+  build/install checks and a Windows PowerShell lane. GitHub Actions are commit-pinned.
 - Provider catalog trimmed to the documented core: `local-cluster`, `openrouter`, `anthropic`,
   `opencode-go`, `nvidia-nim`; provider freshness metadata dropped.
 - `SUPPORT.md`/`SECURITY.md` reworded to reflect a best-effort community project on `master`.
@@ -44,12 +46,21 @@ where cloud AI is blocked), plus a lightweight-to-maintain, correctly-attributed
 - MiniMax profile now uses the model's embedded chat template instead of the Qwen template.
 - Fixed `main` → `master` self-referencing links (PyPI URLs, issue template, `SECURITY.md`).
 - Bundled `catalog/checksums.json` with the demo model's SHA256 so `lac models sync micro`
-  has a real integrity check (best-effort: mismatches warn, they do not block).
+  has a blocking integrity check; mismatched files are quarantined and never launched.
+- Installed wheels now keep models, refreshed catalogs, and runtime state in writable per-user
+  directories instead of trying to modify package resources.
+- Packaged the Claude Code templates required by `lac client render claude-code`.
+- Bootstrap now installs/checks OpenChamber's Node.js 22+ and pnpm prerequisites and falls back
+  to OpenCode when the chat UI is unavailable.
+- Removed stale provider blocks and docs for providers no longer present in the supported catalog.
+- Repaired the packaged shell and PowerShell launch wrappers so they invoke the supported CLI.
+- Pinned the default Dynamic Context Pruning plugin to `3.1.14` for reproducible setup.
 
 ### Removed
 
-- Dead second CLI `scripts/lac.py` and the entire release-gate apparatus (`release-*.sh`,
-  `docs/release/gates.json`, `verify-documentation.sh`, drift-guard verify scripts).
+- Dead second CLI `scripts/lac.py` and the heavyweight release-evidence apparatus (`release-*.sh`,
+  `docs/release/gates.json`, `verify-documentation.sh`, drift-guard verify scripts); a compact
+  `RELEASE_CHECKLIST.md` remains as the public-release gate.
 - Vendored third-party design skills, craft rulebooks, and brand design-systems are no longer
   redistributed — they are opt-in fetch via the Open Design installer. See `THIRD_PARTY_NOTICES.md`.
 

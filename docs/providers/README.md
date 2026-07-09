@@ -20,7 +20,6 @@ Read next:
 - `NVIDIA_NIM.md`
 - `OPENROUTER_FREE.md`
 - `OPENCODE_GO.md`
-- `CODEX_AUTH.md`
 - `ANTHROPIC_API.md`
 - `MICROSOFT_GRAPH.md`
 - `OPENCHAMBER.md`

@@ -39,11 +39,33 @@ def _package_data_dir() -> Path:
             return Path(p)
 
 
+def _user_data_dir() -> Path:
+    """Return a writable per-user data directory without extra dependencies."""
+    configured = os.environ.get("LAC_DATA_ROOT")
+    if configured:
+        return Path(configured).expanduser()
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / "lac"
+    if sys.platform.startswith("win"):
+        return Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")) / "lac"
+    return Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "lac"
+
+
+def _user_state_dir() -> Path:
+    configured = os.environ.get("XDG_STATE_HOME")
+    if sys.platform == "darwin" or sys.platform.startswith("win"):
+        return _user_data_dir() / "state"
+    return Path(configured).expanduser() / "lac" if configured else Path.home() / ".local" / "state" / "lac"
+
+
 _REPO_ROOT = _find_repo_root()
 _PACKAGE_DATA = _package_data_dir() if _REPO_ROOT is None else None
 ROOT = _REPO_ROOT or _PACKAGE_DATA
-_STATE_DEFAULT = _REPO_ROOT / "state" if _REPO_ROOT else Path.cwd() / "state"
-STATE_ROOT = Path(_env_or_deprecated("LAC_STATE_ROOT", "AI_CLUSTER_STATE_ROOT", str(_STATE_DEFAULT)))
+DATA_ROOT = _REPO_ROOT or _user_data_dir()
+MODELS_ROOT = Path(os.environ.get("AI_MODELS_DIR", DATA_ROOT / "models")).expanduser()
+CATALOG_CACHE_ROOT = (_REPO_ROOT / "docs") if _REPO_ROOT else (DATA_ROOT / "catalog")
+_STATE_DEFAULT = _REPO_ROOT / "state" if _REPO_ROOT else _user_state_dir()
+STATE_ROOT = Path(_env_or_deprecated("LAC_STATE_ROOT", "AI_CLUSTER_STATE_ROOT", str(_STATE_DEFAULT))).expanduser()
 PORT = int(_env_or_deprecated("LAC_PORT", "AI_CLUSTER_PORT", "8080"))
 HOST = _env_or_deprecated("LAC_HOST", "AI_CLUSTER_HOST", "127.0.0.1")
 OMLX_PORT = int(os.environ.get("AI_OMLX_PORT", os.environ.get("OMLX_PORT", "8000")))
@@ -53,6 +75,9 @@ DS4_PORT = int(os.environ.get("DS4_PORT", "8000"))
 class Context:
     def __init__(self):
         self.root = ROOT
+        self.data_root = DATA_ROOT
+        self.models_root = MODELS_ROOT
+        self.catalog_cache_root = CATALOG_CACHE_ROOT
         self.state_root = STATE_ROOT
         self._is_repo = _REPO_ROOT is not None
         self.paths = {

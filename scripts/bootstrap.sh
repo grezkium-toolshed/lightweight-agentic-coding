@@ -14,6 +14,13 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 info() { printf '\033[1;34m[bootstrap]\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[bootstrap]\033[0m %s\n' "$*" >&2; }
 have() { command -v "$1" >/dev/null 2>&1; }
+node_22_plus() {
+  have node && node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 22 ? 0 : 1)' >/dev/null 2>&1
+}
+
+# Upstream installers commonly place commands here, but a newly installed shell has not
+# reloaded its profile yet.
+export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$HOME/.openchamber/bin:$PATH"
 
 OS="$(uname -s)"
 if [[ "$OS" != "Darwin" ]]; then
@@ -63,9 +70,21 @@ else
   curl -fsSL https://opencode.ai/install | bash || warn "OpenCode install failed."
 fi
 
-# 5. OpenChamber (the chat UI — your front door). Best-effort; OpenCode alone still works.
+# 5. OpenChamber prerequisites and chat UI. OpenCode remains the supported fallback.
+if ! node_22_plus || ! have pnpm; then
+  if [[ "$OS" == "Darwin" ]] && have brew; then
+    info "Installing Node.js 22+ and pnpm for OpenChamber..."
+    node_22_plus || brew install node || warn "Node.js install failed."
+    have pnpm || brew install pnpm || warn "pnpm install failed."
+  else
+    warn "OpenChamber needs Node.js 22+ and pnpm; install them to use the chat UI."
+  fi
+fi
+
 if have openchamber; then
   info "OpenChamber present — skipping."
+elif ! node_22_plus || ! have pnpm; then
+  warn "Skipping OpenChamber because Node.js 22+ or pnpm is unavailable. OpenCode will be used."
 else
   info "Installing OpenChamber..."
   curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash \
@@ -96,8 +115,10 @@ RUN_STATUS=$?
 
 # 8. What next.
 echo ""
-if [[ "$RUN_STATUS" -eq 0 ]]; then
+if [[ "$RUN_STATUS" -eq 0 ]] && have openchamber; then
   info "Done. OpenChamber should be open at http://localhost:3000"
+elif [[ "$RUN_STATUS" -eq 0 ]] && have opencode; then
+  info "Done. OpenCode was launched because OpenChamber is unavailable."
 else
   warn "First run didn't complete cleanly. Diagnose with: ./bin/lac doctor"
 fi

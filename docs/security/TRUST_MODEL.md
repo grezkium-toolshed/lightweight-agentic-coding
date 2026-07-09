@@ -5,19 +5,19 @@ This repo ships a curated set of OpenCode agents and skills. It does not bulk im
 ## What is curated here
 - project-local OpenCode subagents under `.opencode/agents/`
 - project-local office and workflow skills under `.opencode/skills/`
-- Open Design skills, craft rules, and design systems that are cataloged as community or optional assets
 - provider guidance written specifically for this repo
 - optional workflow packs that must be installed explicitly, such as the Microsoft Graph skill pack
 
 ## What is only referenced externally
 - larger third-party agent catalogs
 - community-maintained free model indexes
+- the Open Design skill, craft, and design-system catalog
 
 ## Open Design catalog assets
 
-Open Design content is bundled for offline design and prototyping workflows, but it is not treated as core trusted automation. The asset catalog marks these imports as `trust_level: community`, `support_tier: optional`, `source: upstream-external`, and `review_status: not-reviewed` until a maintainer performs a deeper review.
+Open Design content is not bundled or redistributed by lac. Users may install it directly from upstream as an opt-in design and prototyping layer. Those files are outside lac's reviewed runtime and retain their upstream licenses and trust posture.
 
-That means they may be useful references for local models, but they should not be presented as fully audited agent behaviors. When a community design asset graduates to core support, update `catalog/assets.json` with a reviewed status and document the review evidence.
+Do not present opt-in Open Design assets as lac-reviewed agent behavior. If a specific asset is ever proposed for inclusion, run the third-party intake process and record its source, license, review evidence, and minimum required permissions first.
 
 ## Optional Microsoft Graph pack
 

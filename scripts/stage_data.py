@@ -1,7 +1,7 @@
 """Stage canonical top-level data into src/lac/data/ for packaging.
 
 The top-level trees (runtime-config/, catalog/, opencode.template.jsonc, .opencode/,
-templates/opencode/) are the single source of truth. src/lac/data/ is a generated,
+and supported client templates) are the single source of truth. src/lac/data/ is a generated,
 gitignored copy that ships inside the wheel so the installed `lac` can find its data.
 
 This runs at build time (imported by setup.py) and can also be invoked directly:
@@ -66,6 +66,7 @@ def stage() -> bool:
     _copy_tree(ROOT / "catalog", DEST / "catalog")
     _copy_tree(ROOT / "runtime-config", DEST / "runtime-config")
     _copy_tree(ROOT / "templates" / "opencode", DEST / "templates" / "opencode")
+    _copy_tree(ROOT / "templates" / "claude-code", DEST / "templates" / "claude-code")
 
     opencode_dest = DEST / "opencode"
     opencode_dest.mkdir(parents=True, exist_ok=True)

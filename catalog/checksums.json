@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "SHA256 integrity checks for downloaded model files, keyed by <subdir>/<filename> under the models dir. Best-effort: a mismatch warns but does not block the download. Populated for the demo path; add more entries as desired.",
+  "_comment": "SHA256 integrity checks for downloaded model files, keyed by <subdir>/<filename> under the models dir. A mismatch blocks use and quarantines the file. Populated for the demo path; profiles without an entry remain size-checked only.",
   "checksums": {
     "qwen3.5/Qwen3.5-4B-Q4_K_M.gguf": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4"
   }

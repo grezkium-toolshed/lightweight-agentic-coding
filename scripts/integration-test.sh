@@ -65,21 +65,57 @@ launch_cli_ps1 = (root / "runtime-config/launch/launch-local-cli.ps1").read_text
 launch_desktop_ps1 = (root / "runtime-config/launch/launch-local-desktop.ps1").read_text(encoding="utf-8")
 dcp_config = (root / ".opencode/dcp.jsonc").read_text(encoding="utf-8")
 
-assert "@tarquinen/opencode-dcp@latest" in template
+assert "@tarquinen/opencode-dcp@3.1.14" in template
 assert "PYTHONPATH" in bin_lac
 assert "Python 3.10+" in bin_lac
 assert "-m lac" in bin_lac
 assert "PYTHONPATH" in bin_lac_ps1
 assert "Python 3.10+" in bin_lac_ps1
 assert "-m lac" in bin_lac_ps1
-assert "launch-llama.ps1" in launch_cli_ps1
-assert "launch-opencode.ps1" in launch_cli_ps1
-assert "launch-llama.ps1" in launch_desktop_ps1
-assert "launch-opencode-desktop.ps1" in launch_desktop_ps1
+assert "runtime start" in launch_cli_ps1
+assert "client open opencode" in launch_cli_ps1
+assert "runtime start" in launch_desktop_ps1
+assert "client open opencode --desktop" in launch_desktop_ps1
 assert '"commands"' in dcp_config and '"enabled": true' in dcp_config
 PY
 
-# 8. Optional msgraph skill lifecycle works against a temp skill root
+# 8. Demo client selection prefers OpenChamber and falls back to OpenCode.
+python3 - <<'PY' "$ROOT"
+import sys
+from unittest.mock import patch
+
+sys.path.insert(0, str(__import__("pathlib").Path(sys.argv[1]) / "src"))
+from lac import cli
+
+for available, expected in (({"openchamber", "opencode"}, "openchamber"), ({"opencode"}, "opencode")):
+    ctx = object()
+    with patch.object(cli.shutil, "which", side_effect=lambda name: f"/fake/{name}" if name in available else None):
+        with patch.object(cli, "render_client") as render, patch.object(cli, "client_open") as client_open:
+            assert cli._launch_demo_client(ctx) == expected
+            render.assert_called_once_with(ctx, expected)
+            client_open.assert_called_once_with(ctx, expected)
+PY
+
+# 9. Known checksum mismatches are blocking and quarantined.
+python3 - <<'PY' "$ROOT" "$TMP_DIR"
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(sys.argv[1]) / "src"))
+from lac.models import _quarantine_checksum_mismatch, _verify_checksum
+
+models = Path(sys.argv[2]) / "checksum-models"
+model = models / "demo" / "model.gguf"
+model.parent.mkdir(parents=True)
+model.write_bytes(b"corrupt")
+known = {"demo/model.gguf": "0" * 64}
+assert _verify_checksum(model, models, known) is False
+_quarantine_checksum_mismatch(model)
+assert not model.exists()
+assert (model.parent / "model.gguf.checksum-mismatch").is_file()
+PY
+
+# 10. Optional msgraph skill lifecycle works against a temp skill root
 SKILL_ROOT="$TMP_DIR/opencode-skills"
 FAKE_MSGRAPH="$TMP_DIR/fixtures/msgraph"
 mkdir -p "$FAKE_MSGRAPH/scripts"

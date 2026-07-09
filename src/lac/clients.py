@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -158,7 +159,10 @@ def client_open(ctx, target, desktop=False, remote_host=None):
                         "message": f"Launched {app_name} desktop. If it was already running, restart it so env vars are picked up.",
                     }
             raise SystemExit("Desktop auto-launch is only implemented for macOS.")
-        subprocess.Popen(["openchamber"], env=env, start_new_session=True)
+        process = subprocess.Popen(["openchamber"], env=env, start_new_session=True)
+        time.sleep(1)
+        if process.poll() is not None:
+            raise SystemExit(f"OpenChamber exited during startup with code {process.returncode}.")
         mode = "remote" if remote_host else "local"
         hint = f"OpenChamber web UI should be available at http://localhost:3000" if not remote_host else f"OpenChamber connecting to {remote_host}"
         return {"ok": True, "target": target, "desktop": False, "message": hint}

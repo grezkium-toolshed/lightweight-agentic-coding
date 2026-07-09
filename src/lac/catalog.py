@@ -80,13 +80,15 @@ def _render_markdown(data):
 
 
 def sync_free(root=None, out_json=None, out_md=None, source_url=None):
-    from lac.context import ROOT as DEFAULT_ROOT
+    from lac.context import CATALOG_CACHE_ROOT, ROOT as DEFAULT_ROOT
+    root_was_provided = root is not None
     if root is None:
         root = DEFAULT_ROOT
+    output_root = Path(root) / "docs" if root_was_provided else CATALOG_CACHE_ROOT
     if out_json is None:
-        out_json = root / "docs" / "free-coding-models.json"
+        out_json = output_root / "free-coding-models.json"
     if out_md is None:
-        out_md = root / "docs" / "FREE_CLOUD_MODELS.md"
+        out_md = output_root / "FREE_CLOUD_MODELS.md"
     print(f"Fetching upstream source: {source_url or FREE_MODELS_SOURCE_URL}")
     src = _fetch_source_js(source_url)
     parsed = _parse_source_js(src)

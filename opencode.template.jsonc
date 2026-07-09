@@ -6,7 +6,7 @@
   // Project config: .opencode/dcp.jsonc
   // Upstream: https://github.com/Opencode-DCP/opencode-dynamic-context-pruning
   "plugin": [
-    "@tarquinen/opencode-dcp@latest"
+    "@tarquinen/opencode-dcp@3.1.14"
   ],
   "provider": {
     "local-cluster": {

@@ -186,6 +186,17 @@ def _verify_checksum(file_path, models_dir, known_checksums=None):
     return True
 
 
+def _quarantine_checksum_mismatch(file_path):
+    path = Path(file_path)
+    candidate = path.with_name(path.name + ".checksum-mismatch")
+    counter = 1
+    while candidate.exists():
+        candidate = path.with_name(path.name + f".checksum-mismatch.{counter}")
+        counter += 1
+    shutil.move(str(path), str(candidate))
+    print(f"[fail] Quarantined checksum mismatch: {candidate}", file=sys.stderr)
+
+
 def _get_expected_bytes(url):
     import urllib.request
     try:
@@ -203,10 +214,17 @@ def _download_one(subdir, filename, repo, remote, min_mb, models_dir, known_chec
     target_dir = Path(models_dir) / subdir
     target_file = target_dir / filename
     tmp_file = target_file.with_name(filename + ".downloading")
+    rel_path = str(target_file.relative_to(models_dir))
+    has_checksum = bool((known_checksums or {}).get(rel_path))
     url = f"https://huggingface.co/{repo}/resolve/main/{remote}"
     target_dir.mkdir(parents=True, exist_ok=True)
     expected_bytes = _get_expected_bytes(url)
     expected_mb = expected_bytes // (1024 * 1024) if expected_bytes else 0
+    if target_file.is_file() and has_checksum:
+        if _verify_checksum(target_file, models_dir, known_checksums):
+            print(f"[skip] {target_file} (verified)")
+            return True
+        _quarantine_checksum_mismatch(target_file)
     if target_file.is_file():
         size_bytes = target_file.stat().st_size
         size_mb = size_bytes // (1024 * 1024)
@@ -227,6 +245,11 @@ def _download_one(subdir, filename, repo, remote, min_mb, models_dir, known_chec
         elif expected_bytes == 0 and tmp_mb >= min_mb:
             print(f"[resume] Promoting completed partial file: {tmp_file}")
             shutil.move(str(tmp_file), str(target_file))
+    if target_file.is_file() and has_checksum:
+        if _verify_checksum(target_file, models_dir, known_checksums):
+            print(f"[skip] {target_file} (verified resumed download)")
+            return True
+        _quarantine_checksum_mismatch(target_file)
     if target_file.is_file():
         promoted_bytes = target_file.stat().st_size
         promoted_mb = promoted_bytes // (1024 * 1024)
@@ -266,7 +289,9 @@ def _download_one(subdir, filename, repo, remote, min_mb, models_dir, known_chec
     elif new_mb < min_mb:
         print(f"[fail] Download too small for {filename} ({new_mb}MB < {min_mb}MB); keeping file for inspection/resume", file=sys.stderr)
         return False
-    _verify_checksum(str(target_file), models_dir, known_checksums)
+    if not _verify_checksum(str(target_file), models_dir, known_checksums):
+        _quarantine_checksum_mismatch(target_file)
+        return False
     print(f"[ ok ] {target_file} ({new_mb}MB{' of ~' + str(expected_mb) + 'MB' if expected_mb else ''})")
     return True
 
@@ -289,11 +314,12 @@ def _download_mlx_repo(repo, models_dir):
 
 
 def models_sync(profile_id, models_dir=None, root=None):
-    from lac.context import ROOT as DEFAULT_ROOT
+    from lac.context import MODELS_ROOT, ROOT as DEFAULT_ROOT
+    root_was_provided = root is not None
     if root is None:
         root = DEFAULT_ROOT
     if models_dir is None:
-        models_dir = os.environ.get("AI_MODELS_DIR", str(root / "models"))
+        models_dir = Path(root) / "models" if root_was_provided else MODELS_ROOT
     if profile_id in CLOUD_PROFILES:
         print(f"Profile: {profile_id}")
         print(f"No local model downloads are required for the cloud-only {profile_id} profile.")

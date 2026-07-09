@@ -12,7 +12,7 @@ Built on [llama.cpp](https://github.com/ggml-org/llama.cpp), [Unsloth](https://u
 
 ## Get started (one command)
 
-On a Mac, this installs everything you need (Homebrew, llama.cpp, OpenCode, OpenChamber, a small model) and opens a private chat window — nothing leaves your machine:
+On a Mac, this installs everything you need (Homebrew, Python, Node.js, pnpm, llama.cpp, OpenCode, OpenChamber, and a small model) and opens a private chat window. If OpenChamber cannot be installed, the same flow falls back to OpenCode:
 
 ```bash
 git clone https://github.com/TuukkaTanner/lightweight-agentic-coding.git
@@ -65,7 +65,7 @@ Rule of thumb: **single-shot help (proofreading, drafting) works on almost anyth
 
 lac keeps everything local, but it does install and run software. If you need to clear it with IT, here's the honest list — forward this:
 
-- **Installing a few developer tools**: a local model runtime (llama.cpp), the OpenCode/OpenChamber clients, and Python 3.10+. On managed Macs, users usually have the local admin this needs.
+- **Installing developer tools**: Homebrew, Python 3.10+, Node.js 22+, pnpm, the llama.cpp runtime, and the OpenCode/OpenChamber clients. Managed Macs may require IT approval or local admin rights.
 - **Running a local server on `localhost`** — a model server on port 8080 and the chat UI on port 3000. Nothing listens on the public network by default.
 - **Downloading model weights once** from Hugging Face (a few GB). After that it works fully offline.
 - **No cloud egress of your data.** Prompts and documents stay on the device; lac reaches the internet only to download models/tools — and only talks to a cloud AI provider if you explicitly configure one.
@@ -102,7 +102,9 @@ For 64 GB+ machines, the Gemma family, and specialist runtimes. These are power-
 
 ## Platform support
 
-**macOS (Apple Silicon) is the primary, tested platform** — best performance (unified memory + Metal) and the fewest install hurdles. Linux is CI-checked for config, schema, and packaging (not GPU runtime). Windows is best-effort: PowerShell wrappers are provided and kept in parity, but there's no Windows CI yet, and WSL2 is the smoothest Windows path. `lac doctor` reports what your platform is missing.
+**macOS (Apple Silicon) is the primary, tested platform** — best performance (unified memory + Metal) and the fewest install hurdles. Linux and macOS run the offline contract and CLI integration suite in CI; Windows runs PowerShell wrapper and client-render checks. GPU/runtime behavior still requires real-hardware validation, and WSL2 remains the smoothest Windows path. `lac doctor` reports what your platform is missing.
+
+Installed copies keep mutable data outside the Python package: models and refreshed catalogs use the platform user-data directory, while runtime state uses the platform user-state directory. Override them with `LAC_DATA_ROOT`, `LAC_STATE_ROOT`, or `AI_MODELS_DIR`.
 
 ## Daily use
 

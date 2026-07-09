@@ -70,4 +70,4 @@ A profile ties a hardware bucket to a model set and runtime. Definitions live in
 - **Never commit:** `*.gguf` model binaries, anything under `state/`, generated `src/lac/data/`, the internal `dev/` folder, or local tool state (`.qwen/`, `.claude/`).
 - Prefer additive profile changes over hardcoded machine-specific paths. Keep llama.cpp as the default runtime path.
 
-Internal working notes (plans, backlog, release checklists) live in the gitignored `dev/` folder, out of the public tree.
+Internal working notes and backlogs live in the gitignored `dev/` folder. The concise public release gate remains tracked in `RELEASE_CHECKLIST.md`.

@@ -53,6 +53,36 @@ for skill in "${BANNED_SKILLS[@]}"; do
     fi
   done
 done
+
+step "Release documentation coherence"
+python3 - <<'PY' "$ROOT"
+import re
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+if not (root / "RELEASE_CHECKLIST.md").is_file():
+    raise SystemExit("RELEASE_CHECKLIST.md is missing")
+
+for rel in (
+    "docs/providers/README.md",
+    "docs/providers/OPENCODE_GO.md",
+    "docs/security/TRUST_MODEL.md",
+    "docs/security/THIRD_PARTY_AGENT_INTAKE.md",
+    "templates/opencode/opencode.example.jsonc",
+):
+    text = (root / rel).read_text(encoding="utf-8")
+    stale = sorted(token for token in ("codex-auth", "opencode-zen", "antigravity") if token in text.lower())
+    if stale:
+        raise SystemExit(f"{rel}: stale removed-provider references: {stale}")
+
+index = (root / "skills/README.md").read_text(encoding="utf-8")
+indexed = set(re.findall(r"^\| `([^`]+)` \|", index, flags=re.MULTILINE))
+staged = {path.parent.name for path in (root / "src/lac/data/opencode/skills").glob("*/SKILL.md")}
+if indexed != staged:
+    raise SystemExit(f"skills/README.md mismatch: indexed={sorted(indexed)}, staged={sorted(staged)}")
+print("[ok] release checklist, provider docs, trust docs, and skill index are coherent")
+PY
 # Vendored asset trees are opt-in fetch only; they must not be bundled.
 for tree in .opencode/craft .opencode/design-systems src/lac/data/opencode/craft src/lac/data/opencode/design-systems; do
   if [ -d "$tree" ]; then
