@@ -61,6 +61,9 @@ where cloud AI is blocked), plus a lightweight-to-maintain, correctly-attributed
   installed PyPA `build` module, keeping repeated release checks idempotent.
 - OpenChamber discovery now checks the pnpm install locations used by bootstrap, so later
   `lac client open openchamber` runs do not depend on inheriting bootstrap's temporary PATH.
+- Rendered OpenCode configs now take every selected local model's context limit from the active
+  profile preset and reject profiles below the 32K startup/headroom floor, preventing both
+  immediate prompt overloads and later runtime/advertised-context drift.
 - Removed stale provider blocks and docs for providers no longer present in the supported catalog.
 - Repaired the packaged shell and PowerShell launch wrappers so they invoke the supported CLI.
 - Pinned the default Dynamic Context Pruning plugin to `3.1.14` for reproducible setup.

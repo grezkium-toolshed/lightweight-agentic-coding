@@ -60,6 +60,7 @@ from pathlib import Path
 root = Path(sys.argv[1])
 sys.path.insert(0, str(root / "src"))
 from lac.lib.jsonc import load_jsonc
+from lac.config import MIN_OPENCODE_CONTEXT
 
 template = (root / "opencode.template.jsonc").read_text(encoding="utf-8")
 template_config = load_jsonc(root / "opencode.template.jsonc")
@@ -72,12 +73,11 @@ dcp_config = (root / ".opencode/dcp.jsonc").read_text(encoding="utf-8")
 micro_preset = (root / "runtime-config/presets/micro.ini").read_text(encoding="utf-8")
 
 micro_limit = template_config["provider"]["local-cluster"]["models"]["qwen3.5-4b-q4"]["limit"]
-compaction_reserved = template_config["compaction"]["reserved"]
 
 assert "@tarquinen/opencode-dcp@3.1.14" in template
-assert micro_limit["context"] > compaction_reserved + micro_limit["output"]
-assert f'ctx-size = {micro_limit["context"]}' in micro_preset
-assert f'fit-ctx = {micro_limit["context"]}' in micro_preset
+assert micro_limit["context"] >= MIN_OPENCODE_CONTEXT
+assert f"ctx-size = {MIN_OPENCODE_CONTEXT}" in micro_preset
+assert f"fit-ctx = {MIN_OPENCODE_CONTEXT}" in micro_preset
 assert "n-gpu-layers = 0" not in micro_preset
 assert "PYTHONPATH" in bin_lac
 assert "Python 3.10+" in bin_lac
@@ -121,7 +121,77 @@ with patch.object(clients.shutil, "which", return_value=None), patch.object(clie
     assert clients.resolve_command("openchamber") == str(pnpm_launcher)
 PY
 
-# 9. Known checksum mismatches are blocking and quarantined.
+# 9. Every selected local model advertises the active preset's real context.
+python3 - <<'PY' "$ROOT" "$TMP_DIR"
+import configparser
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+matrix_root = Path(sys.argv[2]) / "context-matrix"
+profiles = json.loads((root / "runtime-config/profiles.json").read_text(encoding="utf-8"))["profiles"]
+checked = 0
+
+for profile_id, profile in profiles.items():
+    selectors = [profile[field] for field in ("default_model", "small_model")]
+    local_ids = {
+        selector.split("/", 1)[1]
+        for selector in selectors
+        if selector.startswith("local-cluster/")
+    }
+    if not local_ids:
+        continue
+
+    parser = configparser.ConfigParser(interpolation=None, strict=False)
+    preset = (root / profile["preset"]).read_text(encoding="utf-8")
+    parser.read_string("[global]\n" + preset)
+    state_root = matrix_root / profile_id
+    env = os.environ.copy()
+    env["AI_LOCAL_RUNTIME"] = "llama.cpp"
+    env["LAC_STATE_ROOT"] = str(state_root)
+    subprocess.run(
+        [str(root / "bin/lac"), "profile", "apply", profile_id, "--json"],
+        cwd=root,
+        env=env,
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    generated = json.loads((state_root / "clients/opencode/opencode.json").read_text(encoding="utf-8"))
+    generated_models = generated["provider"]["local-cluster"]["models"]
+    for model_id in local_ids:
+        runtime_context = parser.getint(model_id, "ctx-size")
+        advertised_context = generated_models[model_id]["limit"]["context"]
+        assert runtime_context >= 32768, (profile_id, model_id, runtime_context)
+        assert advertised_context == runtime_context, (
+            profile_id, model_id, runtime_context, advertised_context
+        )
+        checked += 1
+
+assert checked >= 20, checked
+print(f"[ok] profile-aware OpenCode context limits: {checked} local model selections")
+PY
+
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  OMLX_STATE="$TMP_DIR/omlx-context"
+  AI_LOCAL_RUNTIME=omlx LAC_STATE_ROOT="$OMLX_STATE" run "$LAC" profile apply 24gb --json > "$TMP_DIR/profile-omlx.json"
+  python3 - <<'PY' "$OMLX_STATE/clients/opencode/opencode.json"
+import json
+import sys
+from pathlib import Path
+
+config = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+assert config["model"] == config["small_model"] == "local-cluster/Qwen3.6-27B-UD-MLX-6bit"
+model_id = config["model"].split("/", 1)[1]
+assert config["provider"]["local-cluster"]["models"][model_id]["limit"]["context"] == 65536
+print("[ok] oMLX shared alias uses the smallest selected profile context")
+PY
+fi
+
+# 10. Known checksum mismatches are blocking and quarantined.
 python3 - <<'PY' "$ROOT" "$TMP_DIR"
 import sys
 from pathlib import Path
