@@ -96,20 +96,29 @@ assert '"commands"' in dcp_config and '"enabled": true' in dcp_config
 PY
 
 # 8. Demo client selection prefers OpenChamber and falls back to OpenCode.
-python3 - <<'PY' "$ROOT"
+python3 - <<'PY' "$ROOT" "$TMP_DIR"
 import sys
+from pathlib import Path
 from unittest.mock import patch
 
-sys.path.insert(0, str(__import__("pathlib").Path(sys.argv[1]) / "src"))
-from lac import cli
+sys.path.insert(0, str(Path(sys.argv[1]) / "src"))
+from lac import cli, clients
 
 for available, expected in (({"openchamber", "opencode"}, "openchamber"), ({"opencode"}, "opencode")):
     ctx = object()
-    with patch.object(cli.shutil, "which", side_effect=lambda name: f"/fake/{name}" if name in available else None):
+    with patch.object(cli, "resolve_command", side_effect=lambda name: f"/fake/{name}" if name in available else None):
         with patch.object(cli, "render_client") as render, patch.object(cli, "client_open") as client_open:
             assert cli._launch_demo_client(ctx) == expected
             render.assert_called_once_with(ctx, expected)
             client_open.assert_called_once_with(ctx, expected)
+
+fake_home = Path(sys.argv[2]) / "command-home"
+pnpm_launcher = fake_home / "Library/pnpm/bin/openchamber"
+pnpm_launcher.parent.mkdir(parents=True)
+pnpm_launcher.write_text("#!/bin/sh\n", encoding="utf-8")
+pnpm_launcher.chmod(0o755)
+with patch.object(clients.shutil, "which", return_value=None), patch.object(clients.Path, "home", return_value=fake_home):
+    assert clients.resolve_command("openchamber") == str(pnpm_launcher)
 PY
 
 # 9. Known checksum mismatches are blocking and quarantined.

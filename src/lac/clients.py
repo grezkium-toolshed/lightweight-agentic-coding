@@ -14,9 +14,34 @@ def utc_now():
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+def resolve_command(name):
+    found = shutil.which(name)
+    if found or name != "openchamber":
+        return found
+
+    home = Path.home()
+    roots = []
+    pnpm_home = os.environ.get("PNPM_HOME")
+    if pnpm_home:
+        roots.extend((Path(pnpm_home) / "bin", Path(pnpm_home)))
+    roots.extend((
+        home / "Library/pnpm/bin",
+        home / "Library/pnpm",
+        home / ".local/share/pnpm/bin",
+        home / ".local/share/pnpm",
+        home / ".openchamber/bin",
+    ))
+    names = (name, f"{name}.cmd", f"{name}.exe") if os.name == "nt" else (name,)
+    for root in roots:
+        for candidate_name in names:
+            candidate = root / candidate_name
+            if candidate.is_file() and (os.name == "nt" or os.access(candidate, os.X_OK)):
+                return str(candidate)
+    return None
+
+
 def command_exists(name):
-    import shutil
-    return shutil.which(name) is not None
+    return resolve_command(name) is not None
 
 
 def render_client(ctx, target):
@@ -123,9 +148,10 @@ def client_open(ctx, target, desktop=False, remote_host=None):
     config_path = ctx.paths["opencode_config"]
 
     if target == "openchamber":
-        if not command_exists("openchamber"):
+        openchamber_command = resolve_command("openchamber")
+        if not openchamber_command:
             raise SystemExit(
-                "openchamber is not in PATH.\n"
+                "OpenChamber launcher not found in PATH or common pnpm install locations.\n"
                 "Install: curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"
             )
         if not config_path.is_file():
@@ -159,7 +185,7 @@ def client_open(ctx, target, desktop=False, remote_host=None):
                         "message": f"Launched {app_name} desktop. If it was already running, restart it so env vars are picked up.",
                     }
             raise SystemExit("Desktop auto-launch is only implemented for macOS.")
-        process = subprocess.Popen(["openchamber"], env=env, start_new_session=True)
+        process = subprocess.Popen([openchamber_command], env=env, start_new_session=True)
         time.sleep(1)
         if process.poll() is not None:
             raise SystemExit(f"OpenChamber exited during startup with code {process.returncode}.")

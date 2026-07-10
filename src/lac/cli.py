@@ -51,7 +51,7 @@ from lac.packs import (
     install_optional_skill, remove_optional_skill, verify_optional_skill,
 )
 from lac.scenarios import scenario_list, scenario_show
-from lac.clients import render_client, client_open
+from lac.clients import render_client, client_open, resolve_command
 from lac.models import models_sync
 from lac.catalog import sync_free
 from lac.init import (
@@ -79,8 +79,7 @@ def write_json(path, payload):
 
 
 def command_exists(name):
-    import shutil
-    return shutil.which(name) is not None
+    return resolve_command(name) is not None
 
 
 def log_info(message):
@@ -332,9 +331,9 @@ def _offer_persist_env(name, value):
 
 def _launch_demo_client(ctx):
     """Prefer OpenChamber, with OpenCode as the supported fallback."""
-    if shutil.which("openchamber"):
+    if resolve_command("openchamber"):
         target = "openchamber"
-    elif shutil.which("opencode"):
+    elif resolve_command("opencode"):
         target = "opencode"
         print("OpenChamber is unavailable; launching OpenCode instead.")
     else:

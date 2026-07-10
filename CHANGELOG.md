@@ -59,6 +59,8 @@ where cloud AI is blocked), plus a lightweight-to-maintain, correctly-attributed
   auto-select GPU offload instead of forcing CPU-only inference.
 - Package verification no longer mistakes an ignored local `build/` output directory for the
   installed PyPA `build` module, keeping repeated release checks idempotent.
+- OpenChamber discovery now checks the pnpm install locations used by bootstrap, so later
+  `lac client open openchamber` runs do not depend on inheriting bootstrap's temporary PATH.
 - Removed stale provider blocks and docs for providers no longer present in the supported catalog.
 - Repaired the packaged shell and PowerShell launch wrappers so they invoke the supported CLI.
 - Pinned the default Dynamic Context Pruning plugin to `3.1.14` for reproducible setup.
