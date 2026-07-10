@@ -58,15 +58,27 @@ import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
+sys.path.insert(0, str(root / "src"))
+from lac.lib.jsonc import load_jsonc
+
 template = (root / "opencode.template.jsonc").read_text(encoding="utf-8")
+template_config = load_jsonc(root / "opencode.template.jsonc")
 bin_lac = (root / "bin/lac").read_text(encoding="utf-8")
 bin_lac_ps1 = (root / "bin/lac.ps1").read_text(encoding="utf-8")
 launch_cli_ps1 = (root / "runtime-config/launch/launch-local-cli.ps1").read_text(encoding="utf-8")
 launch_desktop_ps1 = (root / "runtime-config/launch/launch-local-desktop.ps1").read_text(encoding="utf-8")
 bootstrap_sh = (root / "scripts/bootstrap.sh").read_text(encoding="utf-8")
 dcp_config = (root / ".opencode/dcp.jsonc").read_text(encoding="utf-8")
+micro_preset = (root / "runtime-config/presets/micro.ini").read_text(encoding="utf-8")
+
+micro_limit = template_config["provider"]["local-cluster"]["models"]["qwen3.5-4b-q4"]["limit"]
+compaction_reserved = template_config["compaction"]["reserved"]
 
 assert "@tarquinen/opencode-dcp@3.1.14" in template
+assert micro_limit["context"] > compaction_reserved + micro_limit["output"]
+assert f'ctx-size = {micro_limit["context"]}' in micro_preset
+assert f'fit-ctx = {micro_limit["context"]}' in micro_preset
+assert "n-gpu-layers = 0" not in micro_preset
 assert "PYTHONPATH" in bin_lac
 assert "Python 3.10+" in bin_lac
 assert "-m lac" in bin_lac

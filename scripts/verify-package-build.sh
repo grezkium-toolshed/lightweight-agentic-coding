@@ -21,7 +21,7 @@ DIST_DIR="$TMP_DIR/dist"
 INSTALL_DIR="$TMP_DIR/install"
 mkdir -p "$DIST_DIR" "$INSTALL_DIR"
 
-if "$PYTHON_BIN" -c 'import build' >/dev/null 2>&1; then
+if "$PYTHON_BIN" -c 'import build.__main__' >/dev/null 2>&1; then
   "$PYTHON_BIN" -m build --outdir "$DIST_DIR" "$ROOT" >/dev/null
 elif command -v uv >/dev/null 2>&1; then
   UV_CACHE_DIR="$TMP_DIR/uv-cache" uv build --quiet --out-dir "$DIST_DIR" --no-create-gitignore "$ROOT" >/dev/null

@@ -15,7 +15,7 @@
       "models": {
         "qwen3.5-4b-q4": {
           "limit": {
-            "context": 8192,
+            "context": 32768,
             "output": 4096
           }
         },

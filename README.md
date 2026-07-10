@@ -76,7 +76,7 @@ lac keeps everything local, but it does install and run software. If you need to
 
 | Machine | Profile | What you get |
 |---|---|---|
-| Any machine, instant demo | `micro` | Tiny 4B model (~2.5 GB), runs on CPU, instant chat |
+| Any machine, lightweight demo | `micro` | Tiny 4B model (~2.5 GB), automatic GPU offload with CPU fallback |
 | 16 GB Apple Silicon Mac | `macos-16gb` | Balanced Apple Silicon default |
 | 16 GB Windows/Linux laptop | `16gb` | 27B starter (tight — expect slower CPU speeds) |
 | 24 GB Mac / workstation | `24gb` | The sweet spot — recommended daily driver |
