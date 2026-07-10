@@ -14,8 +14,33 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 info() { printf '\033[1;34m[bootstrap]\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[bootstrap]\033[0m %s\n' "$*" >&2; }
 have() { command -v "$1" >/dev/null 2>&1; }
+find_python() {
+  local candidate
+  for candidate in "${PYTHON:-}" python3.14 python3.13 python3.12 python3.11 python3.10 python3; do
+    [[ -n "$candidate" ]] || continue
+    have "$candidate" || continue
+    if "$candidate" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
 node_22_plus() {
   have node && node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 22 ? 0 : 1)' >/dev/null 2>&1
+}
+configure_pnpm_path() {
+  have pnpm || return 0
+  if [[ -z "${PNPM_HOME:-}" ]]; then
+    if [[ "$OS" == "Darwin" ]]; then
+      PNPM_HOME="$HOME/Library/pnpm"
+    else
+      PNPM_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/pnpm"
+    fi
+  fi
+  export PNPM_HOME
+  mkdir -p "$PNPM_HOME" "$PNPM_HOME/bin" || return 1
+  export PATH="$PNPM_HOME/bin:$PNPM_HOME:$PATH"
 }
 
 # Upstream installers commonly place commands here, but a newly installed shell has not
@@ -43,11 +68,14 @@ if [[ "$OS" == "Darwin" ]]; then
 fi
 
 # 2. Python 3.10+ (needed to run lac).
-if have python3 && python3 -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)'; then
-  info "Python 3.10+ present — skipping."
+PYTHON_BIN="$(find_python || true)"
+if [[ -n "$PYTHON_BIN" ]]; then
+  info "Python 3.10+ present ($PYTHON_BIN) — skipping."
 elif [[ "$OS" == "Darwin" ]] && have brew; then
   info "Installing Python via Homebrew..."
   brew install python || warn "Python install failed."
+  hash -r
+  PYTHON_BIN="$(find_python || true)"
 else
   warn "Python 3.10+ not found and can't auto-install on this platform. Install it, then re-run."
 fi
@@ -76,10 +104,12 @@ if ! node_22_plus || ! have pnpm; then
     info "Installing Node.js 22+ and pnpm for OpenChamber..."
     node_22_plus || brew install node || warn "Node.js install failed."
     have pnpm || brew install pnpm || warn "pnpm install failed."
+    hash -r
   else
     warn "OpenChamber needs Node.js 22+ and pnpm; install them to use the chat UI."
   fi
 fi
+configure_pnpm_path || warn "Could not initialize pnpm's global bin directory."
 
 if have openchamber; then
   info "OpenChamber present — skipping."
@@ -95,9 +125,11 @@ fi
 if ! have pipx; then
   info "Installing pipx (isolated Python-CLI installer)..."
   if [[ "$OS" == "Darwin" ]] && have brew; then
-    brew install pipx >/dev/null 2>&1 || python3 -m pip install --user pipx >/dev/null 2>&1 || true
-  else
-    python3 -m pip install --user pipx >/dev/null 2>&1 || true
+    if ! brew install pipx >/dev/null 2>&1 && [[ -n "$PYTHON_BIN" ]]; then
+      "$PYTHON_BIN" -m pip install --user pipx >/dev/null 2>&1 || true
+    fi
+  elif [[ -n "$PYTHON_BIN" ]]; then
+    "$PYTHON_BIN" -m pip install --user pipx >/dev/null 2>&1 || true
   fi
   have pipx && pipx ensurepath >/dev/null 2>&1 || true
 fi

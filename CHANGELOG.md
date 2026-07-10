@@ -52,6 +52,8 @@ where cloud AI is blocked), plus a lightweight-to-maintain, correctly-attributed
 - Packaged the Claude Code templates required by `lac client render claude-code`.
 - Bootstrap now installs/checks OpenChamber's Node.js 22+ and pnpm prerequisites and falls back
   to OpenCode when the chat UI is unavailable.
+- Bootstrap now exposes pnpm's macOS global bin directory to the same install process and detects
+  versioned Python binaries before installing another Homebrew Python.
 - Removed stale provider blocks and docs for providers no longer present in the supported catalog.
 - Repaired the packaged shell and PowerShell launch wrappers so they invoke the supported CLI.
 - Pinned the default Dynamic Context Pruning plugin to `3.1.14` for reproducible setup.

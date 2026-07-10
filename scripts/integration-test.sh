@@ -63,6 +63,7 @@ bin_lac = (root / "bin/lac").read_text(encoding="utf-8")
 bin_lac_ps1 = (root / "bin/lac.ps1").read_text(encoding="utf-8")
 launch_cli_ps1 = (root / "runtime-config/launch/launch-local-cli.ps1").read_text(encoding="utf-8")
 launch_desktop_ps1 = (root / "runtime-config/launch/launch-local-desktop.ps1").read_text(encoding="utf-8")
+bootstrap_sh = (root / "scripts/bootstrap.sh").read_text(encoding="utf-8")
 dcp_config = (root / ".opencode/dcp.jsonc").read_text(encoding="utf-8")
 
 assert "@tarquinen/opencode-dcp@3.1.14" in template
@@ -76,6 +77,9 @@ assert "runtime start" in launch_cli_ps1
 assert "client open opencode" in launch_cli_ps1
 assert "runtime start" in launch_desktop_ps1
 assert "client open opencode --desktop" in launch_desktop_ps1
+assert 'PNPM_HOME="$HOME/Library/pnpm"' in bootstrap_sh
+assert 'export PATH="$PNPM_HOME/bin:$PNPM_HOME:$PATH"' in bootstrap_sh
+assert "python3.14 python3.13 python3.12 python3.11 python3.10 python3" in bootstrap_sh
 assert '"commands"' in dcp_config and '"enabled": true' in dcp_config
 PY
 
