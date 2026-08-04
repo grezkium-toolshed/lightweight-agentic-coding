@@ -59,5 +59,5 @@ These should be gitignored if they contain sensitive or transient data.
 - The `.planning/` directory is repo-local — do not install GSD as a global tool
 
 ## Notes
-- Inspired by https://github.com/gsd-build/get-shit-done — adapted for repo-local OpenCode use without global config pollution
+- Inspired by https://github.com/gsd-build/get-shit-done at commit `bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815` (MIT); this file is a lac-authored adaptation for repo-local OpenCode use without global config pollution.
 - Granularity setting: use `coarse` for docs/config updates, `standard` for feature work, `fine` for complex refactoring

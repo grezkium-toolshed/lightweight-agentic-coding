@@ -82,6 +82,10 @@ where cloud AI is blocked), plus a lightweight-to-maintain, correctly-attributed
 - Removed stale provider blocks and docs for providers no longer present in the supported catalog.
 - Repaired the packaged shell and PowerShell launch wrappers so they invoke the supported CLI.
 - Pinned the default Dynamic Context Pruning plugin to `3.1.14` for reproducible setup.
+- Pinned the optional Microsoft Graph skill installer to release `v1.0.19` and added a blocking
+  SHA-256 check before extracting the downloaded archive.
+- Fixed package verification when run from the repository root, where the local `build/` output
+  directory previously shadowed Python's `build` module.
 
 ### Removed
 

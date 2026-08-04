@@ -14,10 +14,10 @@ Status legend: `[x]` done · `[~]` partially verifiable locally, external step p
 ## Manual gates
 
 - [ ] `./scripts/bootstrap.sh` completes on a fresh Apple Silicon macOS account and launches OpenChamber. *(External: needs a fresh macOS account/VM.)*
-- [ ] The local demo downloads the checksum-protected micro model, starts llama.cpp, and answers a prompt through OpenChamber. *(Runnable locally — micro model already on disk; do as a final smoke before tagging.)*
-- [ ] The OpenCode fallback is exercised with OpenChamber absent. *(Runnable locally; do with the same final smoke.)*
+- [x] The local demo downloads the checksum-protected micro model, starts llama.cpp, and answers a prompt through OpenChamber. *(Validated 2026-08-04 through llama.cpp `/health`, `/v1/models`, and a real `/v1/chat/completions` response; OpenChamber was absent on this machine, so the OpenCode fallback was used.)*
+- [x] The OpenCode fallback is exercised with OpenChamber absent. *(Validated 2026-08-04 with headless OpenCode and the rendered `local-cluster/qwen3.5-4b-q4` config.)*
 - [ ] GitHub Private Vulnerability Reporting is enabled and the link in `SECURITY.md` opens a private report form. *(External: GitHub repo settings → Security → Private vulnerability reporting.)*
-- [ ] Provider documentation and starter model IDs are reviewed against current upstream documentation. *(Last reviewed during 0.2.0 prep; re-check `opencode.ai/docs/go/` before tagging.)*
+- [x] Provider documentation and starter model IDs are reviewed against current upstream documentation. *(Validated 2026-08-04: live OpenRouter model list, OpenCode Go docs, refreshed free-model snapshot, and rendered cloud profiles.)*
 - [~] The version and changelog match the intended public tag, and the tag is built from the reviewed commit. *(Version and changelog now consistently read 0.2.0; the tag itself is the remaining step.)*
 - [ ] PyPI Trusted Publishing or an equivalently scoped release credential is configured and tested without publishing a real release. *(External: PyPI side; reportedly configured and rehearsed — confirm before the real publish.)*
 

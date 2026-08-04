@@ -1,6 +1,7 @@
 """Workflow packs and asset catalog."""
 
 import copy
+import hashlib
 import json
 import os
 import sys
@@ -44,7 +45,8 @@ def OPTIONAL_SKILLS():
     return {
         "msgraph": {
             "label": "Microsoft Graph Skill",
-            "install_url": "https://github.com/merill/msgraph/releases/latest/download/msgraph.zip",
+            "install_url": "https://github.com/merill/msgraph/releases/download/v1.0.19/msgraph.zip",
+            "sha256": "363926d4d3f49a7f19cb6f50589e6646267e89a4f72764b5fc043db36a5a6764",
             "docs": "docs/providers/MICROSOFT_GRAPH.md",
             "required_help_terms": ["auth", "graph-call", "openapi-search"],
         }
@@ -128,6 +130,14 @@ def install_optional_skill(ctx, skill_id, source=None, force=False):
                 urllib.request.urlretrieve(opt_skills[skill_id]["install_url"], archive_path)
             except urllib.error.URLError as exc:
                 raise SystemExit(f"Failed to download {skill_id}: {exc}") from exc
+            digest = hashlib.sha256()
+            with archive_path.open("rb") as archive:
+                for chunk in iter(lambda: archive.read(1024 * 1024), b""):
+                    digest.update(chunk)
+            expected = opt_skills[skill_id]["sha256"]
+            actual = digest.hexdigest()
+            if actual != expected:
+                raise SystemExit(f"Checksum mismatch for {skill_id}: expected {expected}, got {actual}")
             _copy_optional_skill_from_zip(archive_path, staged_target)
         if target.exists():
             shutil.rmtree(target)

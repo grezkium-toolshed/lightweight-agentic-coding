@@ -11,7 +11,8 @@ Do not import external agent or skill packs directly into the default runtime pa
 6. Add attribution and source links.
 7. Keep imported content optional unless it is core to the repo.
 8. For any public-release addition of externally sourced skills, agents, or assets, update the asset catalog, trust model, and `THIRD_PARTY_NOTICES.md`.
-9. Do not claim upstream validation, review, or licensing status unless you have direct evidence for it.
+9. Pin downloaded archives and enforce a recorded SHA-256 before extraction.
+10. Do not claim upstream validation, review, or licensing status unless you have direct evidence for it.
 
 ## Red flags
 - `ignore previous instructions`

@@ -13,8 +13,8 @@ skills authored for this repository are covered by the repository's own MIT `LIC
 | Catalog source_ref | Upstream | lac usage | Terms note |
 | --- | --- | --- | --- |
 | `lightweight-agentic-coding` | This repository | First-party OpenCode agents and workflow skills (`documentation-generator`, `docx-/pptx-/xlsx-/pdf-workflow`, `research-synthesizer`, and the review agents). | Covered by this repository's MIT `LICENSE`. |
-| `gsd-build/get-shit-done` | [gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done) | Adapted `skill:gsd` workflow skill. | Upstream license is MIT. Carried as a trimmed, reviewed adaptation with attribution in the skill. |
-| `merill/msgraph` | [merill/msgraph](https://github.com/merill/msgraph) | Optional Microsoft Graph skill; **fetched on demand** via `lac skill install msgraph`, not bundled in the wheel. | Upstream license is MIT. Authenticated API use must also follow Microsoft Graph, tenant, and credential-handling terms. |
+| `gsd-build/get-shit-done@bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815` | [gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done) | Adapted `skill:gsd` workflow skill. | Upstream license is MIT. This is a lac-authored, trimmed adaptation; the source revision is recorded in the skill and catalog. |
+| `merill/msgraph@v1.0.19` | [merill/msgraph](https://github.com/merill/msgraph) | Optional Microsoft Graph skill; **fetched on demand** via `lac skill install msgraph`, not bundled in the wheel. | Upstream license is MIT. The installer pins release `v1.0.19` and enforces SHA-256 `363926d4d3f49a7f19cb6f50589e6646267e89a4f72764b5fc043db36a5a6764`. Authenticated API use must also follow Microsoft Graph, tenant, and credential-handling terms. |
 
 ## Optional, opt-in content (not redistributed)
 
@@ -45,6 +45,7 @@ download them in their own environment.
 | [antirez/deepseek-v4-gguf](https://huggingface.co/antirez/deepseek-v4-gguf) | `lac models sync 128gb-ds4-flash` download mapping for the conservative imatrix GGUF. | The Hugging Face repository reports MIT for the quantized files; also review base-model terms before production use. |
 | [vava-nessa/free-coding-models](https://github.com/vava-nessa/free-coding-models) | `docs/free-coding-models.json` is a snapshot of this upstream free-model index (`lac catalog sync-free`). | Snapshot of upstream data; see the upstream repository for its license and refresh cadence. |
 | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | Optional OpenCode plugin (`@dietrichgebert/ponytail`) added to generated OpenCode configs: laziness ruleset injected into every turn, `/ponytail lite\|full\|ultra\|off` commands, and review/audit/debt skills. | Upstream license is MIT. Fetched from npm by OpenCode on first use (requires network); not vendored in the wheel. Disable per-session with `PONYTAIL_DEFAULT_MODE=off`. |
+| [Opencode-DCP/opencode-dynamic-context-pruning](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning) | `@tarquinen/opencode-dcp@3.1.14` is referenced by generated OpenCode configs for dynamic context pruning. | npm metadata reports AGPL-3.0-or-later. Fetched by OpenCode on first use (requires network); not vendored in the wheel. |
 
 ## Maintenance rule
 

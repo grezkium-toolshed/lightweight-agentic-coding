@@ -12,7 +12,11 @@ The upstream skill comes from Graph.pm / `merill/msgraph`. It bundles local inde
 ./bin/lac skill verify msgraph
 ```
 
-The default installer downloads the upstream release zip and expands it into `.opencode/skills/msgraph/`. That directory is ignored by git so local installs do not dirty the repo.
+The default installer downloads the pinned upstream `v1.0.19` release zip, verifies its
+SHA-256 (`363926d4d3f49a7f19cb6f50589e6646267e89a4f72764b5fc043db36a5a6764`), and expands it
+into `.opencode/skills/msgraph/`. That directory is ignored by git so local installs do not
+dirty the repo. A local `--source` install is available when you have reviewed an archive or
+directory yourself.
 
 For offline or reviewed installs, provide a local extracted folder or zip:
 
