@@ -5,12 +5,17 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export PYTHONPATH="${ROOT}/scripts:${PYTHONPATH:-}"
 
 python3 - <<'PY' "$ROOT"
+import json
 import sys
 from pathlib import Path
 
 from lib.jsonc import load_jsonc
 
 root = Path(sys.argv[1])
+catalog_providers = {
+    provider["id"]
+    for provider in json.loads((root / "catalog/providers.json").read_text(encoding="utf-8"))["providers"]
+}
 files = [
     root / "opencode.template.jsonc",
     root / "templates/opencode/opencode.example.jsonc",
@@ -37,6 +42,8 @@ def validate(path: Path):
 
     providers = obj["provider"]
     require(isinstance(providers, dict), f"{path}: 'provider' must be an object")
+    removed = sorted(set(providers) - catalog_providers - {"ds4"})
+    require(not removed, f"{path}: provider blocks are not in the supported catalog: {removed}")
 
     for provider_name in ("local-cluster", "openrouter", "nvidia-nim"):
         require(

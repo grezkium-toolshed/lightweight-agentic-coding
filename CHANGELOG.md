@@ -6,76 +6,85 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 for tagged releases (public beta and beyond).
 
-## [Unreleased]
+## [0.2.0] — Unreleased
+
+*(Pre-public codebase versioning; public beta remains gated by the release checklist.)*
+
+Re-aimed the project around **private, on-device AI for everyday work** (for people on machines
+where cloud AI is blocked), plus a lightweight-to-maintain, correctly-attributed cleanup pass.
 
 ### Added
 
-- Public beta release gate flow: `docs/release/gates.json`, `docs/release/MANUAL_VALIDATION.md`, `scripts/release-gate-report.sh`, `scripts/release-evidence.sh`, `scripts/release-manual-next-steps.sh`, `scripts/test-release-gate-report.sh`, and `scripts/verify-public-beta-local.sh`.
-- Public beta support policy in `SUPPORT.md`, including issue routing, validation commands, and no-SLA beta expectations.
-- Paste-ready manual evidence stubs from `scripts/release-evidence.sh`, kept at `Status: open` until external evidence is complete.
-- Transcript capture guidance for manual release gates, writing local evidence logs under ignored `state/release-evidence/`.
-- Fresh-clone Unix onboarding smoke helper at `scripts/release-fresh-clone-unix.sh`, with no-download rehearsal mode and `--full-runtime` release evidence mode.
-- Provider freshness evidence helper at `scripts/release-provider-freshness.sh`, capturing provider verify JSON, OpenRouter refresh/check output, and explicit skipped-provider reasons without secrets.
-- llama.cpp smoke evidence helper at `scripts/release-llama-smoke.sh`, capturing runtime status, curl health/models probes, and `lac smoke --json`.
-- GitHub Private Vulnerability Reporting evidence helper wiring for `scripts/release-security-pvr.sh`, documenting local rehearsal with `--allow-unavailable` while keeping the gate open until repo owner/admin `--confirm-enabled --screenshot <reference>` evidence is captured after enabling PVR in repository settings.
-- Linux CI evidence helper wiring for `scripts/release-linux-ci.sh`, documenting local rehearsal with `--allow-unavailable` while keeping the gate open until GitHub Actions evidence proves `.github/workflows/ci.yml` completed successfully for the release commit.
-- Historical plan/backlog docs now carry public-beta supersession notes, and `verify-documentation.sh` prevents old implementation plans from being mistaken for current release guidance.
-- Release state open questions now carry explicit owners and target conditions, with `verify-documentation.sh` coverage preventing ownerless or targetless public-beta blockers.
-- OpenCode template schema validation is explicitly tracked in CI, the local beta wrapper, and documentation verification.
-- Contributor script-style guidance now standardizes public helper entrypoints as shell/PowerShell wrappers with inline Python for small validators and standalone Python reserved for the CLI/shared libraries.
-- Manual release next-step handoffs now show exact evidence-helper commands and expose gate command bundles in JSON for external testers.
-- The optional `scripts/lac.py` module split is now explicitly deferred to post-beta technical debt rather than treated as a public-beta blocker.
-- Public-beta hardware validation scope now distinguishes release-blocking live gates from non-gating profiles that remain covered by automated profile checks and verification tiers.
-- Public docs navigation now links Codex auth back to provider onboarding and Claude Code guidance, and the scenario guide documents `catalog/workflow-packs.json` as the canonical workflow-pack source.
-- Provider/free-model freshness age warnings via `scripts/check-provider-doc-freshness.sh`, wired into CI and the local public-beta suite without auto-refreshing live catalogs.
-- Windows PowerShell release evidence helper wiring for `scripts/release-windows-powershell.ps1`, documenting manual `-FullRuntime` evidence from a fresh Windows clone, optional `-NoRuntime` Windows rehearsal, generated evidence under `state/release-evidence/`, wrapper JSON command outputs, environment details, and transcript/summary paths while keeping the gate open until real Windows proof exists.
-- OpenCode discovery evidence helper wiring for `scripts/release-opencode-discovery.sh`, documenting automated rehearsal, real-session proof, generated evidence under `state/release-evidence/`, OpenCode version, rendered config path, repo/package agent and skill counts, and screenshot/transcript/manual session notes.
-- ds4 128GB release evidence helper wiring for `scripts/release-ds4-128gb.sh`, documenting local rehearsal with `--dry-run --allow-missing-ds4` while keeping the gate open until `--full-runtime` evidence is captured on real 128GB+ Apple Silicon hardware.
-- Gate-to-checklist cross-references in release helpers and release-gate reports, including diagnostics for closed gates whose checklist item remains open.
-- ds4/DwarfStar local runtime support for the `128gb-ds4-flash` profile, targeting 128GB+ Apple Silicon validation for DeepSeek V4 Flash.
-- Packaged `.opencode` asset mirror under `src/lac/data/opencode`, covering tracked agents, skills, craft rulebooks, design systems, and DCP config.
-- `THIRD_PARTY_NOTICES.md` for bundled external assets, optional runtimes, and ds4 model-source attribution.
-- Wheel/package verification via `scripts/verify-package-build.sh`.
-- Package metadata now declares `THIRD_PARTY_NOTICES.md`, package data ships it for installed users, and wheel/sdist verification checks both.
-- MCP server configuration for GitHub API (`disabled` by default; requires `GITHUB_TOKEN`).
-- Custom commands `/doctor` and `/health` for runtime validation.
-- Dynamic Context Pruning (DCP) plugin configuration at `.opencode/dcp.jsonc`.
-- `docs/review-backlog.md` — comprehensive backlog of open issues from full repo review.
+- Ponytail plugin (`@dietrichgebert/ponytail@4.8.4`, MIT) pre-wired into generated OpenCode
+  configs: laziness ruleset injected every turn, `/ponytail lite|full|ultra|off` commands, and
+  review/audit/debt skills. Opt out per session with `PONYTAIL_DEFAULT_MODE=off`; see
+  `THIRD_PARTY_NOTICES.md`.
+- Qwen 3.8 readiness: `qwen3.8-27b-q3/q4/q6` slots in the `local-cluster` provider template so
+  configs render before the open-weights drop (~2026-08-10); drop-day checklist in
+  `docs/models/QWEN38_READY.md`.
+- `scripts/bootstrap.sh` (macOS-first) + `scripts/bootstrap.ps1` — one command from nothing to a
+  running private assistant: installs prerequisites (llama.cpp, OpenCode, OpenChamber, Python),
+  then downloads a small model and opens the OpenChamber chat UI. Idempotent.
+- README re-positioned around private on-device AI for work, OpenChamber-first, with honest
+  "Will this run on my work laptop?" and "What your IT needs to allow" sections; big-memory
+  profiles moved to an "Advanced" section.
+- A compact public-release checklist and installed wheel/sdist verification across Python
+  3.10-3.13, plus a native Windows PowerShell CI smoke test.
 
 ### Changed
 
-- README quick start now uses the public clone/install flow: `git clone`, `cd lightweight-agentic-coding`, `python3 -m pip install .`, then `lac init`.
-- Python package metadata now includes public beta classifiers, project URLs, keywords, and maintainer attribution for package-index readiness.
-- Historical audit/backlog docs now identify themselves as superseded snapshots and point current release work at the canonical manual-gate system.
-- `models/README.md` now documents `lac models sync` / `lac profile apply` instead of retired setup scripts, including the ds4 model directory.
-- Migration and hybrid-workspace docs now frame `./bin/lac` / `./bin/lac.ps1` as the primary operational path, with `scripts/` reserved for compatibility and verification helpers.
-- Repo-local Unix and PowerShell wrappers now work from a clean checkout without manually exporting `PYTHONPATH=src`.
-- CI now runs the integration test, package build check, release local audit, and release gate report self-test.
-- `scripts/integration-test.sh` validates current `bin/lac.ps1` and `runtime-config/launch/*.ps1` paths instead of removed setup scripts.
-- Renamed `opencode.jsonc` to `opencode.template.jsonc` to prevent OpenCode auto-discovery conflict.
-- Bumped all model context limits to `262144` and output limits to `16384` for consistency.
-- Expanded `state/README.md` with env-var override and git-ignore notes.
-- Added `docs/providers/FREE_CLOUD_FALLBACKS.md` to documentation verification checks.
-- Release local audit now verifies third-party notice coverage for cataloged external source refs and ds4 runtime/model sources.
-- Added Contributing section to `README.md`.
-- Device setup now installs or refreshes `@tarquinen/opencode-dcp@latest` so `/dcp` is available after restarting OpenCode.
+- Onboarding is OpenChamber-first (chat UI) with OpenCode as the coding option; `lac init` now
+  lists OpenChamber in prerequisites and next-steps.
+- Single source of truth for bundled data: the top-level `runtime-config/`, `catalog/`,
+  `opencode.template.jsonc`, and `.opencode/` trees are canonical. `src/lac/data/` is now
+  generated at build time by `scripts/stage_data.py` (invoked from `setup.py`) and gitignored.
+- CI uses the offline verifier and integration suite on Linux/macOS, plus clean artifact
+  build/install checks and a Windows PowerShell lane. GitHub Actions are commit-pinned.
+- Provider catalog trimmed to the documented core: `local-cluster`, `openrouter`, `anthropic`,
+  `opencode-go`, `nvidia-nim`; provider freshness metadata dropped.
+- `SUPPORT.md`/`SECURITY.md` reworded to reflect a best-effort community project on `master`.
 
 ### Fixed
 
-- Package-mode `client render opencode` writes generated manifests to state instead of package data.
-- OpenCode `/doctor` command and model verification docs now point at current `./bin/lac doctor` / `./bin/lac smoke` commands instead of retired script paths.
-- Root and packaged catalogs now have parity checks to prevent silent drift.
-- Installed-wheel profile application now references packaged chat templates.
-- `SECURITY.md` keeps GitHub Private Vulnerability Reporting as an explicit public-beta release gate until enabled.
-- CI glob fragility in `.github/workflows/ci.yml` (loop guard for empty globs).
-- Missing documentation for `opencode-antigravity-auth` plugin in `docs/providers/AUTHENTICATION.md`.
-- Example template (`templates/opencode/opencode.example.jsonc`) missing 7 model IDs and 4 provider blocks.
-- Example bash permissions misaligned with main config.
-- `scripts/switch-profile.sh` usage string now auto-generated from `profiles.json`.
-- Foreground runtime mode missing SIGINT/SIGTERM cleanup in `scripts/lac.py`.
-- Root `agents/` and `skills/` directories missing warnings about `.opencode/` runtime paths.
-- Missing `--version` flag on `./bin/lac` CLI.
-- DCP setup no longer calls the unsupported `opencode plugin list` command.
+- `lac doctor --fix` no longer runs installs/downloads/runtime-start before the consent prompt
+  (detection is now side-effect-free), and no longer crashes in text mode.
+- `lac init` no longer offers cloud providers that were removed from the catalog (the wizard
+  used to list `opencode-zen`/`codex-auth`/`antigravity`/`z-ai` and crash if one was selected).
+- Removed the phantom `nomic-embed-text-v1.5` model slot that 12 presets declared but no profile
+  ever downloaded.
+- MiniMax profile now uses the model's embedded chat template instead of the Qwen template.
+- Fixed `main` → `master` self-referencing links (PyPI URLs, issue template, `SECURITY.md`).
+- Bundled `catalog/checksums.json` with the demo model's SHA256 so `lac models sync micro`
+  has a blocking integrity check; mismatched files are quarantined and never launched.
+- Installed wheels now keep models, refreshed catalogs, and runtime state in writable per-user
+  directories instead of trying to modify package resources.
+- Packaged the Claude Code templates required by `lac client render claude-code`.
+- Bootstrap now installs/checks OpenChamber's Node.js 22+ and pnpm prerequisites and falls back
+  to OpenCode when the chat UI is unavailable.
+- Bootstrap now exposes pnpm's macOS global bin directory to the same install process and detects
+  versioned Python binaries before installing another Homebrew Python.
+- The `micro` profile now uses a 32K context window, preventing OpenCode from repeatedly trying
+  and failing to compact its startup prompt into the previous 8K limit, and lets llama.cpp
+  auto-select GPU offload instead of forcing CPU-only inference.
+- Package verification no longer mistakes an ignored local `build/` output directory for the
+  installed PyPA `build` module, keeping repeated release checks idempotent.
+- OpenChamber discovery now checks the pnpm install locations used by bootstrap, so later
+  `lac client open openchamber` runs do not depend on inheriting bootstrap's temporary PATH.
+- Rendered OpenCode configs now take every selected local model's context limit from the active
+  profile preset and reject profiles below the 32K startup/headroom floor, preventing both
+  immediate prompt overloads and later runtime/advertised-context drift.
+- Removed stale provider blocks and docs for providers no longer present in the supported catalog.
+- Repaired the packaged shell and PowerShell launch wrappers so they invoke the supported CLI.
+- Pinned the default Dynamic Context Pruning plugin to `3.1.14` for reproducible setup.
+
+### Removed
+
+- Dead second CLI `scripts/lac.py` and the heavyweight release-evidence apparatus (`release-*.sh`,
+  `docs/release/gates.json`, `verify-documentation.sh`, drift-guard verify scripts); a compact
+  `RELEASE_CHECKLIST.md` remains as the public-release gate.
+- Vendored third-party design skills, craft rulebooks, and brand design-systems are no longer
+  redistributed — they are opt-in fetch via the Open Design installer. See `THIRD_PARTY_NOTICES.md`.
+
 
 ## [0.1.0] — 2026-04-27
 

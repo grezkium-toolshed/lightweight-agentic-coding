@@ -56,10 +56,10 @@ def render_provider_list(providers):
     for provider in providers:
         if provider["id"] == "local-cluster":
             readiness = "local profile active" if provider["configured"] else "local profile inactive"
-            print(f"{provider['id']}: {provider['label']} | {readiness} | risk {provider['risk_level']} | verified {provider['last_verified_at']}")
+            print(f"{provider['id']}: {provider['label']} | {readiness} | risk {provider['risk_level']}")
             continue
         flag = "ready" if provider["configured"] else "unset"
-        print(f"{provider['id']}: {provider['label']} | env {provider['env_var']} ({flag}) | risk {provider['risk_level']} | verified {provider['last_verified_at']}")
+        print(f"{provider['id']}: {provider['label']} | env {provider['env_var']} ({flag}) | risk {provider['risk_level']}")
 
 
 def _catalog_model_short_id(provider_id, model_id):
@@ -77,7 +77,7 @@ def render_provider_models(provider_id, models):
         short_id = _catalog_model_short_id(provider_id, model["id"])
         context = model.get("context_length")
         context_label = str(context) if context is not None else "?"
-        print(f"{short_id}: context {context_label} | verified {model['last_verified_at']}")
+        print(f"{short_id}: context {context_label}")
 
 
 def render_provider_status(payload):

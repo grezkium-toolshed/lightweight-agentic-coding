@@ -142,11 +142,7 @@ PROVIDER_VERIFICATION = {
     },
     "openrouter": {"path": "/models", "auth": "bearer"},
     "opencode-go": {"path": "/models", "auth": "bearer"},
-    "opencode-zen": {"path": "/models", "auth": "bearer"},
-    "codex-auth": {"path": "/models", "auth": "bearer"},
     "nvidia-nim": {"path": "/models", "auth": "bearer"},
-    "antigravity": {"path": "/models", "auth": "bearer"},
-    "z-ai": {"path": "/models", "auth": "bearer"},
     "anthropic": {
         "endpoint": "https://api.anthropic.com/v1/models",
         "auth": "x-api-key",
@@ -272,7 +268,7 @@ def collect_provider_readiness(ctx):
             "env_var": provider["env_var"],
             "configured": _provider_configured(ctx, provider),
             "risk_level": provider["risk_level"],
-            "last_verified_at": provider["last_verified_at"],
+            "last_verified_at": provider.get("last_verified_at"),
         })
     return results
 

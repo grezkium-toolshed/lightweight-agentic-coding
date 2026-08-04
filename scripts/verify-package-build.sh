@@ -2,319 +2,140 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_DIR"' EXIT
-
-WHEEL_DIR="$TMP_DIR/wheel"
-SDIST_DIR="$TMP_DIR/sdist"
-INSTALL_DIR="$TMP_DIR/install"
-mkdir -p "$WHEEL_DIR" "$SDIST_DIR"
-
 PYTHON_BIN=""
-COMPATIBLE_WITHOUT_BACKEND=""
-FALLBACK_PYTHON=""
-IGNORE_REQUIRES=0
-NO_BUILD_ISOLATION=1
-USE_UV_BUILD=0
-for candidate in "${PYTHON:-}" python3.14 python3.13 python3.12 python3.11 python3.10 python3; do
+for candidate in "${PYTHON:-}" python python3 python3.14 python3.13 python3.12 python3.11 python3.10; do
   [[ -n "$candidate" ]] || continue
   command -v "$candidate" >/dev/null 2>&1 || continue
-  has_backend=0
-  if "$candidate" -c 'import setuptools.build_meta' >/dev/null 2>&1; then
-    has_backend=1
-  fi
   if "$candidate" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1; then
-    if [[ "$has_backend" -eq 1 ]]; then
-      PYTHON_BIN="$candidate"
-      break
-    fi
-    if [[ -z "$COMPATIBLE_WITHOUT_BACKEND" ]]; then
-      COMPATIBLE_WITHOUT_BACKEND="$candidate"
-    fi
-  elif [[ "$has_backend" -eq 1 && -z "$FALLBACK_PYTHON" ]]; then
-    FALLBACK_PYTHON="$candidate"
+    PYTHON_BIN="$candidate"
+    break
   fi
 done
-
-if [[ -z "$PYTHON_BIN" && -n "$FALLBACK_PYTHON" ]]; then
-  PYTHON_BIN="$FALLBACK_PYTHON"
-  IGNORE_REQUIRES=1
-  echo "[warn] Using $PYTHON_BIN with --ignore-requires-python for wheel-content inspection; install/runtime still requires Python 3.10+." >&2
-fi
-
-if [[ -z "$PYTHON_BIN" && -n "$COMPATIBLE_WITHOUT_BACKEND" ]]; then
-  PYTHON_BIN="$COMPATIBLE_WITHOUT_BACKEND"
-  if command -v uv >/dev/null 2>&1; then
-    USE_UV_BUILD=1
-  else
-    NO_BUILD_ISOLATION=0
-  fi
-fi
-
 if [[ -z "$PYTHON_BIN" ]]; then
-  echo "Python 3.10+ with pip is required for package build verification." >&2
+  echo "Python 3.10+ is required for package verification." >&2
+  exit 1
+fi
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
+DIST_DIR="$TMP_DIR/dist"
+INSTALL_DIR="$TMP_DIR/install"
+mkdir -p "$DIST_DIR" "$INSTALL_DIR"
+
+if "$PYTHON_BIN" -c 'import build.__main__' >/dev/null 2>&1; then
+  "$PYTHON_BIN" -m build --outdir "$DIST_DIR" "$ROOT" >/dev/null
+elif command -v uv >/dev/null 2>&1; then
+  UV_CACHE_DIR="$TMP_DIR/uv-cache" uv build --quiet --out-dir "$DIST_DIR" --no-create-gitignore "$ROOT" >/dev/null
+else
+  echo "Package verification needs the Python 'build' module or uv." >&2
+  echo "Install with: $PYTHON_BIN -m pip install build" >&2
   exit 1
 fi
 
-if [[ "$USE_UV_BUILD" -eq 1 ]]; then
-  uv build --wheel --cache-dir "${UV_CACHE_DIR:-$TMP_DIR/uv-cache}" --out-dir "$WHEEL_DIR" --no-create-gitignore "$ROOT" >/dev/null
-else
-  build_cmd=("$PYTHON_BIN" -m pip wheel "$ROOT" --no-deps -w "$WHEEL_DIR")
-  if [[ "$NO_BUILD_ISOLATION" -eq 1 ]]; then
-    build_cmd+=(--no-build-isolation)
-  fi
-  if [[ "$IGNORE_REQUIRES" -eq 1 ]]; then
-    build_cmd+=(--ignore-requires-python)
-  fi
-
-  if ! "${build_cmd[@]}" >/dev/null; then
-    if [[ "$NO_BUILD_ISOLATION" -eq 1 ]]; then
-      echo "[warn] No-isolation wheel build failed; retrying with standard build isolation." >&2
-      retry_cmd=("$PYTHON_BIN" -m pip wheel "$ROOT" --no-deps -w "$WHEEL_DIR")
-      if [[ "$IGNORE_REQUIRES" -eq 1 ]]; then
-        retry_cmd+=(--ignore-requires-python)
-      fi
-      "${retry_cmd[@]}" >/dev/null
-    else
-      exit 1
-    fi
-  fi
-fi
-
-"$PYTHON_BIN" - "$WHEEL_DIR" <<'PY'
+"$PYTHON_BIN" - "$DIST_DIR" <<'PY'
 import sys
+import tarfile
 import zipfile
 from pathlib import Path
 
-wheel_dir = Path(sys.argv[1])
-wheels = sorted(wheel_dir.glob("lightweight_agentic_coding-*.whl"))
-if len(wheels) != 1:
-    raise SystemExit(f"Expected one lightweight_agentic_coding wheel, found: {[p.name for p in wheel_dir.glob('*.whl')]}")
+dist = Path(sys.argv[1])
+wheels = list(dist.glob("lightweight_agentic_coding-*.whl"))
+sdists = list(dist.glob("lightweight_agentic_coding-*.tar.gz"))
+if len(wheels) != 1 or len(sdists) != 1:
+    raise SystemExit(f"Expected one wheel and one sdist, got {wheels} and {sdists}")
 
-wheel = wheels[0]
-with zipfile.ZipFile(wheel) as archive:
-    names = set(archive.namelist())
-    metadata_files = [name for name in names if name.endswith(".dist-info/METADATA")]
-    if not metadata_files:
-        raise SystemExit("Wheel is missing METADATA")
-    metadata = archive.read(metadata_files[0]).decode("utf-8")
-
-required = {
+required_wheel = {
     "lac/cli.py",
-    "lac/runtime.py",
+    "lac/context.py",
     "lac/data/THIRD_PARTY_NOTICES.md",
-    "lac/data/catalog/assets.json",
-    "lac/data/catalog/workflow-packs.json",
+    "lac/data/catalog/providers.json",
     "lac/data/opencode/opencode.template.jsonc",
-    "lac/data/opencode/dcp.jsonc",
     "lac/data/opencode/agents/architecture-reviewer.md",
-    "lac/data/opencode/skills/agent-browser/SKILL.md",
     "lac/data/opencode/skills/gsd/SKILL.md",
-    "lac/data/opencode/craft/anti-ai-slop.md",
-    "lac/data/opencode/design-systems/apple/DESIGN.md",
     "lac/data/runtime-config/profiles.json",
-    "lac/data/runtime-config/chat-templates/gemma-4.jinja",
-    "lac/data/runtime-config/chat-templates/qwen-coder-next.jinja",
-    "lac/data/runtime-config/chat-templates/qwen3.5.jinja",
-    "lac/data/runtime-config/presets/128gb-ds4-flash.ini",
+    "lac/data/runtime-config/presets/micro.ini",
+    "lac/data/templates/claude-code/README.md",
 }
+forbidden_fragments = (
+    "/craft/",
+    "/design-systems/",
+    "/skills/msgraph/",
+    "/skills/agent-browser/",
+    "/skills/brand-guidelines/",
+)
 
-missing = sorted(required - names)
-if missing:
-    raise SystemExit("Wheel is missing required package files:\n  - " + "\n  - ".join(missing))
+with zipfile.ZipFile(wheels[0]) as archive:
+    names = set(archive.namelist())
+    missing = sorted(required_wheel - names)
+    if missing:
+        raise SystemExit("Wheel is missing required files:\n  - " + "\n  - ".join(missing))
+    forbidden = sorted(name for name in names if any(fragment in name for fragment in forbidden_fragments))
+    if forbidden:
+        raise SystemExit("Wheel contains excluded third-party content:\n  - " + "\n  - ".join(forbidden))
+    if not any(name.endswith(".dist-info/licenses/LICENSE") for name in names):
+        raise SystemExit("Wheel is missing LICENSE metadata")
+    if not any(name.endswith(".dist-info/licenses/THIRD_PARTY_NOTICES.md") for name in names):
+        raise SystemExit("Wheel is missing THIRD_PARTY_NOTICES.md metadata")
+    skill_count = sum(name.startswith("lac/data/opencode/skills/") and name.endswith("/SKILL.md") for name in names)
+    agent_count = sum(name.startswith("lac/data/opencode/agents/") and name.endswith(".md") for name in names)
+    if (skill_count, agent_count) != (7, 6):
+        raise SystemExit(f"Unexpected packaged assets: {skill_count} skills, {agent_count} agents")
 
-required_license_files = {"LICENSE", "THIRD_PARTY_NOTICES.md"}
-missing_license_files = [
-    file_name
-    for file_name in sorted(required_license_files)
-    if not any(
-        name.endswith(f".dist-info/licenses/{file_name}") or name.endswith(f".dist-info/{file_name}")
-        or name == f"lac/data/{file_name}"
-        for name in names
-    )
-]
-if missing_license_files:
-    raise SystemExit(
-        "Wheel is missing required license/notice files:\n  - "
-        + "\n  - ".join(missing_license_files)
-    )
-
-if "Name: lightweight-agentic-coding" not in metadata:
-    raise SystemExit("Wheel metadata has the wrong package name")
-if "Version: 0.1.0" not in metadata:
-    raise SystemExit("Wheel metadata has the wrong package version")
-for file_name in sorted(required_license_files):
-    if f"License-File: {file_name}" not in metadata:
-        raise SystemExit(f"Wheel metadata missing License-File entry for {file_name}")
-print("[ok] packaged license/notice files present")
-
-skill_count = sum(1 for name in names if name.startswith("lac/data/opencode/skills/") and name.endswith("/SKILL.md"))
-agent_count = sum(1 for name in names if name.startswith("lac/data/opencode/agents/") and name.endswith(".md"))
-if skill_count < 35 or agent_count < 6:
-    raise SystemExit(f"Unexpected asset counts in wheel: {skill_count} skills, {agent_count} agents")
-
-print(f"[ok] wheel: {wheel.name}")
-print(f"[ok] packaged assets: {skill_count} skills, {agent_count} agents")
-PY
-
-if "$PYTHON_BIN" -c 'import setuptools' >/dev/null 2>&1; then
-  SDIST_LOG="$TMP_DIR/sdist.log"
-  if ! (cd "$ROOT" && "$PYTHON_BIN" setup.py sdist --dist-dir "$SDIST_DIR" >"$SDIST_LOG" 2>&1); then
-    cat "$SDIST_LOG" >&2
-    exit 1
-  fi
-elif command -v uv >/dev/null 2>&1; then
-  uv build --sdist --cache-dir "${UV_CACHE_DIR:-$TMP_DIR/uv-cache}" --out-dir "$SDIST_DIR" --no-create-gitignore "$ROOT" >/dev/null
-else
-  echo "setuptools or uv is required for sdist verification." >&2
-  exit 1
-fi
-
-"$PYTHON_BIN" - "$SDIST_DIR" "$ROOT" <<'PY'
-import sys
-import tarfile
-from pathlib import Path
-
-sdist_dir = Path(sys.argv[1])
-root = Path(sys.argv[2])
-sdists = sorted(sdist_dir.glob("lightweight-agentic-coding-*.tar.gz"))
-if len(sdists) != 1:
-    raise SystemExit(f"Expected one lightweight-agentic-coding sdist, found: {[p.name for p in sdist_dir.glob('*.tar.gz')]}")
-
-sdist = sdists[0]
-required_suffixes = {
-    "LICENSE",
-    "README.md",
-    "CHANGELOG.md",
-    "THIRD_PARTY_NOTICES.md",
-    "src/lac/data/THIRD_PARTY_NOTICES.md",
-    "src/lac/data/catalog/assets.json",
-    "src/lac/data/opencode/opencode.template.jsonc",
-    "src/lac/data/opencode/skills/agent-browser/SKILL.md",
-    "src/lac/data/runtime-config/presets/128gb-ds4-flash.ini",
-}
-
-with tarfile.open(sdist, "r:gz") as archive:
-    members = archive.getmembers()
-    names = [member.name for member in members]
-    missing = [
-        suffix
-        for suffix in sorted(required_suffixes)
-        if not any(name.endswith(suffix) for name in names)
-    ]
+with tarfile.open(sdists[0], "r:gz") as archive:
+    names = [member.name for member in archive.getmembers()]
+    required_suffixes = {
+        "LICENSE",
+        "README.md",
+        "THIRD_PARTY_NOTICES.md",
+        "src/lac/data/catalog/providers.json",
+        "src/lac/data/templates/claude-code/README.md",
+    }
+    missing = sorted(suffix for suffix in required_suffixes if not any(name.endswith(suffix) for name in names))
     if missing:
         raise SystemExit("Sdist is missing required files:\n  - " + "\n  - ".join(missing))
 
-    def read_member(suffix: str) -> str:
-        matches = [member for member in members if member.name.endswith(suffix)]
-        if len(matches) != 1:
-            raise SystemExit(f"Expected one sdist member ending with {suffix}, found: {[member.name for member in matches]}")
-        extracted = archive.extractfile(matches[0])
-        if extracted is None:
-            raise SystemExit(f"Could not read sdist member {matches[0].name}")
-        return extracted.read().decode("utf-8")
-
-    def read_root_member(file_name: str) -> str:
-        matches = [member for member in members if member.name.endswith(f"/{file_name}") and member.name.count("/") == 1]
-        if len(matches) != 1:
-            raise SystemExit(f"Expected one root sdist member named {file_name}, found: {[member.name for member in matches]}")
-        extracted = archive.extractfile(matches[0])
-        if extracted is None:
-            raise SystemExit(f"Could not read sdist member {matches[0].name}")
-        return extracted.read().decode("utf-8")
-
-    root_pkg_info = [member for member in members if member.name.endswith("/PKG-INFO") and member.name.count("/") == 1]
-    if len(root_pkg_info) != 1:
-        raise SystemExit(f"Expected one root sdist PKG-INFO, found: {[member.name for member in root_pkg_info]}")
-    extracted_pkg_info = archive.extractfile(root_pkg_info[0])
-    if extracted_pkg_info is None:
-        raise SystemExit(f"Could not read sdist member {root_pkg_info[0].name}")
-    pkg_info = extracted_pkg_info.read().decode("utf-8")
-    root_notice = read_root_member("THIRD_PARTY_NOTICES.md")
-    packaged_notice = read_member("src/lac/data/THIRD_PARTY_NOTICES.md")
-
-repo_notice = (root / "THIRD_PARTY_NOTICES.md").read_text(encoding="utf-8")
-if root_notice != repo_notice:
-    raise SystemExit("Sdist root THIRD_PARTY_NOTICES.md does not match repo copy")
-if packaged_notice != repo_notice:
-    raise SystemExit("Sdist packaged THIRD_PARTY_NOTICES.md does not match repo copy")
-
-if "Name: lightweight-agentic-coding" not in pkg_info:
-    raise SystemExit("Sdist PKG-INFO has the wrong package name")
-if "Version: 0.1.0" not in pkg_info:
-    raise SystemExit("Sdist PKG-INFO has the wrong package version")
-if "Home-page: UNKNOWN" in pkg_info:
-    raise SystemExit("Sdist PKG-INFO is missing Home-page metadata")
-for file_name in ("LICENSE", "THIRD_PARTY_NOTICES.md"):
-    if f"License-File: {file_name}" not in pkg_info:
-        raise SystemExit(f"Sdist PKG-INFO missing License-File entry for {file_name}")
-
-print(f"[ok] sdist: {sdist.name}")
-print("[ok] sdist notice/package-data files present")
+print(f"[ok] wheel: {wheels[0].name}")
+print(f"[ok] sdist: {sdists[0].name}")
+print("[ok] packaged assets: 7 skills, 6 agents")
 PY
 
-wheel_path=("$WHEEL_DIR"/lightweight_agentic_coding-*.whl)
-install_cmd=("$PYTHON_BIN" -m pip install "${wheel_path[0]}" --no-deps --target "$INSTALL_DIR")
-if [[ "$IGNORE_REQUIRES" -eq 1 ]]; then
-  install_cmd+=(--ignore-requires-python)
-fi
-"${install_cmd[@]}" >/dev/null
+WHEEL="$(find "$DIST_DIR" -name 'lightweight_agentic_coding-*.whl' -print -quit)"
+PIP_CACHE_DIR="$TMP_DIR/pip-cache" "$PYTHON_BIN" -m pip install --no-deps --target "$INSTALL_DIR" "$WHEEL" >/dev/null
 
-PYTHONPATH="$INSTALL_DIR" LAC_STATE_ROOT="$TMP_DIR/state" "$PYTHON_BIN" -m lac doctor --json > "$TMP_DIR/doctor.json"
-"$PYTHON_BIN" - "$TMP_DIR/doctor.json" <<'PY'
+(
+  cd "$TMP_DIR"
+  export PYTHONPATH="$INSTALL_DIR"
+  export LAC_DATA_ROOT="$TMP_DIR/data"
+  export LAC_STATE_ROOT="$TMP_DIR/state"
+  "$PYTHON_BIN" -m lac --version >/dev/null
+  "$PYTHON_BIN" -m lac pack list --json > "$TMP_DIR/packs.json"
+  "$PYTHON_BIN" -m lac profile apply micro --json > "$TMP_DIR/profile.json"
+  "$PYTHON_BIN" -m lac client render claude-code --json > "$TMP_DIR/claude-code.json"
+  "$PYTHON_BIN" - <<'PY'
+from pathlib import Path
+
+Path("sources.js").write_text(
+    "export const openrouter = [\n['demo/model:free', 'Demo', 'A', 'n/a', '8k']\n]\n",
+    encoding="utf-8",
+)
+PY
+  "$PYTHON_BIN" -m lac catalog sync-free --source-url "file://$TMP_DIR/sources.js" >/dev/null
+  "$PYTHON_BIN" - <<'PY'
 import json
-import sys
+import os
 from pathlib import Path
 
-payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-assets = payload["assets"]
-assert assets["catalog_asset_count"] == 41, assets
-assert assets["pack_count"] == 7, assets
-assert assets["opencode_agents"] == 6, assets
-assert assets["opencode_skills"] == 35, assets
-assert payload["ok"] is True, payload.get("failures")
-print("[ok] installed wheel doctor reports expected package assets")
+from lac.context import Context
+
+ctx = Context()
+expected_data = Path(os.environ["LAC_DATA_ROOT"])
+assert ctx.models_root == expected_data / "models", (ctx.models_root, expected_data)
+assert str(ctx.root).startswith(os.environ["PYTHONPATH"]), ctx.root
+assert len(json.loads(Path("packs.json").read_text())) == 6
+assert (Path(os.environ["LAC_STATE_ROOT"]) / "clients/claude-code/templates/README.md").is_file()
+assert (expected_data / "catalog/free-coding-models.json").is_file()
+assert (expected_data / "catalog/FREE_CLOUD_MODELS.md").is_file()
+print("[ok] installed wheel uses writable user paths and renders supported clients")
 PY
-
-PYTHONPATH="$INSTALL_DIR" LAC_STATE_ROOT="$TMP_DIR/state" "$PYTHON_BIN" -m lac pack list --json > "$TMP_DIR/pack-list.json"
-"$PYTHON_BIN" - "$TMP_DIR/pack-list.json" <<'PY'
-import json
-import sys
-from pathlib import Path
-
-packs = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-ids = {pack["id"] for pack in packs}
-expected = {
-    "coding",
-    "design",
-    "devops",
-    "microsoft-graph",
-    "office",
-    "research",
-    "team-rollout",
-}
-if ids != expected:
-    raise SystemExit(f"Installed wheel pack list mismatch: expected {sorted(expected)}, got {sorted(ids)}")
-if len(packs) != 7:
-    raise SystemExit(f"Installed wheel expected 7 workflow packs, got {len(packs)}")
-print("[ok] installed wheel pack list reports expected workflow packs")
-PY
-
-PYTHONPATH="$INSTALL_DIR" LAC_STATE_ROOT="$TMP_DIR/state" "$PYTHON_BIN" -m lac profile apply 24gb >/dev/null
-"$PYTHON_BIN" - "$TMP_DIR/state/runtime/presets.active.ini" <<'PY'
-import sys
-from pathlib import Path
-
-preset = Path(sys.argv[1])
-missing = []
-for line in preset.read_text(encoding="utf-8").splitlines():
-    if line.strip().startswith("chat-template-file"):
-        path = Path(line.split("=", 1)[1].strip())
-        if not path.is_file():
-            missing.append(path)
-if missing:
-    raise SystemExit("Generated preset references missing chat templates:\n  - " + "\n  - ".join(str(path) for path in missing))
-print("[ok] installed wheel profile apply references packaged chat templates")
-PY
+)
 
 echo "Package build checks passed."

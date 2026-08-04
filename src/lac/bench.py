@@ -26,7 +26,7 @@ def _models(ctx):
     models = []
     for m in data.get("data", []):
         mid = m.get("id", "")
-        if mid and mid != "nomic-embed-text-v1.5":
+        if mid:
             models.append(mid)
     return models
 

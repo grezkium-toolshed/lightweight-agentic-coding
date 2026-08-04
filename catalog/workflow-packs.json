@@ -26,55 +26,6 @@
       ]
     },
     {
-      "id": "design",
-      "name": "Design and Prototyping",
-      "description": "Design skills, brand systems, and prototyping curated from Open Design",
-      "source": "open-design",
-      "trust_level": "community",
-      "assets": [
-        "skill:agent-browser",
-        "skill:algorithmic-art",
-        "skill:article-magazine",
-        "skill:brainstorming",
-        "skill:brand-guidelines",
-        "skill:brandkit",
-        "skill:canvas-design",
-        "skill:card-twitter",
-        "skill:color-expert",
-        "skill:competitive-ads-extractor",
-        "skill:copywriting",
-        "skill:creative-director",
-        "skill:data-report",
-        "skill:deck-open-slide-canvas",
-        "skill:deck-swiss-international",
-        "skill:design-brief",
-        "skill:design-consultation",
-        "skill:design-review",
-        "skill:doc-kami-parchment",
-        "skill:faq-page",
-        "skill:gsap-core",
-        "skill:impeccable-design-polish",
-        "skill:pdf",
-        "skill:ppt-keynote",
-        "skill:pptx-html-fidelity-audit",
-        "skill:research-decision-room",
-        "skill:ui-ux-pro-max"
-      ],
-      "label": "Design Pack",
-      "supported_clients": [
-        "opencode",
-        "claude-code",
-        "codex-reference",
-        "openchamber"
-      ],
-      "required_tools": [
-        "shell",
-        "html/css skill",
-        "image tooling",
-        "design system references"
-      ]
-    },
-    {
       "id": "devops",
       "label": "DevOps Pack",
       "description": "Infrastructure-as-code review, Dockerfile auditing, and CI/CD pipeline validation for reliable deployments.",

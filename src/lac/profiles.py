@@ -6,12 +6,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-from lac.context import ROOT, STATE_ROOT
 from lac.lib.jsonc import load_jsonc
 
 
 def render_preset(ctx, profile):
-    models_dir = Path(os.environ.get("AI_MODELS_DIR", str(ctx.root / "models")))
+    models_dir = ctx.models_root
     preset_path = ctx.root / profile["preset"]
     if not preset_path.is_file():
         raise SystemExit(f"Preset template missing: {preset_path}")

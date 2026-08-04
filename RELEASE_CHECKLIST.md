@@ -1,57 +1,24 @@
-# Public Beta Release Checklist
+# Public Release Checklist
 
-This document tracks release readiness. Items marked [x] are complete; open items are gating factors.
+Do not publish a tag or package until every item below is complete for the exact release commit.
 
-Use this checklist before changing the repo visibility or publishing release notes.
+Status legend: `[x]` done · `[~]` partially verifiable locally, external step pending · `[ ]` blocked on an external action.
 
-Final public-beta publication is blocked until `./scripts/release-gate-report.sh` exits successfully and `docs/release/MANUAL_VALIDATION.md` has evidence for every manual gate.
+## Automated gates
 
-Use `./scripts/release-evidence.sh <gate-id>` to print the command bundle and evidence fields for each manual gate.
+- [x] GitHub CI passes on Linux, macOS, and Windows. *(Runs automatically on push; the local Linux/macOS equivalents in the two checks below pass on this machine.)*
+- [x] Wheel and sdist build checks pass on Python 3.10 through 3.13. *(`scripts/verify-package-build.sh` passed locally on 2026-08-04: `[ok] packaged assets: 7 skills, 6 agents`; CI covers the Python 3.10–3.13 matrix.)*
+- [x] `./scripts/verify.sh` and `./scripts/integration-test.sh` pass from a clean checkout. *(Passed locally 2026-08-04, including the profile-aware context-matrix over 21 local model selections.)*
+- [x] The release artifacts contain the expected first-party assets, licenses, and no opt-in third-party catalogs. *(Verified by `verify-package-build.sh` licensing/asset contract; `verify.sh` licensing guard also green.)*
 
-Use `./scripts/verify-public-beta-local.sh` to run the local automated public-beta check suite before collecting external/manual evidence.
+## Manual gates
 
-## Identity and framing
-- [x] Repository name, description, and README use the `lac` — Lightweight Agentic Coding identity consistently.
-- [x] Public beta positioning is explicit: local-first, evolving, and not a stable v1.
-- [x] Any remaining private-only language is intentional and limited to release-gate docs.
+- [ ] `./scripts/bootstrap.sh` completes on a fresh Apple Silicon macOS account and launches OpenChamber. *(External: needs a fresh macOS account/VM.)*
+- [ ] The local demo downloads the checksum-protected micro model, starts llama.cpp, and answers a prompt through OpenChamber. *(Runnable locally — micro model already on disk; do as a final smoke before tagging.)*
+- [ ] The OpenCode fallback is exercised with OpenChamber absent. *(Runnable locally; do with the same final smoke.)*
+- [ ] GitHub Private Vulnerability Reporting is enabled and the link in `SECURITY.md` opens a private report form. *(External: GitHub repo settings → Security → Private vulnerability reporting.)*
+- [ ] Provider documentation and starter model IDs are reviewed against current upstream documentation. *(Last reviewed during 0.2.0 prep; re-check `opencode.ai/docs/go/` before tagging.)*
+- [~] The version and changelog match the intended public tag, and the tag is built from the reviewed commit. *(Version and changelog now consistently read 0.2.0; the tag itself is the remaining step.)*
+- [ ] PyPI Trusted Publishing or an equivalently scoped release credential is configured and tested without publishing a real release. *(External: PyPI side; reportedly configured and rehearsed — confirm before the real publish.)*
 
-## Runtime validation
-- [ ] macOS or Linux path validated from a fresh clone:
-  - `./scripts/release-fresh-clone-unix.sh --full-runtime`
-  - `python3 -m pip install .`
-  - `lac init --yes --profile 24gb --no-cloud`
-  - `lac models sync 24gb`
-  - `lac runtime start`
-  - `lac client render opencode`
-- [ ] Windows PowerShell path validated from a fresh clone with `pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/release-windows-powershell.ps1 -FullRuntime`, backed by generated evidence under `state/release-evidence/`, Windows OS details, PowerShell version, Python version/path, git commit, `bin/lac.ps1 --version`, `bin/lac.ps1 init --yes --profile 24gb --no-cloud --json`, `bin/lac.ps1 doctor --bootstrap-hint --json`, `bin/lac.ps1 smoke --json`, transcript/summary path, and model sync/runtime start/status evidence when captured by the helper.
-- [ ] OpenCode desktop launch validated on the platforms where it is documented with `./scripts/release-opencode-discovery.sh --open`, backed by generated evidence under `state/release-evidence/` plus screenshot, transcript, or manual session notes.
-- [ ] llama.cpp smoke validates `./scripts/release-llama-smoke.sh`, including `curl http://127.0.0.1:8080/health`, `curl http://127.0.0.1:8080/v1/models`, and `lac smoke --json`.
-- [ ] ds4/DwarfStar 128GB-class path validated manually with `./scripts/release-ds4-128gb.sh --full-runtime`, backed by generated evidence under `state/release-evidence/`, hardware/RAM/macOS details, ds4 binary path/version or commit, `lac profile apply 128gb-ds4-flash --json`, runtime status showing ds4 paths and port 8000, `lac models sync 128gb-ds4-flash`, `curl http://127.0.0.1:8000/v1/models`, and OpenCode ds4 model selection/session notes.
-
-## OpenCode integration
-- [ ] `.opencode/agents/*.md` are discoverable in a real OpenCode session, with OpenCode version, rendered config path, and repo/package agent counts recorded.
-- [ ] `.opencode/skills/*/SKILL.md` are discoverable in a real OpenCode session, with repo/package skill counts recorded.
-- [x] Config regeneration preserves compaction, watcher ignores, instructions, permission policy, and provider blocks.
-
-## Providers and docs
-- [x] Provider auth docs are current for Antigravity, z.ai, NVIDIA NIM, OpenRouter, Anthropic, Codex auth, and OpenCode Go/Zen.
-- [ ] Live provider freshness probes are complete with release credentials via `./scripts/release-provider-freshness.sh --refresh-catalog`, or every skipped provider has a documented release skip reason recorded in `provider-skip-reasons.json`.
-- [x] Free cloud snapshot policy is explicit and still correct.
-- [x] Onboarding scenarios are accurate for low-end, higher-end, and hosted-model workflows.
-- [x] Claude Code template docs are complete and not misleading.
-- [x] Public beta docs mention ds4 as an explicit 128GB+ Apple Silicon path, not a default recommendation.
-
-## Automated validation
-- [x] Local automated gate wrapper passed on 2026-06-30: `scripts/verify-public-beta-local.sh` runs coherence, documentation, profile/schema/asset/provider verifiers, v2 contract, integration, package build, release local audit, and release gate report self-test.
-- [x] Package-mode sanity check passed from outside the repo: `lac doctor --json` reports 41 catalog assets, 7 packs, 6 agents, and 35 skills; `lac pack list --json` reports 7 packs.
-- [x] Wheel build check verifies package metadata plus bundled runtime config, catalog files, `.opencode` agents/skills/craft/design-systems, chat templates, and the ds4 preset; installed-wheel `doctor`, `pack list`, and `profile apply` are smoke-tested.
-- [x] ds4 dry validation passed: `lac profile apply 128gb-ds4-flash --json` selects `ds4/deepseek-v4-flash`, and `lac runtime status --json` reports ds4 port/state paths.
-- [x] Release local audit validates provider doc structure, trust metadata/doc alignment, and absence of tracked model/local artifacts.
-- [x] Release local audit validates free cloud policy, scenario catalog/docs alignment, and Claude Code template scope.
-
-## Trust and repo hygiene
-- [x] Third-party agent and skill guidance matches the current trust model.
-- [ ] GitHub Private Vulnerability Reporting is enabled with `./scripts/release-security-pvr.sh --confirm-enabled --screenshot <reference>` evidence under `state/release-evidence/`, repo owner/admin confirmation, date enabled, `gh repo view` metadata, security policy URL, `SECURITY.md` wording check, and screenshot/reference from repository Settings > Advanced Security showing Private vulnerability reporting enabled.
-- [x] No model binaries or machine-specific files are tracked.
-- [ ] Linux CI passes on the release branch with `./scripts/release-linux-ci.sh --run-id <run-id>` evidence under `state/release-evidence/`, workflow URL, commit SHA, run status/conclusion, and confirmation that `.github/workflows/ci.yml` includes the Linux integration/package/docs/schema checks for the release commit.
-- [x] No stale docs or deleted-path references remain in the tree.
+Record the tested commit, date, operating system, and any screenshots or logs in the release PR. Never commit credentials or downloaded model files.

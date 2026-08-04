@@ -7,9 +7,7 @@ This lac setup supports three practical provider modes:
 
 Provider freshness and risk metadata now live in `catalog/providers.json`.
 
-Run `./bin/lac provider verify --all` for a live reachability probe — each configured provider gets a real HTTP request to its baseURL and reports `ok`, `skipped`, or `error`. Pass `--refresh-catalog` to bump `last_verified_at` on success.
-
-Run `./scripts/check-provider-doc-freshness.sh` for a non-network warning when free-model snapshots or OpenRouter freshness markers are older than the release threshold. Use `--strict` only when you intentionally want stale freshness markers to fail a release check.
+Run `./bin/lac provider verify --all` for a live reachability probe — each configured provider gets a real HTTP request to its baseURL and reports `ok`, `skipped`, or `error`.
 
 Local baseline guidance:
 - target default family: Qwen 3.6 MoE
@@ -21,8 +19,7 @@ Read next:
 - `FREE_CLOUD_FALLBACKS.md`
 - `NVIDIA_NIM.md`
 - `OPENROUTER_FREE.md`
-- `OPENCODE_ZEN_GO.md`
-- `CODEX_AUTH.md`
+- `OPENCODE_GO.md`
 - `ANTHROPIC_API.md`
 - `MICROSOFT_GRAPH.md`
 - `OPENCHAMBER.md`

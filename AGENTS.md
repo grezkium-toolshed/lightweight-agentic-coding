@@ -47,10 +47,10 @@ Windows:
 
 ## RepositoryIntent
 
-The repo is broader than a coding-focused local setup. It should support:
+The primary goal is the easiest possible **private, on-device AI setup for everyday work** — for people (often on corporate laptops where cloud AI is blocked) who want a local assistant that keeps their data on the machine. Best on Apple Silicon; runs on ordinary laptops too. Beyond that, the same engine supports:
+- everyday knowledge work: proofreading, drafting, editing documents, summarizing
+- office automation: spreadsheets, decks, docs
 - coding and refactoring
-- documentation generation
-- spreadsheets, decks, and office automation
 - research and synthesis
 - startup, home, and team agent workflows
 
@@ -90,27 +90,37 @@ Manual validation:
 - `opencode.template.jsonc`: source template for generated OpenCode config
 - `.opencode/agents/`: curated subagents
 - `.opencode/skills/`: curated skills
-- `.opencode/dcp.jsonc`: Dynamic Context Pruning plugin config (installed/refreshed as `@tarquinen/opencode-dcp@latest` by device setup)
+- `.opencode/dcp.jsonc`: Dynamic Context Pruning plugin config (release-pinned by device setup)
 - `~/.config/opencode/plugins/`: globally installed OpenCode plugins
 - `runtime-config/presets/<profile>.ini`: template presets
 - `state/runtime/presets.active.ini`: generated active preset
 - `state/active/profile.txt`: generated selected profile marker
 - `state/clients/opencode/opencode.json`: generated OpenCode runtime config
-- `scripts/`: compatibility wrappers, release helpers, and verification scripts
+- `scripts/`: compatibility wrappers, `verify.sh`/`integration-test.sh` checks, and the build-time data stager (`stage_data.py`)
 
-## Open Design Integration
+## Open Design Integration (opt-in)
 
-Open Design (nexu-io/open-design) provides design skills, craft rules, and brand design systems curated under:
-- `.opencode/craft/` — 12 brand-agnostic design rulebooks (typography, color, anti-AI-slop, etc.)
-- `.opencode/skills/` — 35 curated skills
-- `.opencode/design-systems/` — 20 brand `DESIGN.md` files (Linear, Vercel, Apple, Stripe, etc.)
-
-These work offline without any daemon — ideal for local models.
-
-For the full 155-skill / 150-design-system catalog, optionally install the MCP server:
+lac bundles only its own first-party agents and workflow skills. The Open Design
+(nexu-io/open-design) catalog — design skills, craft rulebooks, and brand design-system
+references — is **not** vendored here; it is fetched on demand so lac does not redistribute
+third-party/proprietary content. Install it yourself:
 
 ```bash
 curl -fsSL https://open-design.ai/install.sh | sh -s opencode
-# Or if od CLI is already installed:
+# Or if the od CLI is already installed:
 od mcp install opencode
 ```
+
+Once installed it works offline without a daemon — ideal for local models. See
+`THIRD_PARTY_NOTICES.md` for attribution and license notes on that catalog.
+
+## Ponytail Integration (default-on)
+
+Generated OpenCode configs pre-wire the [ponytail](https://github.com/DietrichGebert/ponytail)
+plugin (`@dietrichgebert/ponytail@4.8.4`, MIT): a laziness ruleset injected into every
+turn, plus `/ponytail lite|full|ultra|off` commands and review/audit/debt skills. It is
+fetched from npm by OpenCode on first use (requires network), not vendored in the wheel.
+
+- Per-session opt-out: `PONYTAIL_DEFAULT_MODE=off` (or `/ponytail off`).
+- To drop it for all generated configs: remove the entry from `opencode.template.jsonc`.
+- See `THIRD_PARTY_NOTICES.md` and `docs/models/QWEN38_READY.md` (Qwen 3.8 model prep).

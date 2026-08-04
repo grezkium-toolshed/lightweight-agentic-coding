@@ -7,7 +7,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from lac.context import HOST, PORT, OMLX_PORT, DS4_PORT, ROOT, STATE_ROOT
+from lac.context import HOST, PORT, OMLX_PORT, DS4_PORT
 
 
 def log_info(message):
@@ -246,7 +246,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
     if runtime == "omlx":
         if not command_exists(os.environ.get("OMLX_BIN", "omlx")):
             raise SystemExit("oMLX runtime selected but `omlx` is not in PATH. Install with Homebrew or set AI_LOCAL_RUNTIME=llama.cpp.")
-        models_dir = Path(os.environ.get("AI_MODELS_DIR", str(ctx.root / "models"))) / "mlx"
+        models_dir = ctx.models_root / "mlx"
         env["OMLX_MODEL_DIR"] = str(models_dir)
         env["OMLX_HOST"] = HOST
         env["OMLX_PORT"] = str(port)
@@ -256,7 +256,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
         ds4_bin = os.environ.get("DS4_BIN", "ds4-server")
         if not command_exists(ds4_bin):
             raise SystemExit("ds4 runtime selected but `ds4-server` is not in PATH. Build antirez/ds4 and set DS4_BIN, or set AI_LOCAL_RUNTIME=llama.cpp.")
-        models_dir = Path(os.environ.get("AI_MODELS_DIR", str(ctx.root / "models")))
+        models_dir = ctx.models_root
         model_path = Path(os.environ.get("DS4_MODEL", str(models_dir / "ds4" / "ds4flash.gguf")))
         if not model_path.is_file():
             raise SystemExit(f"Missing ds4 model file: {model_path}\nRun ./bin/lac models sync 128gb-ds4-flash first, or set DS4_MODEL.")

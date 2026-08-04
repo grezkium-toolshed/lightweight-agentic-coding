@@ -1,6 +1,7 @@
 """Config rendering: opencode config, catalog selectors, MLX model mapping."""
 
 import copy
+import configparser
 import os
 
 from lac.context import HOST, PORT, OMLX_PORT
@@ -18,11 +19,67 @@ LOCAL_MLX_MODEL_IDS = {
     "gemma-4-26b-a4b-q4": "gemma-4-26b-a4b-it-UD-MLX-8bit",
 }
 
+MIN_OPENCODE_CONTEXT = 32_768
+
 
 def _local_model_name(selector):
     if not selector.startswith("local-cluster/"):
         return ""
     return selector.split("/", 1)[1]
+
+
+def _profile_local_contexts(ctx, profile, template):
+    selected_ids = {
+        _local_model_name(profile.get(field, ""))
+        for field in ("default_model", "small_model")
+    }
+    selected_ids.discard("")
+    if not selected_ids:
+        return {}
+
+    preset_path = ctx.root / profile["preset"]
+    parser = configparser.ConfigParser(interpolation=None, strict=False)
+    try:
+        parser.read_string("[global]\n" + preset_path.read_text(encoding="utf-8"))
+    except (OSError, configparser.Error) as exc:
+        raise SystemExit(f"Could not parse preset context limits from {preset_path}: {exc}") from exc
+
+    provider_models = template["provider"]["local-cluster"]["models"]
+    reserved = int(template.get("compaction", {}).get("reserved", 0))
+    contexts = {}
+    for model_id in selected_ids:
+        if not parser.has_section(model_id) or not parser.has_option(model_id, "ctx-size"):
+            raise SystemExit(
+                f"Profile '{profile['id']}' selects local model '{model_id}' but its preset "
+                "does not define ctx-size."
+            )
+        try:
+            runtime_context = parser.getint(model_id, "ctx-size")
+        except ValueError as exc:
+            raise SystemExit(
+                f"Profile '{profile['id']}' has an invalid ctx-size for local model '{model_id}'."
+            ) from exc
+
+        model_entry = provider_models.get(model_id)
+        if model_entry is None:
+            raise SystemExit(f"OpenCode template is missing local model '{model_id}'.")
+        limit = model_entry.setdefault("limit", {})
+        capability = limit.get("context")
+        output = int(limit.get("output", 0))
+        required = max(MIN_OPENCODE_CONTEXT, reserved + output + 1)
+        if runtime_context < required:
+            raise SystemExit(
+                f"Profile '{profile['id']}' gives local model '{model_id}' {runtime_context} context "
+                f"tokens; OpenCode requires at least {required} for startup and response headroom."
+            )
+        if capability is not None and runtime_context > int(capability):
+            raise SystemExit(
+                f"Profile '{profile['id']}' gives local model '{model_id}' {runtime_context} context "
+                f"tokens, exceeding its declared capability of {capability}."
+            )
+        limit["context"] = runtime_context
+        contexts[model_id] = runtime_context
+    return contexts
 
 
 def _catalog_model_short_id(provider_id, model_id):
@@ -155,6 +212,7 @@ def render_opencode_config(ctx, profile_id, profile, verbose_runtime=True):
     runtime = selected_local_runtime(profile, verbose=verbose_runtime)
     default_model = _resolve_catalog_selector(ctx, profile["default_model"])
     small_model = _resolve_catalog_selector(ctx, profile["small_model"])
+    local_contexts = _profile_local_contexts(ctx, profile, template)
     if runtime == "omlx":
         log_info(f"[config] Rendering OpenCode config for oMLX runtime (port {local_runtime_port(runtime)})")
         provider = template["provider"]["local-cluster"]
@@ -164,6 +222,11 @@ def render_opencode_config(ctx, profile_id, profile, verbose_runtime=True):
         for model_id, mlx_id in LOCAL_MLX_MODEL_IDS.items():
             if model_id in provider["models"]:
                 mapped_models[mlx_id] = provider["models"][model_id]
+        for model_id, context in local_contexts.items():
+            mlx_id = LOCAL_MLX_MODEL_IDS.get(model_id, model_id)
+            if mlx_id in mapped_models:
+                current = mapped_models[mlx_id].setdefault("limit", {}).get("context", context)
+                mapped_models[mlx_id]["limit"]["context"] = min(int(current), context)
         provider["models"] = mapped_models
         if default_model.startswith("local-cluster/"):
             default_model = f"local-cluster/{LOCAL_MLX_MODEL_IDS.get(_local_model_name(default_model), _local_model_name(default_model))}"

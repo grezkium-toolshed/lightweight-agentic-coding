@@ -13,19 +13,6 @@ Use `provider verify` to confirm both provider auth and local-cluster readiness:
 
 The probe sends a real request to each provider's baseURL with your key. `--all` also probes the local health endpoint, so it can report `error` until `./bin/lac runtime start` has been run. Results report as `ok`, `skipped` (env var unset), or `error` with a reason. Secrets are never written to logs or JSON output — only the env var name and a boolean `configured` flag appear.
 
-## Antigravity
-- recommended repo env var convention: `ANTIGRAVITY_API_KEY`
-- endpoint in repo config: `https://api.antigravity.ai/v1`
-- prerequisite: an account with API access to the referenced models
-- recommended usage: frontier-grade cloud fallback when local hardware is not enough
-- plugin: `opencode-antigravity-auth` must be installed via npm before using this provider. Add it to the `plugin` array in your config and run `npm install opencode-antigravity-auth`. Without this plugin, the antigravity provider block will fail to initialize.
-
-## z.ai
-- recommended repo env var convention: `ZAI_API_KEY`
-- endpoint in repo config: `https://open.z.ai/api/paas/v4`
-- prerequisite: an account with access to the referenced GLM models
-- recommended usage: alternative cloud fallback with strong general models
-
 ## NVIDIA NIM
 - recommended repo env var convention: `NVIDIA_API_KEY`
 - endpoint in repo config: `https://integrate.api.nvidia.com/v1`
@@ -43,22 +30,7 @@ The probe sends a real request to each provider's baseURL with your key. `--all`
 - endpoint in repo config: `https://opencode.ai/zen/go/v1`
 - prerequisite: OpenCode Go subscription at https://opencode.ai
 - recommended usage: flat-rate subscription with a curated model list, matched to OpenCode's agentic flows
-- details: `OPENCODE_ZEN_GO.md`
-
-## OpenCode Zen
-- recommended repo env var convention: `OPENCODE_ZEN_API_KEY`
-- endpoint in repo config: `https://api.opencode.ai/zen/v1`
-- prerequisite: OpenCode Zen account with credits at https://opencode.ai
-- recommended usage: pay-per-request curated access, broader current catalog than Go
-- details: `OPENCODE_ZEN_GO.md`
-
-## Codex via ChatGPT Subscription
-- recommended repo env var convention: `OPENAI_API_KEY`
-- endpoint in repo config: `https://api.openai.com/v1`
-- prerequisite: ChatGPT Plus / Pro / Team subscription, plus the third-party helper at https://github.com/numman-ali/opencode-openai-codex-auth
-- recommended usage: reuse an existing ChatGPT subscription as an OpenAI-compatible provider
-- details: `CODEX_AUTH.md`
-- note: third-party auth helper; treat as reviewed-external trust
+- details: `OPENCODE_GO.md`
 
 ## Anthropic API
 - recommended repo env var convention: `ANTHROPIC_API_KEY`

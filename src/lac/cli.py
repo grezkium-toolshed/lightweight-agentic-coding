@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from lac import VERSION
-from lac.context import Context, ROOT, STATE_ROOT, HOST, PORT, OMLX_PORT
+from lac.context import Context, MODELS_ROOT, STATE_ROOT, HOST, PORT, OMLX_PORT
 
 
 def _env_or_deprecated(new_key, old_key, default=None):
@@ -51,7 +51,7 @@ from lac.packs import (
     install_optional_skill, remove_optional_skill, verify_optional_skill,
 )
 from lac.scenarios import scenario_list, scenario_show
-from lac.clients import render_client, client_open
+from lac.clients import render_client, client_open, resolve_command
 from lac.models import models_sync
 from lac.catalog import sync_free
 from lac.init import (
@@ -79,8 +79,7 @@ def write_json(path, payload):
 
 
 def command_exists(name):
-    import shutil
-    return shutil.which(name) is not None
+    return resolve_command(name) is not None
 
 
 def log_info(message):
@@ -158,8 +157,8 @@ def _install_hint(tool_id, env_var=None):
         },
         "openchamber": {
             "summary": "Install OpenChamber — web/PWA/desktop interface for OpenCode with mobile/remote access.",
-            "macos": ["curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash", "brew install openchamber/tap/openchamber"],
-            "linux": ["curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"],
+            "macos": ["brew install node pnpm", "curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"],
+            "linux": ["# Install Node.js 22+ and pnpm first", "curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"],
             "windows": ["curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"],
             "docs": "https://github.com/openchamber/openchamber",
         },
@@ -206,12 +205,7 @@ def device_setup(ctx, profile_id):
         print("[setup] oMLX max_context_window=262144 max_tokens=16384")
     else:
         print(f"[setup] oMLX not detected (no {omlx_settings}). Skipping oMLX configuration.")
-    dcp_plugin = "@tarquinen/opencode-dcp@latest"
-    dcp_cache_dir = Path.home() / ".cache" / "opencode" / "packages" / dcp_plugin
-    dcp_package_json = dcp_cache_dir / "node_modules" / dcp_plugin / "package.json"
-    if dcp_package_json.is_file() and '"version"' in dcp_package_json.read_text(encoding="utf-8") and '"3.1.9"' in dcp_package_json.read_text(encoding="utf-8"):
-        print("[setup] Removing stale DCP 3.1.9 package cache before reinstall...")
-        shutil.rmtree(dcp_cache_dir, ignore_errors=True)
+    dcp_plugin = "@tarquinen/opencode-dcp@3.1.14"
     if _env_or_deprecated("LAC_INSTALL_DCP", "AI_CLUSTER_INSTALL_DCP", "1") == "0":
         print("[setup] DCP plugin install skipped (LAC_INSTALL_DCP=0).")
     elif command_exists("opencode"):
@@ -304,6 +298,53 @@ def run_models_sync(profile_id):
     return models_sync(profile_id)
 
 
+def _shell_profile_path():
+    """Best-effort path to the user's shell rc for persisting an env var (POSIX shells)."""
+    if sys.platform.startswith("win"):
+        return None
+    shell = os.environ.get("SHELL", "")
+    home = Path.home()
+    if shell.endswith("zsh"):
+        return home / ".zshrc"
+    if shell.endswith("bash"):
+        return home / ".bashrc"
+    return None
+
+
+def _offer_persist_env(name, value):
+    """Persist an env var to the user's shell profile if possible, else print the export line."""
+    export_line = f'export {name}="{value}"'
+    rc = _shell_profile_path()
+    if rc is not None and rc.is_file():
+        save = input(f"Save to {rc} for future sessions? [Y/n]: ").strip().lower()
+        if save in ("", "y", "yes"):
+            existing = rc.read_text(encoding="utf-8")
+            if name in existing:
+                print(f"{name} already present in {rc.name} — skipping.")
+            else:
+                rc.write_text(existing.rstrip("\n") + f"\n{export_line}\n", encoding="utf-8")
+                print(f"Saved to {rc}. Restart your shell or run 'source {rc}'.")
+            return
+    print("To persist it for future sessions, add this to your shell profile:")
+    print(f"  {export_line}")
+
+
+def _launch_demo_client(ctx):
+    """Prefer OpenChamber, with OpenCode as the supported fallback."""
+    if resolve_command("openchamber"):
+        target = "openchamber"
+    elif resolve_command("opencode"):
+        target = "opencode"
+        print("OpenChamber is unavailable; launching OpenCode instead.")
+    else:
+        raise SystemExit("No supported client found. Install OpenChamber or OpenCode, then re-run the demo.")
+    print(f"Rendering {target} client config...")
+    render_client(ctx, target)
+    print(f"Launching {target}...")
+    client_open(ctx, target)
+    return target
+
+
 def _demo_cloud(ctx, yes=False):
     """Cloud demo: OpenRouter free tier, zero downloads."""
     api_key = os.environ.get("OPENROUTER_API_KEY", "")
@@ -317,17 +358,8 @@ def _demo_cloud(ctx, yes=False):
         if not api_key:
             print("No API key entered. Try: lac demo --local")
             return {"status": "error", "message": "No API key provided"}
-        shell_rc = Path.home() / ".zshrc"
-        if shell_rc.is_file():
-            save = input(f"Save to {shell_rc} for future sessions? [Y/n]: ").strip().lower()
-            if save in ("", "y", "yes"):
-                existing = shell_rc.read_text(encoding="utf-8")
-                if "OPENROUTER_API_KEY" not in existing:
-                    shell_rc.write_text(f"{existing}\nexport OPENROUTER_API_KEY=\"{api_key}\"\n", encoding="utf-8")
-                    print(f"Saved to {shell_rc}. Restart your shell or run 'source {shell_rc}'.")
-                else:
-                    print("OPENROUTER_API_KEY already found in .zshrc — skipping.")
         os.environ["OPENROUTER_API_KEY"] = api_key
+        _offer_persist_env("OPENROUTER_API_KEY", api_key)
     else:
         print("Using OPENROUTER_API_KEY from environment.")
 
@@ -335,13 +367,9 @@ def _demo_cloud(ctx, yes=False):
     print("Applying openrouter profile...")
     profile_apply(ctx, "openrouter", verbose_runtime=False)
 
-    from lac.clients import render_client, client_open
-    print("Rendering OpenChamber client config...")
-    render_client(ctx, "openchamber")
-    print("Launching OpenChamber...")
-    client_open(ctx, "openchamber")
+    client = _launch_demo_client(ctx)
 
-    return {"status": "ok", "mode": "cloud", "profile": "openrouter"}
+    return {"status": "ok", "mode": "cloud", "profile": "openrouter", "client": client}
 
 
 def _demo_local(ctx, yes=False):
@@ -349,9 +377,8 @@ def _demo_local(ctx, yes=False):
     from lac.models import models_sync
     from lac.profiles import profile_apply
     from lac.runtime import runtime_start
-    from lac.clients import render_client, client_open
 
-    models_dir = Path(os.environ.get("AI_MODELS_DIR", str(ROOT / "models")))
+    models_dir = MODELS_ROOT
     model_file = models_dir / "qwen3.5" / "Qwen3.5-4B-Q4_K_M.gguf"
 
     need_download = not model_file.is_file()
@@ -376,12 +403,9 @@ def _demo_local(ctx, yes=False):
     print("Starting local runtime (llama-server)...")
     runtime_start(ctx, show_logs=False, tail_hint=False)
 
-    print("Rendering OpenChamber client config...")
-    render_client(ctx, "openchamber")
-    print("Launching OpenChamber...")
-    client_open(ctx, "openchamber")
+    client = _launch_demo_client(ctx)
 
-    return {"status": "ok", "mode": "local", "profile": "micro"}
+    return {"status": "ok", "mode": "local", "profile": "micro", "client": client}
 
 
 def run_demo(ctx, mode="cloud", yes=False):
@@ -740,8 +764,9 @@ def main():
 
     if args.command == "doctor":
         if getattr(args, "fix", False):
-            report = run_fixes(ctx, yes=False)
-            emit(report, args.json, kind="doctor")
+            report = run_fixes(ctx, yes=False)  # prints its own human-readable progress
+            if args.json:
+                print(json.dumps(report, indent=2))
             raise SystemExit(0 if report["ok"] else 1)
         report = doctor(ctx, strict=args.strict, bootstrap_hint=args.bootstrap_hint)
         emit(report, args.json, kind="doctor")
@@ -869,7 +894,7 @@ def main():
 
     if args.command == "catalog":
         if args.catalog_command == "sync-free":
-            raise SystemExit(sync_free(root=ROOT, source_url=getattr(args, "source_url", None)))
+            raise SystemExit(sync_free(source_url=getattr(args, "source_url", None)))
 
     if args.command == "init":
         result = init_wizard(

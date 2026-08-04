@@ -63,10 +63,9 @@ The default posture is **local always included, cloud as an optional overlay**. 
 
 Supported cloud overlays in `opencode.template.jsonc`:
 - OpenRouter free tier
-- OpenCode Go (flat subscription) and OpenCode Zen (pay-per-request)
-- Codex via ChatGPT subscription (third-party OAuth helper)
+- OpenCode Go (flat subscription)
+- NVIDIA NIM (free / trial)
 - Anthropic API (API-key only; Claude.ai subscription does not apply)
-- Antigravity, z.ai, NVIDIA NIM
 
 There is no dedicated "hybrid profile" tier — hybridness comes from enabling overlays on top of any local profile.
 
@@ -86,3 +85,16 @@ Instead it ships a curated asset catalog plus workflow packs:
 Pack metadata lives in `catalog/workflow-packs.json`, and individual asset trust/support metadata lives in `catalog/assets.json`.
 
 ## Release posture
+
+Public release is gated by `RELEASE_CHECKLIST.md`. Automated gates run in CI
+(`verify.sh`, `integration-test.sh`, wheel/sdist checks across Python 3.10–3.13, and a
+Windows PowerShell smoke lane); manual gates require real-hardware validation (fresh macOS
+bootstrap, 128 GB Apple Silicon ds4 path, Windows full runtime, GitHub Private Vulnerability
+Reporting enablement, live provider freshness). Versioning follows SemVer for tagged
+releases; there are no tags yet, and the first public tag is cut from the release branch only
+when every gate is complete.
+
+Third-party integrations follow a strict posture: lac bundles only first-party agents and
+workflow skills. External catalogs (Open Design) are opt-in fetch, and external OpenCode
+plugins (Dynamic Context Pruning, ponytail) are referenced from npm in
+`opencode.template.jsonc` rather than vendored. See `THIRD_PARTY_NOTICES.md`.

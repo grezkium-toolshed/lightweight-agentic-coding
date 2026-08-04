@@ -2,15 +2,16 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "local-cluster/qwen3.6-27b-q4",
   "small_model": "local-cluster/qwen3.6-27b-q3",
-  // Requires: npm install opencode-antigravity-auth
-  // Docs: docs/providers/AUTHENTICATION.md (Antigravity section)
-  //
   // Dynamic Context Pruning — auto-compresses stale context for local models.
   // Project config: .opencode/dcp.jsonc
   // Upstream: https://github.com/Opencode-DCP/opencode-dynamic-context-pruning
   "plugin": [
-    "opencode-antigravity-auth",
-    "@tarquinen/opencode-dcp@latest"
+    "@tarquinen/opencode-dcp@3.1.14",
+    // Ponytail — laziness ruleset injected into every turn, plus /ponytail lite|full|ultra|off
+    // commands and the review/audit/debt skills. MIT. Fetched from npm on first use (network).
+    // Upstream: https://github.com/DietrichGebert/ponytail
+    // Per-session opt-out: PONYTAIL_DEFAULT_MODE=off (or /ponytail off). See THIRD_PARTY_NOTICES.md.
+    "@dietrichgebert/ponytail@4.8.4"
   ],
   "provider": {
     "local-cluster": {
@@ -19,7 +20,7 @@
       "models": {
         "qwen3.5-4b-q4": {
           "limit": {
-            "context": 8192,
+            "context": 262144,
             "output": 4096
           }
         },
@@ -53,6 +54,27 @@
             "output": 16384
           }
         },
+        // Qwen 3.8-27B — open weights expected ~2026-08-10 (alongside Qwen3.8-Max 2.4T).
+        // Slots are live so configs render before the drop; keep in sync with docs/models/QWEN38_READY.md.
+        // Until GGUFs land, `lac models sync` has no catalog entry for these and will skip them.
+        "qwen3.8-27b-q3": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
+        "qwen3.8-27b-q4": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
+        "qwen3.8-27b-q6": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
         "qwen3.5-9b-q4": {
           "limit": {
             "context": 262144,
@@ -69,12 +91,6 @@
           "limit": {
             "context": 131072,
             "output": 12288
-          }
-        },
-        "nomic-embed-text-v1.5": {
-          "limit": {
-            "context": 2048,
-            "output": 512
           }
         },
         "gemma-4-26b-a4b-q4": {
@@ -145,37 +161,6 @@
         "chunkTimeout": 30000
       }
     },
-    "antigravity": {
-      "name": "Antigravity Cloud",
-      "npm": "@ai-sdk/openai-compatible",
-      "models": {
-        "gpt-oss-120b": {},
-        "gpt-oss-20b": {},
-        "qwen3-coder-480b": {},
-        "deepseek-v3.2": {}
-      },
-      "options": {
-        "baseURL": "https://api.antigravity.ai/v1",
-        "timeout": 600000,
-        "chunkTimeout": 30000
-      }
-    },
-    "z-ai": {
-      "name": "Z.AI Cloud",
-      "npm": "@ai-sdk/openai-compatible",
-      "models": {
-        "zai/glm-5": {},
-        "zai/glm-4.7": {},
-        "zai/glm-4.5": {},
-        "zai/glm-4.5-air": {},
-        "zai/glm-4.6": {}
-      },
-      "options": {
-        "baseURL": "https://open.z.ai/api/paas/v4",
-        "timeout": 600000,
-        "chunkTimeout": 30000
-      }
-    },
     "nvidia-nim": {
       "name": "NVIDIA NIM Free or Trial",
       "npm": "@ai-sdk/openai-compatible",
@@ -224,20 +209,6 @@
         "chunkTimeout": 30000
       }
     },
-    "opencode-zen": {
-      "name": "OpenCode Zen",
-      "npm": "@ai-sdk/openai-compatible",
-      "models": {
-        "glm-4.7": {},
-        "claude-sonnet-4-6": {},
-        "gpt-5-codex": {}
-      },
-      "options": {
-        "baseURL": "https://api.opencode.ai/zen/v1",
-        "timeout": 600000,
-        "chunkTimeout": 30000
-      }
-    },
     "opencode-go": {
       "name": "OpenCode Go",
       "npm": "@ai-sdk/openai-compatible",
@@ -257,19 +228,6 @@
       },
       "options": {
         "baseURL": "https://opencode.ai/zen/go/v1",
-        "timeout": 600000,
-        "chunkTimeout": 30000
-      }
-    },
-    "codex-auth": {
-      "name": "Codex (ChatGPT Subscription)",
-      "npm": "@ai-sdk/openai-compatible",
-      "models": {
-        "gpt-5-codex": {},
-        "gpt-5": {}
-      },
-      "options": {
-        "baseURL": "https://api.openai.com/v1",
         "timeout": 600000,
         "chunkTimeout": 30000
       }
@@ -335,8 +293,7 @@
   },
   "instructions": [
     "AGENTS.md",
-    "docs/rules/*.md",
-    "docs/release/*.md"
+    "docs/rules/*.md"
   ],
   "agent": {
     "build": {

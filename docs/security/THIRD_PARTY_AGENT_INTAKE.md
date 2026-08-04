@@ -32,4 +32,4 @@ External packs that add real authenticated capability should stay opt-in even wh
 
 ## Open Design imports
 
-Open Design is bundled as a community design/reference layer, not as a fully reviewed core automation pack. Keep those assets cataloged as optional/community until a maintainer records a review. Do not give imported design skills broader shell, network, or secret-handling assumptions just because they ship in the offline bundle.
+Open Design is an upstream, opt-in design/reference layer and is not bundled by lac. Treat installed assets as external community content: review their licenses and instructions, and do not give them broader shell, network, or secret-handling permissions merely because they are installed locally.

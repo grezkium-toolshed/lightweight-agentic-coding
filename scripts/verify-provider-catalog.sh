@@ -15,15 +15,11 @@ required_provider_fields = {
     "label",
     "env_var",
     "docs_path",
-    "last_verified_at",
-    "verification_method",
     "risk_level",
     "models",
 }
 required_model_fields = {
     "id",
-    "last_verified_at",
-    "verification_method",
     "risk_level",
 }
 

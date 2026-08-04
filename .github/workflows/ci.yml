@@ -2,75 +2,68 @@ name: CI
 
 on:
   push:
+    branches: [master]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
-  validate-linux:
+  validate:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+
+      - name: Offline contract check
+        run: ./scripts/verify.sh
+
+      - name: Integration test (CLI workflow, no GPU)
+        run: ./scripts/integration-test.sh
+
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-      - name: Bash Syntax Check
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install build frontend
+        run: python -m pip install build
+
+      - name: Build, inspect, and smoke-test published artifacts
+        run: ./scripts/verify-package-build.sh
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+
+      - name: PowerShell wrapper and client-render smoke test
+        shell: pwsh
         run: |
-          set -x
-          bash -n scripts/*.sh
-          bash -n verify-*.sh
-          for f in runtime-config/launch/*.sh; do [ -f "$f" ] && bash -n "$f"; done
-
-      - name: Integration Test
-        run: set -x && ./scripts/integration-test.sh
-
-      - name: Package Build Check
-        run: set -x && ./scripts/verify-package-build.sh
-
-      - name: Config Schema Check
-        run: set -x && ./scripts/verify-config-schema.sh
-
-      - name: Profile and Preset Parity Check
-        run: set -x && ./scripts/verify-profiles-sync.sh
-
-      - name: Documentation Consistency Check
-        run: set -x && ./verify-documentation.sh
-
-      - name: OpenCode Asset Schema Check
-        run: set -x && ./scripts/verify-opencode-assets.sh
-
-      - name: Provider Catalog Validation
-        run: set -x && ./scripts/verify-provider-catalog.sh
-
-      - name: Provider Doc Freshness Warning
-        run: set -x && ./scripts/check-provider-doc-freshness.sh
-
-      - name: Release Local Audit
-        run: set -x && ./scripts/release-local-audit.sh
-
-      - name: Release Gate Report Self-Test
-        run: set -x && ./scripts/test-release-gate-report.sh
-
-      - name: V2 CLI Contract Check
-        run: set -x && ./scripts/verify-v2-contract.sh
-
-      - name: OpenCode Agent and Skill Presence Check
-        run: |
-          set -x
-          test -f .opencode/agents/architecture-reviewer.md
-          test -f .opencode/agents/release-reviewer.md
-          test -f .opencode/agents/reality-checker.md
-          test -f .opencode/skills/docx-workflow/SKILL.md
-          test -f .opencode/skills/pptx-workflow/SKILL.md
-          test -f .opencode/skills/xlsx-workflow/SKILL.md
-
-      - name: Public Beta Asset Presence Check
-        run: |
-          set -x
-          test -f RELEASE_CHECKLIST.md
-          test -f state/README.md
-          test -f catalog/assets.json
-          test -f catalog/workflow-packs.json
-          test -f catalog/providers.json
-          test -f catalog/scenarios.json
-          test -f .github/ISSUE_TEMPLATE/config.yml
-          test -f .github/ISSUE_TEMPLATE/bug_report.md
-          test -f .github/ISSUE_TEMPLATE/docs_mismatch.md
-          test -f .github/ISSUE_TEMPLATE/provider_model_drift.md
-          test -f .github/ISSUE_TEMPLATE/hardware_profile_request.md
+          $env:LAC_STATE_ROOT = Join-Path $env:RUNNER_TEMP "lac-state"
+          ./scripts/stage-data.ps1
+          ./bin/lac.ps1 --version
+          ./bin/lac.ps1 profile apply micro --json
+          ./bin/lac.ps1 client render claude-code --json
