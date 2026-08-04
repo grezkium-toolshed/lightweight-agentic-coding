@@ -125,6 +125,8 @@ All commands support `--json` for scripting.
 - **Advanced profiles** — MTP speculative decoding, oMLX on macOS, hybrid local+cloud: [`docs/architecture.md`](docs/architecture.md)
 - **Bundled agents & skills** — architecture/release review, documentation, research synthesis, and office workflows (docx/pptx/xlsx/pdf): [`.opencode/agents/`](.opencode/agents/), [`.opencode/skills/`](.opencode/skills/)
 - **Design skills & brand systems (opt-in)** — lac does not bundle these; add the [Open Design](https://open-design.ai) catalog yourself: `curl -fsSL https://open-design.ai/install.sh | sh -s opencode`
+- **Ponytail (default-on)** — generated OpenCode configs include the [ponytail](https://github.com/DietrichGebert/ponytail) plugin (laziness ruleset + `/ponytail` commands). Disable per session with `PONYTAIL_DEFAULT_MODE=off`. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)
+- **Qwen 3.8 prep** — config slots are ready for the upcoming 27B open-weights drop: [`docs/models/QWEN38_READY.md`](docs/models/QWEN38_READY.md)
 - **Free cloud model catalog** — `lac catalog sync-free`, see [`docs/free-coding-models.json`](docs/free-coding-models.json)
 - **Model deep dive** — tuning rationale, profile details: [`docs/model-recommendations.md`](docs/model-recommendations.md)
 
@@ -149,6 +151,7 @@ lac is a thin orchestration layer standing on the shoulders of:
 - **[Open Design](https://open-design.ai)** by nexu-io — design skills, craft rulebooks, and brand design systems
 - **[oMLX](https://github.com/danielzgtg/omlx)** — optional macOS MLX inference backend
 - **[ds4/DwarfStar](https://github.com/antirez/ds4)** by Salvatore Sanfilippo — optional 128GB+ Apple Silicon DeepSeek V4 Flash runtime path
+- **[ponytail](https://github.com/DietrichGebert/ponytail)** by Dietrich Gebert — laziness ruleset pre-wired into generated OpenCode configs
 - **[OpenChamber](https://github.com/openchamber/openchamber)** by @btriapitsyn — web/mobile/desktop remote access
 - **[free-coding-models](https://github.com/vava-nessa/free-coding-models)** by @vava-nessa — free cloud model index and NIM helper tooling
 - **[Qwen](https://github.com/QwenLM/Qwen)** and **[Gemma](https://ai.google.dev/gemma)** model families

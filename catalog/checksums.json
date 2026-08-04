@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "SHA256 integrity checks for downloaded model files, keyed by <subdir>/<filename> under the models dir. A mismatch blocks use and quarantines the file. Populated for the demo path; profiles without an entry remain size-checked only.",
+  "_comment": "SHA256 integrity checks for downloaded model files, keyed by <subdir>/<filename> under the models dir. A mismatch blocks use and quarantines the file. Populated for the demo path; profiles without an entry remain size-checked only. Pending (Qwen 3.8 drop ~2026-08-10): qwen3.8/Qwen3.8-27B-Q3_K_M.gguf, qwen3.8/Qwen3.8-27B-Q4_K_M.gguf, qwen3.8/Qwen3.8-27B-Q6_K.gguf — see docs/models/QWEN38_READY.md.",
   "checksums": {
     "qwen3.5/Qwen3.5-4B-Q4_K_M.gguf": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4"
   }

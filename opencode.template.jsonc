@@ -6,7 +6,12 @@
   // Project config: .opencode/dcp.jsonc
   // Upstream: https://github.com/Opencode-DCP/opencode-dynamic-context-pruning
   "plugin": [
-    "@tarquinen/opencode-dcp@3.1.14"
+    "@tarquinen/opencode-dcp@3.1.14",
+    // Ponytail — laziness ruleset injected into every turn, plus /ponytail lite|full|ultra|off
+    // commands and the review/audit/debt skills. MIT. Fetched from npm on first use (network).
+    // Upstream: https://github.com/DietrichGebert/ponytail
+    // Per-session opt-out: PONYTAIL_DEFAULT_MODE=off (or /ponytail off). See THIRD_PARTY_NOTICES.md.
+    "@dietrichgebert/ponytail@4.8.4"
   ],
   "provider": {
     "local-cluster": {
@@ -44,6 +49,27 @@
           }
         },
         "qwen3.6-35b-a3b-mtp-q6": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
+        // Qwen 3.8-27B — open weights expected ~2026-08-10 (alongside Qwen3.8-Max 2.4T).
+        // Slots are live so configs render before the drop; keep in sync with docs/models/QWEN38_READY.md.
+        // Until GGUFs land, `lac models sync` has no catalog entry for these and will skip them.
+        "qwen3.8-27b-q3": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
+        "qwen3.8-27b-q4": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
+        "qwen3.8-27b-q6": {
           "limit": {
             "context": 262144,
             "output": 16384

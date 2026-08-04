@@ -44,6 +44,7 @@ download them in their own environment.
 | [Qwen](https://github.com/QwenLM/Qwen) / [Gemma](https://ai.google.dev/gemma) | Model families downloaded by `lac models sync` for local profiles. | User-downloaded; subject to each family's model license and acceptable-use policy. |
 | [antirez/deepseek-v4-gguf](https://huggingface.co/antirez/deepseek-v4-gguf) | `lac models sync 128gb-ds4-flash` download mapping for the conservative imatrix GGUF. | The Hugging Face repository reports MIT for the quantized files; also review base-model terms before production use. |
 | [vava-nessa/free-coding-models](https://github.com/vava-nessa/free-coding-models) | `docs/free-coding-models.json` is a snapshot of this upstream free-model index (`lac catalog sync-free`). | Snapshot of upstream data; see the upstream repository for its license and refresh cadence. |
+| [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | Optional OpenCode plugin (`@dietrichgebert/ponytail`) added to generated OpenCode configs: laziness ruleset injected into every turn, `/ponytail lite\|full\|ultra\|off` commands, and review/audit/debt skills. | Upstream license is MIT. Fetched from npm by OpenCode on first use (requires network); not vendored in the wheel. Disable per-session with `PONYTAIL_DEFAULT_MODE=off`. |
 
 ## Maintenance rule
 

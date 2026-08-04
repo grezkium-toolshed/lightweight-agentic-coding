@@ -6,13 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 for tagged releases (public beta and beyond).
 
-## [Unreleased]
+## [0.2.0] — Unreleased
+
+*(Pre-public codebase versioning; public beta remains gated by the release checklist.)*
 
 Re-aimed the project around **private, on-device AI for everyday work** (for people on machines
 where cloud AI is blocked), plus a lightweight-to-maintain, correctly-attributed cleanup pass.
 
 ### Added
 
+- Ponytail plugin (`@dietrichgebert/ponytail@4.8.4`, MIT) pre-wired into generated OpenCode
+  configs: laziness ruleset injected every turn, `/ponytail lite|full|ultra|off` commands, and
+  review/audit/debt skills. Opt out per session with `PONYTAIL_DEFAULT_MODE=off`; see
+  `THIRD_PARTY_NOTICES.md`.
+- Qwen 3.8 readiness: `qwen3.8-27b-q3/q4/q6` slots in the `local-cluster` provider template so
+  configs render before the open-weights drop (~2026-08-10); drop-day checklist in
+  `docs/models/QWEN38_READY.md`.
 - `scripts/bootstrap.sh` (macOS-first) + `scripts/bootstrap.ps1` — one command from nothing to a
   running private assistant: installs prerequisites (llama.cpp, OpenCode, OpenChamber, Python),
   then downloads a small model and opens the OpenChamber chat UI. Idempotent.

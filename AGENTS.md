@@ -113,3 +113,14 @@ od mcp install opencode
 
 Once installed it works offline without a daemon — ideal for local models. See
 `THIRD_PARTY_NOTICES.md` for attribution and license notes on that catalog.
+
+## Ponytail Integration (default-on)
+
+Generated OpenCode configs pre-wire the [ponytail](https://github.com/DietrichGebert/ponytail)
+plugin (`@dietrichgebert/ponytail@4.8.4`, MIT): a laziness ruleset injected into every
+turn, plus `/ponytail lite|full|ultra|off` commands and review/audit/debt skills. It is
+fetched from npm by OpenCode on first use (requires network), not vendored in the wheel.
+
+- Per-session opt-out: `PONYTAIL_DEFAULT_MODE=off` (or `/ponytail off`).
+- To drop it for all generated configs: remove the entry from `opencode.template.jsonc`.
+- See `THIRD_PARTY_NOTICES.md` and `docs/models/QWEN38_READY.md` (Qwen 3.8 model prep).

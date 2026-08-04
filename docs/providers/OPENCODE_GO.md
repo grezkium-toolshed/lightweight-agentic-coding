@@ -16,7 +16,15 @@ Sign in at https://opencode.ai and copy the API key from your account page. In t
 
 OpenCode Go is pre-wired in `opencode.template.jsonc`. The curated model list evolves upstream; treat the block as a starting point and verify it before a release.
 
-Current OpenCode Go entries include GLM 5.1, GLM 5, Kimi K2.6, Kimi K2.5, MiMo-V2.5, MiMo-V2.5-Pro, MiMo-V2-Pro, MiMo-V2-Omni, MiniMax M2.7, MiniMax M2.5, Qwen3.6 Plus, and Qwen3.5 Plus.
+Current OpenCode Go entries include GLM 5.1, GLM 5, Kimi K2.6, Kimi K2.5, MiMo-V2.5, MiMo-V2.5-Pro, MiMo-V2-Pro, MiMo-V2-Omni, MiniMax M2.7, MiniMax M2.5, Qwen3.6 Plus, and Qwen3.5 Plus. When Qwen3.8 Plus is hosted, add it here and in `opencode.template.jsonc` (see `docs/models/QWEN38_READY.md`).
+
+### China-hosted model opt-in
+
+The newest hosted Qwen releases can be served only from China-hosted endpoints until your
+account opts in. OpenCode then shows "The latest version of this model is only available
+hosted in China and requires explicit opt in" with a workspace link
+(`opencode.ai/workspace/<id>/go`). Open that link once and enable the opt-in; the setting
+is per-account and does not affect local `local-cluster` inference.
 
 Useful setup commands:
 
