@@ -24,7 +24,7 @@ Status: **prepped — open weights not yet released.**
    - `small_model` entries follow the same swap.
 5. **Re-run the context matrix** — `./scripts/integration-test.sh` asserts generated OpenCode context == preset `ctx-size` for every profile; then `lac profile apply 24gb`, `lac runtime start`, and an OpenCode smoke session.
 6. **Update docs** — `docs/model-recommendations.md` tables and README profile table once the 27B is validated.
-7. **Cloud overlay** — add `qwen3.8-plus` to the `opencode-go` provider block in `opencode.template.jsonc` once OpenCode Go hosts it (see `docs/providers/OPENCODE_GO.md` for the China-hosted opt-in note).
+7. **Cloud overlay** — `qwen3.8-max` is **already live on OpenCode Go** (since the 2026-08-03 announcement) and is selectable after subscribing via `/connect` (Anthropic `/v1/messages` endpoint — see `docs/providers/OPENCODE_GO.md`; it is not in the template's OpenAI-compatible Go block by design).
 
 ## Hosted-model caveat
 

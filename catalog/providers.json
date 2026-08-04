@@ -8,8 +8,14 @@
       "docs_path": "docs/providers/README.md",
       "risk_level": "low",
       "models": [
-        { "id": "local-cluster/qwen3.6-27b-q4", "risk_level": "low" },
-        { "id": "local-cluster/gemma-4-31b-q4", "risk_level": "low" }
+        {
+          "id": "local-cluster/qwen3.6-27b-q4",
+          "risk_level": "low"
+        },
+        {
+          "id": "local-cluster/gemma-4-31b-q4",
+          "risk_level": "low"
+        }
       ]
     },
     {
@@ -19,8 +25,14 @@
       "docs_path": "docs/providers/OPENROUTER_FREE.md",
       "risk_level": "high",
       "models": [
-        { "id": "openrouter/qwen/qwen3-coder:480b-free", "risk_level": "high" },
-        { "id": "openrouter/openai/gpt-4o-mini:free", "risk_level": "high" }
+        {
+          "id": "openrouter/google/gemma-4-26b-a4b-it:free",
+          "risk_level": "high"
+        },
+        {
+          "id": "openrouter/openai/gpt-oss-20b:free",
+          "risk_level": "high"
+        }
       ]
     },
     {
@@ -30,7 +42,10 @@
       "docs_path": "docs/providers/NVIDIA_NIM.md",
       "risk_level": "medium",
       "models": [
-        { "id": "nvidia-nim/qwen/qwen3-coder-480b-a35b-instruct", "risk_level": "medium" }
+        {
+          "id": "nvidia-nim/qwen/qwen3-coder-480b-a35b-instruct",
+          "risk_level": "medium"
+        }
       ]
     },
     {
@@ -40,8 +55,14 @@
       "docs_path": "docs/providers/OPENCODE_GO.md",
       "risk_level": "low",
       "models": [
-        { "id": "opencode-go/qwen3.6-plus", "risk_level": "low" },
-        { "id": "opencode-go/qwen3.5-plus", "risk_level": "low" }
+        {
+          "id": "opencode-go/glm-5.1",
+          "risk_level": "low"
+        },
+        {
+          "id": "opencode-go/deepseek-v4-flash",
+          "risk_level": "low"
+        }
       ]
     },
     {
@@ -51,8 +72,14 @@
       "docs_path": "docs/providers/ANTHROPIC_API.md",
       "risk_level": "low",
       "models": [
-        { "id": "anthropic/claude-sonnet-4-6", "risk_level": "low" },
-        { "id": "anthropic/claude-opus-4-7", "risk_level": "low" }
+        {
+          "id": "anthropic/claude-sonnet-4-6",
+          "risk_level": "low"
+        },
+        {
+          "id": "anthropic/claude-opus-4-7",
+          "risk_level": "low"
+        }
       ]
     }
   ]

@@ -6,9 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 for tagged releases (public beta and beyond).
 
-## [0.2.0] — Unreleased
-
-*(Pre-public codebase versioning; public beta remains gated by the release checklist.)*
+## [0.2.0] — 2026-08-04
 
 Re-aimed the project around **private, on-device AI for everyday work** (for people on machines
 where cloud AI is blocked), plus a lightweight-to-maintain, correctly-attributed cleanup pass.
@@ -35,6 +33,14 @@ where cloud AI is blocked), plus a lightweight-to-maintain, correctly-attributed
 
 - Onboarding is OpenChamber-first (chat UI) with OpenCode as the coding option; `lac init` now
   lists OpenChamber in prerequisites and next-steps.
+- Cloud catalogs refreshed against upstream (2026-08-04): OpenCode Go block now lists the
+  current OpenAI-compatible models (Grok 4.5, GLM 5.2/5.1, Kimi K3/K2.7 Code/K2.6, DeepSeek V4
+  Pro/Flash, MiMo-V2.5, Hy3 — Qwen/MiniMax Go models use the Anthropic endpoint and are
+  documented as `/connect` models); the OpenRouter free block now lists live free-tier IDs
+  (Gemma 4, Nemotron 3, GPT-OSS 20B, and more); profile defaults follow suit.
+- Public beta posture documented: README/SUPPORT state that Apple Silicon macOS is the
+  validated platform, with Windows full-runtime, 128 GB `ds4`, and fresh-macOS bootstrap
+  flagged as not-yet-validated-on-hardware paths.
 - Single source of truth for bundled data: the top-level `runtime-config/`, `catalog/`,
   `opencode.template.jsonc`, and `.opencode/` trees are canonical. `src/lac/data/` is now
   generated at build time by `scripts/stage_data.py` (invoked from `setup.py`) and gitignored.

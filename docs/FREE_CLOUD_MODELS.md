@@ -2,167 +2,128 @@
 
 Source: [vava-nessa/free-coding-models](https://github.com/vava-nessa/free-coding-models)
 
-**Last verified:** 2026-04-20 (structural review; regenerate with `lac catalog sync-free` to pull the current upstream list).
+**Last verified:** 2026-08-04 (upstream sync; regenerate with `lac catalog sync-free`).
 
 Kudos to **@vava-nessa** for the free model index and NIM helper tooling.
-
-Free cloud model availability drifts frequently. Treat this page as a snapshot and refresh provider/model availability before each beta cut; OpenRouter is intentionally handled through the live provider catalog commands rather than a frozen table.
 
 ## nvidiaNim
 
 | Model ID | Label | Tier | SWE | Context |
 |---|---|---|---|---|
-| `deepseek-ai/deepseek-v3.2` | DeepSeek V3.2 | S+ | 73.1% | 128k |
-| `moonshotai/kimi-k2.5` | Kimi K2.5 | S+ | 76.8% | 128k |
-| `z-ai/glm5` | GLM 5 | S+ | 77.8% | 128k |
-| `z-ai/glm4.7` | GLM 4.7 | S+ | 73.8% | 200k |
-| `moonshotai/kimi-k2-thinking` | Kimi K2 Thinking | S+ | 71.3% | 256k |
-| `minimaxai/minimax-m2.1` | MiniMax M2.1 | S+ | 74.0% | 200k |
-| `stepfun-ai/step-3.5-flash` | Step 3.5 Flash | S+ | 74.4% | 256k |
-| `qwen/qwen3-coder-480b-a35b-instruct` | Qwen3 Coder 480B | S+ | 70.6% | 256k |
-| `qwen/qwen3-235b-a22b` | Qwen3 235B | S+ | 70.0% | 128k |
-| `mistralai/devstral-2-123b-instruct-2512` | Devstral 2 123B | S+ | 72.2% | 256k |
-| `deepseek-ai/deepseek-v3.1-terminus` | DeepSeek V3.1 Term | S | 68.4% | 128k |
-| `moonshotai/kimi-k2-instruct` | Kimi K2 Instruct | S | 65.8% | 128k |
-| `minimaxai/minimax-m2` | MiniMax M2 | S | 69.4% | 128k |
-| `qwen/qwen3-next-80b-a3b-thinking` | Qwen3 80B Thinking | S | 68.0% | 128k |
-| `qwen/qwen3-next-80b-a3b-instruct` | Qwen3 80B Instruct | S | 65.0% | 128k |
-| `qwen/qwen3.5-397b-a17b` | Qwen3.5 400B VLM | S | 68.0% | 128k |
-| `openai/gpt-oss-120b` | GPT OSS 120B | S | 60.0% | 128k |
-| `meta/llama-4-maverick-17b-128e-instruct` | Llama 4 Maverick | S | 62.0% | 1M |
-| `deepseek-ai/deepseek-v3.1` | DeepSeek V3.1 | S | 62.0% | 128k |
-| `nvidia/llama-3.1-nemotron-ultra-253b-v1` | Nemotron Ultra 253B | A+ | 56.0% | 128k |
-| `mistralai/mistral-large-3-675b-instruct-2512` | Mistral Large 675B | A+ | 58.0% | 256k |
-| `qwen/qwq-32b` | QwQ 32B | A+ | 50.0% | 131k |
-| `igenius/colosseum_355b_instruct_16k` | Colosseum 355B | A+ | 52.0% | 16k |
-| `mistralai/mistral-medium-3-instruct` | Mistral Medium 3 | A | 48.0% | 128k |
-| `mistralai/magistral-small-2506` | Magistral Small | A | 45.0% | 32k |
-| `nvidia/llama-3.3-nemotron-super-49b-v1.5` | Nemotron Super 49B | A | 49.0% | 128k |
-| `meta/llama-4-scout-17b-16e-instruct` | Llama 4 Scout | A | 44.0% | 10M |
-| `nvidia/nemotron-3-nano-30b-a3b` | Nemotron Nano 30B | A | 43.0% | 128k |
-| `deepseek-ai/deepseek-r1-distill-qwen-32b` | R1 Distill 32B | A | 43.9% | 128k |
-| `openai/gpt-oss-20b` | GPT OSS 20B | A | 42.0% | 128k |
-| `qwen/qwen2.5-coder-32b-instruct` | Qwen2.5 Coder 32B | A | 46.0% | 32k |
-| `meta/llama-3.1-405b-instruct` | Llama 3.1 405B | A | 44.0% | 128k |
-| `meta/llama-3.3-70b-instruct` | Llama 3.3 70B | A- | 39.5% | 128k |
-| `deepseek-ai/deepseek-r1-distill-qwen-14b` | R1 Distill 14B | A- | 37.7% | 64k |
-| `bytedance/seed-oss-36b-instruct` | Seed OSS 36B | A- | 38.0% | 32k |
-| `stockmark/stockmark-2-100b-instruct` | Stockmark 100B | A- | 36.0% | 32k |
-| `mistralai/mixtral-8x22b-instruct-v0.1` | Mixtral 8x22B | B+ | 32.0% | 64k |
-| `mistralai/ministral-14b-instruct-2512` | Ministral 14B | B+ | 34.0% | 32k |
-| `ibm/granite-34b-code-instruct` | Granite 34B Code | B+ | 30.0% | 32k |
-| `deepseek-ai/deepseek-r1-distill-llama-8b` | R1 Distill 8B | B | 28.2% | 32k |
-| ... | ... and 4 more |  |  |  |
+| `z-ai/glm-5.2` | GLM 5.1 | S+ | 82.8% | 128k |
+| `moonshotai/kimi-k2.6` | Kimi K2.6 | S+ | 80.2% | 262k |
+| `deepseek-ai/deepseek-v4-pro` | DeepSeek V4 Pro | S+ | 80.6% | 1M |
+| `deepseek-ai/deepseek-v4-flash` | DeepSeek V4 Flash | S+ | 79.0% | 1M |
+| `stepfun-ai/step-3.7-flash` | Step 3.7 Flash | S+ | 74.4% | 256k |
+| `nvidia/nemotron-3-ultra-550b-a55b` | Nemotron 3 Ultra | S+ | 71.9% | 1M |
+| `openai/gpt-oss-120b` | GPT OSS 120B | S | 62.4% | 128k |
+| `mistralai/mistral-medium-3.5-128b` | Mistral Medium 3.5 | S+ | 77.6% | 256k |
+| `minimaxai/minimax-m3` | MiniMax M3 | S+ | 78.4% | 1M |
+| `mistralai/mistral-nemotron` | Mistral Nemotron | S | - | 128k |
+| `nvidia/nemotron-3-super-120b-a12b` | Nemotron 3 Super | S | 60.5% | 128k |
+| `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` | Nemotron 3 Omni | A+ | 52.0% | 256k |
+| `nvidia/llama-3.3-nemotron-super-49b-v1.5` | Llama 3.3 Nemotron Super 49B v1.5 | A+ | - | 128k |
+| `nvidia/nemotron-3-nano-30b-a3b` | Nemotron Nano 30B | A- | 38.8% | 1M |
+| `openai/gpt-oss-20b` | GPT OSS 20B | A+ | 50.3% | 128k |
+| `google/gemma-4-31b-it` | Gemma 4 31B | A+ | 52.0% | 256k |
+| `nvidia/nvidia-nemotron-nano-9b-v2` | Nemotron Nano 9B v2 | A- | - | 128k |
+| `deepseek-ai/deepseek-coder-6.7b-instruct` | DeepSeek Coder 6.7B | A- | - | 128k |
+| `mistralai/codestral-22b-instruct-v0.1` | Codestral 22B | A | - | 32k |
+| `thinkingmachines/inkling` | Inkling | B+ | - | 32k |
+| `meta/llama-3.2-11b-vision-instruct` | Llama 3.2 11B Vision | B | 28.0% | 128k |
+| `nvidia/nemotron-mini-4b-instruct` | Nemotron Mini 4B | B | - | 32k |
 
 ## groq
 
 | Model ID | Label | Tier | SWE | Context |
 |---|---|---|---|---|
-| `llama-3.3-70b-versatile` | Llama 3.3 70B | A- | 39.5% | 128k |
-| `meta-llama/llama-4-scout-17b-16e-preview` | Llama 4 Scout | A | 44.0% | 10M |
-| `meta-llama/llama-4-maverick-17b-128e-preview` | Llama 4 Maverick | S | 62.0% | 1M |
-| `deepseek-r1-distill-llama-70b` | R1 Distill 70B | A | 43.9% | 128k |
-| `qwen-qwq-32b` | QwQ 32B | A+ | 50.0% | 131k |
-| `moonshotai/kimi-k2-instruct` | Kimi K2 Instruct | S | 65.8% | 131k |
-| `llama-3.1-8b-instant` | Llama 3.1 8B | B | 28.8% | 128k |
-| `openai/gpt-oss-120b` | GPT OSS 120B | S | 60.0% | 128k |
-| `openai/gpt-oss-20b` | GPT OSS 20B | A | 42.0% | 128k |
-| `qwen/qwen3-32b` | Qwen3 32B | A+ | 50.0% | 131k |
+| `llama-3.3-70b-versatile` | Llama 3.3 70B | B | 22.0% | 131k |
+| `llama-3.1-8b-instant` | Llama 3.1 8B | C | 18.0% | 131k |
+| `openai/gpt-oss-120b` | GPT OSS 120B | S | 62.4% | 131k |
+| `openai/gpt-oss-20b` | GPT OSS 20B | A+ | 50.3% | 131k |
+| `qwen/qwen3.6-27b` | Qwen3.6 27B | S+ | 77.2% | 131k |
+| `groq/compound` | Groq Compound | A | 45.0% | 131k |
+| `groq/compound-mini` | Groq Compound Mini | B+ | 32.0% | 131k |
 
 ## cerebras
 
 | Model ID | Label | Tier | SWE | Context |
 |---|---|---|---|---|
-| `llama3.3-70b` | Llama 3.3 70B | A- | 39.5% | 128k |
-| `llama-4-scout-17b-16e-instruct` | Llama 4 Scout | A | 44.0% | 10M |
-| `qwen-3-32b` | Qwen3 32B | A+ | 50.0% | 128k |
-| `gpt-oss-120b` | GPT OSS 120B | S | 60.0% | 128k |
-| `qwen-3-235b-a22b-instruct-2507` | Qwen3 235B | S+ | 70.0% | 128k |
-| `llama3.1-8b` | Llama 3.1 8B | B | 28.8% | 128k |
-| `zai-glm-4.7` | GLM 4.7 | S+ | 73.8% | 200k |
+| `gpt-oss-120b` | GPT OSS 120B | S | 62.4% | 65k |
+| `gemma-4-31b` | Gemma 4 31B | A+ | 52.0% | 65k |
 
 ## sambanova
 
 | Model ID | Label | Tier | SWE | Context |
 |---|---|---|---|---|
-| `MiniMax-M2.5` | MiniMax M2.5 | S+ | 74.0% | 160k |
-| `DeepSeek-R1-0528` | DeepSeek R1 0528 | S | 61.0% | 128k |
-| `DeepSeek-V3.1` | DeepSeek V3.1 | S | 62.0% | 128k |
-| `DeepSeek-V3-0324` | DeepSeek V3 0324 | S | 62.0% | 128k |
-| `DeepSeek-V3.2` | DeepSeek V3.2 | S+ | 73.1% | 8k |
-| `Llama-4-Maverick-17B-128E-Instruct` | Llama 4 Maverick | S | 62.0% | 1M |
-| `gpt-oss-120b` | GPT OSS 120B | S | 60.0% | 128k |
-| `DeepSeek-V3.1-Terminus` | DeepSeek V3.1 Term | S | 68.4% | 128k |
-| `Qwen3-32B` | Qwen3 32B | A+ | 50.0% | 128k |
-| `DeepSeek-R1-Distill-Llama-70B` | R1 Distill 70B | A | 43.9% | 128k |
-| `Meta-Llama-3.3-70B-Instruct` | Llama 3.3 70B | A- | 39.5% | 128k |
-| `Meta-Llama-3.1-8B-Instruct` | Llama 3.1 8B | B | 28.8% | 128k |
+| `MiniMax-M2.7` | MiniMax M2.7 | S+ | 78.0% | 196k |
+| `DeepSeek-V3.1` | DeepSeek V3.1 | S | 66.0% | 131k |
+| `DeepSeek-V3.2` | DeepSeek V3.2 | S+ | 70.0% | 32k |
+| `gpt-oss-120b` | GPT OSS 120B | S | 62.4% | 131k |
+| `gemma-4-31B-it` | Gemma 4 31B | A+ | 52.0% | 131k |
+| `Meta-Llama-3.3-70B-Instruct` | Llama 3.3 70B | B | 22.0% | 131k |
 
 ## openrouter
 
-OpenRouter free models are refreshed from the live catalog path and intentionally omitted from this static snapshot table.
-
-- Use `./bin/lac provider verify openrouter --refresh-catalog` to refresh the catalog from the endpoint.
-- Use `./bin/lac provider models openrouter` to list the currently stored live set.
-- The repo still keeps starter defaults in `opencode.template.jsonc` for clean-clone rendering, but this page should not mirror them as a frozen table.
+| Model ID | Label | Tier | SWE | Context |
+|---|---|---|---|---|
+| `nvidia/nemotron-3-ultra-550b-a55b:free` | Nemotron 3 Ultra | S+ | 71.9% | 1M |
+| `poolside/laguna-m.1:free` | Poolside Laguna M.1 | S+ | 72.5% | 262k |
+| `poolside/laguna-xs-2.1:free` | Poolside Laguna XS 2.1 | S+ | 70.9% | 262k |
+| `cohere/north-mini-code:free` | North Mini Code | S | - | 256k |
+| `poolside/laguna-s-2.1:free` | Poolside Laguna S 2.1 | S+ | - | 262k |
+| `nvidia/nemotron-3-super-120b-a12b:free` | Nemotron 3 Super | S | 60.5% | 1M |
+| `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` | Nemotron 3 Omni | A+ | 52.0% | 256k |
+| `inclusionai/ling-3.0-flash:free` | Ling-3.0 Flash | A+ | - | 262k |
+| `nvidia/nemotron-3-nano-30b-a3b:free` | Nemotron Nano 30B | A- | 38.8% | 256k |
+| `nvidia/nemotron-nano-12b-v2-vl:free` | Nemotron Nano 12B VL | A | 20.0% | 128k |
+| `google/gemma-4-31b-it:free` | Gemma 4 31B | A+ | 52.0% | 262k |
+| `google/gemma-4-26b-a4b-it:free` | Gemma 4 26B MoE | A | 38.0% | 262k |
+| `nvidia/nemotron-nano-9b-v2:free` | Nemotron Nano 9B | B+ | 18.0% | 128k |
+| `openai/gpt-oss-20b:free` | GPT OSS 20B | A- | - | 131k |
+| `nvidia/nemotron-3.5-content-safety:free` | Nemotron 3.5 Content Safety | C | - | 128k |
 
 ## googleai
 
 | Model ID | Label | Tier | SWE | Context |
 |---|---|---|---|---|
-| `gemma-3-27b-it` | Gemma 3 27B | B | 22.0% | 128k |
-| `gemma-3-12b-it` | Gemma 3 12B | C | 15.0% | 128k |
-| `gemma-3-4b-it` | Gemma 3 4B | C | 10.0% | 128k |
+| `gemini-3.6-flash` | Gemini 3.6 Flash | S+ | - | 1M |
+| `gemini-3.5-flash` | Gemini 3.5 Flash | S+ | 78.0% | 1M |
+| `gemini-3.1-pro-preview` | Gemini 3.1 Pro Preview | S+ | 80.6% | 1M |
+| `gemini-3-flash-preview` | Gemini 3 Flash Preview | S+ | 78.0% | 1M |
+| `gemini-3.5-flash-lite` | Gemini 3.5 Flash Lite | S | - | 1M |
+| `gemini-3.1-flash-lite` | Gemini 3.1 Flash Lite | S | 62.8% | 1M |
+| `gemini-2.5-pro` | Gemini 2.5 Pro | S | 63.8% | 1M |
+| `gemini-2.5-flash` | Gemini 2.5 Flash | A+ | 54.0% | 1M |
+| `gemini-2.5-flash-lite` | Gemini 2.5 Flash Lite | A | 42.6% | 1M |
 
 ## zai
 
 | Model ID | Label | Tier | SWE | Context |
 |---|---|---|---|---|
-| `zai/glm-5` | GLM-5 | S+ | 77.8% | 128k |
-| `zai/glm-4.7` | GLM-4.7 | S+ | 73.8% | 200k |
-| `zai/glm-4.5` | GLM-4.5 | S+ | 75.0% | 128k |
-| `zai/glm-4.5-air` | GLM-4.5-Air | S+ | 72.0% | 128k |
-| `zai/glm-4.6` | GLM-4.6 | S+ | 70.0% | 128k |
-
-## siliconflow
-
-| Model ID | Label | Tier | SWE | Context |
-|---|---|---|---|---|
-| `Qwen/Qwen3-Coder-480B-A35B-Instruct` | Qwen3 Coder 480B | S+ | 70.6% | 256k |
-| `deepseek-ai/DeepSeek-V3.2` | DeepSeek V3.2 | S+ | 73.1% | 128k |
-| `Qwen/Qwen3-235B-A22B` | Qwen3 235B | S+ | 70.0% | 128k |
-| `deepseek-ai/DeepSeek-R1` | DeepSeek R1 | S | 61.0% | 128k |
-| `Qwen/Qwen3-Coder-30B-A3B-Instruct` | Qwen3 Coder 30B | A+ | 55.0% | 32k |
-| `Qwen/Qwen2.5-Coder-32B-Instruct` | Qwen2.5 Coder 32B | A | 46.0% | 32k |
-
-## together
-
-| Model ID | Label | Tier | SWE | Context |
-|---|---|---|---|---|
-| `moonshotai/Kimi-K2.5` | Kimi K2.5 | S+ | 76.8% | 128k |
-| `Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8` | Qwen3 Coder 480B | S+ | 70.6% | 256k |
-| `deepseek-ai/DeepSeek-V3.1` | DeepSeek V3.1 | S | 62.0% | 128k |
-| `deepseek-ai/DeepSeek-R1` | DeepSeek R1 | S | 61.0% | 128k |
-| `openai/gpt-oss-120b` | GPT OSS 120B | S | 60.0% | 128k |
-| `openai/gpt-oss-20b` | GPT OSS 20B | A | 42.0% | 128k |
-| `meta-llama/Llama-3.3-70B-Instruct-Turbo` | Llama 3.3 70B | A- | 39.5% | 128k |
+| `zai/glm-4.7-flash` | GLM-4.7-Flash | A+ | 59.2% | 200k |
+| `zai/glm-4.5-flash` | GLM-4.5-Flash | S | 59.2% | 128k |
+| `zai/glm-4.6v-flash` | GLM-4.6V-Flash | A | - | 128k |
 
 ## cloudflare
 
 | Model ID | Label | Tier | SWE | Context |
 |---|---|---|---|---|
-| `@cf/openai/gpt-oss-120b` | GPT OSS 120B | S | 60.0% | 128k |
-| `@cf/qwen/qwen2.5-coder-32b-instruct` | Qwen2.5 Coder 32B | A | 46.0% | 32k |
-| `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | R1 Distill 32B | A | 43.9% | 128k |
-| `@cf/openai/gpt-oss-20b` | GPT OSS 20B | A | 42.0% | 128k |
-| `@cf/meta/llama-3.3-70b-instruct-fp8-fast` | Llama 3.3 70B | A- | 39.5% | 128k |
-| `@cf/meta/llama-3.1-8b-instruct` | Llama 3.1 8B | B | 28.8% | 128k |
+| `@cf/moonshotai/kimi-k2.6` | Kimi K2.6 | S+ | 80.2% | 262k |
+| `@cf/moonshotai/kimi-k2.7-code` | Kimi K2.7 Code | S | 60.4% | 262k |
+| `@cf/zai-org/glm-5.2` | GLM-5.2 | S+ | 82.8% | 262k |
+| `@cf/zai-org/glm-4.7-flash` | GLM-4.7-Flash | A+ | 59.2% | 131k |
+| `@cf/openai/gpt-oss-120b` | GPT OSS 120B | S | 62.4% | 128k |
+| `@cf/nvidia/nemotron-3-120b-a12b` | Nemotron 3 Super | S | 60.5% | 128k |
+| `@cf/meta/llama-4-scout-17b-16e-instruct` | Llama 4 Scout | B | 28.0% | 131k |
+| `@cf/qwen/qwen3-30b-a3b-fp8` | Qwen3 30B MoE | B | 25.2% | 128k |
+| `@cf/qwen/qwen2.5-coder-32b-instruct` | Qwen2.5 Coder 32B | A | 47.0% | 128k |
+| `@cf/openai/gpt-oss-20b` | GPT OSS 20B | A+ | 50.3% | 128k |
+| `@cf/qwen/qwq-32b` | QwQ 32B | A | - | 128k |
+| `@cf/deepseek-ai/deepseek-r1-distill-qwen-32b` | DeepSeek R1 Distill Qwen 32B | A | - | 128k |
+| `@cf/meta/llama-3.3-70b-instruct-fp8-fast` | Llama 3.3 70B | B | 22.0% | 128k |
+| `@cf/google/gemma-4-26b-a4b-it` | Gemma 4 26B MoE | A- | 38.0% | 256k |
+| `@cf/mistralai/mistral-small-3.1-24b-instruct` | Mistral Small 3.1 | B+ | 30.0% | 128k |
+| `@cf/ibm-granite/granite-4.0-h-micro` | Granite 4.0 Micro | B+ | 30.0% | 128k |
+| `@cf/meta/llama-3.1-8b-instruct-fast` | Llama 3.1 8B Instruct (Fast) | C | 18.0% | 128k |
 
-## perplexity
-
-| Model ID | Label | Tier | SWE | Context |
-|---|---|---|---|---|
-| `sonar-reasoning-pro` | Sonar Reasoning Pro | A+ | 50.0% | 128k |
-| `sonar-reasoning` | Sonar Reasoning | A | 45.0% | 128k |
-| `sonar-pro` | Sonar Pro | B+ | 32.0% | 128k |
-| `sonar` | Sonar | B | 25.0% | 128k |

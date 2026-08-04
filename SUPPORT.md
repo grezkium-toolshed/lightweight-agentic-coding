@@ -3,6 +3,14 @@
 lac is a community project maintained on a best-effort basis. It works today, but it is a
 small side project, not a supported product — please set expectations accordingly.
 
+## Validation status (public beta)
+
+Primary, actively validated platform: **Apple Silicon macOS**. Linux and macOS run the
+offline contract and integration suite in CI; Windows runs a PowerShell wrapper smoke.
+**Not yet validated on real hardware:** Windows full-runtime (model download + local
+server), the 128 GB-class `ds4`/DwarfStar profile, and a from-scratch install on a fresh
+corporate-managed macOS account. Treat those paths as best-effort and report what you find.
+
 ## Where to Ask
 
 - Bugs in setup, profiles, runtime launch, or generated config: use the bug report issue template.

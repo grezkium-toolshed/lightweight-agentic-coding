@@ -21,6 +21,9 @@ DIST_DIR="$TMP_DIR/dist"
 INSTALL_DIR="$TMP_DIR/install"
 mkdir -p "$DIST_DIR" "$INSTALL_DIR"
 
+# Resolve and run the build from TMP_DIR: a repo-root build/ directory would
+# shadow the PyPI 'build' module as a namespace package when cwd is the repo.
+cd "$TMP_DIR"
 if "$PYTHON_BIN" -c 'import build.__main__' >/dev/null 2>&1; then
   "$PYTHON_BIN" -m build --outdir "$DIST_DIR" "$ROOT" >/dev/null
 elif command -v uv >/dev/null 2>&1; then
@@ -30,6 +33,7 @@ else
   echo "Install with: $PYTHON_BIN -m pip install build" >&2
   exit 1
 fi
+cd "$ROOT"
 
 "$PYTHON_BIN" - "$DIST_DIR" <<'PY'
 import sys

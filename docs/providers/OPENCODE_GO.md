@@ -16,7 +16,9 @@ Sign in at https://opencode.ai and copy the API key from your account page. In t
 
 OpenCode Go is pre-wired in `opencode.template.jsonc`. The curated model list evolves upstream; treat the block as a starting point and verify it before a release.
 
-Current OpenCode Go entries include GLM 5.1, GLM 5, Kimi K2.6, Kimi K2.5, MiMo-V2.5, MiMo-V2.5-Pro, MiMo-V2-Pro, MiMo-V2-Omni, MiniMax M2.7, MiniMax M2.5, Qwen3.6 Plus, and Qwen3.5 Plus. When Qwen3.8 Plus is hosted, add it here and in `opencode.template.jsonc` (see `docs/models/QWEN38_READY.md`).
+Current OpenAI-compatible Go entries in `opencode.template.jsonc` (checked 2026-08-04): Grok 4.5, GLM 5.2, GLM 5.1, Kimi K3, Kimi K2.7 Code, Kimi K2.6, DeepSeek V4 Pro, DeepSeek V4 Flash, MiMo-V2.5, MiMo-V2.5-Pro, and Hy3.
+
+Go also hosts Qwen3.6 Plus, Qwen3.7 Plus, Qwen3.7 Max, **Qwen3.8 Max** (live since the 2026-08-03 announcement), and MiniMax M3/M2.7/M2.5 — but those use the Anthropic `/v1/messages` endpoint, so they are **not** listed in the template's single-provider OpenAI-compatible block. Select them in OpenCode after subscribing via the `/connect` flow. See `docs/models/QWEN38_READY.md` for the Qwen 3.8 story.
 
 ### China-hosted model opt-in
 
@@ -35,7 +37,7 @@ Useful setup commands:
 ./bin/lac provider verify opencode-go
 ```
 
-Use the first command when you want local models plus a Go overlay. Use `profile apply opencode-go` when you want a zero-download Go-only setup. After subscribing, set `OPENCODE_GO_API_KEY` in your shell environment or connect through OpenCode's `/connect` flow. Then use `/models` in OpenCode to select a Go model such as `opencode-go/qwen3.6-plus`.
+Use the first command when you want local models plus a Go overlay. Use `profile apply opencode-go` when you want a zero-download Go-only setup. After subscribing, set `OPENCODE_GO_API_KEY` in your shell environment or connect through OpenCode's `/connect` flow. Then use `/models` in OpenCode to select a Go model such as `opencode-go/glm-5.1`.
 
 ## When to use vs. other providers
 

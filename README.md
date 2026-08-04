@@ -22,7 +22,13 @@ cd lightweight-agentic-coding
 
 It's idempotent — re-running skips anything already installed. When it finishes, the [OpenChamber](https://github.com/openchamber/openchamber) chat UI opens at `http://localhost:3000`, backed by a small local model. That's your private assistant.
 
-> A hosted `curl … | bash` one-liner will come with the first tagged release. Windows: `./scripts/bootstrap.ps1` (secondary — WSL is smoother). `lac doctor` tells you what, if anything, is missing.
+A hosted one-liner (same flow, no clone needed):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/TuukkaTanner/lightweight-agentic-coding/v0.2.0/scripts/bootstrap.sh | bash
+```
+
+Windows: `./scripts/bootstrap.ps1` (secondary — WSL is smoother). `lac doctor` tells you what, if anything, is missing.
 
 <details>
 <summary>Prefer to set it up by hand? (click to expand)</summary>
@@ -103,6 +109,8 @@ For 64 GB+ machines, the Gemma family, and specialist runtimes. These are power-
 ## Platform support
 
 **macOS (Apple Silicon) is the primary, tested platform** — best performance (unified memory + Metal) and the fewest install hurdles. Linux and macOS run the offline contract and CLI integration suite in CI; Windows runs PowerShell wrapper and client-render checks. GPU/runtime behavior still requires real-hardware validation, and WSL2 remains the smoothest Windows path. `lac doctor` reports what your platform is missing.
+
+> **Public beta validation status:** actively validated on Apple Silicon macOS. Windows full-runtime (download + local server) and the 128 GB `ds4` profile are wired and CI-covered at the smoke level but not yet validated on real hardware; the fresh-macOS one-command bootstrap has not been run on a stock corporate-managed account. Please report anything you hit there.
 
 Installed copies keep mutable data outside the Python package: models and refreshed catalogs use the platform user-data directory, while runtime state uses the platform user-state directory. Override them with `LAC_DATA_ROOT`, `LAC_STATE_ROOT`, or `AI_MODELS_DIR`.
 
