@@ -231,7 +231,9 @@ def render_opencode_config(ctx, profile_id, profile, verbose_runtime=True):
         if default_model.startswith("local-cluster/"):
             default_model = f"local-cluster/{LOCAL_MLX_MODEL_IDS.get(_local_model_name(default_model), _local_model_name(default_model))}"
         if small_model.startswith("local-cluster/"):
-            small_model = f"local-cluster/{LOCAL_MLX_MODEL_IDS.get(_local_model_name(small_model), _local_model_name(small_model))}"
+            small_id = _local_model_name(small_model)
+            default_id = _local_model_name(default_model)
+            small_model = f"local-cluster/{LOCAL_MLX_MODEL_IDS.get(small_id, LOCAL_MLX_MODEL_IDS.get(default_id, default_id))}"
     elif runtime == "ds4":
         log_info(f"[config] Rendering OpenCode config for ds4 runtime (port {local_runtime_port(runtime)})")
         provider = template["provider"]["ds4"]

@@ -43,16 +43,14 @@ def _profile_supports_omlx(profile, verbose=False):
         if verbose:
             log_info(f"[omlx] Profile '{profile.get('id', '?')}' rejected: not a local runtime profile")
         return False
-    model_ids = {
-        _local_model_name(profile.get("default_model", "")),
-        _local_model_name(profile.get("small_model", "")),
-    }
-    unsupported = [mid for mid in model_ids if mid and mid not in LOCAL_MLX_MODEL_IDS]
-    if unsupported:
+    # Only the default model gates oMLX eligibility: the small model is a
+    # title/compaction helper and is substituted at render time when unmapped.
+    default_id = _local_model_name(profile.get("default_model", ""))
+    if default_id and default_id not in LOCAL_MLX_MODEL_IDS:
         if verbose:
-            log_info(f"[omlx] Profile '{profile.get('id')}' rejected: no MLX model ID mapped for {', '.join(unsupported)}")
+            log_info(f"[omlx] Profile '{profile.get('id')}' rejected: no MLX model ID mapped for {default_id}")
         return False
-    return bool(model_ids)
+    return bool(default_id)
 
 
 def _normalize_local_runtime(value):

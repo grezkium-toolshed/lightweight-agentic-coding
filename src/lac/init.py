@@ -2,7 +2,7 @@
 
 import os
 
-from lac.profiles import family_alternatives, recommend_profile, FAMILY_DESCRIPTIONS
+from lac.profiles import family_alternatives, recommend_profile, FAMILY_DESCRIPTIONS, effective_memory_gb
 from lac.runtime import selected_local_runtime
 
 
@@ -103,9 +103,10 @@ def _profile_provider_ids(profile):
 
 
 def _init_recommendation(profile_id, profile, hardware):
+    eff_gb = effective_memory_gb(hardware)
     ram_gb = hardware.get("ram_gb")
-    alternatives = family_alternatives(ram_gb)
-    recommended_profile = recommend_profile(ram_gb)
+    alternatives = family_alternatives(eff_gb)
+    recommended_profile = recommend_profile(eff_gb)
     if profile["runtime_mode"] == "cloud":
         recommended_path = "cloud-only zero-download profile"
     elif profile.get("preferred_runtime") == "ds4":
@@ -236,9 +237,9 @@ def _next_steps(ctx, profile_id, cloud_ids, load_json):
 
 def init_wizard(ctx, yes=False, profile=None, cloud=None, no_cloud=False, also_download=False,
                 load_json=None, command_exists=None, _host_install_platform=None, _install_hint=None):
-    from lac.profiles import profile_apply, detect_hardware
+    from lac.profiles import profile_apply, detect_hardware, effective_memory_gb
     hardware = detect_hardware()
-    ram_gb = hardware["ram_gb"]
+    ram_gb = effective_memory_gb(hardware)
     if yes:
         chosen_profile = profile or recommend_profile(ram_gb)
         ctx.get_profile(chosen_profile)
@@ -249,7 +250,9 @@ def init_wizard(ctx, yes=False, profile=None, cloud=None, no_cloud=False, also_d
         also_download_profile = None
     else:
         ram_label = f"{ram_gb:.1f} GB" if ram_gb is not None else "unknown"
-        print(f"Detected: {hardware['os']} / {hardware['arch']} / RAM {ram_label}")
+        vram_label = f"{hardware['vram_gb']:.1f} GB" if hardware.get("vram_gb") is not None else ""
+        detected_label = f"RAM {ram_label}" + (f" / VRAM {vram_label}" if vram_label else "")
+        print(f"Detected: {hardware['os']} / {hardware['arch']} / {detected_label}")
         alternates = family_alternatives(ram_gb)
         family_choices = [("qwen", FAMILY_DESCRIPTIONS["qwen"]), ("gemma", FAMILY_DESCRIPTIONS["gemma"])]
         family = _prompt_choice("Which local model family?", family_choices, default_index=0)

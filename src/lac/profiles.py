@@ -81,7 +81,10 @@ RAM_BUCKETS = [
     (30, ["32gb"], "gemma-32gb"),
     (22, ["24gb"], "gemma-24gb"),
     (14, ["16gb"], "gemma-16gb"),
-    (0, ["gemma-16gb"], "gemma-16gb"),
+    (10, ["12gb"], "gemma-8gb"),
+    (7, ["8gb"], "gemma-8gb"),
+    (5, ["6gb"], "gemma-6gb"),
+    (0, ["4gb"], "4gb"),
 ]
 
 FAMILY_DESCRIPTIONS = {
@@ -113,12 +116,40 @@ def detect_total_ram_gb():
     return None
 
 
+def detect_vram_gb():
+    """Discrete-GPU VRAM in GB via nvidia-smi; None when absent (e.g. Apple Silicon or no NVIDIA GPU)."""
+    try:
+        raw = subprocess.check_output(
+            ["nvidia-smi", "--query-gpu=memory.total", "--format=csv,noheader,nounits"],
+            stderr=subprocess.DEVNULL, timeout=10,
+        ).decode("utf-8", errors="ignore").strip().splitlines()
+        if raw:
+            return float(raw[0].strip()) / 1024.0
+    except Exception:
+        pass
+    return None
+
+
 def detect_hardware():
     return {
         "os": sys.platform,
         "arch": platform.machine(),
         "ram_gb": detect_total_ram_gb(),
+        "vram_gb": detect_vram_gb(),
     }
+
+
+def effective_memory_gb(hardware):
+    """Bucketing memory: discrete VRAM when it is smaller than RAM, else RAM.
+
+    On Apple Silicon (unified memory) vram_gb is None, so RAM wins. On a
+    discrete-GPU laptop the model must fit VRAM, so VRAM wins.
+    """
+    ram = hardware.get("ram_gb")
+    vram = hardware.get("vram_gb")
+    if vram is not None and (ram is None or vram < ram):
+        return vram
+    return ram
 
 
 def _bucket_for_ram(ram_gb):

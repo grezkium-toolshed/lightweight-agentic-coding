@@ -2,6 +2,10 @@
 
 Status: **prepped — open weights not yet released.**
 
+## Small-model status
+
+**No small Qwen 3.8 models at the drop** — only Qwen3.8-Max (2.4T) and Qwen3.8-27B go open-weights (~2026-08-10); there is no 3.8 4B/9B/12B-class model announced. Do not add low-end 3.8 slots. A community 4B distill of 3.8-Max exists on Hugging Face (14K downloads in its first 2 days) — watch it, don't ship it. The low-end tiers keep Qwen3.5-9B / Gemma 4 12B QAT as the agentic baseline; re-evaluate after the drop.
+
 ## Timeline
 
 - **2026-08-03** — Qwen3.8-Max announced: 2.4T-parameter MoE (95B active), hybrid attention, 1M context, text + image/video input, `$2` / `$6` / `$0.25`-cached per 1M tokens. Open-weights release announced for the **following week (~2026-08-10)**, together with **Qwen3.8-27B** going open-weights.

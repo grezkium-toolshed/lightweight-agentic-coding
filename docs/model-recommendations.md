@@ -180,3 +180,17 @@ Profiles in `runtime-config/profiles.json` carry a `verification_tier` field:
 - `extended` — Validated on multiple hardware configurations or by community feedback. Used for niche or high-memory profiles where the maintainer has less direct access to matching hardware.
 
 Use `verified` profiles for production or team baselines. `standard` and `extended` profiles are safe to try but should be validated locally before relying on them.
+
+## Low-end tier guide (4-16 GB)
+
+The 4-16 GB market is served by six profiles (`4gb`, `6gb`, `8gb`, `12gb`, `gemma-6gb`, `gemma-8gb`) plus the retuned `16gb` and `macos-16gb`.
+
+Design rules that make these tiers feasible:
+
+- **Qwen hybrid attention** (Qwen3.5-9B, Qwen3.6-27B): only a quarter of layers use full attention, so the KV cache is near-constant in context size. 32K-64K contexts stay affordable even at 6 GB. This is architecture, not tuning.
+- **Dense beats MoE at 12-16 GB for agentic work**: the dense 27B out-scores the 35B-A3B MoE on agentic benchmarks, and its honest 16 GB quant (UD-IQ3_XXS, 12.2 GB) is smaller than the MoE's. The only MoE worth a low-end slot is gemma-4-26b-a4b UD-Q3_K_XL (12.9 GB) on 16 GB, for decode speed over agentic reliability.
+- **Gemma 4 12B QAT** (`gemma-4-12b-qat`, 6.4 GB, Google-official, near-lossless) is the strongest model that fits 8 GB — it replaces the plain Q4 as the default for `macos-16gb` and `gemma-8gb`.
+- **KV quantization**: `cache-type-k/v = q4_0` on the 4/6 GB tiers halves KV memory; `q8_0` everywhere else.
+- **Partial offload**: discrete-VRAM presets (e.g. `6gb`) default to partial `n-gpu-layers` so llama.cpp spills to CPU (`fit = true`) instead of failing to allocate.
+
+Honest expectations: 4 GB is chat + light automation; 8 GB is the agentic floor (small models, short sessions); real multi-step agentic coding wants 12-16 GB. VRAM detection in `lac init` buckets by VRAM when a discrete NVIDIA GPU is smaller than RAM; Apple Silicon uses unified RAM.

@@ -60,8 +60,12 @@ Probably — but speed depends heavily on your hardware. Local models use whatev
 
 | Your machine | Model it runs well | What it feels like | Best for |
 |---|---|---|---|
-| 16 GB Windows/Linux laptop (CPU/iGPU) | 4B (`micro`) | A few tokens/sec — usable, not snappy | Short single-shot tasks: proofread a paragraph, rewrite an email |
-| 16 GB Apple Silicon Mac | 4–12B (`macos-16gb`) | Comfortably interactive | Everyday drafting, editing, summarizing |
+| 4 GB laptop (CPU/iGPU) | 4B (`4gb`) | A few tokens/sec — usable, not snappy | Chat, proofreading, single-shot edits |
+| 6 GB laptop | 9B Q4 (`6gb`) | Steady, small agentic | Short agentic tasks, drafting, summarizing |
+| 8 GB laptop / Mac | 9B Q4–Q6 or Gemma 12B QAT (`8gb`) | Comfortable, agentic floor | Tool-calling, multi-step edits |
+| 12 GB workstation | 9B Q8 (`12gb`) | Fast, 64K context | Real agentic coding sessions |
+| 16 GB Windows/Linux laptop (CPU/iGPU) | 27B IQ3_XXS (`16gb`) | Tight but real agentic | Multi-step coding, big context |
+| 16 GB Apple Silicon Mac | Gemma 4 12B QAT (`macos-16gb`) | Fast, strong quality | The sweet spot for Macs |
 | 24–32 GB Mac / workstation | up to ~27B (`24gb`, `32gb`) | Fast, strong quality | The sweet spot — daily driver |
 | 64–128 GB MacBook Pro (M-series Max) | large MoE models | Near-frontier local quality | Heavier agentic work, big context |
 
@@ -83,8 +87,12 @@ lac keeps everything local, but it does install and run software. If you need to
 | Machine | Profile | What you get |
 |---|---|---|
 | Any machine, lightweight demo | `micro` | Tiny 4B model (~2.5 GB), automatic GPU offload with CPU fallback |
-| 16 GB Apple Silicon Mac | `macos-16gb` | Balanced Apple Silicon default |
-| 16 GB Windows/Linux laptop | `16gb` | 27B starter (tight — expect slower CPU speeds) |
+| 4 GB device | `4gb` | Qwen3.5-4B Q4 — chat + light automation |
+| 6 GB device | `6gb` | Qwen3.5-9B Q4 with partial offload — smallest practical agentic tier |
+| 8 GB device | `8gb` | Qwen3.5-9B Q4/Q6 or Gemma 4 12B QAT (`gemma-8gb`) — the agentic floor |
+| 12 GB device | `12gb` | Qwen3.5-9B Q8, 64K context |
+| 16 GB Windows/Linux laptop | `16gb` | Qwen 3.6 27B UD-IQ3_XXS (12.2 GB) |
+| 16 GB Apple Silicon Mac | `macos-16gb` | Balanced Apple Silicon default (Gemma 4 12B QAT) |
 | 24 GB Mac / workstation | `24gb` | The sweet spot — recommended daily driver |
 | 32 GB workstation | `32gb` | Stronger, with MTP speculative decoding |
 | Cloud-only, free | `openrouter` | Zero downloads, free-tier hosted models |

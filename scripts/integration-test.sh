@@ -178,7 +178,8 @@ PY
 if [[ "$(uname -s)" == "Darwin" ]]; then
   OMLX_STATE="$TMP_DIR/omlx-context"
   AI_LOCAL_RUNTIME=omlx LAC_STATE_ROOT="$OMLX_STATE" run "$LAC" profile apply 24gb --json > "$TMP_DIR/profile-omlx.json"
-  python3 - <<'PY' "$OMLX_STATE/clients/opencode/opencode.json"
+  python3 - <<'PY' "$OMLX_STATE/clients/opencode/opencode.json" "$ROOT/runtime-config/presets/24gb.ini"
+import configparser
 import json
 import sys
 from pathlib import Path
@@ -186,7 +187,13 @@ from pathlib import Path
 config = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 assert config["model"] == config["small_model"] == "local-cluster/Qwen3.6-27B-UD-MLX-6bit"
 model_id = config["model"].split("/", 1)[1]
-assert config["provider"]["local-cluster"]["models"][model_id]["limit"]["context"] == 65536
+# The unmapped 4B small model is substituted with the mapped default, so the
+# shared MLX alias advertises the default model's preset context.
+parser = configparser.ConfigParser(interpolation=None, strict=False)
+parser.read_string("[global]\n" + Path(sys.argv[2]).read_text(encoding="utf-8"))
+expected = parser.getint("qwen3.6-27b-q4", "ctx-size")
+assert config["provider"]["local-cluster"]["models"][model_id]["limit"]["context"] == expected
+print("[ok] oMLX shared alias advertises the default model's preset context")
 print("[ok] oMLX shared alias uses the smallest selected profile context")
 PY
 fi

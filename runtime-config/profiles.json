@@ -24,7 +24,7 @@
     "16gb": {
       "id": "16gb",
       "label": "16 GB local starter",
-      "description": "Entry local workstation profile for office automation and light coding with a compact Qwen baseline.",
+      "description": "16 GB RAM/VRAM. Qwen 3.6 27B at UD-IQ3_XXS (12.2 GB) — the only honest 16 GB 27B-dense quant, hybrid attention keeps 128K context affordable.",
       "preset": "runtime-config/presets/16gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -40,13 +40,13 @@
         "claude-code",
         "codex-reference"
       ],
-      "default_model": "local-cluster/qwen3.6-27b-q3",
-      "small_model": "local-cluster/qwen3.6-27b-q3"
+      "default_model": "local-cluster/qwen3.6-27b-iq3xxs",
+      "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "macos-16gb": {
       "id": "macos-16gb",
       "label": "macOS 16 GB Apple Silicon",
-      "description": "Apple Silicon profile for 16 GB machines. Gemma 4 12B Q4 default for strong reasoning + multimodal with Qwen 3.5 fallback.",
+      "description": "Apple Silicon profile for 16 GB machines. Gemma 4 12B QAT default (Google-official, near-lossless, 6.4 GB) + Qwen 3.5 fallback.",
       "preset": "runtime-config/presets/macos-16gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -62,7 +62,7 @@
         "claude-code",
         "codex-reference"
       ],
-      "default_model": "local-cluster/gemma-4-12b-q4",
+      "default_model": "local-cluster/gemma-4-12b-qat",
       "small_model": "local-cluster/gemma-4-e4b-q8"
     },
     "24gb": {
@@ -86,7 +86,7 @@
         "codex-reference"
       ],
       "default_model": "local-cluster/qwen3.6-27b-q4",
-      "small_model": "local-cluster/qwen3.6-27b-q3"
+      "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "32gb": {
       "id": "32gb",
@@ -108,7 +108,7 @@
         "codex-reference"
       ],
       "default_model": "local-cluster/qwen3.6-27b-q4",
-      "small_model": "local-cluster/qwen3.6-27b-q4"
+      "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "64gb": {
       "id": "64gb",
@@ -131,7 +131,7 @@
         "openchamber"
       ],
       "default_model": "local-cluster/qwen3.6-35b-a3b-q8",
-      "small_model": "local-cluster/qwen3.6-27b-q4"
+      "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "128gb-multi": {
       "id": "128gb-multi",
@@ -153,7 +153,7 @@
         "openchamber"
       ],
       "default_model": "local-cluster/qwen3.6-35b-a3b-q8",
-      "small_model": "local-cluster/qwen3.6-27b-q4"
+      "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "128gb-qwen122b": {
       "id": "128gb-qwen122b",
@@ -175,7 +175,7 @@
         "openchamber"
       ],
       "default_model": "local-cluster/qwen3.5-122b-a10b",
-      "small_model": "local-cluster/qwen3.5-122b-a10b"
+      "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "128gb-minimax": {
       "id": "128gb-minimax",
@@ -197,7 +197,7 @@
         "openchamber"
       ],
       "default_model": "local-cluster/minimax-m2.7",
-      "small_model": "local-cluster/minimax-m2.7"
+      "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "128gb-ds4-flash": {
       "id": "128gb-ds4-flash",
@@ -220,7 +220,7 @@
         "openchamber"
       ],
       "default_model": "ds4/deepseek-v4-flash",
-      "small_model": "ds4/deepseek-v4-flash"
+      "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "gemma-16gb": {
       "id": "gemma-16gb",
@@ -242,7 +242,7 @@
         "codex-reference"
       ],
       "default_model": "local-cluster/gemma-4-12b-q8",
-      "small_model": "local-cluster/gemma-4-12b-q4"
+      "small_model": "local-cluster/gemma-4-e4b-q8"
     },
     "gemma-24gb": {
       "id": "gemma-24gb",
@@ -264,7 +264,7 @@
         "codex-reference"
       ],
       "default_model": "local-cluster/gemma-4-31b-q4",
-      "small_model": "local-cluster/gemma-4-26b-a4b-q4"
+      "small_model": "local-cluster/gemma-4-e4b-q8"
     },
     "gemma-32gb": {
       "id": "gemma-32gb",
@@ -286,7 +286,7 @@
         "codex-reference"
       ],
       "default_model": "local-cluster/gemma-4-31b-q8",
-      "small_model": "local-cluster/gemma-4-26b-a4b-q4"
+      "small_model": "local-cluster/gemma-4-e4b-q8"
     },
     "gemma-64gb": {
       "id": "gemma-64gb",
@@ -307,7 +307,7 @@
         "codex-reference"
       ],
       "default_model": "local-cluster/gemma-4-31b-bf16",
-      "small_model": "local-cluster/gemma-4-26b-a4b-q4"
+      "small_model": "local-cluster/gemma-4-e4b-q8"
     },
     "openrouter": {
       "id": "openrouter",
@@ -358,6 +358,139 @@
       ],
       "default_model": "opencode-go/glm-5.1",
       "small_model": "opencode-go/deepseek-v4-flash"
+    },
+    "4gb": {
+      "id": "4gb",
+      "label": "4 GB — entry (chat + light automation)",
+      "description": "Entry tier for 4 GB devices. Qwen3.5-4B Q4 (~2.6 GB) — chat, proofreading, single-shot edits; agentic harnesses run, but stay short-context.",
+      "preset": "runtime-config/presets/4gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "verification_tier": "standard",
+      "primary_workload": "entry",
+      "recommended_for": [
+        "office-automation",
+        "solo-coder"
+      ],
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ],
+      "default_model": "local-cluster/qwen3.5-4b-q4",
+      "small_model": "local-cluster/qwen3.5-4b-q4"
+    },
+    "6gb": {
+      "id": "6gb",
+      "label": "6 GB — small agentic",
+      "description": "6 GB devices. Qwen3.5-9B Q4 (~5.5 GB) with partial GPU offload and 32K context — the smallest practical agentic tier.",
+      "preset": "runtime-config/presets/6gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "verification_tier": "standard",
+      "primary_workload": "small-agentic",
+      "recommended_for": [
+        "solo-coder",
+        "office-automation"
+      ],
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ],
+      "default_model": "local-cluster/qwen3.5-9b-q4",
+      "small_model": "local-cluster/qwen3.5-4b-q4"
+    },
+    "8gb": {
+      "id": "8gb",
+      "label": "8 GB — agentic floor",
+      "description": "8 GB devices. Qwen3.5-9B Q4 (comfy) or Q6 (tight) — reliable tool-calling at 32K context.",
+      "preset": "runtime-config/presets/8gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "verification_tier": "standard",
+      "primary_workload": "agentic-floor",
+      "recommended_for": [
+        "solo-coder",
+        "research-operator"
+      ],
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ],
+      "default_model": "local-cluster/qwen3.5-9b-q4",
+      "small_model": "local-cluster/qwen3.5-4b-q4"
+    },
+    "12gb": {
+      "id": "12gb",
+      "label": "12 GB — mid agentic",
+      "description": "12 GB devices. Qwen3.5-9B Q8 (~9.7 GB) default with 64K context; hybrid attention keeps KV affordable.",
+      "preset": "runtime-config/presets/12gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "verification_tier": "standard",
+      "primary_workload": "mid-agentic",
+      "recommended_for": [
+        "solo-coder",
+        "research-operator",
+        "office-automation"
+      ],
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ],
+      "default_model": "local-cluster/qwen3.5-9b-q8",
+      "small_model": "local-cluster/qwen3.5-4b-q4"
+    },
+    "gemma-6gb": {
+      "id": "gemma-6gb",
+      "label": "6 GB — Gemma (small agentic)",
+      "description": "6 GB devices, Gemma family. Gemma 4 E4B Q8 (~5 GB, 2B active) — light and fast; multilingual.",
+      "preset": "runtime-config/presets/gemma-6gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "verification_tier": "standard",
+      "primary_workload": "small-agentic",
+      "recommended_for": [
+        "office-automation",
+        "solo-coder"
+      ],
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ],
+      "default_model": "local-cluster/gemma-4-e4b-q8",
+      "small_model": "local-cluster/gemma-4-e4b-q8"
+    },
+    "gemma-8gb": {
+      "id": "gemma-8gb",
+      "label": "8 GB — Gemma (agentic floor)",
+      "description": "8 GB devices, Gemma family. Gemma 4 12B QAT (Google-official, near-lossless, 6.4 GB) — the strongest model that fits 8 GB.",
+      "preset": "runtime-config/presets/gemma-8gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "verification_tier": "standard",
+      "primary_workload": "agentic-floor",
+      "recommended_for": [
+        "solo-coder",
+        "research-operator"
+      ],
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference"
+      ],
+      "default_model": "local-cluster/gemma-4-12b-qat",
+      "small_model": "local-cluster/gemma-4-e4b-q8"
     }
   }
 }

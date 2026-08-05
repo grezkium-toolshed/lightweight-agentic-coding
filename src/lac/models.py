@@ -12,116 +12,165 @@ from pathlib import Path
 PROFILE_MODELS = {
     "micro": {
         "gguf": [
-            ("qwen3.5", "Qwen3.5-4B-Q4_K_M.gguf", "unsloth/Qwen3.5-4B-GGUF", 2500),
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
+        ],
+        "mlx": [],
+    },
+    "4gb": {
+        "gguf": [
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
+        ],
+        "mlx": [],
+    },
+    "6gb": {
+        "gguf": [
+            ('qwen3.5', 'Qwen3.5-9B-Q4_K_M.gguf', 'unsloth/Qwen3.5-9B-GGUF', 5000),
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
+        ],
+        "mlx": [],
+    },
+    "8gb": {
+        "gguf": [
+            ('qwen3.5', 'Qwen3.5-9B-Q4_K_M.gguf', 'unsloth/Qwen3.5-9B-GGUF', 5000),
+            ('qwen3.5', 'Qwen3.5-9B-Q6_K.gguf', 'unsloth/Qwen3.5-9B-GGUF', 7500),
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
+        ],
+        "mlx": [],
+    },
+    "12gb": {
+        "gguf": [
+            ('qwen3.5', 'Qwen3.5-9B-Q8_0.gguf', 'unsloth/Qwen3.5-9B-GGUF', 9000),
+            ('qwen3.5', 'Qwen3.5-9B-Q6_K.gguf', 'unsloth/Qwen3.5-9B-GGUF', 7500),
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": [],
     },
     "16gb": {
         "gguf": [
-            ("qwen3.6", "Qwen3.6-27B-UD-Q3_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 14000),
+            ('qwen3.6', 'Qwen3.6-27B-UD-IQ3_XXS.gguf', 'unsloth/Qwen3.6-27B-GGUF', 12000),
+            ('qwen3.6', 'Qwen3.6-27B-UD-Q3_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 14000),
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
-        "mlx": ["unsloth/Qwen3.6-27B-UD-MLX-6bit"],
+        "mlx": ['unsloth/Qwen3.6-27B-UD-MLX-6bit'],
+    },
+    "gemma-6gb": {
+        "gguf": [
+            ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
+        ],
+        "mlx": [],
+    },
+    "gemma-8gb": {
+        "gguf": [
+            ('gemma4', 'gemma-4-12B-it-qat-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-12B-it-qat-GGUF', 6000),
+            ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
+        ],
+        "mlx": [],
     },
     "macos-16gb": {
         "gguf": [
-            ("gemma4", "gemma-4-12b-it-UD-Q4_K_XL.gguf", "unsloth/gemma-4-12b-it-GGUF", 7500),
-            ("qwen3.5", "Qwen3.5-9B-Q4_K_M.gguf", "unsloth/Qwen3.5-9B-GGUF", 5000),
-            ("gemma4", "gemma-4-E4B-IT-Q8_0.gguf", "unsloth/gemma-4-E4B-IT-GGUF", 4000),
+            ('gemma4', 'gemma-4-12B-it-qat-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-12B-it-qat-GGUF', 6000),
+            ('gemma4', 'gemma-4-12b-it-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-12b-it-GGUF', 7500),
+            ('qwen3.5', 'Qwen3.5-9B-Q4_K_M.gguf', 'unsloth/Qwen3.5-9B-GGUF', 5000),
+            ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
         ],
-        "mlx": ["unsloth/gemma-4-E4B-it-MLX-8bit"],
+        "mlx": ['unsloth/gemma-4-E4B-it-MLX-8bit'],
     },
     "24gb": {
         "gguf": [
-            ("qwen3.6", "Qwen3.6-27B-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 17000),
-            ("qwen3.6", "Qwen3.6-27B-UD-Q3_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 14000),
+            ('qwen3.6', 'Qwen3.6-27B-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 17000),
+            ('qwen3.6', 'Qwen3.6-27B-UD-Q3_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 14000),
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
-        "mlx": ["unsloth/Qwen3.6-27B-UD-MLX-6bit"],
+        "mlx": ['unsloth/Qwen3.6-27B-UD-MLX-6bit'],
     },
     "32gb": {
         "gguf": [
-            ("qwen3.6", "Qwen3.6-27B-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 17000),
-            ("qwen3.6-mtp", "Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-MTP-GGUF", 19000),
+            ('qwen3.6', 'Qwen3.6-27B-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 17000),
+            ('qwen3.6-mtp', 'Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-MTP-GGUF', 19000),
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
-        "mlx": ["unsloth/Qwen3.6-27B-UD-MLX-6bit"],
+        "mlx": ['unsloth/Qwen3.6-27B-UD-MLX-6bit'],
     },
     "64gb": {
         "gguf": [
-            ("qwen3.6", "Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-GGUF", 36000),
-            ("qwen3.6", "Qwen3.6-27B-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 17000),
-            ("qwen3.6-mtp", "Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-MTP-GGUF", 31000),
+            ('qwen3.6', 'Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-GGUF', 36000),
+            ('qwen3.6', 'Qwen3.6-27B-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 17000),
+            ('qwen3.6-mtp', 'Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-MTP-GGUF', 31000),
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
-        "mlx": ["unsloth/Qwen3.6-35B-A3B-MLX-8bit", "unsloth/Qwen3.6-27B-UD-MLX-6bit"],
+        "mlx": ['unsloth/Qwen3.6-35B-A3B-MLX-8bit', 'unsloth/Qwen3.6-27B-UD-MLX-6bit'],
     },
     "128gb-qwen122b": {
         "gguf": [
-            ("qwen3.5", "Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf", "unsloth/Qwen3.5-122B-A10B-GGUF", 100),
-            ("qwen3.5", "Qwen3.5-122B-A10B-MXFP4_MOE-00002-of-00003.gguf", "unsloth/Qwen3.5-122B-A10B-GGUF", 42000),
-            ("qwen3.5", "Qwen3.5-122B-A10B-MXFP4_MOE-00003-of-00003.gguf", "unsloth/Qwen3.5-122B-A10B-GGUF", 15000),
-            ("qwen3.6-mtp", "Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-MTP-GGUF", 19000),
-            ("qwen3.6-mtp", "Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-MTP-GGUF", 31000),
+            ('qwen3.5', 'Qwen3.5-122B-A10B-MXFP4_MOE-00001-of-00003.gguf', 'unsloth/Qwen3.5-122B-A10B-GGUF', 100),
+            ('qwen3.5', 'Qwen3.5-122B-A10B-MXFP4_MOE-00002-of-00003.gguf', 'unsloth/Qwen3.5-122B-A10B-GGUF', 42000),
+            ('qwen3.5', 'Qwen3.5-122B-A10B-MXFP4_MOE-00003-of-00003.gguf', 'unsloth/Qwen3.5-122B-A10B-GGUF', 15000),
+            ('qwen3.6-mtp', 'Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-MTP-GGUF', 19000),
+            ('qwen3.6-mtp', 'Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-MTP-GGUF', 31000),
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": [],
     },
     "128gb-multi": {
         "gguf": [
-            ("qwen3.6", "Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-GGUF", 36000),
-            ("qwen3.6", "Qwen3.6-27B-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-GGUF", 17000),
-            ("qwen3.6-mtp", "Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-MTP-GGUF", 19000),
-            ("qwen3.6-mtp", "Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-MTP-GGUF", 31000),
+            ('qwen3.6', 'Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-GGUF', 36000),
+            ('qwen3.6', 'Qwen3.6-27B-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 17000),
+            ('qwen3.6-mtp', 'Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-MTP-GGUF', 19000),
+            ('qwen3.6-mtp', 'Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-MTP-GGUF', 31000),
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
-        "mlx": ["unsloth/Qwen3.6-35B-A3B-MLX-8bit", "unsloth/Qwen3.6-27B-UD-MLX-6bit"],
+        "mlx": ['unsloth/Qwen3.6-35B-A3B-MLX-8bit', 'unsloth/Qwen3.6-27B-UD-MLX-6bit'],
     },
     "128gb-minimax": {
         "gguf": [
-            ("minimax", "MiniMax-M2.7-UD-IQ4_XS-00001-of-00003.gguf", os.environ.get("MINIMAX_REPO", "unsloth/MiniMax-M2.7-GGUF"), 5),
-            ("minimax", "MiniMax-M2.7-UD-IQ4_XS-00002-of-00003.gguf", os.environ.get("MINIMAX_REPO", "unsloth/MiniMax-M2.7-GGUF"), 30000),
-            ("minimax", "MiniMax-M2.7-UD-IQ4_XS-00003-of-00003.gguf", os.environ.get("MINIMAX_REPO", "unsloth/MiniMax-M2.7-GGUF"), 30000),
-            ("qwen3.6-mtp", "Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf", "unsloth/Qwen3.6-27B-MTP-GGUF", 19000),
-            ("qwen3.6-mtp", "Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf", "unsloth/Qwen3.6-35B-A3B-MTP-GGUF", 31000),
+            ('minimax', 'MiniMax-M2.7-UD-IQ4_XS-00001-of-00003.gguf', os.environ.get("MINIMAX_REPO", "unsloth/MiniMax-M2.7-GGUF"), 5),
+            ('minimax', 'MiniMax-M2.7-UD-IQ4_XS-00002-of-00003.gguf', os.environ.get("MINIMAX_REPO", "unsloth/MiniMax-M2.7-GGUF"), 30000),
+            ('minimax', 'MiniMax-M2.7-UD-IQ4_XS-00003-of-00003.gguf', os.environ.get("MINIMAX_REPO", "unsloth/MiniMax-M2.7-GGUF"), 30000),
+            ('qwen3.6-mtp', 'Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-MTP-GGUF', 19000),
+            ('qwen3.6-mtp', 'Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-MTP-GGUF', 31000),
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": [],
     },
     "128gb-ds4-flash": {
         "gguf": [
-            (
-                "ds4",
-                "ds4flash.gguf",
-                os.environ.get("DS4_REPO", "antirez/deepseek-v4-gguf"),
-                75000,
-                "DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix.gguf",
-            ),
+            ('ds4', 'ds4flash.gguf', os.environ.get("DS4_REPO", "antirez/deepseek-v4-gguf"), 75000, 'DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix.gguf'),
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": [],
     },
     "gemma-16gb": {
         "gguf": [
-            ("gemma4", "gemma-4-12b-it-UD-Q8_K_XL.gguf", "unsloth/gemma-4-12b-it-GGUF", 13600),
-            ("gemma4", "gemma-4-12b-it-UD-Q4_K_XL.gguf", "unsloth/gemma-4-12b-it-GGUF", 7500),
-            ("gemma4", "gemma-4-E4B-IT-Q8_0.gguf", "unsloth/gemma-4-E4B-IT-GGUF", 4000),
+            ('gemma4', 'gemma-4-12b-it-UD-Q8_K_XL.gguf', 'unsloth/gemma-4-12b-it-GGUF', 13600),
+            ('gemma4', 'gemma-4-12b-it-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-12b-it-GGUF', 7500),
+            ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
         ],
-        "mlx": ["unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit", "unsloth/gemma-4-E4B-it-MLX-8bit"],
+        "mlx": ['unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit', 'unsloth/gemma-4-E4B-it-MLX-8bit'],
     },
     "gemma-24gb": {
         "gguf": [
-            ("gemma4", "gemma-4-31B-IT-UD-Q4_K_XL.gguf", "unsloth/gemma-4-31B-IT-GGUF", 16000),
-            ("gemma4", "gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf", "unsloth/gemma-4-26B-A4B-IT-GGUF", 15000),
+            ('gemma4', 'gemma-4-31B-IT-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-31B-IT-GGUF', 16000),
+            ('gemma4', 'gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-26B-A4B-IT-GGUF', 15000),
+            ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
         ],
-        "mlx": ["unsloth/gemma-4-31b-it-UD-MLX-4bit", "unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit"],
+        "mlx": ['unsloth/gemma-4-31b-it-UD-MLX-4bit', 'unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit'],
     },
     "gemma-32gb": {
         "gguf": [
-            ("gemma4", "gemma-4-31B-IT-Q8_0.gguf", "unsloth/gemma-4-31B-IT-GGUF", 32000),
-            ("gemma4", "gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf", "unsloth/gemma-4-26B-A4B-IT-GGUF", 15000),
+            ('gemma4', 'gemma-4-31B-IT-Q8_0.gguf', 'unsloth/gemma-4-31B-IT-GGUF', 32000),
+            ('gemma4', 'gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-26B-A4B-IT-GGUF', 15000),
+            ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
         ],
-        "mlx": ["unsloth/gemma-4-31b-it-UD-MLX-4bit", "unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit"],
+        "mlx": ['unsloth/gemma-4-31b-it-UD-MLX-4bit', 'unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit'],
     },
     "gemma-64gb": {
         "gguf": [
-            ("gemma4", "gemma-4-31B-IT-BF16.gguf", "unsloth/gemma-4-31B-IT-GGUF", 60000),
-            ("gemma4", "gemma-4-31B-IT-Q8_0.gguf", "unsloth/gemma-4-31B-IT-GGUF", 32000),
-            ("gemma4", "gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf", "unsloth/gemma-4-26B-A4B-IT-GGUF", 15000),
+            ('gemma4', 'gemma-4-31B-IT-BF16.gguf', 'unsloth/gemma-4-31B-IT-GGUF', 60000),
+            ('gemma4', 'gemma-4-31B-IT-Q8_0.gguf', 'unsloth/gemma-4-31B-IT-GGUF', 32000),
+            ('gemma4', 'gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-26B-A4B-IT-GGUF', 15000),
+            ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
         ],
-        "mlx": ["unsloth/gemma-4-31b-it-UD-MLX-4bit", "unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit"],
+        "mlx": ['unsloth/gemma-4-31b-it-UD-MLX-4bit', 'unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit'],
     },
 }
 
