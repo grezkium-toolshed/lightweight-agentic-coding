@@ -26,6 +26,7 @@ EXCLUDE_NAMES = {
     "package.json", "package-lock.json", "bun.lock", ".gitignore",
     "render-manifest.json", "plans",
     "msgraph",  # opt-in skill, downloaded on demand — never bundled
+    "tenant-smith-workflow",  # internal skill, kept local — never bundled
 }
 EXCLUDE_SUFFIXES = (".downloading", ".pyc", ".swp", ".swo", ".log", ".tmp")
 
