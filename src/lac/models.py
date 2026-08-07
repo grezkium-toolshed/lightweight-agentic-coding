@@ -316,10 +316,15 @@ def _download_one(subdir, filename, repo, remote, min_mb, models_dir, known_chec
         if result.returncode != 0:
             print(f"[fail] Hugging Face CLI download failed: {repo}/{remote}", file=sys.stderr)
             return False
+        downloaded = target_dir / remote
+        if downloaded.is_file() and downloaded != target_file:
+            shutil.move(str(downloaded), str(target_file))
     else:
         print(f"[get ] {url}")
         result = subprocess.run(
-            ["curl", "-fL", "--retry", "3", "--retry-delay", "3", "--retry-max-time", "300", "-C", "-", "-o", str(tmp_file), url],
+            ["curl", "-fL", "--retry", "3", "--retry-delay", "3", "--retry-max-time", "300",
+             "--retry-all-errors", "--speed-limit", "1024", "--speed-time", "60",
+             "-C", "-", "-o", str(tmp_file), url],
             check=False,
         )
         if result.returncode != 0:

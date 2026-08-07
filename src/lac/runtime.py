@@ -241,6 +241,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
             backup.unlink()
         log_path.replace(backup)
     env = os.environ.copy()
+    launch_cwd = None
     if runtime == "omlx":
         if not command_exists(os.environ.get("OMLX_BIN", "omlx")):
             raise SystemExit("oMLX runtime selected but `omlx` is not in PATH. Install with Homebrew or set AI_LOCAL_RUNTIME=llama.cpp.")
@@ -276,6 +277,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
             str(port),
         ]
         ready_url = f"{base_url}/v1/models"
+        launch_cwd = str(Path(ds4_bin).resolve().parent)
     else:
         env["LLAMA_ARG_JINJA"] = "true"
         command = [
@@ -314,7 +316,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
         original_sigterm = signal.getsignal(signal.SIGTERM)
         signal.signal(signal.SIGINT, _foreground_cleanup)
         signal.signal(signal.SIGTERM, _foreground_cleanup)
-        process = subprocess.Popen(command, env=env)
+        process = subprocess.Popen(command, env=env, cwd=launch_cwd)
         payload = {
             "started_at": started_at,
             "ready_at": None,
@@ -355,6 +357,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
         stdout=log_handle,
         stderr=subprocess.STDOUT,
         env=env,
+        cwd=launch_cwd,
         creationflags=flags,
         **kwargs,
     )
