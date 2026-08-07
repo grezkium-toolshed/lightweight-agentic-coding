@@ -17,7 +17,7 @@ Recommended profile mapping:
 - `24gb`: Qwen 3.6 27B `UD-Q4_K_XL`
 - `32gb`: Qwen 3.6 27B `UD-Q4_K_XL` + 27B MTP `UD-Q4_K_XL`
 - `64gb`: Qwen 3.6 35B-A3B `UD-Q8_K_XL` + 35B-A3B MTP `UD-Q6_K_XL`
-- `128gb-ds4-flash`: DeepSeek V4 Flash q2 imatrix through DwarfStar ds4
+- `128gb-ds4-flash`: DeepSeek V4 Flash q2-q4-imatrix through DwarfStar ds4
 - `128gb-multi`: multiple practical local models
 - `128gb-qwen122b`: Qwen 122B-focused
 - `128gb-minimax`: MiniMax M2.7 `UD-IQ4_XS` alternative
@@ -80,7 +80,7 @@ Why this one:
 Use `128gb-ds4-flash` when you have a 128 GB+ Apple Silicon or comparable unified-memory workstation and want DeepSeek V4 Flash through DwarfStar ds4 instead of the oMLX/MTP path.
 
 Recommended default for this repo:
-- DeepSeek V4 Flash `q2-imatrix` from `antirez/deepseek-v4-gguf`
+- DeepSeek V4 Flash `q2-q4-imatrix` 0731 (mixed q2/q4 experts, ~97.6 GB) from `antirez/deepseek-v4-gguf`
 - local file: `models/ds4/ds4flash.gguf`
 - runtime: `ds4-server` on `http://127.0.0.1:8000/v1`
 - context: `100000`
@@ -88,11 +88,11 @@ Recommended default for this repo:
 
 Why this path exists:
 - ds4 is intentionally narrow and DeepSeek V4-specific, which makes it a better fit for this high-memory niche than treating DeepSeek V4 as another generic GGUF slot
-- the 2-bit Flash quant is the practical 96/128 GB target in upstream ds4 guidance
+- the mixed q2/q4 Flash quant keeps expert precision while staying in the 128 GB class — measured ~39 t/s decode short-context on M5 Max 128GB (no speculative decoding)
 - lac users have seen mixed oMLX/MTP behavior on this class of machine, so ds4 is exposed as a first-class runtime rather than a footnote
 
-Advanced manual variant:
-- `q2-q4-imatrix` is a higher-quality Flash quant around 98 GB on disk; download it manually with upstream ds4 tooling and point `DS4_MODEL` at the selected GGUF
+Lower-memory fallback:
+- the 2-bit Flash quant (`DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix.gguf`, ~86.7 GB) remains selectable via `DS4_QUANT=<name>` at `lac models sync` time
 - keep `q4-imatrix` and PRO variants out of the default profile; they are 256 GB+ or 512 GB-class paths
 
 ## MTP specialist models

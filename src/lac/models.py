@@ -134,7 +134,8 @@ PROFILE_MODELS = {
     },
     "128gb-ds4-flash": {
         "gguf": [
-            ('ds4', 'ds4flash.gguf', os.environ.get("DS4_REPO", "antirez/deepseek-v4-gguf"), 75000, 'DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix.gguf'),
+            ('ds4', 'ds4flash.gguf', os.environ.get("DS4_REPO", "antirez/deepseek-v4-gguf"), 75000,
+             os.environ.get("DS4_QUANT", "DeepSeek-V4-Flash-Layers37-42Q4KExperts-OtherExpertLayersIQ2XXSGateUp-Q2KDown-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-fixed-0731.gguf")),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": [],

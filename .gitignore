@@ -48,3 +48,10 @@ dev/
 # Virtual environments
 .venv/
 venv/
+
+# Staged customer Assessment run data (privacy-sensitive, never committed)
+assessment/
+
+# Internal MSP workflow docs and skill (kept locally, never shipped)
+docs/internal/
+.opencode/skills/tenant-smith-workflow/

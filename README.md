@@ -145,6 +145,7 @@ All commands support `--json` for scripting.
 - **Qwen 3.8 prep** — config slots are ready for the upcoming 27B open-weights drop: [`docs/models/QWEN38_READY.md`](docs/models/QWEN38_READY.md)
 - **Free cloud model catalog** — `lac catalog sync-free`, see [`docs/free-coding-models.json`](docs/free-coding-models.json)
 - **Model deep dive** — tuning rationale, profile details: [`docs/model-recommendations.md`](docs/model-recommendations.md)
+- **Agentic analysis of assessment exports** — model capability review, harness assessment, and the agentic-only-folder workflow (staging script + skill implemented): [`docs/assessments/`](docs/assessments/)
 
 ## Troubleshooting
 
