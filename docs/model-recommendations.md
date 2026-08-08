@@ -99,6 +99,25 @@ Why this path exists:
 - the mixed q2/q4 Flash quant keeps expert precision while staying in the 128 GB class — measured ~39 t/s decode short-context on M5 Max 128GB (no speculative decoding); measured on M4 Max 128GB: ~29 t/s decode at 2-10K ctx (31.1 t/s steady at 2K), 270-295 t/s prefill, ~35s load, 90.9 GiB resident
 - lac users have seen mixed oMLX/MTP behavior on this class of machine, so ds4 is exposed as a first-class runtime rather than a footnote
 
+Measured context curve (M4 Max 128GB, `q2-q4-imatrix` 0731, ds4-bench, steady-state decode):
+
+| Context | Prefill t/s | Decode t/s (avg → steady) |
+|---|---|---|
+| 2K | 338 | 31.0 → 31.6 |
+| 35K | 282 | 27.1 → 27.6 |
+| 68K | 234 | 25.3 → 25.9 |
+| 100K | 203 | 23.5 → 23.8 |
+| 133K | 176 | 21.9 → 22.2 |
+| 166K | 160 | 20.5 → 21.0 |
+| 199K | 146 | 19.5 → 19.9 |
+| 231K | 133 | 18.7 → 18.9 |
+| 262K | 123 | 16.8 → 17.8 |
+
+Real-server data point (same machine, live `ds4-server`): a 75K-token prompt prefilled at 218.5 t/s
+(343s) and decoded 23-24 t/s; disk KV grew 1.6 GiB at 75K (~5.5 GiB projected at 256K, inside the
+8 GiB `DS4_KV_DISK_SPACE_MB` budget). DCP (`dcp.jsonc`) compresses at 100-200K, so agentic loops
+operate in the ≥19.5 t/s region and never approach the 17.8 t/s floor at the ceiling.
+
 Lower-memory fallback:
 - the 2-bit Flash quant (`DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix.gguf`, ~86.7 GB) remains selectable via `DS4_QUANT=<name>` at `lac models sync` time
 - keep `q4-imatrix` and PRO variants out of the default profile; they are 256 GB+ or 512 GB-class paths
