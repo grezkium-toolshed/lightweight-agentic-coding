@@ -31,6 +31,5 @@ Required SKILL.md contract:
 | `documentation-generator` | Draft practical setup, rollout, and usage documentation from repository reality | maintainers | markdown-docs |
 | `research-synthesizer` | Turn scattered model, provider, and tooling research into concise recommendations | maintainers | recommendation-doc |
 | `gsd` | Structured Discuss → Plan → Execute → Verify → Ship workflow to prevent context rot in multi-session work | maintainers | execution-plan-and-status |
-| `assessment-analysis` | Analyze staged assessment run exports with a local model and produce operator-reviewed recommendation drafts | office | recommendations-md |
 
 These first-party skills are the complete bundled set. Third-party design catalogs are opt-in and are not part of this index.
