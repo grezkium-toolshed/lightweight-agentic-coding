@@ -141,9 +141,14 @@ else
 fi
 
 # 7. Instant first run: small 4B model, local runtime, open the chat UI.
-info "Starting your private local assistant (downloads a ~2.5 GB model on first run)..."
-"$ROOT/bin/lac" demo --local --yes
-RUN_STATUS=$?
+if [[ -n "${LAC_BOOTSTRAP_SKIP_DEMO:-}" ]]; then
+  info "LAC_BOOTSTRAP_SKIP_DEMO set — skipping the first run (install-only mode for CI)."
+  RUN_STATUS=0
+else
+  info "Starting your private local assistant (downloads a ~2.5 GB model on first run)..."
+  "$ROOT/bin/lac" demo --local --yes
+  RUN_STATUS=$?
+fi
 
 # 8. What next.
 echo ""

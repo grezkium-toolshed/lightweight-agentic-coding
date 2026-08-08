@@ -1,0 +1,35 @@
+name: Bootstrap validation
+
+# Validates the fresh-macOS one-command bootstrap on a pristine runner.
+# Manual + on changes to the script only: macOS runners bill at a 10x
+# minutes multiplier on private repos, so this does not run on every push.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/bootstrap.sh
+      - .github/workflows/bootstrap.yml
+
+jobs:
+  bootstrap:
+    name: Fresh-macOS bootstrap (install-only)
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run bootstrap (demo skipped in CI)
+        run: LAC_BOOTSTRAP_SKIP_DEMO=1 ./scripts/bootstrap.sh
+      # bootstrap.sh warns-and-continues by design, so these explicit
+      # checks are the actual gate: every tool it promises must exist.
+      - name: Verify installed toolchain
+        run: |
+          export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$HOME/.openchamber/bin:$PATH"
+          command -v llama-server
+          command -v opencode
+          command -v lac
+          lac --version
+          lac pack list --json > /dev/null
+      - name: Doctor report (informational)
+        run: |
+          export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$HOME/.openchamber/bin:$PATH"
+          lac doctor || true
