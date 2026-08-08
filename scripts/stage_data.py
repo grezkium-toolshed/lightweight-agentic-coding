@@ -27,6 +27,7 @@ EXCLUDE_NAMES = {
     "render-manifest.json", "plans",
     "msgraph",  # opt-in skill, downloaded on demand — never bundled
     "tenant-smith-workflow",  # internal skill, kept local — never bundled
+    "assessment-analysis",  # internal skill, kept local — never bundled
 }
 EXCLUDE_SUFFIXES = (".downloading", ".pyc", ".swp", ".swo", ".log", ".tmp")
 

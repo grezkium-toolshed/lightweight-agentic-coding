@@ -31,6 +31,14 @@ The `.ini` presets are part of the recommendation, not incidental config. They c
 - The important knobs are `ctx-size`, `fit-ctx`, `temp`, `top-p`, `top-k`, `min-p`, `presence-penalty`, `repeat-penalty`, cache type, batch sizes, and chat template.
 - Unsloth model docs: [Qwen3.5](https://unsloth.ai/docs/models/qwen3.5) and [Gemma 4](https://unsloth.ai/docs/models/gemma-4).
 
+### Coding harness context floor
+
+Any harness-facing profile (OpenCode and similar) must advertise a default context of
+at least **128K**; **256K is the recommended minimum**. Harness system prompts and tool
+schemas consume tens of thousands of tokens before any user content is seen, so
+sub-128K defaults cause compaction churn and early context overflow in multi-step
+agent loops. Chat-only profiles (e.g. `micro`) are exempt from this floor.
+
 ### Qwen baseline
 
 Qwen3.5 and Qwen 3.6 are treated as the default local coding/general families. For Qwen3.5 small non-thinking mode, Unsloth's general baseline is `temp=0.7`, `top_p=0.8`, `top_k=20`, `min_p=0.0`, `presence_penalty=1.5`, and repeat penalty disabled or `1.0`. The `macos-16gb` Qwen3.5 9B preset follows that shape directly.
@@ -83,12 +91,12 @@ Recommended default for this repo:
 - DeepSeek V4 Flash `q2-q4-imatrix` 0731 (mixed q2/q4 experts, ~97.6 GB) from `antirez/deepseek-v4-gguf`
 - local file: `models/ds4/ds4flash.gguf`
 - runtime: `ds4-server` on `http://127.0.0.1:8000/v1`
-- context: `100000`
+- context: `262144` (256K harness floor; disk-backed KV, override via `DS4_CTX`)
 - disk KV cache: `state/runtime/ds4-kv`
 
 Why this path exists:
 - ds4 is intentionally narrow and DeepSeek V4-specific, which makes it a better fit for this high-memory niche than treating DeepSeek V4 as another generic GGUF slot
-- the mixed q2/q4 Flash quant keeps expert precision while staying in the 128 GB class — measured ~39 t/s decode short-context on M5 Max 128GB (no speculative decoding)
+- the mixed q2/q4 Flash quant keeps expert precision while staying in the 128 GB class — measured ~39 t/s decode short-context on M5 Max 128GB (no speculative decoding); measured on M4 Max 128GB: ~29 t/s decode at 2-10K ctx (31.1 t/s steady at 2K), 270-295 t/s prefill, ~35s load, 90.9 GiB resident
 - lac users have seen mixed oMLX/MTP behavior on this class of machine, so ds4 is exposed as a first-class runtime rather than a footnote
 
 Lower-memory fallback:

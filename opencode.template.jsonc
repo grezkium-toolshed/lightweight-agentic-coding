@@ -175,7 +175,7 @@
         "deepseek-v4-flash": {
           "name": "DeepSeek V4 Flash (ds4 local)",
           "limit": {
-            "context": 100000,
+            "context": 262144,
             "output": 384000
           }
         }

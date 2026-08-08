@@ -266,7 +266,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
             "-m",
             str(model_path),
             "--ctx",
-            os.environ.get("DS4_CTX", "100000"),
+            os.environ.get("DS4_CTX", "262144"),
             "--kv-disk-dir",
             str(kv_dir),
             "--kv-disk-space-mb",
