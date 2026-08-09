@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "profiles": {
     "micro": {
       "id": "micro",
@@ -10,6 +10,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
+      "memory_target_gb": 4,
+      "recommendation_floor_gb": 0,
+      "estimated_default_weight_gb": 2.5,
+      "auto_recommend": false,
       "primary_workload": "demo",
       "recommended_for": [
         "solo-coder"
@@ -30,6 +34,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "verified",
+      "memory_target_gb": 16,
+      "recommendation_floor_gb": 14,
+      "estimated_default_weight_gb": 12.2,
+      "auto_recommend": true,
       "primary_workload": "starter",
       "recommended_for": [
         "office-automation",
@@ -52,6 +60,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
+      "memory_target_gb": 16,
+      "recommendation_floor_gb": 14,
+      "estimated_default_weight_gb": 6.4,
+      "auto_recommend": true,
       "primary_workload": "macos-starter",
       "recommended_for": [
         "solo-coder",
@@ -74,6 +86,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "verified",
+      "memory_target_gb": 24,
+      "recommendation_floor_gb": 22,
+      "estimated_default_weight_gb": 17,
+      "auto_recommend": true,
       "primary_workload": "generalist",
       "recommended_for": [
         "solo-coder",
@@ -97,6 +113,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
+      "memory_target_gb": 32,
+      "recommendation_floor_gb": 30,
+      "estimated_default_weight_gb": 17,
+      "auto_recommend": true,
       "primary_workload": "coding",
       "recommended_for": [
         "solo-coder",
@@ -110,6 +130,34 @@
       "default_model": "local-cluster/qwen3.6-27b-q4",
       "small_model": "local-cluster/qwen3.5-4b-q4"
     },
+    "48gb": {
+      "id": "48gb",
+      "label": "48 GB local candidate",
+      "description": "Explicit 48 GB profile for Qwen 3.6 35B-A3B Q8 with conservative runtime settings. Automatic recommendation waits for a real 48 GB hardware smoke test.",
+      "preset": "runtime-config/presets/48gb.ini",
+      "runtime_mode": "local",
+      "local_runtime_required": true,
+      "downloads_required": true,
+      "verification_tier": "standard",
+      "memory_target_gb": 48,
+      "recommendation_floor_gb": 46,
+      "estimated_default_weight_gb": 36,
+      "auto_recommend": false,
+      "primary_workload": "local-heavy",
+      "recommended_for": [
+        "solo-coder",
+        "research-operator",
+        "team-pilot"
+      ],
+      "supported_clients": [
+        "opencode",
+        "claude-code",
+        "codex-reference",
+        "openchamber"
+      ],
+      "default_model": "local-cluster/qwen3.6-35b-a3b-q8",
+      "small_model": "local-cluster/qwen3.5-4b-q4"
+    },
     "64gb": {
       "id": "64gb",
       "label": "64 GB local multi-model",
@@ -119,6 +167,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "extended",
+      "memory_target_gb": 64,
+      "recommendation_floor_gb": 60,
+      "estimated_default_weight_gb": 36,
+      "auto_recommend": true,
       "primary_workload": "multi-model",
       "recommended_for": [
         "solo-coder",
@@ -142,6 +194,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "extended",
+      "memory_target_gb": 128,
+      "recommendation_floor_gb": 120,
+      "estimated_default_weight_gb": 36,
+      "auto_recommend": true,
       "primary_workload": "multi-model",
       "recommended_for": [
         "team-pilot"
@@ -164,6 +220,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "extended",
+      "memory_target_gb": 128,
+      "recommendation_floor_gb": 120,
+      "estimated_default_weight_gb": 57,
+      "auto_recommend": true,
       "primary_workload": "max-qwen",
       "recommended_for": [
         "team-pilot"
@@ -186,6 +246,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "extended",
+      "memory_target_gb": 128,
+      "recommendation_floor_gb": 120,
+      "estimated_default_weight_gb": 108,
+      "auto_recommend": true,
       "primary_workload": "max-minimax",
       "recommended_for": [
         "team-pilot"
@@ -209,6 +273,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "extended",
+      "memory_target_gb": 128,
+      "recommendation_floor_gb": 120,
+      "estimated_default_weight_gb": 97.6,
+      "auto_recommend": true,
       "primary_workload": "max-ds4",
       "recommended_for": [
         "solo-coder",
@@ -231,6 +299,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
+      "memory_target_gb": 16,
+      "recommendation_floor_gb": 14,
+      "estimated_default_weight_gb": 13.6,
+      "auto_recommend": true,
       "primary_workload": "starter-gemma",
       "recommended_for": [
         "office-automation",
@@ -253,6 +325,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "verified",
+      "memory_target_gb": 24,
+      "recommendation_floor_gb": 22,
+      "estimated_default_weight_gb": 16,
+      "auto_recommend": true,
       "primary_workload": "gemma-generalist",
       "recommended_for": [
         "research-operator",
@@ -275,6 +351,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
+      "memory_target_gb": 32,
+      "recommendation_floor_gb": 30,
+      "estimated_default_weight_gb": 32,
+      "auto_recommend": true,
       "primary_workload": "gemma-strong",
       "recommended_for": [
         "research-operator",
@@ -297,6 +377,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "extended",
+      "memory_target_gb": 64,
+      "recommendation_floor_gb": 60,
+      "estimated_default_weight_gb": 60,
+      "auto_recommend": true,
       "primary_workload": "gemma-max",
       "recommended_for": [
         "team-pilot"
@@ -368,6 +452,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
+      "memory_target_gb": 4,
+      "recommendation_floor_gb": 0,
+      "estimated_default_weight_gb": 2.6,
+      "auto_recommend": true,
       "primary_workload": "entry",
       "recommended_for": [
         "office-automation",
@@ -390,6 +478,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
+      "memory_target_gb": 6,
+      "recommendation_floor_gb": 5,
+      "estimated_default_weight_gb": 5.5,
+      "auto_recommend": true,
       "primary_workload": "small-agentic",
       "recommended_for": [
         "solo-coder",
@@ -412,6 +504,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
+      "memory_target_gb": 8,
+      "recommendation_floor_gb": 7,
+      "estimated_default_weight_gb": 5.5,
+      "auto_recommend": true,
       "primary_workload": "agentic-floor",
       "recommended_for": [
         "solo-coder",
@@ -434,6 +530,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
+      "memory_target_gb": 12,
+      "recommendation_floor_gb": 10,
+      "estimated_default_weight_gb": 9.7,
+      "auto_recommend": true,
       "primary_workload": "mid-agentic",
       "recommended_for": [
         "solo-coder",
@@ -457,6 +557,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
+      "memory_target_gb": 6,
+      "recommendation_floor_gb": 5,
+      "estimated_default_weight_gb": 5,
+      "auto_recommend": true,
       "primary_workload": "small-agentic",
       "recommended_for": [
         "office-automation",
@@ -479,6 +583,10 @@
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
+      "memory_target_gb": 8,
+      "recommendation_floor_gb": 7,
+      "estimated_default_weight_gb": 6.4,
+      "auto_recommend": true,
       "primary_workload": "agentic-floor",
       "recommended_for": [
         "solo-coder",

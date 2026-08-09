@@ -102,11 +102,10 @@ def _profile_provider_ids(profile):
     return provider_ids
 
 
-def _init_recommendation(profile_id, profile, hardware):
+def _init_recommendation(profile_id, profile, hardware, profiles):
     eff_gb = effective_memory_gb(hardware)
-    ram_gb = hardware.get("ram_gb")
-    alternatives = family_alternatives(eff_gb)
-    recommended_profile = recommend_profile(eff_gb)
+    alternatives = family_alternatives(eff_gb, profiles=profiles, hardware=hardware)
+    recommended_profile = recommend_profile(eff_gb, profiles=profiles, hardware=hardware)
     if profile["runtime_mode"] == "cloud":
         recommended_path = "cloud-only zero-download profile"
     elif profile.get("preferred_runtime") == "ds4":
@@ -241,7 +240,7 @@ def init_wizard(ctx, yes=False, profile=None, cloud=None, no_cloud=False, also_d
     hardware = detect_hardware()
     ram_gb = effective_memory_gb(hardware)
     if yes:
-        chosen_profile = profile or recommend_profile(ram_gb)
+        chosen_profile = profile or recommend_profile(ram_gb, profiles=ctx.profiles, hardware=hardware)
         ctx.get_profile(chosen_profile)
         cloud_ids = _parse_cloud_arg(cloud, no_cloud)
         if not cloud_ids and not no_cloud and cloud is None:
@@ -249,14 +248,16 @@ def init_wizard(ctx, yes=False, profile=None, cloud=None, no_cloud=False, also_d
         _validate_cloud_ids(ctx, cloud_ids, load_json)
         also_download_profile = None
     else:
-        ram_label = f"{ram_gb:.1f} GB" if ram_gb is not None else "unknown"
-        vram_label = f"{hardware['vram_gb']:.1f} GB" if hardware.get("vram_gb") is not None else ""
-        detected_label = f"RAM {ram_label}" + (f" / VRAM {vram_label}" if vram_label else "")
-        print(f"Detected: {hardware['os']} / {hardware['arch']} / {detected_label}")
-        alternates = family_alternatives(ram_gb)
+        budget_label = f"{ram_gb:.1f} GB" if ram_gb is not None else "unknown"
+        print(
+            f"Detected: {hardware['os']} / {hardware['arch']} / "
+            f"{hardware['memory_kind']} budget {budget_label} via {hardware['probe_source']} "
+            f"({hardware['confidence']} confidence)"
+        )
+        alternates = family_alternatives(ram_gb, profiles=ctx.profiles, hardware=hardware)
         family_choices = [("qwen", FAMILY_DESCRIPTIONS["qwen"]), ("gemma", FAMILY_DESCRIPTIONS["gemma"])]
         family = _prompt_choice("Which local model family?", family_choices, default_index=0)
-        recommended = recommend_profile(ram_gb, family=family)
+        recommended = recommend_profile(ram_gb, family=family, profiles=ctx.profiles, hardware=hardware)
         if profile:
             ctx.get_profile(profile)
             chosen_profile = profile
@@ -286,7 +287,7 @@ def init_wizard(ctx, yes=False, profile=None, cloud=None, no_cloud=False, also_d
     result = {
         "applied": True, "status": _init_status(readiness), "profile": chosen_profile,
         "cloud": cloud_ids, "hardware": hardware,
-        "recommendation": _init_recommendation(chosen_profile, chosen_profile_record, hardware),
+        "recommendation": _init_recommendation(chosen_profile, chosen_profile_record, hardware, ctx.profiles),
         "prerequisites": prerequisites, "readiness": readiness, "generated": generated,
         "also_download_profile": also_download_profile, "state_root": summary["state_root"],
         "next_steps": _next_steps(ctx, chosen_profile, cloud_ids, load_json),
@@ -311,10 +312,16 @@ def _render_init_section(title, items):
 def render_init_text(result):
     hardware = result["hardware"]
     ram_label = f"{hardware['ram_gb']:.1f} GB" if hardware.get("ram_gb") is not None else "unknown"
+    budget = hardware.get("effective_budget_gb")
+    budget_label = f"{budget:.1f} GB" if budget is not None else "unknown"
     recommendation = result["recommendation"]
     print("  lac init — Lightweight Agentic Coding")
     print(f"Status: {result['status']}")
     print(f"Detected: {hardware['os']} / {hardware['arch']} / RAM {ram_label}")
+    print(
+        f"Selection budget: {budget_label} {hardware.get('memory_kind', 'system')} memory "
+        f"via {hardware.get('probe_source', 'fallback')} ({hardware.get('confidence', 'low')} confidence)"
+    )
     print(f"Selected profile: {result['profile']} ({recommendation['selected_label']})")
     print(f"Recommended path: {recommendation['recommended_path']}")
     if result["cloud"]:

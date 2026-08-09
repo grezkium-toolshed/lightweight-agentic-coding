@@ -4,6 +4,8 @@
 
 Use Qwen 3.6 as the default local family for general agentic work.
 
+Recommendations target the strongest validated model that fits the **effective accelerator-memory budget** while retaining headroom for the OS, runtime, context, and KV cache. Dedicated VRAM is a hard budget; ordinary iGPUs use their reported usable graphics budget rather than total system RAM; Apple Silicon uses unified memory; and Snapdragon/Adreno uses a measured shared-memory budget or a conservative 4 GB fallback. CPU-only machines may use system RAM.
+
 Default quant guidance:
 - prefer Unsloth's published `UD-Q8_K_XL` GGUF artifact for Qwen 3.6 35B-A3B where hardware allows
 - use dense Qwen 3.6 27B for lower-footprint quantized defaults; it is less sensitive to quantization than 35B-A3B
@@ -12,10 +14,13 @@ Default quant guidance:
 - keep low-bit 35B-A3B dynamic quants as optional footprint-saving alternatives, not the default product recommendation
 
 Recommended profile mapping:
+- `4gb` / `6gb`: the expected tiers for many 16 GB Windows/Linux iGPU laptops, based on measured graphics budget
+- `8gb` / `12gb`: true accelerator-budget tiers, not system-RAM labels
 - `16gb`: Qwen 3.6 27B `UD-Q3_K_XL`
 - `macos-16gb`: Gemma 4 12B `UD-Q4_K_XL` + Qwen3.5 9B `Q4_K_M` + Gemma 4 E4B `Q8_0` for Apple Silicon
 - `24gb`: Qwen 3.6 27B `UD-Q4_K_XL`
 - `32gb`: Qwen 3.6 27B `UD-Q4_K_XL` + 27B MTP `UD-Q4_K_XL`
+- `48gb`: Qwen 3.6 35B-A3B `UD-Q8_K_XL`, 27B Q4 fallback, and 4B small model; manual-only until its real-hardware gate passes
 - `64gb`: Qwen 3.6 35B-A3B `UD-Q8_K_XL` + 35B-A3B MTP `UD-Q6_K_XL`
 - `128gb-ds4-flash`: DeepSeek V4 Flash q2-q4-imatrix through DwarfStar ds4
 - `128gb-multi`: multiple practical local models
@@ -63,13 +68,15 @@ Gemma 4 profiles keep the Unsloth-style Gemma defaults: `temperature=1.0`, `top_
 | `16gb` / Qwen 3.6 27B Q3 | `UD-Q3_K_XL` | 64K | `0.6 / 0.9 / 40` | presence `0.2`, repeat `1.05` | Repo coding/agent tuning for constrained non-Mac 16GB experiments. |
 | `24gb` / Qwen 3.6 27B Q4 | `UD-Q4_K_XL` | 128K | `0.7 / 0.9 / 40` | presence `0.4`, repeat `1.05` | Balanced Qwen default with stronger repeat control for agent loops. |
 | `32gb` / Qwen 3.6 27B Q4 | `UD-Q4_K_XL` | 128K | `0.6 / 0.9 / 40` | presence `0.2`, repeat `1.05` | More conservative coding profile, paired with coder specialist. |
+| `48gb` / Qwen 3.6 35B-A3B Q8 | `UD-Q8_K_XL` | 256K | `0.7 / 0.92 / 40` | presence `0.5`, repeat `1.05` | Intended 48 GB default with 1024/256 batches; standard validation and explicit selection only. |
+| `48gb` / Qwen 3.6 27B Q4 fallback | `UD-Q4_K_XL` | 128K | `0.6 / 0.9 / 40` | presence `0.2`, repeat `1.05` | Lower-weight fallback; the initial 48 GB download set deliberately excludes MTP. |
 | `64gb` / Qwen 3.6 35B-A3B Q8 | `UD-Q8_K_XL` | 256K | `0.7 / 0.92 / 40` | presence `0.5`, repeat `1.05` | Higher-headroom Qwen default while retaining repeat control. |
 | `64gb` / Qwen 3.6 27B Q4 fallback | `UD-Q4_K_XL` | 128K | `0.6 / 0.9 / 40` | presence `0.2`, repeat `1.05` | Stable fallback when the 35B-A3B path is too heavy. |
 | `gemma-16gb` / Gemma 4 12B Q8 | `UD-Q8_K_XL` | 256K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Unsloth Gemma defaults; encoder-free text+image+audio default for 16GB VRAM. |
 | `gemma-16gb` / Gemma 4 12B Q4 fallback | `UD-Q4_K_XL` | 256K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Lighter 12B slot; same multimodal capability at lower RAM. |
 | `gemma-16gb` / Gemma 4 E4B Q8 fallback | `Q8_0` | 128K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Smallest Gemma fallback for lightweight multilingual work. |
 | `gemma-24gb+` / Gemma 4 26B/31B | `UD-Q4_K_XL`, `Q8_0`, or `BF16` | 256K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Unsloth Gemma defaults; profile chooses quant/context by hardware tier. |
-| `32gb+` / Qwen3.6 27B MTP | `UD-Q4_K_XL` (MTP) | 256K | `0.7 / 0.9 / 40` | presence `0.2`, repeat `1.04` | MTP speculative decoding; 1.4-2.2x faster than baseline. `spec-draft-n-max=6` (tunable 1-6). |
+| `32gb`, `64gb+` / Qwen3.6 27B MTP | `UD-Q4_K_XL` (MTP) | 256K | `0.7 / 0.9 / 40` | presence `0.2`, repeat `1.04` | MTP speculative decoding; 1.4-2.2x faster than baseline. `spec-draft-n-max=6` (tunable 1-6). |
 | `64gb+` / Qwen3.6 35B-A3B MTP | `UD-Q6_K_XL` (MTP) | 256K | `0.7 / 0.92 / 40` | presence `0.4`, repeat `1.04` | MTP speculative decoding; fast architect replacement for coder-next. ~1GB extra headroom vs non-MTP. |
 
 ## 128GB MiniMax alternative
@@ -220,4 +227,4 @@ Design rules that make these tiers feasible:
 - **KV quantization**: `cache-type-k/v = q4_0` on the 4/6 GB tiers halves KV memory; `q8_0` everywhere else.
 - **Partial offload**: discrete-VRAM presets (e.g. `6gb`) default to partial `n-gpu-layers` so llama.cpp spills to CPU (`fit = true`) instead of failing to allocate.
 
-Honest expectations: 4 GB is chat + light automation; 8 GB is the agentic floor (small models, short sessions); real multi-step agentic coding wants 12-16 GB. VRAM detection in `lac init` buckets by VRAM when a discrete NVIDIA GPU is smaller than RAM; Apple Silicon uses unified RAM.
+Honest expectations: 4 GB is chat + light automation; 8 GB is the agentic floor (small models, short sessions); real multi-step agentic coding wants 12-16 GB of usable accelerator memory. `lac init` selects the largest single measured accelerator budget rather than summing GPUs. NVIDIA, AMD, Intel, llama.cpp, Linux DRM, and Windows adapter outputs are normalized; an unmeasured iGPU falls back to `4gb` with low confidence. Apple Silicon uses unified RAM. Windows ARM64 Qualcomm/Adreno is a separate shared-memory class and remains experimental; there is no Snapdragon-specific model profile or promised NPU runtime.

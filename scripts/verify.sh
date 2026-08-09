@@ -26,6 +26,9 @@ step "Config schema"
 step "Provider catalog"
 ./scripts/verify-provider-catalog.sh || fail "provider catalog"
 
+step "Hardware/profile contracts"
+python3 -m unittest discover -s tests -p 'test_*.py' || fail "hardware/profile contracts"
+
 step "Package data staging + completeness"
 python3 scripts/stage_data.py
 REQUIRED=(

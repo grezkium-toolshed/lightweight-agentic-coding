@@ -1,12 +1,6 @@
 """Profile management: apply, list, recommend, hardware detection."""
 
-import os
-import platform
-import subprocess
-import sys
-from pathlib import Path
-
-from lac.lib.jsonc import load_jsonc
+from lac.hardware import detect_hardware, detect_total_ram_gb, detect_vram_gb, effective_memory_gb
 
 
 def render_preset(ctx, profile):
@@ -31,6 +25,10 @@ def profile_list(ctx):
                 "label": profile["label"],
                 "runtime_mode": profile["runtime_mode"],
                 "verification_tier": profile["verification_tier"],
+                "memory_target_gb": profile.get("memory_target_gb"),
+                "recommendation_floor_gb": profile.get("recommendation_floor_gb"),
+                "estimated_default_weight_gb": profile.get("estimated_default_weight_gb"),
+                "auto_recommend": profile.get("auto_recommend", False),
                 "primary_workload": profile["primary_workload"],
                 "recommended_for": profile["recommended_for"],
                 "supported_clients": profile["supported_clients"],
@@ -93,83 +91,33 @@ FAMILY_DESCRIPTIONS = {
 }
 
 
-def detect_total_ram_gb():
-    try:
-        if sys.platform == "darwin":
-            raw = subprocess.check_output(["sysctl", "-n", "hw.memsize"], stderr=subprocess.DEVNULL)
-            return int(raw.strip()) / (1024 ** 3)
-        if sys.platform.startswith("linux"):
-            meminfo = Path("/proc/meminfo").read_text(encoding="utf-8")
-            for line in meminfo.splitlines():
-                if line.startswith("MemTotal:"):
-                    kb = int(line.split()[1])
-                    return kb / (1024 ** 2)
-        if os.name == "nt":
-            raw = subprocess.check_output(
-                ["powershell.exe", "-NoProfile", "-Command", "(Get-CimInstance Win32_OperatingSystem).TotalVisibleMemorySize"],
-                stderr=subprocess.DEVNULL,
-            )
-            kb = int(raw.strip())
-            return kb / (1024 ** 2)
-    except Exception:
-        return None
-    return None
-
-
-def detect_vram_gb():
-    """Discrete-GPU VRAM in GB via nvidia-smi; None when absent (e.g. Apple Silicon or no NVIDIA GPU)."""
-    try:
-        raw = subprocess.check_output(
-            ["nvidia-smi", "--query-gpu=memory.total", "--format=csv,noheader,nounits"],
-            stderr=subprocess.DEVNULL, timeout=10,
-        ).decode("utf-8", errors="ignore").strip().splitlines()
-        if raw:
-            return float(raw[0].strip()) / 1024.0
-    except Exception:
-        pass
-    return None
-
-
-def detect_hardware():
-    return {
-        "os": sys.platform,
-        "arch": platform.machine(),
-        "ram_gb": detect_total_ram_gb(),
-        "vram_gb": detect_vram_gb(),
-    }
-
-
-def effective_memory_gb(hardware):
-    """Bucketing memory: discrete VRAM when it is smaller than RAM, else RAM.
-
-    On Apple Silicon (unified memory) vram_gb is None, so RAM wins. On a
-    discrete-GPU laptop the model must fit VRAM, so VRAM wins.
-    """
-    ram = hardware.get("ram_gb")
-    vram = hardware.get("vram_gb")
-    if vram is not None and (ram is None or vram < ram):
-        return vram
-    return ram
-
-
-def _bucket_for_ram(ram_gb):
+def _bucket_for_ram(ram_gb, profiles=None):
     if ram_gb is None:
         return RAM_BUCKETS[-2]
+    if profiles:
+        profile = profiles.get("48gb", {})
+        if profile.get("auto_recommend") and ram_gb >= profile.get("recommendation_floor_gb", 46):
+            if ram_gb < 60:
+                return (profile["recommendation_floor_gb"], ["48gb"], "gemma-32gb")
     for threshold, qwen_profiles, gemma_profile in RAM_BUCKETS:
         if ram_gb >= threshold:
             return (threshold, qwen_profiles, gemma_profile)
     return RAM_BUCKETS[-1]
 
 
-def recommend_profile(ram_gb, family="qwen"):
-    _, qwen_profiles, gemma_profile = _bucket_for_ram(ram_gb)
+def recommend_profile(ram_gb, family="qwen", profiles=None, hardware=None):
+    if hardware and hardware.get("memory_kind") == "unified" and ram_gb is not None and 14 <= ram_gb < 22:
+        return "macos-16gb" if family == "qwen" else "gemma-16gb"
+    _, qwen_profiles, gemma_profile = _bucket_for_ram(ram_gb, profiles)
     if family == "gemma":
         return gemma_profile
     return qwen_profiles[0]
 
 
-def family_alternatives(ram_gb):
-    _, qwen_profiles, gemma_profile = _bucket_for_ram(ram_gb)
+def family_alternatives(ram_gb, profiles=None, hardware=None):
+    _, qwen_profiles, gemma_profile = _bucket_for_ram(ram_gb, profiles)
+    if hardware and hardware.get("memory_kind") == "unified" and ram_gb is not None and 14 <= ram_gb < 22:
+        qwen_profiles, gemma_profile = ["macos-16gb"], "gemma-16gb"
     return {
         "qwen": qwen_profiles[0],
         "gemma": gemma_profile,

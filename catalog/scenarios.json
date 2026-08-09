@@ -29,7 +29,7 @@
       "id": "team-pilot",
       "label": "Team Pilot",
       "description": "A reproducible workstation baseline for a small team rollout with review and release guardrails.",
-      "recommended_profiles": ["32gb", "64gb", "openrouter"],
+      "recommended_profiles": ["32gb", "48gb", "64gb", "openrouter"],
       "recommended_packs": ["coding", "research", "office", "team-rollout"],
       "client_target": "opencode"
     }

@@ -24,7 +24,7 @@
 
 ## CLI contract
 
-The supported v2 interface is:
+The supported current CLI contract is:
 - `./bin/lac init` (interactive onboarding; `--yes --profile <id> [--cloud <ids>] [--no-cloud]` for non-interactive)
 - `./bin/lac profile list`
 - `./bin/lac profile apply <profile>`
@@ -38,7 +38,7 @@ The supported v2 interface is:
 - `./bin/lac doctor`
 - `./bin/lac smoke`
 
-`lac init` is the primary onboarding surface. Its text output groups hardware detection, selected profile, cloud overlays, generated files, readiness, required checks, optional checks, and next steps. Its JSON output includes the same decision data for automation: `status`, `recommendation`, `prerequisites`, `readiness`, `generated`, and `next_steps`.
+`lac init` is the primary onboarding surface. Its text output groups hardware detection, selected profile, cloud overlays, generated files, readiness, required checks, optional checks, and next steps. Its JSON output includes the same decision data for automation: `status`, `recommendation`, `prerequisites`, `readiness`, `generated`, and `next_steps`. The `hardware` object preserves `ram_gb` and `vram_gb` and adds `memory_kind`, `effective_budget_gb`, `probe_source`, `gpu_vendor`, `gpu_device`, `confidence`, `runtime_acceleration`, and normalized `accelerators`.
 
 The global `--json` flag is supported repo-wide for machine-readable output. Without it, `init`, `doctor`, and `smoke` print compact human-readable summaries; the JSON written to `state/reports/*.json` for doctor and smoke is identical either way.
 

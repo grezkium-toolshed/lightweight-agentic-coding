@@ -14,7 +14,7 @@ This repo supports two useful hybrid shapes:
 Use this when you have several private repos on the same workstation and want the same client to offer both local and cloud models.
 
 - Keep `lightweight-agentic-coding` as the canonical setup repo.
-- Apply one local profile globally, usually `24gb`, `32gb`, or `64gb`.
+- Apply one local profile globally, usually `24gb`, `32gb`, `48gb` (manual candidate), or `64gb`.
 - Use `opencode-go` and `openrouter` together when you want reliable hosted coding models plus a free/trial fallback.
 - Keep project-specific rules in each project repo, not in the cluster repo.
 - Reuse `.opencode/agents` and `.opencode/skills` from this repo only when the workflow applies broadly.
@@ -44,8 +44,10 @@ Suggested defaults:
 | Machine class | Local profile | Hosted overlay |
 |---|---|---|
 | MacBook Air-class 16 GB | `macos-16gb` | `opencode-go`, `openrouter` |
-| 16-24 GB | `24gb` or `16gb` | `opencode-go`, `openrouter` |
+| 16 GB Windows/Linux with 4–6 GB iGPU budget | `4gb` or `6gb` | `opencode-go`, `openrouter` |
+| True 16–24 GB accelerator budget | `16gb` or `24gb` | `opencode-go`, `openrouter` |
 | 32 GB | `32gb` | `opencode-go`, `openrouter` |
+| 48 GB | automatic `32gb`; explicit `48gb` candidate | `opencode-go`, `openrouter` |
 | 64 GB+ | `64gb` | `opencode-go`, `openrouter`, optional `anthropic` |
 | No local runtime | `opencode-go` | none required |
 

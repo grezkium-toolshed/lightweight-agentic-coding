@@ -18,7 +18,7 @@ OpenCode Go is pre-wired in `opencode.template.jsonc`. The curated model list ev
 
 Current OpenAI-compatible Go entries in `opencode.template.jsonc` (checked 2026-08-04): Grok 4.5, GLM 5.2, GLM 5.1, Kimi K3, Kimi K2.7 Code, Kimi K2.6, DeepSeek V4 Pro, DeepSeek V4 Flash, MiMo-V2.5, MiMo-V2.5-Pro, and Hy3.
 
-Go also hosts Qwen3.6 Plus, Qwen3.7 Plus, Qwen3.7 Max, **Qwen3.8 Max** (live since the 2026-08-03 announcement), and MiniMax M3/M2.7/M2.5 — but those use the Anthropic `/v1/messages` endpoint, so they are **not** listed in the template's single-provider OpenAI-compatible block. Select them in OpenCode after subscribing via the `/connect` flow. See `docs/models/QWEN38_READY.md` for the Qwen 3.8 story.
+OpenCode Go may expose additional Qwen and MiniMax models through its Anthropic `/v1/messages` endpoint, so they are **not** listed in the template's single-provider OpenAI-compatible block. Verify the live catalog through the `/connect` flow before relying on a specific hosted model. Hosted availability does not validate lac's local candidate slots; see `docs/models/QWEN38_READY.md`.
 
 ### China-hosted model opt-in
 

@@ -64,6 +64,8 @@ jobs:
         run: |
           $env:LAC_STATE_ROOT = Join-Path $env:RUNNER_TEMP "lac-state"
           ./scripts/stage-data.ps1
+          python -m unittest discover -s tests -p "test_*.py"
           ./bin/lac.ps1 --version
           ./bin/lac.ps1 profile apply micro --json
+          ./bin/lac.ps1 profile apply 48gb --json
           ./bin/lac.ps1 client render claude-code --json

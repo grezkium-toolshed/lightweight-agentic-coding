@@ -91,6 +91,14 @@ PROFILE_MODELS = {
         ],
         "mlx": ['unsloth/Qwen3.6-27B-UD-MLX-6bit'],
     },
+    "48gb": {
+        "gguf": [
+            ('qwen3.6', 'Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-GGUF', 36000),
+            ('qwen3.6', 'Qwen3.6-27B-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 17000),
+            ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
+        ],
+        "mlx": ['unsloth/Qwen3.6-35B-A3B-MLX-8bit', 'unsloth/Qwen3.6-27B-UD-MLX-6bit'],
+    },
     "64gb": {
         "gguf": [
             ('qwen3.6', 'Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-GGUF', 36000),

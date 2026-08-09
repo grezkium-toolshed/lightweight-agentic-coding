@@ -52,37 +52,33 @@ A local AI assistant running on **your** machine:
 
 - **Private by default** — the model runs on `localhost`; your documents and prompts never leave the device unless you deliberately add a cloud provider.
 - **A chat window** (OpenChamber) for everyday work — proofreading, drafting, rewriting, summarizing, small edits — plus an agentic coding CLI (OpenCode) if you want it.
-- **Matched to your hardware** — `lac init` detects your RAM and picks a model that fits, from a tiny 4B on a 16 GB laptop up to larger models on a 128 GB MacBook Pro.
+- **Matched to your hardware** — `lac init` recommends the strongest validated model that fits the effective accelerator-memory budget with headroom for the OS, runtime, context, and KV cache.
 
 ## Will this run on my work laptop?
 
-Probably — but speed depends heavily on your hardware. Local models use whatever memory and compute you have; Apple Silicon's unified memory is the sweet spot, and a CPU-only laptop works but is slower.
+Probably — but speed depends heavily on the accelerator and its usable memory. `lac init` treats dedicated VRAM, ordinary iGPU budgets, Apple unified memory, and Snapdragon shared memory separately. A 16 GB Windows/Linux laptop whose iGPU can use only 4–6 GB belongs in the 4–6 GB rows, not the 16 GB row. If an iGPU is visible but its budget is not measurable, lac conservatively selects `4gb` and reports low confidence. CPU-only machines may use system RAM.
 
-| Your machine | Model it runs well | What it feels like | Best for |
-|---|---|---|---|
-| 4 GB laptop (CPU/iGPU) | 4B (`4gb`) | A few tokens/sec — usable, not snappy | Chat, proofreading, single-shot edits |
-| 6 GB laptop | 9B Q4 (`6gb`) | Steady, small agentic | Short agentic tasks, drafting, summarizing |
-| 8 GB laptop / Mac | 9B Q4–Q6 or Gemma 12B QAT (`8gb`) | Comfortable, agentic floor | Tool-calling, multi-step edits |
-| 12 GB workstation | 9B Q8 (`12gb`) | Fast, 64K context | Real agentic coding sessions |
-| 16 GB Windows/Linux laptop (CPU/iGPU) | 27B IQ3_XXS (`16gb`) | Tight but real agentic | Multi-step coding, big context |
-| 16 GB Apple Silicon Mac | Gemma 4 12B QAT (`macos-16gb`) | Fast, strong quality | The sweet spot for Macs |
-| 24–32 GB Mac / workstation | up to ~27B (`24gb`, `32gb`) | Fast, strong quality | The sweet spot — daily driver |
-| 64–128 GB MacBook Pro (M-series Max) | large MoE models | Near-frontier local quality | Heavier agentic work, big context |
+| Memory target | Typical hardware / memory type | Default profile and model weights | Validation | Realistic workload |
+|---:|---|---|---|---|
+| 4 GB | 16 GB Windows/Linux laptop with an unmeasured or ~4 GB iGPU budget | `4gb`: Qwen3.5 4B Q4, ~2.6 GB | standard | Chat, proofreading, single-shot edits |
+| 6 GB | 16 GB Windows/Linux laptop with a measured ~6 GB iGPU budget | `6gb`: Qwen3.5 9B Q4, ~5.5 GB | standard | Short agentic tasks, drafting, summaries |
+| 8 GB | True 8 GB accelerator budget | `8gb`: Qwen3.5 9B Q4, ~5.5 GB | standard | Small-model tool use and short sessions |
+| 12 GB | True 12 GB accelerator budget | `12gb`: Qwen3.5 9B Q8, ~9.7 GB | standard | Longer agentic sessions |
+| 16 GB | Apple Silicon unified memory | `macos-16gb`: Gemma 4 12B QAT, ~6.4 GB | standard | Everyday work with macOS headroom |
+| 16 GB | Dedicated VRAM or CPU-only system RAM | `16gb`: Qwen 3.6 27B IQ3, ~12.2 GB | verified | Constrained larger-model work |
+| 24 GB | Dedicated VRAM or unified memory | `24gb`: Qwen 3.6 27B Q4, ~17 GB | verified | General daily driver |
+| 32 GB | Dedicated VRAM or unified memory | `32gb`: Qwen 3.6 27B Q4, ~17 GB | standard | Coding, research, and multi-step work |
+| 48 GB | Dedicated or Apple unified memory | `48gb`: Qwen 3.6 35B-A3B Q8, ~36 GB | standard, manual only | Candidate local-heavy tier; hardware gate pending |
+| 64 GB | Dedicated VRAM or unified memory | `64gb`: Qwen 3.6 35B-A3B Q8, ~36 GB | extended | High-headroom and MTP specialist work |
+| 128 GB+ | High-memory unified workstation | `128gb-*`: 36–108 GB defaults | extended | Specialist large-model workflows |
 
-Rule of thumb: **single-shot help (proofreading, drafting) works on almost anything; multi-step _agentic_ automation wants Apple Silicon or a real GPU** — each step is another model call, and CPU latency adds up fast.
+The 48 GB tier corresponds to current [MacBook Pro configurations](https://support.apple.com/en-euro/126319), but availability alone is not validation; lac keeps it manual until the recorded smoke-test contract passes.
 
-## What your IT needs to allow
-
-lac keeps everything local, but it does install and run software. If you need to clear it with IT, here's the honest list — forward this:
-
-- **Installing developer tools**: Homebrew, Python 3.10+, Node.js 22+, pnpm, the llama.cpp runtime, and the OpenCode/OpenChamber clients. Managed Macs may require IT approval or local admin rights.
-- **Running a local server on `localhost`** — a model server on port 8080 and the chat UI on port 3000. Nothing listens on the public network by default.
-- **Downloading model weights once** from Hugging Face (a few GB). After that it works fully offline.
-- **No cloud egress of your data.** Prompts and documents stay on the device; lac reaches the internet only to download models/tools — and only talks to a cloud AI provider if you explicitly configure one.
+The target is a safe fit, not maximum memory consumption. For multiple discrete GPUs lac uses the largest single reported budget; multi-GPU selection remains manual. Windows' authoritative target is the OS-provided [DXGI video-memory budget](https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_4/ns-dxgi1_4-dxgi_query_video_memory_info); until that budget is exposed by an available runtime probe, shared GPUs stay conservative. Qualcomm/Adreno is detected separately and reported as experimental acceleration; llama.cpp documents [OpenCL support for Windows 11 ARM64](https://github.com/ggml-org/llama.cpp/blob/master/docs/backend/OPENCL.md), but lac does not promise an NPU path.
 
 ## Which profile / model?
 
-`lac init` picks one of these based on detected RAM; you can also choose explicitly.
+`lac init` uses the effective accelerator budget above; you can also choose explicitly. `lac profile list --json` exposes each profile's nominal target, recommendation floor, estimated default weight, automatic-recommendation eligibility, and validation tier.
 
 | Machine | Profile | What you get |
 |---|---|---|
@@ -91,10 +87,11 @@ lac keeps everything local, but it does install and run software. If you need to
 | 6 GB device | `6gb` | Qwen3.5-9B Q4 with partial offload — smallest practical agentic tier |
 | 8 GB device | `8gb` | Qwen3.5-9B Q4/Q6 or Gemma 4 12B QAT (`gemma-8gb`) — the agentic floor |
 | 12 GB device | `12gb` | Qwen3.5-9B Q8, 64K context |
-| 16 GB Windows/Linux laptop | `16gb` | Qwen 3.6 27B UD-IQ3_XXS (12.2 GB) |
+| 16 GB dedicated VRAM or CPU-only RAM | `16gb` | Qwen 3.6 27B UD-IQ3_XXS (12.2 GB) |
 | 16 GB Apple Silicon Mac | `macos-16gb` | Balanced Apple Silicon default (Gemma 4 12B QAT) |
 | 24 GB Mac / workstation | `24gb` | The sweet spot — recommended daily driver |
 | 32 GB workstation | `32gb` | Stronger, with MTP speculative decoding |
+| 48 GB workstation | `48gb` | 35B-A3B Q8 candidate; explicit selection only pending hardware validation |
 | Cloud-only, free | `openrouter` | Zero downloads, free-tier hosted models |
 
 <details>
@@ -138,11 +135,12 @@ All commands support `--json` for scripting.
 ## Next steps
 
 - **Cloud providers** — add OpenRouter, Anthropic API, or OpenCode Go as fallbacks: [`docs/providers/AUTHENTICATION.md`](docs/providers/AUTHENTICATION.md)
+- **Product roadmap** — hardware-fit milestones, audience, and explicit non-goals: [`ROADMAP.md`](ROADMAP.md)
 - **Advanced profiles** — MTP speculative decoding, oMLX on macOS, hybrid local+cloud: [`docs/architecture.md`](docs/architecture.md)
 - **Bundled agents & skills** — architecture/release review, documentation, research synthesis, and office workflows (docx/pptx/xlsx/pdf): [`.opencode/agents/`](.opencode/agents/), [`.opencode/skills/`](.opencode/skills/)
 - **Design skills & brand systems (opt-in)** — lac does not bundle these; add the [Open Design](https://open-design.ai) catalog yourself: `curl -fsSL https://open-design.ai/install.sh | sh -s opencode`
 - **Ponytail (default-on)** — generated OpenCode configs include the [ponytail](https://github.com/DietrichGebert/ponytail) plugin (laziness ruleset + `/ponytail` commands). Disable per session with `PONYTAIL_DEFAULT_MODE=off`. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)
-- **Qwen 3.8 prep** — config slots are ready for the upcoming 27B open-weights drop: [`docs/models/QWEN38_READY.md`](docs/models/QWEN38_READY.md)
+- **Qwen 3.8 candidate prep** — placeholder config slots exist, but no profile switches without official artifacts and hardware evidence: [`docs/models/QWEN38_READY.md`](docs/models/QWEN38_READY.md)
 - **Free cloud model catalog** — `lac catalog sync-free`, see [`docs/free-coding-models.json`](docs/free-coding-models.json)
 - **Model deep dive** — tuning rationale, profile details: [`docs/model-recommendations.md`](docs/model-recommendations.md)
 - **Agentic analysis of assessment exports** — model capability review, harness assessment, and the agentic-only-folder workflow (staging script + skill implemented): [`docs/assessments/`](docs/assessments/)

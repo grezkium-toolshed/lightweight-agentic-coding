@@ -29,7 +29,7 @@ Starts from jobs-to-be-done first, then maps you to a profile, provider mode, an
 
 ## Team Pilot
 
-- Recommended profiles: `32gb`, `64gb`, `openrouter`
+- Recommended profiles: `32gb`, explicit `48gb` candidate, `64gb`, `openrouter`
 - Recommended packs: `coding`, `research`, `office`, `team-rollout`
 - Best client target: OpenCode
 - Hybrid and multi-workspace guidance: `docs/use-cases/HYBRID_WORKSPACES.md`

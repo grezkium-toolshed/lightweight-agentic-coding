@@ -1,0 +1,9 @@
+{
+  "nvidia": "NVIDIA RTX 4060, 8192 MiB\nNVIDIA RTX 4090, 24576 MiB",
+  "amd": "{\"card0\": {\"VRAM Total Memory (B)\": \"25769803776\"}}",
+  "intel": "{\"device_list\": [{\"device_name\": \"Intel Arc A770\", \"memory_physical_size_byte\": 17179869184}]}",
+  "llama_igpu_4": "Vulkan0: Intel Iris Xe Graphics (4096 MiB, 3072 MiB free)",
+  "llama_igpu_6": "Vulkan0: AMD Radeon(TM) Graphics (6144 MiB, 5120 MiB free)",
+  "windows_qualcomm": "{\"Name\": \"Qualcomm Adreno X1-85 GPU\", \"AdapterCompatibility\": \"Qualcomm\"}",
+  "malformed": "this is not structured probe output"
+}

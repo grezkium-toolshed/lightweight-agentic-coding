@@ -27,7 +27,7 @@ cd "$TMP_DIR"
 if "$PYTHON_BIN" -c 'import build.__main__' >/dev/null 2>&1; then
   "$PYTHON_BIN" -m build --outdir "$DIST_DIR" "$ROOT" >/dev/null
 elif command -v uv >/dev/null 2>&1; then
-  UV_CACHE_DIR="$TMP_DIR/uv-cache" uv build --quiet --out-dir "$DIST_DIR" --no-create-gitignore "$ROOT" >/dev/null
+  UV_CACHE_DIR="$TMP_DIR/uv-cache" uv build --quiet --out-dir "$DIST_DIR" "$ROOT" >/dev/null
 else
   echo "Package verification needs the Python 'build' module or uv." >&2
   echo "Install with: $PYTHON_BIN -m pip install build" >&2
@@ -50,6 +50,7 @@ if len(wheels) != 1 or len(sdists) != 1:
 required_wheel = {
     "lac/cli.py",
     "lac/context.py",
+    "lac/hardware.py",
     "lac/data/THIRD_PARTY_NOTICES.md",
     "lac/data/catalog/providers.json",
     "lac/data/opencode/opencode.template.jsonc",
@@ -57,6 +58,7 @@ required_wheel = {
     "lac/data/opencode/skills/gsd/SKILL.md",
     "lac/data/runtime-config/profiles.json",
     "lac/data/runtime-config/presets/micro.ini",
+    "lac/data/runtime-config/presets/48gb.ini",
     "lac/data/templates/claude-code/README.md",
 }
 forbidden_fragments = (

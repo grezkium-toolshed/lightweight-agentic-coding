@@ -24,7 +24,7 @@ The runtime stays llama.cpp-first, with explicit specialist runtimes:
 
 ## CLI orchestration
 
-Version 2 introduces a first-class CLI:
+The current release provides a first-class CLI:
 - `./bin/lac` on Unix-like systems
 - `./bin/lac.ps1` on Windows
 
@@ -91,8 +91,8 @@ Public release is gated by `RELEASE_CHECKLIST.md`. Automated gates run in CI
 Windows PowerShell smoke lane); manual gates require real-hardware validation (fresh macOS
 bootstrap, 128 GB Apple Silicon ds4 path, Windows full runtime, GitHub Private Vulnerability
 Reporting enablement, live provider freshness). Versioning follows SemVer for tagged
-releases; there are no tags yet, and the first public tag is cut from the release branch only
-when every gate is complete.
+releases; `v0.2.0` is the current public tag, and future tags remain gated by the release
+checklist.
 
 Third-party integrations follow a strict posture: lac bundles only first-party agents and
 workflow skills. External catalogs (Open Design) are opt-in fetch, and external OpenCode
