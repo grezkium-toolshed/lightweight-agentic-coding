@@ -33,6 +33,8 @@ Released the hardware-fit public beta with an explicit Apple Silicon MacBook sup
   38 local model selections. CI covers Linux/macOS contracts, Windows parsing and rendering,
   and clean wheel/sdist builds without treating CI as physical-hardware validation.
 - Fresh-macOS bootstrap validation and package-build checks were hardened for the public release.
+- The bootstrap retries OpenCode through its npm package when the upstream installer cannot fetch
+  version metadata.
 
 ### Removed
 

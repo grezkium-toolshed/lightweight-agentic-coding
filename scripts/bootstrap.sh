@@ -111,6 +111,14 @@ if ! node_22_plus || ! have pnpm; then
 fi
 configure_pnpm_path || warn "Could not initialize pnpm's global bin directory."
 
+# The upstream OpenCode installer occasionally fails before downloading a binary. Once npm is
+# available for OpenChamber, use the same package fallback as the Windows bootstrap.
+if ! have opencode && have npm; then
+  info "Retrying OpenCode installation via npm..."
+  npm install -g opencode-ai || warn "OpenCode npm fallback failed."
+  hash -r
+fi
+
 if have openchamber; then
   info "OpenChamber present — skipping."
 elif ! node_22_plus || ! have pnpm; then
