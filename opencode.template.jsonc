@@ -2,16 +2,16 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "local-cluster/qwen3.6-27b-q4",
   "small_model": "local-cluster/qwen3.6-27b-q3",
-  // Dynamic Context Pruning — auto-compresses stale context for local models.
+  // Dynamic Context Pruning — supplemental model-guided compression and automatic cleanup.
   // Project config: .opencode/dcp.jsonc
   // Upstream: https://github.com/Opencode-DCP/opencode-dynamic-context-pruning
   "plugin": [
-    "@tarquinen/opencode-dcp@3.1.14",
+    "@tarquinen/opencode-dcp@3.1.9",
     // Ponytail — laziness ruleset injected into every turn, plus /ponytail lite|full|ultra|off
     // commands and the review/audit/debt skills. MIT. Fetched from npm on first use (network).
     // Upstream: https://github.com/DietrichGebert/ponytail
     // Per-session opt-out: PONYTAIL_DEFAULT_MODE=off (or /ponytail off). See THIRD_PARTY_NOTICES.md.
-    "@dietrichgebert/ponytail@4.8.4"
+    "@dietrichgebert/ponytail@4.9.0"
   ],
   "provider": {
     "local-cluster": {
@@ -295,9 +295,9 @@
       "description": "Validate lac setup",
       "agent": "build"
     },
-    // Check runtime health on the active port (llama.cpp 8080, oMLX/ds4 8000)
+    // Check runtime health through the effective network record, never a fixed port
     "health": {
-      "template": "Check if the local runtime is healthy. Try `curl -s http://127.0.0.1:8080/health` first (llama.cpp default). If that fails, try `curl -s http://127.0.0.1:8000/v1/models` (oMLX or ds4 default). Report which port responded and the status. If neither responds, suggest running `./bin/lac runtime status` to see which runtime is configured.",
+      "template": "Run `./bin/lac runtime status --json` first. Use its effective `url` and `runtime`: query `<url>/health` for llama.cpp or `<url>/v1/models` for oMLX/ds4. Report the configured endpoint and status; do not assume a port.",
       "description": "Check runtime health",
       "agent": "build"
     }

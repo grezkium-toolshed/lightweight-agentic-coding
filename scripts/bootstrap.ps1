@@ -1,94 +1,73 @@
 #requires -version 5
-$ErrorActionPreference = "Continue"
+$ErrorActionPreference = 'Stop'
 
-# lac bootstrap (Windows) — experimental and test-at-your-own-risk. Apple Silicon MacBooks
-# are the tested and supported target. Some steps below may need WSL or manual follow-up.
-# Idempotent: re-running skips anything already installed.
-#
-# Install commands mirror src/lac/doctor.py `_install_hint()` (windows entries).
+# Native Windows is an experimental, manually provisioned preview. This script deliberately
+# does not install GPU runtimes or clients: those choices are hardware- and privacy-sensitive.
 
 $Root = Split-Path -Parent $PSScriptRoot
-function Have($cmd) { [bool](Get-Command $cmd -ErrorAction SilentlyContinue) }
-function Info($msg) { Write-Host "[bootstrap] $msg" -ForegroundColor Blue }
-function Warn($msg) { Write-Host "[bootstrap] $msg" -ForegroundColor Yellow }
-function Test-Python310($cmd) {
-  if (-not (Have $cmd)) { return $false }
-  if ($cmd -eq "py") {
+$OpenCodeVersion = '1.17.18'
+
+function Have($Command) {
+  return [bool](Get-Command $Command -ErrorAction SilentlyContinue)
+}
+
+function Info($Message) {
+  Write-Host "[bootstrap] $Message" -ForegroundColor Blue
+}
+
+function Warn($Message) {
+  Write-Host "[bootstrap] $Message" -ForegroundColor Yellow
+}
+
+function Test-Python310($Command) {
+  if (-not (Have $Command)) { return $false }
+  if ($Command -eq 'py') {
     & py -3 -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)" *> $null
   } else {
-    & $cmd -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)" *> $null
+    & $Command -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)" *> $null
   }
   return $LASTEXITCODE -eq 0
 }
 
-Warn "Windows is experimental and has no physical-runtime support guarantee. Test at your own risk."
-Warn "If this stalls, WSL2 + the shell bootstrap (./scripts/bootstrap.sh) may be smoother."
+Warn 'Native Windows is experimental and has no physical-runtime support guarantee.'
+Warn 'For local models, WSL2 is the preferred experimental Windows route.'
 
-# 1. Python 3.10+
-$Python = @("py", "python", "python3") | Where-Object { Test-Python310 $_ } | Select-Object -First 1
-if ($Python) {
-  Info "Python 3.10+ present - skipping."
-} elseif (Have "winget") {
-  Info "Installing Python via winget..."
-  winget install --id Python.Python.3.12 -e --source winget
-  $Python = @("py", "python", "python3") | Where-Object { Test-Python310 $_ } | Select-Object -First 1
-} else {
-  Warn "Python 3.10+ is required and winget is unavailable. Install Python, then re-run."
+$Python = @('py', 'python', 'python3') | Where-Object { Test-Python310 $_ } | Select-Object -First 1
+$Missing = @()
+if (-not $Python) { $Missing += 'Python 3.10+' }
+if (-not (Have 'llama-server')) { $Missing += 'llama-server.exe on PATH' }
+if (-not (Have 'opencode')) { $Missing += 'OpenCode on PATH' }
+
+if ($Missing.Count -gt 0) {
+  Warn "Native local preview cannot start; missing: $($Missing -join ', ')."
+  Write-Host ''
+  Info 'Local models (preferred Windows route): install WSL2, keep the repo in the WSL filesystem, and follow docs/WINDOWS.md.'
+  Info 'Native local preview: install Python, an official llama.cpp Windows build, and OpenCode, then re-run this script.'
+  Info 'Cloud alternative: install OpenChamber Desktop and connect OpenCode Go or Zen. This sends work to a hosted provider.'
+  Info 'Guide: docs/WINDOWS.md'
+  exit 1
 }
 
-# 2. llama.cpp
-if (Have "llama-server") {
-  Info "llama.cpp present - skipping."
-} else {
-  Info "Installing llama.cpp via winget (or download a release and add llama-server.exe to PATH)..."
-  winget install llama.cpp 2>$null
+$InstalledOpenCode = (& opencode --version 2>$null | Out-String).Trim()
+if ($InstalledOpenCode -notlike "*$OpenCodeVersion*") {
+  Warn "OpenCode reports '$InstalledOpenCode', not the v0.3-tested $OpenCodeVersion."
+  Warn "lac will not replace it automatically. To align manually: npm install -g opencode-ai@$OpenCodeVersion"
 }
 
-# 3. OpenCode
-if (Have "opencode") {
-  Info "OpenCode present - skipping."
-} elseif (Have "npm") {
-  Info "Installing OpenCode via npm..."
-  npm install -g opencode-ai
-} else {
-  if (Have "winget") {
-    Info "Installing Node.js LTS for OpenCode..."
-    winget install --id OpenJS.NodeJS.LTS -e --source winget
+if (Have 'pipx') {
+  Info 'Installing or updating lac with pipx...'
+  & pipx install --force $Root
+  if ($LASTEXITCODE -ne 0) {
+    throw "pipx install failed with exit code $LASTEXITCODE"
   }
-  Warn "If npm is not available in this shell, restart it and re-run the bootstrap."
-}
-
-# 4. OpenChamber (best-effort; its installer is a bash script - needs WSL/Git Bash on Windows)
-if (Have "openchamber") {
-  Info "OpenChamber present - skipping."
 } else {
-  Warn "OpenChamber's installer is a bash script. Install it via WSL/Git Bash, or use the"
-  Warn "OpenCode CLI instead. See https://github.com/openchamber/openchamber"
+  Warn 'pipx is unavailable; using the repo-local bin/lac.ps1 wrapper without a global install.'
 }
 
-# 5. Install lac
-if (-not $Python) {
-  Warn "Skipping lac installation because Python 3.10+ is not available in this shell."
-} elseif (Have "pipx") {
-  Info "Installing lac via pipx..."
-  pipx install --force "$Root"
-} else {
-  Info "Installing lac via pip (consider pipx for isolation)..."
-  if ($Python -eq "py") {
-    & py -3 -m pip install "$Root"
-  } else {
-    & $Python -m pip install "$Root"
-  }
+Info 'All native-local prerequisites are visible. Starting the micro-profile demo...'
+& "$Root/bin/lac.ps1" demo --local --yes
+if ($LASTEXITCODE -ne 0) {
+  throw "lac demo failed with exit code $LASTEXITCODE"
 }
 
-# 6. First run
-if ($Python) {
-  Info "Starting your private local assistant (downloads a ~2.5 GB model on first run)..."
-  & "$Root/bin/lac.ps1" demo --local --yes
-} else {
-  Warn "First run skipped. Install Python 3.10+, then re-run this script."
-}
-
-Write-Host ""
-Info "If OpenChamber isn't available, open the coding agent instead: lac client open opencode"
-Info "For a hardware-matched setup: lac init  ->  lac models sync <profile>  ->  lac runtime start"
+Info 'Done. Native Windows remains experimental; report reproducible results with lac doctor --json.'

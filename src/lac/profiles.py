@@ -65,6 +65,8 @@ def profile_apply(ctx, profile_id, render_target="opencode", verbose_runtime=Tru
             "active_profile": str(ctx.paths["active_profile"]),
             "active_preset": str(ctx.paths["active_preset"]),
             "opencode_config": str(ctx.paths["opencode_config"]),
+            "opencode_config_dir": str(ctx.paths["opencode_config_dir"]),
+            "dcp_config": str(ctx.paths["dcp_config"]),
         },
     }
     write_json(ctx.paths["active_profile_summary"], summary)
@@ -91,7 +93,27 @@ FAMILY_DESCRIPTIONS = {
 }
 
 
-def _bucket_for_ram(ram_gb, profiles=None):
+def _is_apple_silicon(hardware):
+    return bool(
+        hardware
+        and hardware.get("os") == "darwin"
+        and str(hardware.get("arch", "")).lower() in {"arm64", "aarch64"}
+    )
+
+
+def _eligible_qwen_profiles(profile_ids, profiles=None, hardware=None):
+    if _is_apple_silicon(hardware):
+        return profile_ids
+    eligible = []
+    for profile_id in profile_ids:
+        profile = (profiles or {}).get(profile_id, {})
+        if profile.get("preferred_runtime") == "ds4" or profile_id == "128gb-ds4-flash":
+            continue
+        eligible.append(profile_id)
+    return eligible or profile_ids
+
+
+def _bucket_for_ram(ram_gb, profiles=None, hardware=None):
     if ram_gb is None:
         return RAM_BUCKETS[-2]
     if profiles:
@@ -101,21 +123,25 @@ def _bucket_for_ram(ram_gb, profiles=None):
                 return (profile["recommendation_floor_gb"], ["48gb"], "gemma-32gb")
     for threshold, qwen_profiles, gemma_profile in RAM_BUCKETS:
         if ram_gb >= threshold:
-            return (threshold, qwen_profiles, gemma_profile)
+            return (
+                threshold,
+                _eligible_qwen_profiles(qwen_profiles, profiles=profiles, hardware=hardware),
+                gemma_profile,
+            )
     return RAM_BUCKETS[-1]
 
 
 def recommend_profile(ram_gb, family="qwen", profiles=None, hardware=None):
     if hardware and hardware.get("memory_kind") == "unified" and ram_gb is not None and 14 <= ram_gb < 22:
         return "macos-16gb" if family == "qwen" else "gemma-16gb"
-    _, qwen_profiles, gemma_profile = _bucket_for_ram(ram_gb, profiles)
+    _, qwen_profiles, gemma_profile = _bucket_for_ram(ram_gb, profiles, hardware)
     if family == "gemma":
         return gemma_profile
     return qwen_profiles[0]
 
 
 def family_alternatives(ram_gb, profiles=None, hardware=None):
-    _, qwen_profiles, gemma_profile = _bucket_for_ram(ram_gb, profiles)
+    _, qwen_profiles, gemma_profile = _bucket_for_ram(ram_gb, profiles, hardware)
     if hardware and hardware.get("memory_kind") == "unified" and ram_gb is not None and 14 <= ram_gb < 22:
         qwen_profiles, gemma_profile = ["macos-16gb"], "gemma-16gb"
     return {

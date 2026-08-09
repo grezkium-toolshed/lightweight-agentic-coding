@@ -40,13 +40,18 @@ The `.ini` presets are part of the recommendation, not incidental config. They c
 - The important knobs are `ctx-size`, `fit-ctx`, `temp`, `top-p`, `top-k`, `min-p`, `presence-penalty`, `repeat-penalty`, cache type, batch sizes, and chat template.
 - Unsloth model docs: [Qwen3.5](https://unsloth.ai/docs/models/qwen3.5) and [Gemma 4](https://unsloth.ai/docs/models/gemma-4).
 
-### Coding harness context floor
+### Context and output contract
 
-Any harness-facing profile (OpenCode and similar) must advertise a default context of
-at least **128K**; **256K is the recommended minimum**. Harness system prompts and tool
-schemas consume tens of thousands of tokens before any user content is seen, so
-sub-128K defaults cause compaction churn and early context overflow in multi-step
-agent loops. Chat-only profiles (e.g. `micro`) are exempt from this floor.
+Every local model exposed to OpenCode advertises the exact `ctx-size` and `fit-ctx` from its active
+runtime preset. The generated output cap is 4K at 32K context, 8K at 64K, and 16K at 128K or above,
+and rendering fails if the fixed prompt plus output allowance leaves too little input headroom.
+
+Treat 32K and 64K profiles as constrained, short-session agentic tiers. Sustained coding sessions
+start at 128K; 256K remains the preferred high-headroom target. OpenCode's built-in automatic
+compaction is the hard overflow guard. DCP is supplemental, model-guided compression and cleanup:
+lac generates soft and strong reminders at 50% and 75% of each active model's context, nudges after
+every eligible fetch, and keeps the strong threshold below `context - output`. A reminder does not
+guarantee that a local model will choose to compress.
 
 ### Qwen baseline
 
@@ -126,8 +131,9 @@ Measured context curve (M4 Max 128GB, `q2-q4-imatrix` 0731, ds4-bench, steady-st
 
 Real-server data point (same machine, live `ds4-server`): a 75K-token prompt prefilled at 218.5 t/s
 (343s) and decoded 23-24 t/s; disk KV grew 1.6 GiB at 75K (~5.5 GiB projected at 256K, inside the
-8 GiB `DS4_KV_DISK_SPACE_MB` budget). DCP (`dcp.jsonc`) compresses at 100-200K, so agentic loops
-operate in the ≥19.5 t/s region and never approach the 17.8 t/s floor at the ceiling.
+8 GiB `DS4_KV_DISK_SPACE_MB` budget). The generated DCP reminders for this 256K profile are 128K
+and 192K. DCP remains model-guided and supplemental, so these thresholds are not a guarantee that
+every session will compress before the context ceiling.
 
 Lower-memory fallback:
 - the 2-bit Flash quant (`DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix.gguf`, ~86.7 GB) remains selectable via `DS4_QUANT=<name>` at `lac models sync` time
@@ -159,9 +165,9 @@ For office automation, the model matters less than workflow quality and tool sup
 ## Apple Silicon 16GB
 
 Use `macos-16gb` for MacBook Air M4 16GB-class machines. It prioritizes OS headroom, context room, and interactive responsiveness over maximum parameter count:
-- Qwen3.5 9B `Q4_K_M` is the default local coding/general model.
-- Gemma 4 E4B `Q8_0` is the smaller alternate for lighter multilingual and local office work.
-- Start at 32K context on 16GB macOS; increase only after validating memory pressure.
+- Gemma 4 12B `UD-Q4_K_XL` is the default local general model at the preset's larger context.
+- Qwen3.5 9B `Q4_K_M` and Gemma 4 E4B `Q8_0` are 32K fallback slots for constrained short sessions.
+- Validate memory pressure before increasing any fallback slot's context.
 - Use OpenCode Go or OpenRouter overlays for heavier repository-wide coding tasks.
 
 ## Gemma 4 alternative

@@ -35,7 +35,7 @@ You review structural decisions in the lac repository before they solidify into 
 ## Core Principles
 
 1. **Local-first, cloud-explicit** — Every design must work without network. Cloud features are overlays, not foundations.
-2. **Portability is not optional** — macOS, Linux, and Windows PowerShell are first-class. Platform-specific code must be isolated and documented.
+2. **Portability must be honest** — Apple Silicon macOS is supported; Linux and Windows paths are experimental compatibility surfaces. Platform-specific code must be isolated, tested at its claimed level, and documented.
 3. **Explicit over implicit** — Magic defaults, hidden conventions, and auto-discovery that breaks on fresh clones are bugs.
 4. **Minimal viable surface** — Prefer deleting code to generalizing prematurely.
 
@@ -88,7 +88,7 @@ Check for these specific failure modes:
 
 - **Fresh-clone breakage** — Will this work on a machine that has never run `lac init`?
 - **Profile skew** — If one profile changes, do all profiles that share the same model need updates?
-- **Windows gap** — Is there a PowerShell equivalent for every new shell script?
+- **Windows gap** — Does the experimental Windows route have a safe equivalent, or an explicit unsupported boundary?
 - **Documentation drift** — Does a code change require a doc change that wasn't made?
 - **Agent/skill contract violation** — Are new agents placed in `.opencode/agents/` with frontmatter? Do new skills follow the `SKILL.md` contract?
 

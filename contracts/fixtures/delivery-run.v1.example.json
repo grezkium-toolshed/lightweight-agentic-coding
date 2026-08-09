@@ -1,0 +1,130 @@
+{
+  "contractType": "delivery-run.v1",
+  "schemaVersion": "1.0",
+  "runRef": "run_0123456789abcdef",
+  "subjectRef": "subject_fedcba9876543210",
+  "status": "reassessed",
+  "tools": [
+    {
+      "component": "tracker",
+      "version": "2.9.0-rc.1",
+      "commit": "1111111111111111111111111111111111111111"
+    },
+    {
+      "component": "lac",
+      "version": "0.3.0",
+      "commit": "2222222222222222222222222222222222222222"
+    },
+    {
+      "component": "tenantsmith",
+      "version": "0.5.0",
+      "commit": "3333333333333333333333333333333333333333"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "source-assessment",
+      "kind": "source-evidence",
+      "classification": "restricted",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "ref": "restricted:sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "operator-approval",
+      "kind": "approval",
+      "classification": "restricted",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ref": "restricted:sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    {
+      "id": "change-preflight",
+      "kind": "preflight",
+      "classification": "internal",
+      "sha256": "1212121212121212121212121212121212121212121212121212121212121212",
+      "ref": "internal:sha256:1212121212121212121212121212121212121212121212121212121212121212"
+    },
+    {
+      "id": "rollback-plan",
+      "kind": "rollback",
+      "classification": "internal",
+      "sha256": "3434343434343434343434343434343434343434343434343434343434343434",
+      "ref": "internal:sha256:3434343434343434343434343434343434343434343434343434343434343434"
+    },
+    {
+      "id": "deployment-outcome",
+      "kind": "deployment-outcome",
+      "classification": "restricted",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "ref": "restricted:sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    {
+      "id": "independent-readback",
+      "kind": "verification",
+      "classification": "restricted",
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "ref": "restricted:sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    },
+    {
+      "id": "customer-package",
+      "kind": "customer-export",
+      "classification": "customer-safe",
+      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "ref": "customer-safe:sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    },
+    {
+      "id": "repeat-run-delta",
+      "kind": "repeat-delta",
+      "classification": "customer-safe",
+      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "ref": "customer-safe:sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    }
+  ],
+  "findingIds": [
+    "finding.control-001"
+  ],
+  "intentIds": [
+    "intent.control-001.v1"
+  ],
+  "changeControl": {
+    "applicability": "applicable",
+    "licensing": "satisfied",
+    "consent": "approved",
+    "impact": "medium",
+    "preflightRef": "internal:sha256:1212121212121212121212121212121212121212121212121212121212121212",
+    "rollbackRef": "internal:sha256:3434343434343434343434343434343434343434343434343434343434343434"
+  },
+  "approval": {
+    "status": "approved",
+    "decisionRef": "restricted:sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "deployment": {
+    "status": "applied",
+    "outcomeRef": "restricted:sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "verification": {
+    "status": "passed",
+    "independentReadback": true,
+    "evidenceRefs": [
+      "restricted:sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    ]
+  },
+  "privacyBoundary": {
+    "localAnalysis": true,
+    "cloudProvidersEnabled": false,
+    "customerIdentifiersIncluded": false,
+    "restrictedArtifactsRemainLocal": true,
+    "egressBoundary": "Only an operator-approved customer-safe projection leaves the protected run boundary."
+  },
+  "customerExports": [
+    {
+      "artifactRef": "customer-safe:sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "status": "approved",
+      "approvalRef": "restricted:sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  ],
+  "repeatRun": {
+    "status": "resolved",
+    "previousRunRef": "run_0011223344556677",
+    "deltaRef": "customer-safe:sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  }
+}

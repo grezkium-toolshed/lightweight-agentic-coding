@@ -7,6 +7,9 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
+from lac.network import url as network_url
+from lac.runtime import selected_local_runtime, local_runtime_endpoint
+
 
 def utc_now():
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -43,6 +46,11 @@ def _opencode_base_urls(ctx):
 
 
 def _resolve_verify_endpoint(ctx, provider_id, rule):
+    if provider_id == "local-cluster":
+        runtime = selected_local_runtime(ctx.active_profile())
+        endpoint = local_runtime_endpoint(ctx, runtime)
+        path = "/v1/models" if runtime in {"omlx", "ds4"} else "/health"
+        return network_url(endpoint["connect_host"], endpoint["port"], path)
     if "endpoint" in rule:
         return rule["endpoint"]
     urls = _opencode_base_urls(ctx)
@@ -136,7 +144,6 @@ def _fetch_openrouter_free_models(ctx, timeout=5):
 
 PROVIDER_VERIFICATION = {
     "local-cluster": {
-        "endpoint": "http://127.0.0.1:8080/health",
         "auth": "none",
         "always_probe": True,
     },

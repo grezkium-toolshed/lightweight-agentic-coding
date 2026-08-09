@@ -66,10 +66,6 @@ MODELS_ROOT = Path(os.environ.get("AI_MODELS_DIR", DATA_ROOT / "models")).expand
 CATALOG_CACHE_ROOT = (_REPO_ROOT / "docs") if _REPO_ROOT else (DATA_ROOT / "catalog")
 _STATE_DEFAULT = _REPO_ROOT / "state" if _REPO_ROOT else _user_state_dir()
 STATE_ROOT = Path(_env_or_deprecated("LAC_STATE_ROOT", "AI_CLUSTER_STATE_ROOT", str(_STATE_DEFAULT))).expanduser()
-PORT = int(_env_or_deprecated("LAC_PORT", "AI_CLUSTER_PORT", "8080"))
-HOST = _env_or_deprecated("LAC_HOST", "AI_CLUSTER_HOST", "127.0.0.1")
-OMLX_PORT = int(os.environ.get("AI_OMLX_PORT", os.environ.get("OMLX_PORT", "8000")))
-DS4_PORT = int(os.environ.get("DS4_PORT", "8000"))
 
 
 class Context:
@@ -89,10 +85,13 @@ class Context:
             "scenario_catalog": self.root / "catalog/scenarios.json",
             "opencode_agents_dir": self.root / ("opencode/agents" if not self._is_repo else ".opencode/agents"),
             "opencode_skills_dir": self.root / ("opencode/skills" if not self._is_repo else ".opencode/skills"),
+            "dcp_template": self.root / ("opencode/dcp.jsonc" if not self._is_repo else ".opencode/dcp.jsonc"),
             "active_profile": self.state_root / "active/profile.txt",
             "active_profile_summary": self.state_root / "active/profile.json",
             "active_preset": self.state_root / "runtime/presets.active.ini",
+            "opencode_config_dir": self.state_root / "clients/opencode",
             "opencode_config": self.state_root / "clients/opencode/opencode.json",
+            "dcp_config": self.state_root / "clients/opencode/dcp.jsonc",
             "llama_pid": self.state_root / "runtime/llama-server.pid",
             "llama_state": self.state_root / "runtime/llama-server.json",
             "llama_log": self.state_root / "logs/llama-server.log",

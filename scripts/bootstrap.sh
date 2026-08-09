@@ -1,19 +1,35 @@
 #!/bin/bash
 set -uo pipefail
 
-# lac bootstrap — one command from nothing to a running private, on-device AI assistant.
+# lac bootstrap — a clean-checkout path to a running private, on-device AI assistant.
 #
 # macOS-first (Apple Silicon is the primary target). Idempotent: re-running is safe and skips
 # anything already installed. YOU run this yourself — it installs developer tools (Homebrew,
-# llama.cpp, OpenCode, OpenChamber) and downloads a small model. Nothing leaves your machine.
+# llama.cpp, OpenCode, OpenChamber) and downloads a small model. With the generated local profile,
+# prompts and work content stay local; installation and first plugin use require network access.
 #
-# Install commands here mirror src/lac/doctor.py `_install_hint()` (the one source of truth).
+# Keep install guidance aligned with the read-only hints in src/lac/cli.py.
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OPENCODE_VERSION="1.17.18"
+OPENCHAMBER_VERSION="1.16.3"
 
 info() { printf '\033[1;34m[bootstrap]\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[bootstrap]\033[0m %s\n' "$*" >&2; }
 have() { command -v "$1" >/dev/null 2>&1; }
+check_version() {
+  local command="$1"
+  local expected="$2"
+  local align_command="$3"
+  local actual
+  actual="$("$command" --version 2>/dev/null || true)"
+  if [[ "$actual" == *"$expected"* ]]; then
+    info "$command $expected matches the v0.3 validation set."
+  else
+    warn "$command is installed but reports '${actual:-unknown}', not the v0.3-tested $expected."
+    warn "lac will not replace it automatically. To align manually: $align_command"
+  fi
+}
 find_python() {
   local candidate
   for candidate in "${PYTHON:-}" python3.14 python3.13 python3.12 python3.11 python3.10 python3; do
@@ -92,10 +108,21 @@ fi
 
 # 4. OpenCode (the agent runtime OpenChamber talks to).
 if have opencode; then
-  info "OpenCode present — skipping."
+  check_version opencode "$OPENCODE_VERSION" \
+    "curl -fsSL https://opencode.ai/install | bash -s -- --version $OPENCODE_VERSION"
 else
-  info "Installing OpenCode..."
-  curl -fsSL https://opencode.ai/install | bash || warn "OpenCode install failed."
+  info "Installing OpenCode $OPENCODE_VERSION..."
+  curl -fsSL https://opencode.ai/install | bash -s -- --version "$OPENCODE_VERSION" \
+    || warn "OpenCode install failed."
+fi
+
+# The upstream project recommends its Homebrew tap on macOS. If the hosted
+# installer cannot resolve a release, use that independent official path before
+# falling back to npm later in this script.
+if ! have opencode && [[ "$OS" == "Darwin" ]] && have brew; then
+  info "Retrying OpenCode installation through the official Homebrew tap..."
+  brew install anomalyco/tap/opencode || brew install opencode || warn "OpenCode Homebrew fallback failed."
+  hash -r
 fi
 
 # 5. OpenChamber prerequisites and chat UI. OpenCode remains the supported fallback.
@@ -115,17 +142,18 @@ configure_pnpm_path || warn "Could not initialize pnpm's global bin directory."
 # available for OpenChamber, use the same package fallback as the Windows bootstrap.
 if ! have opencode && have npm; then
   info "Retrying OpenCode installation via npm..."
-  npm install -g opencode-ai || warn "OpenCode npm fallback failed."
+  npm install -g "opencode-ai@$OPENCODE_VERSION" || warn "OpenCode npm fallback failed."
   hash -r
 fi
 
 if have openchamber; then
-  info "OpenChamber present — skipping."
+  check_version openchamber "$OPENCHAMBER_VERSION" \
+    "pnpm add -g @openchamber/web@$OPENCHAMBER_VERSION"
 elif ! node_22_plus || ! have pnpm; then
   warn "Skipping OpenChamber because Node.js 22+ or pnpm is unavailable. OpenCode will be used."
 else
-  info "Installing OpenChamber..."
-  curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash \
+  info "Installing OpenChamber $OPENCHAMBER_VERSION..."
+  pnpm add -g "@openchamber/web@$OPENCHAMBER_VERSION" \
     || warn "OpenChamber install failed — you can still use the OpenCode CLI (see next steps)."
 fi
 
@@ -161,7 +189,7 @@ fi
 # 8. What next.
 echo ""
 if [[ "$RUN_STATUS" -eq 0 ]] && have openchamber; then
-  info "Done. OpenChamber should be open at http://localhost:3000"
+  info "Done. OpenChamber started. Run 'lac ports show --json' for the effective local URL."
 elif [[ "$RUN_STATUS" -eq 0 ]] && have opencode; then
   info "Done. OpenCode was launched because OpenChamber is unavailable."
 else

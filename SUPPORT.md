@@ -2,16 +2,19 @@
 
 lac is a free community product maintained on a best-effort basis. There is no support SLA.
 
-## Validation status (public beta)
+## Validation status (private pre-release)
 
 **Tested and supported platform: Apple Silicon MacBooks.** The 128 GB ds4/DwarfStar path has
 measured M4 Max MacBook Pro evidence. Profile validation remains separate from platform support:
 the `48gb` profile is still manual and unverified on an exact 48 GB configuration.
 
 **Experimental, test at your own risk:** Windows, Linux, Intel Macs, ordinary iGPUs,
-Snapdragon/Adreno, and any other hardware without recorded physical-runtime evidence. Linux,
-macOS, and Windows CI cover contracts, packaging, parsers, wrappers, and rendered configuration;
-they do not prove GPU/runtime compatibility or performance on physical machines. Reports are
+Snapdragon/Adreno, and any other hardware without recorded physical-runtime evidence. WSL2 is the
+preferred Windows local-model route; native OpenChamber with Go/Zen is a cloud alternative rather
+than a local-only deployment. See [Windows routes and requirements](docs/WINDOWS.md). Local release
+checks cover contracts, packaging, parsers, wrappers, and rendered configuration. An optional manual
+GitHub workflow can repeat those compatibility checks, but neither path proves GPU/runtime
+compatibility or performance on physical machines. Reports are
 welcome, but experimental results do not create a support guarantee.
 
 The from-zero bootstrap and OpenChamber flow on a genuinely clean Apple Silicon MacBook

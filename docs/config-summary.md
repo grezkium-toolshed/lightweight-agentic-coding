@@ -10,6 +10,8 @@
 - `state/clients/opencode/opencode.json`: generated OpenCode runtime config
 - `state/logs/`: generated runtime logs
 - `state/reports/`: generated doctor and smoke JSON reports
+- `state/network.v1.json`: persisted local port selections (in an installed copy,
+  the platform user-state directory rather than the package tree)
 
 ## OpenCode config choices
 
@@ -41,6 +43,15 @@ The supported current CLI contract is:
 `lac init` is the primary onboarding surface. Its text output groups hardware detection, selected profile, cloud overlays, generated files, readiness, required checks, optional checks, and next steps. Its JSON output includes the same decision data for automation: `status`, `recommendation`, `prerequisites`, `readiness`, `generated`, and `next_steps`. The `hardware` object preserves `ram_gb` and `vram_gb` and adds `memory_kind`, `effective_budget_gb`, `probe_source`, `gpu_vendor`, `gpu_device`, `confidence`, `runtime_acceleration`, and normalized `accelerators`.
 
 The global `--json` flag is supported repo-wide for machine-readable output. Without it, `init`, `doctor`, and `smoke` print compact human-readable summaries; the JSON written to `state/reports/*.json` for doctor and smoke is identical either way.
+
+`lac ports show --json` reports the effective `lac.network.v1` endpoints and
+their precedence source: CLI, environment, optional `LAC_NETWORK_CONFIG`,
+persisted user state, then defaults. `lac ports reset` removes only the
+persisted state record. Only records marked as automatic participate in the
+next no-override resolution; other successful allocations remain visible under
+`last_successful_allocations` in `lac ports show --json`. Local services bind and connect over loopback by
+default; runtime remote binding is intentionally unsupported until lac has an
+authenticated remote-listener contract.
 
 The legacy `scripts/*.sh` and `scripts/*.ps1` commands remain as thin compatibility wrappers.
 

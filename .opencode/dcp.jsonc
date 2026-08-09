@@ -13,7 +13,7 @@
     "enabled": true,
     "protectedTools": []
   },
-  // Context limits tuned for 262k model context window
+  // Generated configs add absolute per-model limits from the active runtime preset.
   "compress": {
     // "range" or "message"
     "mode": "range",
@@ -22,12 +22,11 @@
     "showCompression": false,
     // Let active summary tokens extend the effective maxContextLimit
     "summaryBuffer": true,
-    // Soft upper threshold — above this, DCP injects strong compression nudges
-    "maxContextLimit": 200000,
-    // Soft lower threshold — below this, compression nudges are off
-    "minContextLimit": 100000,
+    // Fallback thresholds for models without generated per-model limits.
+    "maxContextLimit": "75%",
+    "minContextLimit": "50%",
     // How often the context-limit nudge fires (1 = every fetch)
-    "nudgeFrequency": 5,
+    "nudgeFrequency": 1,
     // Start compression reminders after this many messages since last user msg
     "iterationNudgeThreshold": 15,
     // "strong" (more likely) or "soft" (less likely)

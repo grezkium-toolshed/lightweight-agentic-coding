@@ -14,32 +14,57 @@ Released the hardware-fit public beta with an explicit Apple Silicon MacBook sup
 
 - Normalized accelerator-memory detection and diagnostics for Apple unified memory, NVIDIA,
   AMD, Intel, ordinary iGPUs, and Windows ARM64 Qualcomm/Adreno hardware.
+- A canonical Windows guide separating WSL2 local use, native local preview, and the explicitly
+  hosted OpenChamber Desktop plus OpenCode Go/Zen alternative.
 - A manual-only `48gb` profile for Qwen 3.6 35B-A3B Q8 with a 27B fallback and conservative
   256K-context runtime settings. Automatic recommendation remains disabled until the exact
   48 GB MacBook hardware contract passes.
 - A public, undated roadmap covering trustworthy MacBook self-service, the hardware-fit
   workbench direction, and a scenario-led private-work workspace.
+- A public stack boundary describing lac as the private execution layer in an evidence-to-proof
+  Microsoft 365 security delivery loop, plus a candidate `delivery-run.v1` content-addressed
+  linking contract and dependency-free semantic verifier.
 
 ### Changed
 
 - `lac init` now recommends from the largest single usable accelerator budget instead of broad
-  system-RAM ranges. Unmeasured iGPUs fall back to the `4gb` profile with low confidence.
+  system-RAM ranges. Unmeasured accelerators and WSL2 without a measurable GPU budget fall back
+  to the `4gb` profile with low confidence; non-Apple 128 GB hosts avoid automatic ds4 selection.
 - Public support is now explicit: Apple Silicon MacBooks are the tested and supported platform;
   Windows, Linux, Intel Macs, ordinary iGPUs, Snapdragon/Adreno, and other unverified hardware
   are experimental and test-at-your-own-risk.
 - The ds4/DwarfStar profile uses a 256K harness default and documents measured M4 Max 128 GB
   context, memory, prefill, and decode evidence.
 - Profile metadata, presets, downloads, and rendered client context are checked together across
-  38 local model selections. CI covers Linux/macOS contracts, Windows parsing and rendering,
-  and clean wheel/sdist builds without treating CI as physical-hardware validation.
-- Fresh-macOS bootstrap validation and package-build checks were hardened for the public release.
+  60 active preset model sections. Local release checks cover contracts and clean package builds; an
+  optional manual workflow can repeat Linux/macOS/Windows configuration-compatibility checks.
+- Automatic GitHub Actions triggers and the install-only hosted macOS bootstrap workflow were
+  removed to conserve hosted minutes. A real clean-MacBook bootstrap remains the release gate.
 - The bootstrap retries OpenCode through its npm package when the upstream installer cannot fetch
-  version metadata.
+  version metadata. Clean installs pin OpenCode `1.17.18` and OpenChamber `1.16.3`; existing
+  mismatched versions are left in place with an explicit alignment warning.
+- Native Windows process checks no longer use signal zero, Windows log hints use PowerShell, and
+  the on-demand compatibility workflow can build and exercise an installed Windows wheel.
+- Generated OpenCode configs now expose only models present in the active preset, match runtime and
+  fitting context exactly, cap output at 4K/8K/16K by context tier, and reject insufficient prompt
+  headroom. DCP thresholds are generated per model at 50%/75% as supplemental compression guidance.
+- `OPENCODE_CONFIG_DIR` now carries generated DCP configuration and packaged agents/skills to both
+  OpenCode and OpenChamber, while repository checkouts retain their canonical project assets.
+- Custom `LAC_HOST` and `LAC_PORT` values now reach the llama.cpp client URL as well as the runtime.
+- Ponytail is pinned to `4.9.0`, which loads correctly with the v0.3 OpenCode pin; the earlier
+  `4.8.4` pin failed during a clean isolated plugin load.
+- DCP is pinned to `3.1.9`: it registers its command and compression tool with OpenCode `1.17.18`,
+  while `3.1.14` currently fails clean npm resolution because of an OpenTUI peer conflict.
+- The roadmap now separates lac SemVer from coordinated stack milestones. Cross-product claims
+  remain candidate capabilities until one approved production-pilot control completes assessment,
+  approval, deployment, independent read-back, customer-safe packaging, and repeat-run delta.
 
 ### Removed
 
 - The README's forwardable "What your IT needs to allow" guidance. lac remains individuals-first
   and does not promise enterprise deployment or procurement support.
+- The undocumented `lac doctor --fix` self-healing subsystem, legacy `lac setup` path, and the
+  misleading Windows desktop launcher. Explicit commands and read-only diagnostics remain.
 
 ## [0.2.0] — 2026-08-04
 
@@ -116,7 +141,7 @@ where cloud AI is blocked), plus a lightweight-to-maintain, correctly-attributed
   immediate prompt overloads and later runtime/advertised-context drift.
 - Removed stale provider blocks and docs for providers no longer present in the supported catalog.
 - Repaired the packaged shell and PowerShell launch wrappers so they invoke the supported CLI.
-- Pinned the default Dynamic Context Pruning plugin to `3.1.14` for reproducible setup.
+- Pinned the default Dynamic Context Pruning plugin to `3.1.9` for reproducible setup.
 - Pinned the optional Microsoft Graph skill installer to release `v1.0.19` and added a blocking
   SHA-256 check before extracting the downloaded archive.
 - Fixed package verification when run from the repository root, where the local `build/` output

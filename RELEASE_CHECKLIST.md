@@ -8,26 +8,35 @@ Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/
 
 ## v0.3.0 pre-tag gates
 
-- [x] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and
-  `./scripts/verify-package-build.sh` passed locally on 2026-08-09 for the v0.3.0 release tree,
-  including 38 local model selections and installed-wheel version `0.3.0`.
-- [ ] Linux/macOS/Windows CI and Python 3.10–3.13 package jobs pass on the exact sanitized
-  release commit. Windows/Linux results prove configuration compatibility, not physical support.
+- [~] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and
+  `./scripts/verify-package-build.sh` passed locally on 2026-08-10 for the internal v0.3.0 release
+  candidate, including 60 active preset model sections, the `delivery-run.v1` positive/negative
+  contract checks, and installed-wheel version `0.3.0`. Repeat all three checks on the exact
+  sanitized release head.
 - [ ] A fresh Dependabot read after the dependency graph rescan shows zero critical/high alerts;
   every medium/low alert has a recorded disposition.
 - [x] The 128 GB ds4/DwarfStar resource path has recorded M4 Max MacBook Pro measurements.
   This does not validate unrelated platforms or the 48 GB profile.
 - [x] The `48gb` profile remains `auto_recommend: false` and is described as manual/unverified.
 - [ ] On a genuinely clean Apple Silicon MacBook environment, run the exact release head without
-  `LAC_BOOTSTRAP_SKIP_DEMO`: install the promised toolchain, verify the checksum-protected micro
-  model, health and model listing, `lac smoke`, a real response, and OpenChamber opening. Rerun
-  bootstrap and confirm idempotency.
+  `LAC_BOOTSTRAP_SKIP_DEMO`: install the promised toolchain with OpenCode `1.17.18` and OpenChamber
+  `1.16.3`, verify the checksum-protected micro model, health and model listing, `lac smoke`, a real
+  response, and OpenChamber opening. Rerun bootstrap and confirm idempotency.
+- [~] A real internal-candidate 32K multi-turn session passed with DCP and Ponytail enabled: the
+  initial prompt used 10,860 tokens (below 75% of `context - output`), generated DCP loaded outside
+  the repository and recorded context savings, tool use continued, and OpenCode automatically
+  compacted at about 30K tokens before a successful follow-up task. Repeat this evidence run on the
+  exact sanitized release head.
 - [ ] Record the tested commit, MacBook model/chip, macOS version, elapsed time, sanitized logs,
   and screenshots outside the repository.
-- [ ] Confirm version `0.3.0`, changelog, public-org links, `main` branch links, and the hosted
-  bootstrap URL. The hosted `v0.3.0` URL can be read back only after the tag exists.
+- [ ] Confirm version `0.3.0`, changelog, public-org links, `main` branch links, and clone-plus-
+  bootstrap instructions. v0.3.0 does not publish a hosted pipe-to-shell installer.
 - [ ] Run the release boundary check over the full sanitized history and confirm a clean release
   worktree.
+
+The manually triggered GitHub compatibility workflow is optional evidence, not a tag gate. It may
+be run when a hosted OS reproduction is useful, but local checks and physical-hardware evidence stay
+authoritative.
 
 ## Tag and GitHub release
 
@@ -40,8 +49,8 @@ Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/
 
 - [ ] Obtain fresh explicit operator approval to make the repository public.
 - [ ] Change visibility, re-enable Private Vulnerability Reporting, and read both settings back.
-- [ ] From an anonymous/fresh environment, verify clone, CI badge, issues/support/security links,
-  the raw bootstrap URL, and the hosted one-liner.
+- [ ] From an anonymous/fresh environment, verify clone, issues/support/security links, release
+  notes, and the clone-plus-bootstrap path.
 - [ ] If any public read-back fails, return the repository to private, fix it internally, and repeat
   the port and release gates.
 

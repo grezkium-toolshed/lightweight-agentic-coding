@@ -47,7 +47,7 @@ Windows:
 
 ## RepositoryIntent
 
-The primary goal is the easiest possible **private, on-device AI setup for everyday work** — for people (often on corporate laptops where cloud AI is blocked) who want a local assistant that keeps their data on the machine. Best on Apple Silicon; runs on ordinary laptops too. Beyond that, the same engine supports:
+The primary goal is the easiest possible **private, on-device AI setup for everyday work** — for people (often on corporate laptops where cloud AI is blocked) who want a local assistant that keeps their data on the machine. Apple Silicon MacBooks are the supported path; Windows, Linux, Intel Macs, iGPUs, and Snapdragon/Adreno are experimental. Beyond that, the same engine supports:
 - everyday knowledge work: proofreading, drafting, editing documents, summarizing
 - office automation: spreadsheets, decks, docs
 - coding and refactoring
@@ -72,7 +72,7 @@ The primary goal is the easiest possible **private, on-device AI setup for every
 Common issues:
 - `Connection refused`: start llama-server first
 - `Cannot open file`: verify `AI_MODELS_DIR` and profile model files
-- config parse error: re-render with `lac profile apply <profile>` or `lac setup <profile>`
+- config parse error: re-render with `lac profile apply <profile>`
 - cloud model not found: run `lac provider verify-models` to check configured free models
 
 ## TestingStrategy
@@ -117,7 +117,7 @@ Once installed it works offline without a daemon — ideal for local models. See
 ## Ponytail Integration (default-on)
 
 Generated OpenCode configs pre-wire the [ponytail](https://github.com/DietrichGebert/ponytail)
-plugin (`@dietrichgebert/ponytail@4.8.4`, MIT): a laziness ruleset injected into every
+plugin (`@dietrichgebert/ponytail@4.9.0`, MIT): a laziness ruleset injected into every
 turn, plus `/ponytail lite|full|ultra|off` commands and review/audit/debt skills. It is
 fetched from npm by OpenCode on first use (requires network), not vendored in the wheel.
 

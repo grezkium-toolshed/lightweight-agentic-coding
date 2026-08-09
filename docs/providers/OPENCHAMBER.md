@@ -13,14 +13,26 @@ lac client open openchamber
 ## Installation
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash
+pnpm add -g @openchamber/web@1.16.3
 ```
+
+Version `1.16.3` is the v0.3 clean-install validation target. lac does not silently replace a
+different existing version; align it explicitly with the command above when reproducing a release
+issue.
 
 On macOS you can also use Homebrew:
 
 ```bash
 brew install openchamber/tap/openchamber
 ```
+
+On native Windows, install the
+[OpenChamber Desktop release](https://github.com/openchamber/openchamber/releases). lac does not
+currently auto-launch or inject its generated configuration into that desktop app. For WSL, use
+OpenCode inside WSL as the primary client; see [the Windows guide](../WINDOWS.md).
+
+If OpenChamber connects to OpenCode Go, Zen, or another hosted provider, prompts, selected files,
+tool context, and outputs may leave the device. That is a cloud workflow, not lac's local-only path.
 
 ---
 
@@ -100,6 +112,10 @@ openchamber tunnel start \
 | OpenChamber web UI | 3000 | `OPENCHAMBER_PORT` |
 | OpenCode serve | 4095 | `OPENCODE_PORT` |
 
+`lac` records selected CLI ports and automatic fallback choices in its
+per-user `network.v1.json` state record. Inspect the effective values with
+`lac ports show --json` and clear saved allocations with `lac ports reset`.
+
 If ports conflict, set the env vars before launching:
 
 ```bash
@@ -107,6 +123,16 @@ export OPENCHAMBER_PORT=4000
 export OPENCODE_PORT=4096
 lac client open openchamber
 ```
+
+Or use a one-shot UI override without changing the environment:
+
+```bash
+lac client open openchamber --port 4000
+```
+
+An occupied explicit port fails immediately; lac only uses its bounded `+20`
+fallback for automatic/default local allocations. The launched client receives
+the selected `OPENCHAMBER_PORT` and `OPENCODE_PORT` values.
 
 For remote access, pass the correct port in the URL:
 

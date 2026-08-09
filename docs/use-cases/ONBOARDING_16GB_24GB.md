@@ -6,7 +6,7 @@
 - teams piloting agentic workflows without large local hardware
 
 ## Recommended path
-1. Start with `./bin/lac init`; use `macos-16gb` for MacBook Air M4 16GB-class machines, or let it recommend `16gb`/`24gb` on other systems.
+1. Start with `./bin/lac init`; use `macos-16gb` for MacBook Air M4 16GB-class machines. On other systems, follow the measured accelerator budget rather than total RAM: a 16GB iGPU laptop commonly belongs in `4gb` or `6gb`.
 2. Use the local Qwen baseline as the default for privacy-sensitive or repeated work.
 3. Add OpenCode Go and/or OpenRouter when you need hosted capacity or lower local load.
 4. Use the office-oriented skills for docs, spreadsheets, and decks.
@@ -28,7 +28,9 @@ Non-interactive:
 ./bin/lac client open opencode
 ```
 
-For non-macOS 16-24GB machines, use `16gb` or `24gb` instead of `macos-16gb`.
+Use `16gb` or `24gb` only when the device has a true measured 16–24GB accelerator budget, or when
+you have deliberately chosen a CPU-only system-RAM configuration. WSL2 and unmeasured accelerators
+fall back to `4gb`; see [the Windows guide](../WINDOWS.md).
 
 ## What to avoid
 - jumping straight to 122B-class profiles

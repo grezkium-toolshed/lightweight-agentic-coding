@@ -1,10 +1,8 @@
 """lac CLI — argument parsing, dispatch, and text rendering."""
 
 import argparse
-import copy
 import json
 import os
-import shutil
 import subprocess
 import sys
 import time
@@ -12,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from lac import VERSION
-from lac.context import Context, MODELS_ROOT, STATE_ROOT, HOST, PORT, OMLX_PORT
+from lac.context import Context, MODELS_ROOT, STATE_ROOT
 
 
 def _env_or_deprecated(new_key, old_key, default=None):
@@ -26,12 +24,10 @@ def _env_or_deprecated(new_key, old_key, default=None):
     return default
 from lac.lib.jsonc import load_jsonc
 from lac.profiles import (
-    profile_list, profile_apply, render_preset,
-    RAM_BUCKETS, FAMILY_DESCRIPTIONS,
-    detect_total_ram_gb, detect_hardware, _bucket_for_ram,
+    profile_list, profile_apply, FAMILY_DESCRIPTIONS,
+    detect_hardware,
     recommend_profile, family_alternatives,
 )
-from lac.config import render_opencode_config, LOCAL_MLX_MODEL_IDS
 from lac.runtime import (
     selected_local_runtime, runtime_paths, local_runtime_port,
     local_runtime_base_url, is_pid_running, request_json,
@@ -52,6 +48,7 @@ from lac.packs import (
 )
 from lac.scenarios import scenario_list, scenario_show
 from lac.clients import render_client, client_open, resolve_command
+from lac.network import port_report, reset_ports
 from lac.models import models_sync
 from lac.catalog import sync_free
 from lac.init import (
@@ -59,7 +56,6 @@ from lac.init import (
     _parse_cloud_arg, _validate_cloud_ids,
 )
 from lac.bench import bench
-from lac.doctor import run_fixes
 from lac.render import (
     render_pack_list, render_pack_show, render_skill_status, render_skill_verify,
     render_scenario_list, render_scenario_show, render_provider_list,
@@ -110,9 +106,15 @@ def _install_hint(tool_id, env_var=None):
         },
         "opencode": {
             "summary": "Install the OpenCode CLI, then restart your shell so opencode is on PATH.",
-            "macos": ["curl -fsSL https://opencode.ai/install | bash", "npm install -g opencode-ai"],
-            "linux": ["curl -fsSL https://opencode.ai/install | bash", "npm install -g opencode-ai"],
-            "windows": ["npm install -g opencode-ai"],
+            "macos": [
+                "curl -fsSL https://opencode.ai/install | bash -s -- --version 1.17.18",
+                "npm install -g opencode-ai@1.17.18",
+            ],
+            "linux": [
+                "curl -fsSL https://opencode.ai/install | bash -s -- --version 1.17.18",
+                "npm install -g opencode-ai@1.17.18",
+            ],
+            "windows": ["npm install -g opencode-ai@1.17.18"],
             "docs": "https://opencode.ai/docs",
         },
         "llama-server": {
@@ -157,9 +159,12 @@ def _install_hint(tool_id, env_var=None):
         },
         "openchamber": {
             "summary": "Install OpenChamber — web/PWA/desktop interface for OpenCode with mobile/remote access.",
-            "macos": ["brew install node pnpm", "curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"],
-            "linux": ["# Install Node.js 22+ and pnpm first", "curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"],
-            "windows": ["curl -fsSL https://raw.githubusercontent.com/openchamber/openchamber/main/scripts/install.sh | bash"],
+            "macos": ["brew install node pnpm", "pnpm add -g @openchamber/web@1.16.3"],
+            "linux": ["# Install Node.js 22+ and pnpm first", "pnpm add -g @openchamber/web@1.16.3"],
+            "windows": [
+                "Install OpenChamber Desktop from https://github.com/openchamber/openchamber/releases",
+                "Use OpenCode /connect for Go or Zen; hosted models are not local-only.",
+            ],
             "docs": "https://github.com/openchamber/openchamber",
         },
     }
@@ -188,39 +193,6 @@ def _strip_global_json_flag(argv):
             continue
         filtered.append(arg)
     return filtered, json_mode
-
-
-def device_setup(ctx, profile_id):
-    from lac.profiles import profile_apply
-    print(f"[setup] Applying profile: {profile_id}")
-    profile_apply(ctx, profile_id, verbose_runtime=False)
-    omlx_settings = Path.home() / ".omlx" / "settings.json"
-    if omlx_settings.is_file():
-        print(f"[setup] oMLX detected at {omlx_settings} — updating context limits...")
-        cfg = json.loads(omlx_settings.read_text(encoding="utf-8"))
-        cfg.setdefault("sampling", {})
-        cfg["sampling"]["max_context_window"] = 262144
-        cfg["sampling"]["max_tokens"] = 16384
-        omlx_settings.write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
-        print("[setup] oMLX max_context_window=262144 max_tokens=16384")
-    else:
-        print(f"[setup] oMLX not detected (no {omlx_settings}). Skipping oMLX configuration.")
-    dcp_plugin = "@tarquinen/opencode-dcp@3.1.14"
-    if _env_or_deprecated("LAC_INSTALL_DCP", "AI_CLUSTER_INSTALL_DCP", "1") == "0":
-        print("[setup] DCP plugin install skipped (LAC_INSTALL_DCP=0).")
-    elif command_exists("opencode"):
-        print(f"[setup] Installing/updating Dynamic Context Pruning plugin: {dcp_plugin}")
-        result = subprocess.run(["opencode", "plugin", dcp_plugin, "--global", "--force"], check=False)
-        if result.returncode == 0:
-            print("[setup] DCP plugin ready. Restart OpenCode and run /dcp to verify.")
-        else:
-            print("[setup] WARNING: DCP plugin install failed.")
-            print(f"[setup] Retry manually with: opencode plugin {dcp_plugin} --global --force")
-    else:
-        print("[setup] WARNING: opencode is not in PATH; cannot install DCP plugin.")
-        print(f"[setup] After installing OpenCode, run: opencode plugin {dcp_plugin} --global --force")
-    print(f"[setup] Device configuration complete for profile: {profile_id}")
-    return 0
 
 
 def verify_free_models(ctx, providers=None, timeout=10):
@@ -422,11 +394,14 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
     source_paths = [
         ctx.paths["opencode_template"], ctx.paths["profile_manifest"],
         ctx.paths["asset_catalog"], ctx.paths["workflow_catalog"],
-        ctx.paths["provider_catalog"], ctx.paths["scenario_catalog"],
+        ctx.paths["provider_catalog"], ctx.paths["scenario_catalog"], ctx.paths["dcp_template"],
     ]
     for path in source_paths:
         add_check("source", path, path.is_file())
-    generated_paths = [ctx.paths["active_preset"], ctx.paths["active_profile"], ctx.paths["opencode_config"]]
+    generated_paths = [
+        ctx.paths["active_preset"], ctx.paths["active_profile"],
+        ctx.paths["opencode_config"], ctx.paths["dcp_config"],
+    ]
     for path in generated_paths:
         add_check("generated", path, path.is_file(), generated=True,
                   hint="Run ./bin/lac profile apply <profile> to regenerate state." if bootstrap_hint else None)
@@ -491,7 +466,7 @@ def smoke(ctx, timeout):
     profile = ctx.active_profile()
     profile_id = ctx.active_profile_id()
     runtime = selected_local_runtime(profile)
-    base_url = local_runtime_base_url(runtime)
+    base_url = local_runtime_base_url(ctx, runtime)
     report = {
         "generated_at": utc_now(),
         "active_profile_id": profile_id,
@@ -622,7 +597,6 @@ def build_parser():
     doctor_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
     doctor_parser.add_argument("--strict", action="store_true")
     doctor_parser.add_argument("--bootstrap-hint", action="store_true")
-    doctor_parser.add_argument("--fix", action="store_true", help="Attempt to auto-fix detected issues")
 
     bench_parser = subparsers.add_parser("bench")
     bench_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
@@ -658,6 +632,9 @@ def build_parser():
     runtime_start_parser.add_argument("--foreground", action="store_true", help="Run llama-server attached to this terminal for visible logs")
     runtime_start_parser.add_argument("--show-logs", action="store_true")
     runtime_start_parser.add_argument("--no-tail-hint", action="store_true")
+    runtime_start_parser.add_argument("--port", type=int, help="Explicit local runtime port; occupied explicit ports fail immediately")
+    runtime_start_parser.add_argument("--bind-host", help="Loopback bind host (127.0.0.1 or ::1; remote binding is unsupported)")
+    runtime_start_parser.add_argument("--allow-remote", action="store_true", help=argparse.SUPPRESS)
     runtime_status_parser = runtime_sub.add_parser("status")
     runtime_status_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
     runtime_stop_parser = runtime_sub.add_parser("stop")
@@ -672,7 +649,15 @@ def build_parser():
     client_open_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
     client_open_parser.add_argument("target", choices=["opencode", "openchamber"])
     client_open_parser.add_argument("--desktop", action="store_true")
+    client_open_parser.add_argument("--port", type=int, help="Explicit OpenChamber UI port; occupied explicit ports fail immediately")
     client_open_parser.add_argument("--remote-host", help="Connect to an OpenCode server on a remote host (e.g. http://100.x.x.x:4095 for Tailscale)")
+
+    ports_parser = subparsers.add_parser("ports", help="Show or reset the local network allocation contract")
+    ports_sub = ports_parser.add_subparsers(dest="ports_command", required=True)
+    ports_show_parser = ports_sub.add_parser("show")
+    ports_show_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+    ports_reset_parser = ports_sub.add_parser("reset")
+    ports_reset_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
 
     pack_parser = subparsers.add_parser("pack")
     pack_sub = pack_parser.add_subparsers(dest="pack_command", required=True)
@@ -728,10 +713,6 @@ def build_parser():
     provider_verify_models_parser.add_argument("--timeout", type=int, default=10, help="Per-request timeout in seconds")
     provider_verify_models_parser.add_argument("--providers", help="Comma-separated provider ids (default: openrouter,nvidia-nim)")
 
-    setup_parser = subparsers.add_parser("setup", help="Apply profile and configure device (oMLX, DCP plugin)")
-    setup_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
-    setup_parser.add_argument("profile_id")
-
     catalog_parser = subparsers.add_parser("catalog", help="Catalog management commands")
     catalog_sub = catalog_parser.add_subparsers(dest="catalog_command", required=True)
     catalog_sync_free_parser = catalog_sub.add_parser("sync-free", help="Sync free cloud models from upstream source")
@@ -763,11 +744,6 @@ def main():
     ctx = Context()
 
     if args.command == "doctor":
-        if getattr(args, "fix", False):
-            report = run_fixes(ctx, yes=False)  # prints its own human-readable progress
-            if args.json:
-                print(json.dumps(report, indent=2))
-            raise SystemExit(0 if report["ok"] else 1)
         report = doctor(ctx, strict=args.strict, bootstrap_hint=args.bootstrap_hint)
         emit(report, args.json, kind="doctor")
         raise SystemExit(0 if report["ok"] or not args.strict else 1)
@@ -800,7 +776,10 @@ def main():
 
     if args.command == "runtime":
         if args.runtime_command == "start":
-            emit(runtime_start(ctx, show_logs=args.show_logs, tail_hint=not args.no_tail_hint, foreground=args.foreground), args.json)
+            if args.allow_remote:
+                parser.error("runtime start: remote binding is unsupported because lac does not provide an authenticated remote listener")
+            emit(runtime_start(ctx, show_logs=args.show_logs, tail_hint=not args.no_tail_hint, foreground=args.foreground,
+                               port=args.port, bind_host=args.bind_host, allow_remote=args.allow_remote), args.json)
             return
         if args.runtime_command == "status":
             emit(runtime_status(ctx), args.json)
@@ -814,7 +793,15 @@ def main():
             emit(render_client(ctx, args.target), args.json)
             return
         if args.client_command == "open":
-            emit(client_open(ctx, args.target, desktop=args.desktop, remote_host=getattr(args, "remote_host", None)), args.json)
+            emit(client_open(ctx, args.target, desktop=args.desktop, remote_host=getattr(args, "remote_host", None), port=args.port), args.json)
+            return
+
+    if args.command == "ports":
+        if args.ports_command == "show":
+            emit(port_report(ctx), args.json)
+            return
+        if args.ports_command == "reset":
+            emit(reset_ports(ctx), args.json)
             return
 
     if args.command == "pack":
@@ -888,9 +875,6 @@ def main():
                 record.pop("parsed_models", None)
             emit(record, args.json, kind="provider-verify")
             raise SystemExit(1 if record["status"] == "error" else 0)
-
-    if args.command == "setup":
-        raise SystemExit(device_setup(ctx, args.profile_id))
 
     if args.command == "catalog":
         if args.catalog_command == "sync-free":

@@ -7,7 +7,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from lac.context import HOST, PORT, OMLX_PORT, DS4_PORT
+from lac.network import allocate_service, persist_started_service, resolve_service, url
 
 
 def log_info(message):
@@ -126,24 +126,73 @@ def runtime_paths(ctx, runtime):
     }
 
 
-def local_runtime_port(runtime):
-    if runtime == "ds4":
-        return DS4_PORT
-    return OMLX_PORT if runtime == "omlx" else PORT
+def runtime_service(runtime):
+    return runtime if runtime in {"omlx", "ds4"} else "runtime"
 
 
-def local_runtime_base_url(runtime):
-    return f"http://{HOST}:{local_runtime_port(runtime)}"
+def local_runtime_endpoint(ctx, runtime, *, port=None, bind_host=None, allow_remote=False, allocate=False):
+    resolver = allocate_service if allocate else resolve_service
+    return resolver(
+        ctx, runtime_service(runtime), cli_port=port, cli_bind_host=bind_host, allow_remote=allow_remote
+    )
+
+
+def local_runtime_port(ctx, runtime):
+    return local_runtime_endpoint(ctx, runtime)["port"]
+
+
+def local_runtime_base_url(ctx, runtime):
+    endpoint = local_runtime_endpoint(ctx, runtime)
+    return url(endpoint["connect_host"], endpoint["port"])
+
+
+def _windows_pid_running(pid):
+    """Query a Windows process without sending a signal to it."""
+    import ctypes
+    from ctypes import wintypes
+
+    synchronize = 0x00100000
+    wait_timeout = 0x00000102
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel32.OpenProcess.restype = wintypes.HANDLE
+    kernel32.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+    kernel32.WaitForSingleObject.restype = wintypes.DWORD
+    kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel32.CloseHandle.restype = wintypes.BOOL
+
+    handle = kernel32.OpenProcess(synchronize, False, pid)
+    if not handle:
+        return False
+    try:
+        return kernel32.WaitForSingleObject(handle, 0) == wait_timeout
+    finally:
+        kernel32.CloseHandle(handle)
 
 
 def is_pid_running(pid):
     if not pid:
         return False
+    if os.name == "nt":
+        return _windows_pid_running(pid)
     try:
         os.kill(pid, 0)
     except OSError:
         return False
     return True
+
+
+def log_tail_hint(log_path):
+    if os.name == "nt":
+        escaped = str(log_path).replace("'", "''")
+        return f"Get-Content -Path '{escaped}' -Wait -Tail 50"
+    return f"tail -f {log_path}"
+
+
+def _background_process_options():
+    if os.name == "nt":
+        return subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS, {}
+    return 0, {"start_new_session": True}
 
 
 def request_json(url, method="GET", payload=None, timeout=5, headers=None):
@@ -161,37 +210,53 @@ def request_json(url, method="GET", payload=None, timeout=5, headers=None):
     return json.loads(raw), raw
 
 
-def collect_runtime_status(ctx):
+def collect_runtime_status(ctx, endpoint=None):
     profile = ctx.active_profile()
     runtime = selected_local_runtime(profile)
-    port = local_runtime_port(runtime)
-    health_path = "/v1/models" if runtime in {"omlx", "ds4"} else "/health"
     paths = runtime_paths(ctx, runtime)
     pid_path = paths["pid"]
     state_path = paths["state"]
     log_path = paths["log"]
-    runtime_info = {
-        "runtime": runtime,
-        "host": HOST,
-        "port": port,
-        "url": f"http://{HOST}:{port}",
-        "log_path": str(log_path),
-        "pid_path": str(pid_path),
-        "running": False,
-        "health_reachable": False,
-    }
+    pid = 0
+    running = False
     if pid_path.is_file():
         try:
             pid = int(pid_path.read_text(encoding="utf-8").strip())
         except ValueError:
             pid = 0
-        runtime_info["pid"] = pid
-        runtime_info["running"] = is_pid_running(pid)
+        running = is_pid_running(pid)
+    launch = None
     if state_path.is_file():
         import json
-        runtime_info["launch"] = json.loads(state_path.read_text(encoding="utf-8"))
+        launch = json.loads(state_path.read_text(encoding="utf-8"))
+    # A one-off explicit CLI endpoint is intentionally not reused for a later
+    # start, but status still has to follow the process that is currently alive.
+    if endpoint is None and running and launch:
+        endpoint = {
+            "port": int(launch["port"]),
+            "bind_host": launch["bind_host"],
+            "connect_host": launch["connect_host"],
+        }
+    endpoint = endpoint or local_runtime_endpoint(ctx, runtime)
+    port = endpoint["port"]
+    health_path = "/v1/models" if runtime in {"omlx", "ds4"} else "/health"
+    runtime_info = {
+        "runtime": runtime,
+        "bind_host": endpoint["bind_host"],
+        "connect_host": endpoint["connect_host"],
+        "port": port,
+        "url": url(endpoint["connect_host"], port),
+        "log_path": str(log_path),
+        "pid_path": str(pid_path),
+        "running": running,
+        "health_reachable": False,
+    }
+    if pid_path.is_file():
+        runtime_info["pid"] = pid
+    if launch is not None:
+        runtime_info["launch"] = launch
     try:
-        health, _ = request_json(f"http://{HOST}:{port}{health_path}", timeout=2)
+        health, _ = request_json(url(endpoint["connect_host"], port, health_path), timeout=2)
         runtime_info["health_reachable"] = True
         runtime_info["health"] = health
     except Exception:
@@ -207,7 +272,7 @@ def write_runtime_state(state_path, pid_path, payload):
     pid_path.write_text(f"{payload['pid']}\n", encoding="utf-8")
 
 
-def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
+def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False, port=None, bind_host=None, allow_remote=False):
     profile = ctx.active_profile()
     profile_id = ctx.active_profile_id()
     if profile and profile["runtime_mode"] == "cloud":
@@ -220,16 +285,36 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
     if not preset.is_file():
         raise SystemExit(f"Missing preset file: {preset}\nRun ./bin/lac profile apply <profile> first.")
     runtime = selected_local_runtime(profile, verbose=True)
-    port = local_runtime_port(runtime)
-    base_url = local_runtime_base_url(runtime)
     status = collect_runtime_status(ctx)
     if status["running"] and status["health_reachable"]:
+        if port is not None or bind_host is not None:
+            requested_endpoint = local_runtime_endpoint(
+                ctx, runtime, port=port, bind_host=bind_host, allow_remote=allow_remote
+            )
+            if (
+                requested_endpoint["port"] != status["port"]
+                or requested_endpoint["bind_host"] != status["bind_host"]
+            ):
+                raise SystemExit(
+                    f"{runtime} is already running at {status['url']}. "
+                    "Stop it with `lac runtime stop` before changing its endpoint."
+                )
         return {
             "ok": True,
             "running": True,
-            "message": f"{runtime} already running at {base_url}",
+            "message": f"{runtime} already running at {status['url']}",
             "log_path": status.get("log_path"),
         }
+    endpoint = local_runtime_endpoint(
+        ctx, runtime, port=port, bind_host=bind_host, allow_remote=allow_remote, allocate=True
+    )
+    port = endpoint["port"]
+    bind_host = endpoint["bind_host"]
+    base_url = url(endpoint["connect_host"], port)
+    # Render the transient requested/fallback endpoint before launch; persistence
+    # happens only after the server proves it is ready.
+    from lac.config import render_opencode_config
+    render_opencode_config(ctx, profile_id, profile, verbose_runtime=False, runtime_endpoint=endpoint)
     paths = runtime_paths(ctx, runtime)
     pid_path = paths["pid"]
     state_path = paths["state"]
@@ -247,7 +332,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
             raise SystemExit("oMLX runtime selected but `omlx` is not in PATH. Install with Homebrew or set AI_LOCAL_RUNTIME=llama.cpp.")
         models_dir = ctx.models_root / "mlx"
         env["OMLX_MODEL_DIR"] = str(models_dir)
-        env["OMLX_HOST"] = HOST
+        env["OMLX_HOST"] = bind_host
         env["OMLX_PORT"] = str(port)
         command = [os.environ.get("OMLX_BIN", "omlx"), "serve", "--model-dir", str(models_dir)]
         ready_url = f"{base_url}/v1/models"
@@ -272,7 +357,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
             "--kv-disk-space-mb",
             os.environ.get("DS4_KV_DISK_SPACE_MB", "8192"),
             "--host",
-            HOST,
+            bind_host,
             "--port",
             str(port),
         ]
@@ -288,7 +373,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
             "--port",
             str(port),
             "--host",
-            HOST,
+            bind_host,
         ]
         ready_url = f"{base_url}/health"
 
@@ -323,7 +408,8 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
             "launch_latency_ms": None,
             "pid": process.pid,
             "port": port,
-            "host": HOST,
+            "bind_host": bind_host,
+            "connect_host": endpoint["connect_host"],
             "log_path": str(log_path),
             "profile_id": profile_id,
             "runtime": runtime,
@@ -331,6 +417,31 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
         }
         _write_runtime_state(payload)
         try:
+            ready = False
+            for _ in range(60):
+                if process.poll() is not None:
+                    break
+                try:
+                    request_json(ready_url, timeout=2)
+                    ready = True
+                    break
+                except Exception:
+                    time.sleep(1)
+            if not ready:
+                exit_code = process.poll()
+                _foreground_cleanup()
+                raise SystemExit(
+                    f"{runtime} foreground process did not become ready at {ready_url}"
+                    + (f" (exit code {exit_code})" if exit_code is not None else "")
+                )
+            ready_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+            payload["ready_at"] = ready_at
+            payload["launch_latency_ms"] = int(
+                (datetime.fromisoformat(ready_at.replace("Z", "+00:00"))
+                 - datetime.fromisoformat(started_at.replace("Z", "+00:00"))).total_seconds() * 1000
+            )
+            _write_runtime_state(payload)
+            persist_started_service(ctx, endpoint)
             exit_code = process.wait()
         finally:
             signal.signal(signal.SIGINT, original_sigint)
@@ -345,12 +456,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
         }
 
     started_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    flags = 0
-    kwargs = {}
-    if os.name == "nt":
-        flags = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS
-    else:
-        kwargs["start_new_session"] = True
+    flags, kwargs = _background_process_options()
     log_handle = log_path.open("a", encoding="utf-8")
     process = subprocess.Popen(
         command,
@@ -385,12 +491,14 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
         "launch_latency_ms": int((datetime.fromisoformat(ready_at.replace("Z", "+00:00")) - datetime.fromisoformat(started_at.replace("Z", "+00:00"))).total_seconds() * 1000),
         "pid": process.pid,
         "port": port,
-        "host": HOST,
+        "bind_host": bind_host,
+        "connect_host": endpoint["connect_host"],
         "log_path": str(log_path),
         "profile_id": profile_id,
         "runtime": runtime,
     }
     _write_runtime_state(payload)
+    persist_started_service(ctx, endpoint)
     log_handle.close()
     result = {
         "ok": True,
@@ -403,7 +511,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False):
     if show_logs and command_exists("tail") and os.name != "nt":
         subprocess.run(["tail", "-f", str(log_path)], check=False)
     elif tail_hint:
-        result["tail_hint"] = f"tail -f {log_path}"
+        result["tail_hint"] = log_tail_hint(log_path)
     return result
 
 

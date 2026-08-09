@@ -18,7 +18,7 @@ def _models(ctx):
     if not profile:
         return []
     runtime = selected_local_runtime(profile)
-    base_url = local_runtime_base_url(runtime)
+    base_url = local_runtime_base_url(ctx, runtime)
     try:
         data, raw = request_json(f"{base_url}/v1/models", timeout=10)
     except Exception:
@@ -92,7 +92,7 @@ def bench(ctx, model=None, draft_n=None, prompt=None, timeout=120, json_output=F
         return {"ok": False, "error": "Bench requires a running local runtime. Cloud profiles not supported."}
 
     runtime = selected_local_runtime(profile)
-    base_url = local_runtime_base_url(runtime)
+    base_url = local_runtime_base_url(ctx, runtime)
 
     health_ok = False
     try:

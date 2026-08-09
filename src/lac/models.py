@@ -268,6 +268,10 @@ def _get_expected_bytes(url):
     return 0
 
 
+def _curl_executable():
+    return "curl.exe" if os.name == "nt" else "curl"
+
+
 def _download_one(subdir, filename, repo, remote, min_mb, models_dir, known_checksums=None):
     target_dir = Path(models_dir) / subdir
     target_file = target_dir / filename
@@ -329,14 +333,16 @@ def _download_one(subdir, filename, repo, remote, min_mb, models_dir, known_chec
             shutil.move(str(downloaded), str(target_file))
     else:
         print(f"[get ] {url}")
+        curl = _curl_executable()
         result = subprocess.run(
-            ["curl", "-fL", "--retry", "3", "--retry-delay", "3", "--retry-max-time", "300",
+            [curl, "-fL", "--retry", "3", "--retry-delay", "3", "--retry-max-time", "300",
              "--retry-all-errors", "--speed-limit", "1024", "--speed-time", "60",
              "-C", "-", "-o", str(tmp_file), url],
             check=False,
         )
         if result.returncode != 0:
             print(f"[fail] Download failed, partial file preserved for resume: {tmp_file}", file=sys.stderr)
+            print("[hint] Install the Hugging Face CLI and re-run: python -m pip install 'huggingface_hub[cli]'", file=sys.stderr)
             return False
         shutil.move(str(tmp_file), str(target_file))
     if not target_file.is_file():

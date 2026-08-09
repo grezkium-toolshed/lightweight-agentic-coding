@@ -1,9 +1,7 @@
-name: CI
+name: Manual compatibility checks
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -59,6 +57,23 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Parse PowerShell scripts
+        shell: pwsh
+        run: |
+          $Failed = $false
+          Get-ChildItem -Recurse -Filter *.ps1 | ForEach-Object {
+            $Tokens = $null
+            $Errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $_.FullName, [ref]$Tokens, [ref]$Errors
+            ) | Out-Null
+            if ($Errors.Count -gt 0) {
+              $Failed = $true
+              Write-Error "$($_.FullName): $($Errors -join '; ')"
+            }
+          }
+          if ($Failed) { throw "PowerShell parse errors found" }
+
       - name: PowerShell wrapper and client-render smoke test
         shell: pwsh
         run: |
@@ -69,3 +84,26 @@ jobs:
           ./bin/lac.ps1 profile apply micro --json
           ./bin/lac.ps1 profile apply 48gb --json
           ./bin/lac.ps1 client render claude-code --json
+
+      - name: Build and smoke-test installed Windows wheel
+        shell: pwsh
+        run: |
+          python -m pip install build
+          python -m build
+          $Wheel = (Get-ChildItem dist/*.whl | Select-Object -First 1).FullName
+          $Venv = Join-Path $env:RUNNER_TEMP "lac-wheel"
+          python -m venv $Venv
+          $Python = Join-Path $Venv "Scripts/python.exe"
+          $Lac = Join-Path $Venv "Scripts/lac.exe"
+          & $Python -m pip install $Wheel
+          & $Lac --version
+          Push-Location $env:RUNNER_TEMP
+          try {
+            $Summary = (& $Lac profile apply micro --json | ConvertFrom-Json)
+          } finally {
+            Pop-Location
+          }
+          $ExpectedRoot = Join-Path $env:LOCALAPPDATA "lac"
+          if (-not $Summary.state_root.StartsWith($ExpectedRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw "Installed wheel did not use LOCALAPPDATA: $($Summary.state_root)"
+          }

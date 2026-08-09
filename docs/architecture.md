@@ -26,7 +26,7 @@ The runtime stays llama.cpp-first, with explicit specialist runtimes:
 
 The current release provides a first-class CLI:
 - `./bin/lac` on Unix-like systems
-- `./bin/lac.ps1` on Windows
+- `./bin/lac.ps1` for the experimental native Windows path
 
 This CLI is the supported control plane for:
 - profile selection and generated-state rendering
@@ -67,6 +67,9 @@ Supported cloud overlays in `opencode.template.jsonc`:
 - NVIDIA NIM (free / trial)
 - Anthropic API (API-key only; Claude.ai subscription does not apply)
 
+OpenCode Zen remains available through OpenCode's built-in `/connect` flow rather than a duplicated
+lac provider profile. Any hosted overlay changes the data boundary and is not local-only.
+
 There is no dedicated "hybrid profile" tier — hybridness comes from enabling overlays on top of any local profile.
 
 ## Workflow pack strategy
@@ -84,15 +87,28 @@ Instead it ships a curated asset catalog plus workflow packs:
 
 Pack metadata lives in `catalog/workflow-packs.json`, and individual asset trust/support metadata lives in `catalog/assets.json`.
 
+### Stack boundary
+
+lac may analyze staged assessment artifacts and draft operator-reviewable output, but it is not a
+Microsoft 365 administration or deployment system. In the wider evidence-to-proof stack it owns
+the private, hardware-fit execution boundary only. Approval, tenant writes, rollback, independent
+read-back, customer publication, and durable multi-customer history remain with the components
+that own those responsibilities.
+
+The candidate `contracts/delivery-run.v1.schema.json` is a content-addressed linking manifest. It
+does not replace source schemas, contain tenant identifiers or local paths, or act as approval.
+See `docs/STACK.md` for the public component map and the production-pilot evidence gate.
+
 ## Release posture
 
-Public release is gated by `RELEASE_CHECKLIST.md`. Automated gates run in CI
-(`verify.sh`, `integration-test.sh`, wheel/sdist checks across Python 3.10–3.13, and a
-Windows PowerShell smoke lane). These are configuration-compatibility checks, not physical
-Windows/Linux support evidence. Apple Silicon MacBooks are the supported platform; the ds4 path
+Public release is gated by `RELEASE_CHECKLIST.md`. The authoritative automated gates run locally
+(`verify.sh`, `integration-test.sh`, and the clean wheel/sdist build). An optional manually triggered
+GitHub workflow repeats Linux/macOS checks and an installed Windows wheel plus PowerShell smoke lane;
+it is not a release gate and never runs automatically. These are configuration-compatibility checks,
+not physical Windows/Linux support evidence. Apple Silicon MacBooks are the supported platform; the ds4 path
 has measured M4 Max 128 GB evidence, while the 48 GB profile remains manual pending its exact
 hardware contract. The v0.3.0 launch still requires a genuinely clean MacBook bootstrap,
-exact-head checks, dependency-alert review, and approval-gated visibility/VPR steps. Versioning
+exact-head local checks, dependency-alert review, and approval-gated visibility/VPR steps. Versioning
 follows SemVer; `v0.3.0` is the intended public launch tag and must resolve to the reviewed
 sanitized release commit.
 

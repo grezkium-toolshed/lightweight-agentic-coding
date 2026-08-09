@@ -12,7 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from lac.hardware import (  # noqa: E402
-    _record, _run, normalize_hardware, parse_llama_devices, parse_nvidia_smi,
+    _record, _run, detect_accelerators, detect_execution_environment, normalize_hardware,
+    parse_llama_devices, parse_nvidia_smi,
     parse_rocm_smi, parse_windows_adapters, parse_xpu_smi,
 )
 from lac.models import PROFILE_MODELS  # noqa: E402
@@ -51,8 +52,18 @@ class HardwareProfileTests(unittest.TestCase):
         discrete24 = normalize_hardware(64, "linux", "x86_64", [_record("NVIDIA RTX", 24, "fixture")])
         multi = normalize_hardware(64, "linux", "x86_64", parse_nvidia_smi(self.fixtures["nvidia"]))
         unknown_igpu = normalize_hardware(16, "win32", "AMD64", [_record("Intel Iris Xe", None, "fixture")])
+        unknown_nvidia = normalize_hardware(
+            16, "win32", "AMD64", [_record("NVIDIA GeForce RTX 3050", None, "windows-cim")],
+        )
         snapdragon = normalize_hardware(
             32, "win32", "ARM64", parse_windows_adapters(self.fixtures["windows_qualcomm"]),
+        )
+        wsl_unknown = normalize_hardware(16, "linux", "x86_64", [], "wsl2")
+        wsl_igpu = normalize_hardware(
+            16, "linux", "x86_64", [_record("Intel Iris Xe", None, "windows-cim")], "wsl2",
+        )
+        wsl_nvidia = normalize_hardware(
+            64, "linux", "x86_64", parse_nvidia_smi(self.fixtures["nvidia"]), "wsl2",
         )
         cpu16 = normalize_hardware(16, "linux", "x86_64", [])
         missing = normalize_hardware(None, "linux", "x86_64", [])
@@ -64,11 +75,52 @@ class HardwareProfileTests(unittest.TestCase):
         self.assertEqual(multi["effective_budget_gb"], 24)
         self.assertEqual(unknown_igpu["effective_budget_gb"], 4)
         self.assertEqual(unknown_igpu["confidence"], "low")
+        self.assertEqual(unknown_nvidia["effective_budget_gb"], 4)
+        self.assertEqual(self.profile_for(unknown_nvidia), "4gb")
+        self.assertIn("not measured", unknown_nvidia["selection_guidance"])
         self.assertEqual(snapdragon["memory_kind"], "snapdragon-shared")
         self.assertEqual(snapdragon["runtime_acceleration"], "experimental-opencl")
         self.assertEqual(self.profile_for(snapdragon), "4gb")
+        self.assertEqual(wsl_unknown["execution_environment"], "wsl2")
+        self.assertEqual(wsl_unknown["probe_source"], "wsl-conservative")
+        self.assertEqual(self.profile_for(wsl_unknown), "4gb")
+        self.assertIn("WSL2", wsl_unknown["selection_guidance"])
+        self.assertEqual(self.profile_for(wsl_igpu), "4gb")
+        self.assertEqual(wsl_igpu["confidence"], "low")
+        self.assertEqual(wsl_nvidia["effective_budget_gb"], 24)
+        self.assertEqual(self.profile_for(wsl_nvidia), "24gb")
         self.assertEqual(self.profile_for(cpu16), "16gb")
         self.assertEqual(self.profile_for(missing), "6gb")
+
+    def test_environment_and_platform_safe_large_profile(self):
+        with patch("lac.hardware.sys.platform", "linux"):
+            self.assertEqual(detect_execution_environment("5.15.153.1-microsoft-standard-WSL2", {}), "wsl2")
+            self.assertEqual(detect_execution_environment("6.8.0-generic", {}), "native")
+            self.assertEqual(detect_execution_environment("6.8.0-generic", {"WSL_INTEROP": "/run/WSL/1"}), "wsl2")
+
+        windows128 = normalize_hardware(128, "win32", "AMD64", [])
+        linux128 = normalize_hardware(128, "linux", "x86_64", [])
+        apple128 = normalize_hardware(128, "darwin", "arm64", [])
+        self.assertEqual(self.profile_for(windows128), "128gb-multi")
+        self.assertEqual(self.profile_for(linux128), "128gb-multi")
+        self.assertEqual(self.profile_for(apple128), "128gb-ds4-flash")
+
+    def test_wsl_probe_includes_host_adapter_names(self):
+        def fixture_run(command, timeout=5):
+            if command[0] == "nvidia-smi":
+                return self.fixtures["nvidia"]
+            if command[0] == "powershell.exe":
+                return self.fixtures["windows_qualcomm"]
+            return ""
+
+        with (
+            patch("lac.hardware._run", side_effect=fixture_run),
+            patch("lac.hardware._linux_drm_records", return_value=[]),
+            patch("lac.hardware.sys.platform", "linux"),
+        ):
+            records = detect_accelerators("wsl2")
+        self.assertIn("nvidia-smi", {record["source"] for record in records})
+        self.assertIn("windows-cim", {record["source"] for record in records})
 
     def test_48gb_gate_and_boundaries(self):
         hardware = normalize_hardware(48, "darwin", "arm64", [])

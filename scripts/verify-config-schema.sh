@@ -66,7 +66,7 @@ def validate(path: Path):
 
     require(
         local_provider["options"]["baseURL"] == "http://127.0.0.1:8080/v1",
-        f"{path}: local-cluster baseURL must be http://127.0.0.1:8080/v1",
+        f"{path}: local-cluster template default must be http://127.0.0.1:8080/v1; rendered configs may override it",
     )
     require(
         openrouter_provider["options"]["baseURL"] == "https://openrouter.ai/api/v1",

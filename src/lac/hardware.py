@@ -19,6 +19,17 @@ def _run(command, timeout=5):
     return "\n".join(part for part in (result.stdout, result.stderr) if part).strip()
 
 
+def detect_execution_environment(release=None, environ=None):
+    """Distinguish native hosts from WSL without requiring extra utilities."""
+    if not sys.platform.startswith("linux"):
+        return "native"
+    release = (release if release is not None else platform.release()).lower()
+    environ = os.environ if environ is None else environ
+    if "microsoft" in release or environ.get("WSL_INTEROP") or environ.get("WSL_DISTRO_NAME"):
+        return "wsl2"
+    return "native"
+
+
 def detect_total_ram_gb():
     try:
         if sys.platform == "darwin":
@@ -170,7 +181,8 @@ def _linux_drm_records():
     return records
 
 
-def detect_accelerators():
+def detect_accelerators(execution_environment=None):
+    execution_environment = execution_environment or detect_execution_environment()
     records = parse_nvidia_smi(_run([
         "nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits",
     ]))
@@ -179,13 +191,13 @@ def detect_accelerators():
     records += parse_llama_devices(_run(["llama-server", "--list-devices"]))
     if sys.platform.startswith("linux"):
         records += _linux_drm_records()
-    if os.name == "nt":
+    if os.name == "nt" or execution_environment == "wsl2":
         command = "Get-CimInstance Win32_VideoController | Select Name,AdapterCompatibility | ConvertTo-Json -Compress"
         records += parse_windows_adapters(_run(["powershell.exe", "-NoProfile", "-Command", command]))
     return records
 
 
-def normalize_hardware(ram_gb, os_name, arch, accelerators):
+def normalize_hardware(ram_gb, os_name, arch, accelerators, execution_environment="native"):
     if os_name == "darwin" and arch.lower() in {"arm64", "aarch64"}:
         selected = _record(
             "Apple Silicon", ram_gb, "system-memory", "unified", "high" if ram_gb is not None else "low",
@@ -195,12 +207,17 @@ def normalize_hardware(ram_gb, os_name, arch, accelerators):
         selected = max(measured, key=lambda item: item["budget_gb"]) if measured else None
         if selected is None and accelerators:
             selected = accelerators[0]
+        if selected is None and execution_environment == "wsl2":
+            selected = _record(
+                "Unmeasured WSL accelerator", None, "wsl-conservative", "shared", "low",
+            )
         if selected is None:
             selected = _record("CPU", ram_gb, "system-memory", "system", "medium")
 
     budget = selected.get("budget_gb")
     confidence = selected["confidence"]
-    if selected["kind"] == "shared" and budget is None:
+    unmeasured_accelerator = selected["kind"] in {"shared", "dedicated"} and budget is None
+    if selected["kind"] in {"shared", "dedicated"} and budget is None:
         budget, confidence = 4.0, "low"
     if selected["kind"] == "dedicated" and budget is not None and ram_gb is not None:
         budget = min(budget, ram_gb)
@@ -208,9 +225,21 @@ def normalize_hardware(ram_gb, os_name, arch, accelerators):
         budget = ram_gb
 
     qualcomm = selected["vendor"] == "qualcomm"
+    selection_guidance = None
+    if execution_environment == "wsl2" and selected["source"] == "wsl-conservative":
+        selection_guidance = (
+            "WSL2 did not expose a measurable accelerator budget; using the conservative 4gb profile. "
+            "Choose a larger profile manually only after verifying usable accelerator memory."
+        )
+    elif unmeasured_accelerator:
+        selection_guidance = (
+            "The accelerator was detected but its usable memory budget was not measured; using 4gb. "
+            "Choose a larger profile manually only after verifying the budget."
+        )
     return {
         "os": os_name,
         "arch": arch,
+        "execution_environment": execution_environment,
         "ram_gb": ram_gb,
         "vram_gb": selected.get("budget_gb") if selected["kind"] == "dedicated" else None,
         "memory_kind": "snapdragon-shared" if qualcomm else selected["kind"],
@@ -219,13 +248,18 @@ def normalize_hardware(ram_gb, os_name, arch, accelerators):
         "gpu_vendor": selected["vendor"],
         "gpu_device": selected["device"],
         "confidence": confidence,
+        "selection_guidance": selection_guidance,
         "runtime_acceleration": "experimental-opencl" if qualcomm else "standard",
         "accelerators": accelerators,
     }
 
 
 def detect_hardware():
-    return normalize_hardware(detect_total_ram_gb(), sys.platform, platform.machine(), detect_accelerators())
+    execution_environment = detect_execution_environment()
+    return normalize_hardware(
+        detect_total_ram_gb(), sys.platform, platform.machine(),
+        detect_accelerators(execution_environment), execution_environment,
+    )
 
 
 def detect_vram_gb():

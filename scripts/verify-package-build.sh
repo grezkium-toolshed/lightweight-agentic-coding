@@ -137,10 +137,15 @@ expected_data = Path(os.environ["LAC_DATA_ROOT"])
 assert ctx.models_root == expected_data / "models", (ctx.models_root, expected_data)
 assert str(ctx.root).startswith(os.environ["PYTHONPATH"]), ctx.root
 assert len(json.loads(Path("packs.json").read_text())) == 6
+opencode_dir = Path(os.environ["LAC_STATE_ROOT"]) / "clients/opencode"
+assert (opencode_dir / "opencode.json").is_file()
+assert (opencode_dir / "dcp.jsonc").is_file()
+assert (opencode_dir / "agents/architecture-reviewer.md").is_file()
+assert (opencode_dir / "skills/gsd/SKILL.md").is_file()
 assert (Path(os.environ["LAC_STATE_ROOT"]) / "clients/claude-code/templates/README.md").is_file()
 assert (expected_data / "catalog/free-coding-models.json").is_file()
 assert (expected_data / "catalog/FREE_CLOUD_MODELS.md").is_file()
-print("[ok] installed wheel uses writable user paths and renders supported clients")
+print("[ok] installed wheel uses writable user paths and stages OpenCode config, DCP, agents, and skills")
 PY
 )
 

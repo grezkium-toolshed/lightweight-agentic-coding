@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-`lac` (Lightweight Agentic Coding) is a Python CLI that sets up **private, on-device AI for everyday work** — aimed at people who want a local assistant (proofreading, drafting, document edits, and coding) without sending data to the cloud, often on locked-down corporate laptops. It detects hardware, picks a model profile, downloads GGUF weights, manages a local inference runtime (llama.cpp `llama-server`, with optional oMLX / ds4 backends), and renders config for clients — OpenChamber (chat UI, the default front door) and OpenCode (coding agent). Cloud providers (OpenRouter, Anthropic, NVIDIA NIM, OpenCode Go) are optional overlays/fallbacks. Nothing leaves the machine unless a cloud provider is configured. Best on Apple Silicon; runs on ordinary laptops too (slower on CPU).
+`lac` (Lightweight Agentic Coding) is a Python CLI that sets up **private, on-device AI for everyday work** — aimed at people who want a local assistant (proofreading, drafting, document edits, and coding) without sending data to the cloud. It detects hardware, picks a model profile, downloads GGUF weights, manages a local inference runtime (llama.cpp `llama-server`, with optional oMLX / ds4 backends), and renders config for clients — OpenChamber (chat UI, the default front door) and OpenCode (coding agent). Cloud providers (OpenRouter, Anthropic, NVIDIA NIM, OpenCode Go) are optional overlays/fallbacks. With a local profile, prompts and work content stay on the machine; installation and first plugin use still fetch dependencies. Apple Silicon MacBooks are the tested platform; other platforms are experimental.
 
 The package is `lac` (import name), distributed as `lightweight-agentic-coding`. Console entry point: `lac = lac.cli:main`. Runs on Python 3.10+.
 
@@ -16,24 +16,24 @@ Two ways to invoke the CLI:
 
 All commands accept `--json` for machine-readable output.
 
-Core lifecycle: `lac init` (hardware detection + onboarding), `lac models sync [profile]`, `lac profile apply <profile>`, `lac runtime start|stop|status`, `lac client open opencode|openchamber`, `lac doctor [--strict] [--fix]`, `lac smoke`, `lac bench`.
+Core lifecycle: `lac init` (hardware detection + onboarding), `lac models sync [profile]`, `lac profile apply <profile>`, `lac runtime start|stop|status`, `lac client open opencode|openchamber`, `lac doctor [--strict]`, `lac smoke`, `lac bench`.
 
 ### Tests and checks
 
-There is **no pytest suite**. CI (`.github/workflows/ci.yml`, Linux) runs exactly two scripts:
+There is **no pytest suite**. Run the local release checks directly:
 
 ```bash
 ./scripts/verify.sh              # shell syntax, config/provider schema, package-data staging, licensing guard
 ./scripts/integration-test.sh    # full CLI workflow, no llama-server (uses a temp LAC_STATE_ROOT)
 ```
 
-`verify.sh` orchestrates the kept sub-checks (`verify-config-schema.sh`, `verify-provider-catalog.sh`) plus a licensing guard that fails if any un-shippable third-party skill or vendored asset tree leaks into the wheel. The integration test is the closest thing to a unit-test run — it exercises `profile apply`, config generation, doctor, provider/pack commands, etc., against a throwaway state root without a GPU or running server.
+`verify.sh` orchestrates the kept sub-checks (`verify-config-schema.sh`, `verify-provider-catalog.sh`) plus a licensing guard that fails if any un-shippable third-party skill or vendored asset tree leaks into the wheel. The integration test is the closest thing to a unit-test run — it exercises `profile apply`, config generation, doctor, provider/pack commands, etc., against a throwaway state root without a GPU or running server. `.github/workflows/ci.yml` is an optional, manually triggered compatibility reproduction; it never runs automatically.
 
 ## Architecture
 
 ### CLI structure
 
-`src/lac/` is the single, modular, packaged CLI (`lac.cli:main`). `src/lac/cli.py` owns argument parsing (`build_parser`), dispatch (`main`), and the `emit()` text/JSON renderer. Each subsystem is its own module: `profiles`, `models`, `runtime`, `providers`, `config` (renders OpenCode config), `clients`, `packs`, `scenarios`, `catalog`, `init`, `doctor`, `bench`, `render` (human-readable output formatting). Shared JSONC parsing lives in `src/lac/lib/jsonc.py`.
+`src/lac/` is the single, modular, packaged CLI (`lac.cli:main`). `src/lac/cli.py` owns argument parsing (`build_parser`), dispatch (`main`), read-only doctor diagnostics, and the `emit()` text/JSON renderer. Each subsystem is its own module: `profiles`, `models`, `runtime`, `providers`, `config` (renders OpenCode config), `clients`, `packs`, `scenarios`, `catalog`, `init`, `bench`, and `render` (human-readable output formatting). Shared JSONC parsing lives in `src/lac/lib/jsonc.py`.
 
 ### Config / state / data model
 

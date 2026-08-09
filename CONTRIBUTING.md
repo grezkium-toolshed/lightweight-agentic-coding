@@ -8,12 +8,17 @@ Contributions are welcome — please follow the checks below before submitting a
 
 ## Local Checks Before PR
 
-Two commands cover CI:
+Run the local validation before submitting a change:
 
 ```bash
 ./scripts/verify.sh            # shell syntax, config/provider schema, package staging, licensing guard
 ./scripts/integration-test.sh  # full CLI workflow, no GPU or network
+./scripts/verify-package-build.sh  # clean wheel/sdist and installed-package smoke
 ```
+
+The GitHub compatibility workflow is manual-only and optional. It can reproduce Linux, macOS, or
+Windows packaging/configuration issues, but it is not a substitute for local checks or physical
+hardware validation.
 
 Then regenerate profile config and run doctor:
 

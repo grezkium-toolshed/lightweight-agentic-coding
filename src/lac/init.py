@@ -250,10 +250,12 @@ def init_wizard(ctx, yes=False, profile=None, cloud=None, no_cloud=False, also_d
     else:
         budget_label = f"{ram_gb:.1f} GB" if ram_gb is not None else "unknown"
         print(
-            f"Detected: {hardware['os']} / {hardware['arch']} / "
+            f"Detected: {hardware['os']} / {hardware['arch']} / {hardware.get('execution_environment', 'native')} / "
             f"{hardware['memory_kind']} budget {budget_label} via {hardware['probe_source']} "
             f"({hardware['confidence']} confidence)"
         )
+        if hardware.get("selection_guidance"):
+            print(f"Guidance: {hardware['selection_guidance']}")
         alternates = family_alternatives(ram_gb, profiles=ctx.profiles, hardware=hardware)
         family_choices = [("qwen", FAMILY_DESCRIPTIONS["qwen"]), ("gemma", FAMILY_DESCRIPTIONS["gemma"])]
         family = _prompt_choice("Which local model family?", family_choices, default_index=0)
@@ -317,11 +319,16 @@ def render_init_text(result):
     recommendation = result["recommendation"]
     print("  lac init — Lightweight Agentic Coding")
     print(f"Status: {result['status']}")
-    print(f"Detected: {hardware['os']} / {hardware['arch']} / RAM {ram_label}")
+    print(
+        f"Detected: {hardware['os']} / {hardware['arch']} / "
+        f"{hardware.get('execution_environment', 'native')} / RAM {ram_label}"
+    )
     print(
         f"Selection budget: {budget_label} {hardware.get('memory_kind', 'system')} memory "
         f"via {hardware.get('probe_source', 'fallback')} ({hardware.get('confidence', 'low')} confidence)"
     )
+    if hardware.get("selection_guidance"):
+        print(f"Guidance: {hardware['selection_guidance']}")
     print(f"Selected profile: {result['profile']} ({recommendation['selected_label']})")
     print(f"Recommended path: {recommendation['recommended_path']}")
     if result["cloud"]:

@@ -1,0 +1,290 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/grezkium-toolshed/lightweight-agentic-coding/main/contracts/delivery-run.v1.schema.json",
+  "title": "delivery-run.v1",
+  "description": "Candidate cross-product manifest linking an approved security delivery run to content-addressed evidence. It is not deployment authorization.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractType",
+    "schemaVersion",
+    "runRef",
+    "subjectRef",
+    "status",
+    "tools",
+    "artifacts",
+    "findingIds",
+    "intentIds",
+    "changeControl",
+    "approval",
+    "deployment",
+    "verification",
+    "privacyBoundary",
+    "customerExports",
+    "repeatRun"
+  ],
+  "properties": {
+    "contractType": {
+      "const": "delivery-run.v1"
+    },
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "runRef": {
+      "$ref": "#/$defs/runRef"
+    },
+    "subjectRef": {
+      "type": "string",
+      "pattern": "^subject_[a-f0-9]{16,64}$"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "approved",
+        "executed",
+        "verified",
+        "packaged",
+        "reassessed"
+      ]
+    },
+    "tools": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["component", "version"],
+        "properties": {
+          "component": {
+            "enum": ["digest", "tracker", "lac", "tenantsmith", "platform"]
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "commit": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{40}$"
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/artifact"
+      }
+    },
+    "findingIds": {
+      "$ref": "#/$defs/idList"
+    },
+    "intentIds": {
+      "$ref": "#/$defs/idList"
+    },
+    "changeControl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applicability",
+        "licensing",
+        "consent",
+        "impact",
+        "preflightRef",
+        "rollbackRef"
+      ],
+      "properties": {
+        "applicability": {
+          "enum": ["applicable", "not-applicable", "unknown"]
+        },
+        "licensing": {
+          "enum": ["satisfied", "not-required", "blocked", "unknown"]
+        },
+        "consent": {
+          "enum": ["approved", "not-required", "pending", "denied"]
+        },
+        "impact": {
+          "enum": ["low", "medium", "high", "critical", "unknown"]
+        },
+        "preflightRef": {
+          "$ref": "#/$defs/contentRef"
+        },
+        "rollbackRef": {
+          "$ref": "#/$defs/contentRef"
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "enum": ["not-requested", "pending", "approved", "rejected", "expired"]
+        },
+        "decisionRef": {
+          "$ref": "#/$defs/contentRef"
+        }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "enum": ["not-started", "planned", "applied", "failed", "rolled-back"]
+        },
+        "outcomeRef": {
+          "$ref": "#/$defs/contentRef"
+        },
+        "rollbackRef": {
+          "$ref": "#/$defs/contentRef"
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "independentReadback", "evidenceRefs"],
+      "properties": {
+        "status": {
+          "enum": ["not-run", "passed", "failed", "partial"]
+        },
+        "independentReadback": {
+          "type": "boolean"
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/contentRef"
+          }
+        }
+      }
+    },
+    "privacyBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "localAnalysis",
+        "cloudProvidersEnabled",
+        "customerIdentifiersIncluded",
+        "restrictedArtifactsRemainLocal"
+      ],
+      "properties": {
+        "localAnalysis": {
+          "type": "boolean"
+        },
+        "cloudProvidersEnabled": {
+          "type": "boolean"
+        },
+        "customerIdentifiersIncluded": {
+          "const": false
+        },
+        "restrictedArtifactsRemainLocal": {
+          "const": true
+        },
+        "egressBoundary": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    },
+    "customerExports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifactRef", "status"],
+        "properties": {
+          "artifactRef": {
+            "$ref": "#/$defs/customerSafeRef"
+          },
+          "status": {
+            "enum": ["draft", "approved", "published"]
+          },
+          "approvalRef": {
+            "$ref": "#/$defs/contentRef"
+          }
+        }
+      }
+    },
+    "repeatRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "enum": ["not-run", "new", "persistent", "resolved", "accepted", "regressed"]
+        },
+        "previousRunRef": {
+          "$ref": "#/$defs/runRef"
+        },
+        "deltaRef": {
+          "$ref": "#/$defs/contentRef"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "runRef": {
+      "type": "string",
+      "pattern": "^run_[a-f0-9]{16,64}$"
+    },
+    "contentRef": {
+      "type": "string",
+      "pattern": "^(restricted|internal|customer-safe):sha256:[a-f0-9]{64}$"
+    },
+    "customerSafeRef": {
+      "type": "string",
+      "pattern": "^customer-safe:sha256:[a-f0-9]{64}$"
+    },
+    "idList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._:-]{2,127}$"
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "classification", "sha256", "ref"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{2,63}$"
+        },
+        "kind": {
+          "enum": [
+            "source-evidence",
+            "finding",
+            "intent",
+            "approval",
+            "preflight",
+            "deployment-outcome",
+            "rollback",
+            "verification",
+            "customer-export",
+            "repeat-delta",
+            "other"
+          ]
+        },
+        "classification": {
+          "enum": ["restricted", "internal", "customer-safe"]
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "ref": {
+          "$ref": "#/$defs/contentRef"
+        }
+      }
+    }
+  }
+}

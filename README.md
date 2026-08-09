@@ -1,20 +1,18 @@
-# lac — private, on-device AI for your work machine
+# lac — hardware-fit private AI for your work machine
 
-[![CI](https://github.com/grezkium-toolshed/lightweight-agentic-coding/actions/workflows/ci.yml/badge.svg)](https://github.com/grezkium-toolshed/lightweight-agentic-coding/actions/workflows/ci.yml)
-
-**When your company won't let you put work into ChatGPT or Copilot, `lac` sets up a private AI assistant that runs entirely on your own machine — one command, and nothing leaves the device.** Useful for proofreading, drafting, editing documents, and small local automations, plus coding if that's your thing.
+**When your company won't let you put work into ChatGPT or Copilot, `lac` sets up a private AI assistant that runs on your own machine. With a local profile, your prompts and work content stay on the device unless you deliberately enable a cloud provider.** Useful for proofreading, drafting, editing documents, and small local automations, plus coding if that's your thing.
 
 **Supported platform: Apple Silicon MacBooks.** Windows, Linux, Intel Macs, ordinary iGPUs,
 Snapdragon/Adreno, and other unverified hardware are experimental and **test at your own risk**.
-CI and parser coverage on those platforms is not a physical-runtime support guarantee.
+Parser and configuration checks on those platforms are not a physical-runtime support guarantee.
 
 Built on [llama.cpp](https://github.com/ggml-org/llama.cpp), [Unsloth](https://unsloth.ai) model quantizations, [OpenCode](https://opencode.ai), and [OpenChamber](https://github.com/openchamber/openchamber). Optional [oMLX](https://github.com/danielzgtg/omlx) on Apple Silicon.
 
 > `lac` stands for "lightweight agentic coding" — it began as a local coding setup and still does that well. The engine is the same; this page just leads with the everyday-work use.
 
-## Get started (one command)
+## Get started on a Mac
 
-On a Mac, this installs everything you need (Homebrew, Python, Node.js, pnpm, llama.cpp, OpenCode, OpenChamber, and a small model) and opens a private chat window. If OpenChamber cannot be installed, the same flow falls back to OpenCode:
+On a Mac, clone the release and run its bootstrap. It installs the prerequisites and model over the network, then opens a chat backed by local inference. The v0.3 clean-install contract pins OpenCode 1.17.18 and OpenChamber 1.16.3; an existing different version is left in place with a warning. If OpenChamber cannot be installed, the same flow falls back to OpenCode:
 
 ```bash
 git clone https://github.com/grezkium-toolshed/lightweight-agentic-coding.git
@@ -22,15 +20,12 @@ cd lightweight-agentic-coding
 ./scripts/bootstrap.sh
 ```
 
-It's idempotent — re-running skips anything already installed. When it finishes, the [OpenChamber](https://github.com/openchamber/openchamber) chat UI opens at `http://localhost:3000`, backed by a small local model. That's your private assistant.
+It's idempotent — re-running skips anything already installed. When it finishes, the [OpenChamber](https://github.com/openchamber/openchamber) chat UI opens on its local default or selected port, backed by a small local model. Run `lac ports show --json` for the effective URL. That's your private assistant.
 
-A hosted one-liner (same flow, no clone needed):
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/grezkium-toolshed/lightweight-agentic-coding/v0.3.0/scripts/bootstrap.sh | bash
-```
-
-Windows: `./scripts/bootstrap.ps1` is an experimental path; test it at your own risk. `lac doctor` tells you what, if anything, is missing.
+Windows is experimental. Use **WSL2 for local models**; the guarded native PowerShell script is only
+for machines where Python, `llama-server.exe`, and OpenCode are already installed. OpenChamber
+Desktop with OpenCode Go/Zen is the lower-friction cloud alternative, but it is not local-only.
+See the [Windows routes and requirements](docs/WINDOWS.md).
 
 <details>
 <summary>Prefer to set it up by hand? (click to expand)</summary>
@@ -41,12 +36,19 @@ Install [llama.cpp](https://github.com/ggml-org/llama.cpp), [OpenCode](https://o
 python3 -m pip install .          # installs the `lac` command
 lac init                          # detects your RAM, recommends a profile
 lac models sync                   # downloads weights for the active profile
-lac runtime start                 # starts the local server (llama-server on :8080)
+lac runtime start                 # starts the local server (default port: 8080)
 lac client open openchamber       # opens the chat UI  (or: lac client open opencode)
 ```
 
 `lac demo --local` is the quick path: it downloads a tiny 2.5 GB model and opens the chat UI in one step.
 </details>
+
+## Works with Grezkium Toolshed (optional)
+
+lac is independently useful as a private local assistant. M365 Threat Digest can optionally use
+its OpenAI-compatible loopback endpoint for local enrichment, but lac never requires Digest or
+Tenantsmith and does not install either one. Failure or absence of either sibling leaves every lac
+runtime, client, model, and profile workflow unchanged.
 
 ## What you get
 
@@ -55,17 +57,18 @@ A local AI assistant running on **your** machine:
 - **Private by default** — the model runs on `localhost`; your documents and prompts never leave the device unless you deliberately add a cloud provider.
 - **A chat window** (OpenChamber) for everyday work — proofreading, drafting, rewriting, summarizing, small edits — plus an agentic coding CLI (OpenCode) if you want it.
 - **Matched to your hardware** — `lac init` recommends the strongest validated model that fits the effective accelerator-memory budget with headroom for the OS, runtime, context, and KV cache.
+- **Reproducible behavior** — the runtime, exposed models, context limits, output headroom, and supplemental DCP thresholds are generated from one active profile.
 
 ## Will this run on my work laptop?
 
-Probably — but speed depends heavily on the accelerator and its usable memory. `lac init` treats dedicated VRAM, ordinary iGPU budgets, Apple unified memory, and Snapdragon shared memory separately. A 16 GB Windows/Linux laptop whose iGPU can use only 4–6 GB belongs in the 4–6 GB rows, not the 16 GB row. If an iGPU is visible but its budget is not measurable, lac conservatively selects `4gb` and reports low confidence. CPU-only machines may use system RAM.
+Probably — but speed depends heavily on the accelerator and its usable memory. `lac init` treats dedicated VRAM, ordinary iGPU budgets, Apple unified memory, and Snapdragon shared memory separately. A 16 GB Windows/Linux laptop whose iGPU can use only 4–6 GB belongs in the 4–6 GB rows, not the 16 GB row. Any visible but unmeasured accelerator conservatively selects `4gb` and reports low confidence. WSL2 also selects `4gb` when it cannot measure an accelerator; native CPU-only machines may use system RAM.
 
 | Memory target | Typical hardware / memory type | Default profile and model weights | Validation | Realistic workload |
 |---:|---|---|---|---|
-| 4 GB | 16 GB Windows/Linux laptop with an unmeasured or ~4 GB iGPU budget | `4gb`: Qwen3.5 4B Q4, ~2.6 GB | standard | Chat, proofreading, single-shot edits |
-| 6 GB | 16 GB Windows/Linux laptop with a measured ~6 GB iGPU budget | `6gb`: Qwen3.5 9B Q4, ~5.5 GB | standard | Short agentic tasks, drafting, summaries |
-| 8 GB | True 8 GB accelerator budget | `8gb`: Qwen3.5 9B Q4, ~5.5 GB | standard | Small-model tool use and short sessions |
-| 12 GB | True 12 GB accelerator budget | `12gb`: Qwen3.5 9B Q8, ~9.7 GB | standard | Longer agentic sessions |
+| 4 GB | 16 GB Windows/Linux laptop with an unmeasured or ~4 GB iGPU budget | `4gb`: Qwen3.5 4B Q4, ~2.6 GB | standard | Chat, proofreading, single-shot edits at 32K |
+| 6 GB | 16 GB Windows/Linux laptop with a measured ~6 GB iGPU budget | `6gb`: Qwen3.5 9B Q4, ~5.5 GB | standard | Constrained short agentic tasks at 32K |
+| 8 GB | True 8 GB accelerator budget | `8gb`: Qwen3.5 9B Q4, ~5.5 GB | standard | Small-model tool use and short 32K sessions |
+| 12 GB | True 12 GB accelerator budget | `12gb`: Qwen3.5 9B Q8, ~9.7 GB | standard | Constrained multi-step work at 64K |
 | 16 GB | Apple Silicon unified memory | `macos-16gb`: Gemma 4 12B QAT, ~6.4 GB | standard | Everyday work with macOS headroom |
 | 16 GB | Dedicated VRAM or CPU-only system RAM | `16gb`: Qwen 3.6 27B IQ3, ~12.2 GB | verified | Constrained larger-model work |
 | 24 GB | Dedicated VRAM or unified memory | `24gb`: Qwen 3.6 27B Q4, ~17 GB | verified | General daily driver |
@@ -124,35 +127,82 @@ best-effort with no SLA. The 128 GB ds4/DwarfStar path has measured M4 Max MacBo
 the 48 GB profile remains a manual candidate until it passes its own exact-hardware contract.
 
 Windows, Linux, Intel Macs, ordinary iGPUs, Snapdragon/Adreno, and other unverified hardware are
-experimental and test-at-your-own-risk. Linux/macOS CI exercises offline contracts and the CLI;
-Windows CI exercises parsing, wrappers, and client rendering. Those checks do not validate GPU
-drivers, model loading, performance, or deployment on physical hardware. The from-zero bootstrap
+experimental and test-at-your-own-risk. WSL2 is the preferred Windows local-model route; see the
+[Windows guide](docs/WINDOWS.md). Local release checks are authoritative. An optional, manually
+triggered GitHub workflow exercises Linux/macOS contracts plus Windows parsing, an installed wheel,
+wrappers, and client rendering; it never runs automatically and does not validate GPU drivers,
+model loading, performance, or deployment on physical hardware. The from-zero bootstrap
 and OpenChamber flow on a genuinely clean Apple Silicon MacBook environment remains a release gate.
 `lac doctor` reports what your platform is missing.
 
 Installed copies keep mutable data outside the Python package: models and refreshed catalogs use the platform user-data directory, while runtime state uses the platform user-state directory. Override them with `LAC_DATA_ROOT`, `LAC_STATE_ROOT`, or `AI_MODELS_DIR`.
 
+The complete standalone lifecycle—install, health, logs, update, rollback,
+uninstall, data retention/purge, privacy, network exposure, and optional sibling
+failure behavior—is in [`docs/STANDALONE-OPERATIONS.md`](docs/STANDALONE-OPERATIONS.md).
+
 ## Daily use
 
 ```bash
 lac runtime start                  # Start local server
-lac client open openchamber        # Open the chat UI (http://localhost:3000)
+lac client open openchamber        # Open the chat UI (inspect URL with `lac ports show --json`)
 lac client open opencode           # Or the coding agent CLI
 lac runtime status                 # Check runtime state
 lac runtime stop                   # Stop local server
 lac doctor                         # Validate setup
+lac ports show --json              # Show effective local service ports
 ```
 
 All commands support `--json` for scripting.
 
+## Local network ports
+
+lac keeps local services on loopback by default: the model runtime uses `8080`
+(oMLX/ds4 use `8000`), OpenChamber uses `3000`, and OpenCode serve uses `4095`.
+`lac ports show --json` reports the effective bindings and their source. Use an
+explicit override such as `LAC_PORT=8181 lac profile apply 24gb` or
+`lac runtime start --port 8181`; an occupied explicit port fails with an
+actionable error. Only automatic/default allocations use the documented `+20`
+fallback window. Successful starts are recorded in the per-user
+`network.v1.json` state record, with allocation source and timestamp; only
+automatic fallback allocations are reused by a later no-override launch.
+`lac ports reset` clears those saved allocations.
+
+The runtime binds to loopback and connects clients through a separate loopback
+address. Remote runtime binding is intentionally unsupported in this release:
+lac has no authenticated remote-listener contract, so use an authenticated
+tunnel to the loopback runtime instead. OpenChamber remote mode remains explicit:
+`lac client open openchamber --remote-host https://host:4095` skips starting a
+local OpenCode server and rejects URLs with embedded credentials.
+
+## Where lac fits
+
+lac is a free standalone workbench, not another model marketplace or a Microsoft 365
+administration portal. In the wider toolshed it is the private execution layer for
+analysis and drafting inside an evidence-driven security delivery loop:
+
+> assess → prioritize → approve → change → verify → explain → repeat
+
+Threat Digest supplies external context, a private Tracker assesses and communicates,
+lac assists locally, Tenantsmith performs deterministic operator-approved changes, and a
+future private Platform may preserve history and scheduling. lac never turns an AI draft
+into approval or deployment authority.
+
+The cross-product differentiator is still a candidate until one separately approved
+production-pilot control completes that entire loop with before/after evidence. See
+[the stack boundary, first-proof contract, and value measures](docs/STACK.md).
+
 ## Next steps
 
+- **Windows routes** — WSL2 local models, native cloud, and the manual native preview: [`docs/WINDOWS.md`](docs/WINDOWS.md)
 - **Cloud providers** — add OpenRouter, Anthropic API, or OpenCode Go as fallbacks: [`docs/providers/AUTHENTICATION.md`](docs/providers/AUTHENTICATION.md)
 - **Product roadmap** — hardware-fit milestones, audience, and explicit non-goals: [`ROADMAP.md`](ROADMAP.md)
+- **Evidence-to-proof stack** — lac's role, component boundaries, and the candidate `delivery-run.v1` linking contract: [`docs/STACK.md`](docs/STACK.md)
 - **Advanced profiles** — MTP speculative decoding, oMLX on macOS, hybrid local+cloud: [`docs/architecture.md`](docs/architecture.md)
 - **Bundled agents & skills** — architecture/release review, documentation, research synthesis, and office workflows (docx/pptx/xlsx/pdf): [`.opencode/agents/`](.opencode/agents/), [`.opencode/skills/`](.opencode/skills/)
 - **Design skills & brand systems (opt-in)** — lac does not bundle these; add the [Open Design](https://open-design.ai) catalog yourself: `curl -fsSL https://open-design.ai/install.sh | sh -s opencode`
 - **Ponytail (default-on)** — generated OpenCode configs include the [ponytail](https://github.com/DietrichGebert/ponytail) plugin (laziness ruleset + `/ponytail` commands). Disable per session with `PONYTAIL_DEFAULT_MODE=off`. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)
+- **Context safety** — OpenCode's built-in compaction is the hard overflow guard. DCP adds model-guided compression and cleanup with thresholds generated from the active runtime preset; it is supplemental rather than a guaranteed automatic compressor.
 - **Qwen 3.8 candidate prep** — placeholder config slots exist, but no profile switches without official artifacts and hardware evidence: [`docs/models/QWEN38_READY.md`](docs/models/QWEN38_READY.md)
 - **Free cloud model catalog** — `lac catalog sync-free`, see [`docs/free-coding-models.json`](docs/free-coding-models.json)
 - **Model deep dive** — tuning rationale, profile details: [`docs/model-recommendations.md`](docs/model-recommendations.md)
@@ -162,7 +212,7 @@ All commands support `--json` for scripting.
 
 | Symptom | Fix |
 |---|---|
-| `Connection refused` | Start runtime: `lac runtime start`. Check logs: `tail -f state/logs/llama-server.log` |
+| `Connection refused` | Start runtime: `lac runtime start`. Follow logs with `tail -f state/logs/llama-server.log` on Unix or `Get-Content -Path 'state/logs/llama-server.log' -Wait -Tail 50` in PowerShell. |
 | `Cannot open file` | Run `lac models sync <profile>`. Check `AI_MODELS_DIR` and profile config |
 | Model sync fails | Re-run the same command. Install Hugging Face CLI for resume support |
 | OpenCode misses config | Re-run `lac init`. For Desktop, quit and relaunch after profile switch |
