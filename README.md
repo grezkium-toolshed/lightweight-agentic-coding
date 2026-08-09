@@ -1,10 +1,12 @@
 # lac — private, on-device AI for your work machine
 
-[![CI](https://github.com/TuukkaTanner/lightweight-agentic-coding/actions/workflows/ci.yml/badge.svg)](https://github.com/TuukkaTanner/lightweight-agentic-coding/actions/workflows/ci.yml)
+[![CI](https://github.com/grezkium-toolshed/lightweight-agentic-coding/actions/workflows/ci.yml/badge.svg)](https://github.com/grezkium-toolshed/lightweight-agentic-coding/actions/workflows/ci.yml)
 
 **When your company won't let you put work into ChatGPT or Copilot, `lac` sets up a private AI assistant that runs entirely on your own machine — one command, and nothing leaves the device.** Useful for proofreading, drafting, editing documents, and small local automations, plus coding if that's your thing.
 
-It's best on Apple Silicon Macs (fast, and they usually keep local admin); it runs on ordinary Windows/Linux work laptops too — slower, but private.
+**Supported platform: Apple Silicon MacBooks.** Windows, Linux, Intel Macs, ordinary iGPUs,
+Snapdragon/Adreno, and other unverified hardware are experimental and **test at your own risk**.
+CI and parser coverage on those platforms is not a physical-runtime support guarantee.
 
 Built on [llama.cpp](https://github.com/ggml-org/llama.cpp), [Unsloth](https://unsloth.ai) model quantizations, [OpenCode](https://opencode.ai), and [OpenChamber](https://github.com/openchamber/openchamber). Optional [oMLX](https://github.com/danielzgtg/omlx) on Apple Silicon.
 
@@ -15,7 +17,7 @@ Built on [llama.cpp](https://github.com/ggml-org/llama.cpp), [Unsloth](https://u
 On a Mac, this installs everything you need (Homebrew, Python, Node.js, pnpm, llama.cpp, OpenCode, OpenChamber, and a small model) and opens a private chat window. If OpenChamber cannot be installed, the same flow falls back to OpenCode:
 
 ```bash
-git clone https://github.com/TuukkaTanner/lightweight-agentic-coding.git
+git clone https://github.com/grezkium-toolshed/lightweight-agentic-coding.git
 cd lightweight-agentic-coding
 ./scripts/bootstrap.sh
 ```
@@ -25,10 +27,10 @@ It's idempotent — re-running skips anything already installed. When it finishe
 A hosted one-liner (same flow, no clone needed):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/TuukkaTanner/lightweight-agentic-coding/v0.2.0/scripts/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/grezkium-toolshed/lightweight-agentic-coding/v0.3.0/scripts/bootstrap.sh | bash
 ```
 
-Windows: `./scripts/bootstrap.ps1` (secondary — WSL is smoother). `lac doctor` tells you what, if anything, is missing.
+Windows: `./scripts/bootstrap.ps1` is an experimental path; test it at your own risk. `lac doctor` tells you what, if anything, is missing.
 
 <details>
 <summary>Prefer to set it up by hand? (click to expand)</summary>
@@ -72,6 +74,10 @@ Probably — but speed depends heavily on the accelerator and its usable memory.
 | 64 GB | Dedicated VRAM or unified memory | `64gb`: Qwen 3.6 35B-A3B Q8, ~36 GB | extended | High-headroom and MTP specialist work |
 | 128 GB+ | High-memory unified workstation | `128gb-*`: 36–108 GB defaults | extended | Specialist large-model workflows |
 
+The validation column describes the profile evidence, not platform support. Apple Silicon
+MacBooks are the supported platform; every other platform remains experimental until physical
+runtime evidence justifies promotion.
+
 The 48 GB tier corresponds to current [MacBook Pro configurations](https://support.apple.com/en-euro/126319), but availability alone is not validation; lac keeps it manual until the recorded smoke-test contract passes.
 
 The target is a safe fit, not maximum memory consumption. For multiple discrete GPUs lac uses the largest single reported budget; multi-GPU selection remains manual. Windows' authoritative target is the OS-provided [DXGI video-memory budget](https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_4/ns-dxgi1_4-dxgi_query_video_memory_info); until that budget is exposed by an available runtime probe, shared GPUs stay conservative. Qualcomm/Adreno is detected separately and reported as experimental acceleration; llama.cpp documents [OpenCL support for Windows 11 ARM64](https://github.com/ggml-org/llama.cpp/blob/master/docs/backend/OPENCL.md), but lac does not promise an NPU path.
@@ -113,9 +119,16 @@ For 64 GB+ machines, the Gemma family, and specialist runtimes. These are power-
 
 ## Platform support
 
-**macOS (Apple Silicon) is the primary, tested platform** — best performance (unified memory + Metal) and the fewest install hurdles. Linux and macOS run the offline contract and CLI integration suite in CI; Windows runs PowerShell wrapper and client-render checks. GPU/runtime behavior still requires real-hardware validation, and WSL2 remains the smoothest Windows path. `lac doctor` reports what your platform is missing.
+**Apple Silicon MacBooks are the tested and supported product platform.** Support is
+best-effort with no SLA. The 128 GB ds4/DwarfStar path has measured M4 Max MacBook Pro evidence;
+the 48 GB profile remains a manual candidate until it passes its own exact-hardware contract.
 
-> **Public beta validation status:** actively validated on Apple Silicon macOS. Windows full-runtime (download + local server) and the 128 GB `ds4` profile are wired and CI-covered at the smoke level but not yet validated on real hardware; the fresh-macOS one-command bootstrap has not been run on a stock corporate-managed account. Please report anything you hit there.
+Windows, Linux, Intel Macs, ordinary iGPUs, Snapdragon/Adreno, and other unverified hardware are
+experimental and test-at-your-own-risk. Linux/macOS CI exercises offline contracts and the CLI;
+Windows CI exercises parsing, wrappers, and client rendering. Those checks do not validate GPU
+drivers, model loading, performance, or deployment on physical hardware. The from-zero bootstrap
+and OpenChamber flow on a genuinely clean Apple Silicon MacBook environment remains a release gate.
+`lac doctor` reports what your platform is missing.
 
 Installed copies keep mutable data outside the Python package: models and refreshed catalogs use the platform user-data directory, while runtime state uses the platform user-state directory. Override them with `LAC_DATA_ROOT`, `LAC_STATE_ROOT`, or `AI_MODELS_DIR`.
 

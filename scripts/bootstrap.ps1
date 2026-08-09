@@ -1,9 +1,9 @@
 #requires -version 5
 $ErrorActionPreference = "Continue"
 
-# lac bootstrap (Windows) — best-effort. Windows is a SECONDARY platform for lac; macOS
-# (Apple Silicon) is the primary, tested target. Some steps below may need WSL or manual
-# follow-up. Idempotent: re-running skips anything already installed.
+# lac bootstrap (Windows) — experimental and test-at-your-own-risk. Apple Silicon MacBooks
+# are the tested and supported target. Some steps below may need WSL or manual follow-up.
+# Idempotent: re-running skips anything already installed.
 #
 # Install commands mirror src/lac/doctor.py `_install_hint()` (windows entries).
 
@@ -21,8 +21,8 @@ function Test-Python310($cmd) {
   return $LASTEXITCODE -eq 0
 }
 
-Warn "Windows is a secondary platform for lac. If this stalls, WSL2 + the shell bootstrap"
-Warn "(./scripts/bootstrap.sh) is the smoother path. macOS/Apple Silicon is where lac runs best."
+Warn "Windows is experimental and has no physical-runtime support guarantee. Test at your own risk."
+Warn "If this stalls, WSL2 + the shell bootstrap (./scripts/bootstrap.sh) may be smoother."
 
 # 1. Python 3.10+
 $Python = @("py", "python", "python3") | Where-Object { Test-Python310 $_ } | Select-Object -First 1

@@ -1,24 +1,48 @@
 # Public Release Checklist
 
-Do not publish a tag or package until every item below is complete for the exact release commit.
+Do not publish a tag until every pre-tag item below is complete for the exact sanitized release
+commit. Changing repository visibility is a separate operator action that requires fresh explicit
+approval.
 
-Status legend: `[x]` done · `[~]` partially verifiable locally, external step pending · `[ ]` blocked on an external action.
+Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/external gate pending · `[ ]` blocked or not yet run.
 
-## Automated gates
+## v0.3.0 pre-tag gates
 
-- [x] GitHub CI passes on Linux, macOS, and Windows. *(Runs automatically on push; the local Linux/macOS equivalents in the two checks below pass on this machine.)*
-- [x] Wheel and sdist build checks pass on Python 3.10 through 3.13. *(`scripts/verify-package-build.sh` passed locally on 2026-08-04: `[ok] packaged assets: 7 skills, 6 agents`; CI covers the Python 3.10–3.13 matrix.)*
-- [x] `./scripts/verify.sh` and `./scripts/integration-test.sh` pass from a clean checkout. *(Passed locally 2026-08-04, including the profile-aware context-matrix over 21 local model selections.)*
-- [x] The release artifacts contain the expected first-party assets, licenses, and no opt-in third-party catalogs. *(Verified by `verify-package-build.sh` licensing/asset contract; `verify.sh` licensing guard also green.)*
+- [x] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and
+  `./scripts/verify-package-build.sh` passed locally on 2026-08-09 for the v0.3.0 release tree,
+  including 38 local model selections and installed-wheel version `0.3.0`.
+- [ ] Linux/macOS/Windows CI and Python 3.10–3.13 package jobs pass on the exact sanitized
+  release commit. Windows/Linux results prove configuration compatibility, not physical support.
+- [ ] A fresh Dependabot read after the dependency graph rescan shows zero critical/high alerts;
+  every medium/low alert has a recorded disposition.
+- [x] The 128 GB ds4/DwarfStar resource path has recorded M4 Max MacBook Pro measurements.
+  This does not validate unrelated platforms or the 48 GB profile.
+- [x] The `48gb` profile remains `auto_recommend: false` and is described as manual/unverified.
+- [ ] On a genuinely clean Apple Silicon MacBook environment, run the exact release head without
+  `LAC_BOOTSTRAP_SKIP_DEMO`: install the promised toolchain, verify the checksum-protected micro
+  model, health and model listing, `lac smoke`, a real response, and OpenChamber opening. Rerun
+  bootstrap and confirm idempotency.
+- [ ] Record the tested commit, MacBook model/chip, macOS version, elapsed time, sanitized logs,
+  and screenshots outside the repository.
+- [ ] Confirm version `0.3.0`, changelog, public-org links, `main` branch links, and the hosted
+  bootstrap URL. The hosted `v0.3.0` URL can be read back only after the tag exists.
+- [ ] Run the release boundary check over the full sanitized history and confirm a clean release
+  worktree.
 
-## Manual gates
+## Tag and GitHub release
 
-- [ ] `./scripts/bootstrap.sh` completes on a fresh Apple Silicon macOS account and launches OpenChamber. *(External: needs a fresh macOS account/VM.)*
-- [x] The local demo downloads the checksum-protected micro model, starts llama.cpp, and answers a prompt through OpenChamber. *(Validated 2026-08-04 through llama.cpp `/health`, `/v1/models`, and a real `/v1/chat/completions` response; OpenChamber was absent on this machine, so the OpenCode fallback was used.)*
-- [x] The OpenCode fallback is exercised with OpenChamber absent. *(Validated 2026-08-04 with headless OpenCode and the rendered `local-cluster/qwen3.5-4b-q4` config.)*
-- [ ] GitHub Private Vulnerability Reporting is enabled and the link in `SECURITY.md` opens a private report form. *(External: GitHub repo settings → Security → Private vulnerability reporting.)*
-- [x] Provider documentation and starter model IDs are reviewed against current upstream documentation. *(Validated 2026-08-04: live OpenRouter model list, OpenCode Go docs, refreshed free-model snapshot, and rendered cloud profiles.)*
-- [~] The version and changelog match the intended public tag, and the tag is built from the reviewed commit. *(Version and changelog now consistently read 0.2.0; the tag itself is the remaining step.)*
-- [ ] PyPI Trusted Publishing or an equivalently scoped release credential is configured and tested without publishing a real release. *(External: PyPI side; reportedly configured and rehearsed — confirm before the real publish.)*
+- [ ] Create annotated tag `v0.3.0` on the reviewed sanitized commit and verify the tag resolves
+  exactly to `origin/main`.
+- [ ] Create and read back the GitHub release notes. v0.3.0 is git-install-only; no PyPI artifact,
+  Trusted Publishing setup, or billing flow is part of this release.
 
-Record the tested commit, date, operating system, and any screenshots or logs in the release PR. Never commit credentials or downloaded model files.
+## Approval-gated public flip
+
+- [ ] Obtain fresh explicit operator approval to make the repository public.
+- [ ] Change visibility, re-enable Private Vulnerability Reporting, and read both settings back.
+- [ ] From an anonymous/fresh environment, verify clone, CI badge, issues/support/security links,
+  the raw bootstrap URL, and the hosted one-liner.
+- [ ] If any public read-back fails, return the repository to private, fix it internally, and repeat
+  the port and release gates.
+
+Never commit credentials, downloaded model files, customer data, or unsanitized evidence.

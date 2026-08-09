@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-The repository follows rolling updates on the `master` branch. Only the latest state is supported.
+The repository follows rolling updates on the `main` branch. Only the latest state is supported.
 
 ## Reporting a Vulnerability
 
@@ -16,4 +16,4 @@ Include:
 - affected files and profile(s)
 - suggested remediation if available
 
-To report a security vulnerability, use [GitHub Security Advisories](https://github.com/TuukkaTanner/lightweight-agentic-coding/security/advisories).
+To report a security vulnerability, use [GitHub Private Vulnerability Reporting](https://github.com/grezkium-toolshed/lightweight-agentic-coding/security/advisories/new).

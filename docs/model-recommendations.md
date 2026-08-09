@@ -6,6 +6,10 @@ Use Qwen 3.6 as the default local family for general agentic work.
 
 Recommendations target the strongest validated model that fits the **effective accelerator-memory budget** while retaining headroom for the OS, runtime, context, and KV cache. Dedicated VRAM is a hard budget; ordinary iGPUs use their reported usable graphics budget rather than total system RAM; Apple Silicon uses unified memory; and Snapdragon/Adreno uses a measured shared-memory budget or a conservative 4 GB fallback. CPU-only machines may use system RAM.
 
+Platform support and profile validation are separate. Apple Silicon MacBooks are the tested and
+supported platform. Windows, Linux, Intel Macs, ordinary iGPUs, Snapdragon/Adreno, and other
+unverified hardware are experimental and test-at-your-own-risk even when a profile fits on paper.
+
 Default quant guidance:
 - prefer Unsloth's published `UD-Q8_K_XL` GGUF artifact for Qwen 3.6 35B-A3B where hardware allows
 - use dense Qwen 3.6 27B for lower-footprint quantized defaults; it is less sensitive to quantization than 35B-A3B

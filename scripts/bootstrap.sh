@@ -50,7 +50,7 @@ export PATH="$HOME/.local/bin:$HOME/.opencode/bin:$HOME/.openchamber/bin:$PATH"
 OS="$(uname -s)"
 if [[ "$OS" != "Darwin" ]]; then
   warn "This bootstrap is tuned for macOS (Apple Silicon), where lac runs best."
-  warn "On Linux, install llama.cpp + opencode + python 3.10+ yourself, then run:"
+  warn "Linux is experimental and test-at-your-own-risk. Install llama.cpp + opencode + python 3.10+ yourself, then run:"
   warn "    ./bin/lac demo --local"
   warn "Continuing best-effort; some steps below may be skipped."
 fi

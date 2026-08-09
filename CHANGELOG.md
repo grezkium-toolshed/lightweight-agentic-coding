@@ -6,6 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 for tagged releases (public beta and beyond).
 
+## [0.3.0] — 2026-08-09
+
+Released the hardware-fit public beta with an explicit Apple Silicon MacBook support boundary.
+
+### Added
+
+- Normalized accelerator-memory detection and diagnostics for Apple unified memory, NVIDIA,
+  AMD, Intel, ordinary iGPUs, and Windows ARM64 Qualcomm/Adreno hardware.
+- A manual-only `48gb` profile for Qwen 3.6 35B-A3B Q8 with a 27B fallback and conservative
+  256K-context runtime settings. Automatic recommendation remains disabled until the exact
+  48 GB MacBook hardware contract passes.
+- A public, undated roadmap covering trustworthy MacBook self-service, the hardware-fit
+  workbench direction, and a scenario-led private-work workspace.
+
+### Changed
+
+- `lac init` now recommends from the largest single usable accelerator budget instead of broad
+  system-RAM ranges. Unmeasured iGPUs fall back to the `4gb` profile with low confidence.
+- Public support is now explicit: Apple Silicon MacBooks are the tested and supported platform;
+  Windows, Linux, Intel Macs, ordinary iGPUs, Snapdragon/Adreno, and other unverified hardware
+  are experimental and test-at-your-own-risk.
+- The ds4/DwarfStar profile uses a 256K harness default and documents measured M4 Max 128 GB
+  context, memory, prefill, and decode evidence.
+- Profile metadata, presets, downloads, and rendered client context are checked together across
+  38 local model selections. CI covers Linux/macOS contracts, Windows parsing and rendering,
+  and clean wheel/sdist builds without treating CI as physical-hardware validation.
+- Fresh-macOS bootstrap validation and package-build checks were hardened for the public release.
+
+### Removed
+
+- The README's forwardable "What your IT needs to allow" guidance. lac remains individuals-first
+  and does not promise enterprise deployment or procurement support.
+
 ## [0.2.0] — 2026-08-04
 
 Re-aimed the project around **private, on-device AI for everyday work** (for people on machines

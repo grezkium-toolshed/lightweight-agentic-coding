@@ -44,11 +44,11 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/TuukkaTanner/lightweight-agentic-coding"
-Repository = "https://github.com/TuukkaTanner/lightweight-agentic-coding"
-Issues = "https://github.com/TuukkaTanner/lightweight-agentic-coding/issues"
-Changelog = "https://github.com/TuukkaTanner/lightweight-agentic-coding/blob/master/CHANGELOG.md"
-Documentation = "https://github.com/TuukkaTanner/lightweight-agentic-coding/tree/master/docs"
+Homepage = "https://github.com/grezkium-toolshed/lightweight-agentic-coding"
+Repository = "https://github.com/grezkium-toolshed/lightweight-agentic-coding"
+Issues = "https://github.com/grezkium-toolshed/lightweight-agentic-coding/issues"
+Changelog = "https://github.com/grezkium-toolshed/lightweight-agentic-coding/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/grezkium-toolshed/lightweight-agentic-coding/tree/main/docs"
 
 [project.scripts]
 lac = "lac.cli:main"

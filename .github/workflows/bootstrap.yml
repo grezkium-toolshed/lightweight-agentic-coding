@@ -16,7 +16,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
       - name: Run bootstrap (demo skipped in CI)
         run: LAC_BOOTSTRAP_SKIP_DEMO=1 ./scripts/bootstrap.sh
       # bootstrap.sh warns-and-continues by design, so these explicit

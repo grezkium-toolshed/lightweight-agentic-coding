@@ -88,11 +88,13 @@ Pack metadata lives in `catalog/workflow-packs.json`, and individual asset trust
 
 Public release is gated by `RELEASE_CHECKLIST.md`. Automated gates run in CI
 (`verify.sh`, `integration-test.sh`, wheel/sdist checks across Python 3.10–3.13, and a
-Windows PowerShell smoke lane); manual gates require real-hardware validation (fresh macOS
-bootstrap, 128 GB Apple Silicon ds4 path, Windows full runtime, GitHub Private Vulnerability
-Reporting enablement, live provider freshness). Versioning follows SemVer for tagged
-releases; `v0.2.0` is the current public tag, and future tags remain gated by the release
-checklist.
+Windows PowerShell smoke lane). These are configuration-compatibility checks, not physical
+Windows/Linux support evidence. Apple Silicon MacBooks are the supported platform; the ds4 path
+has measured M4 Max 128 GB evidence, while the 48 GB profile remains manual pending its exact
+hardware contract. The v0.3.0 launch still requires a genuinely clean MacBook bootstrap,
+exact-head checks, dependency-alert review, and approval-gated visibility/VPR steps. Versioning
+follows SemVer; `v0.3.0` is the intended public launch tag and must resolve to the reviewed
+sanitized release commit.
 
 Third-party integrations follow a strict posture: lac bundles only first-party agents and
 workflow skills. External catalogs (Open Design) are opt-in fetch, and external OpenCode

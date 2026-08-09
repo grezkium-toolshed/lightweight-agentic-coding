@@ -5,7 +5,7 @@ labels: provider-drift
 ---
 
 ## Provider
-- Antigravity / z.ai / NVIDIA NIM / OpenRouter / other
+- OpenRouter / OpenCode Go / NVIDIA NIM / Anthropic / other
 
 ## Drift observed
 
