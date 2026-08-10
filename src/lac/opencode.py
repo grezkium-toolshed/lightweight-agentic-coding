@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 from lac.lib.jsonc import load_jsonc
@@ -98,6 +99,44 @@ def _allowed_plugins(ctx):
     return {str(item) for item in plugins} if isinstance(plugins, list) else set()
 
 
+def _sandboxed_inspection(sources, launch_env, cwd, sandbox_root):
+    """Mirror config files so OpenCode migrations cannot touch user files."""
+    sandbox_root = Path(sandbox_root)
+    safe_env = dict(launch_env)
+    config_home = sandbox_root / "config"
+    global_target = config_home / "opencode"
+    global_target.mkdir(parents=True, exist_ok=True)
+    safe_env["XDG_CONFIG_HOME"] = str(config_home)
+
+    for source in sources:
+        if source["kind"] != "global":
+            continue
+        path = Path(source["path"])
+        shutil.copy2(path, global_target / path.name)
+
+    project_sources = [Path(source["path"]) for source in sources if source["kind"] == "project"]
+    real_cwd = Path(cwd or Path.cwd()).resolve()
+    mirror_root = sandbox_root / "project"
+    safe_cwd = mirror_root
+    if project_sources:
+        real_root = project_sources[-1].parent
+        try:
+            safe_cwd = mirror_root / real_cwd.relative_to(real_root)
+        except ValueError:
+            safe_cwd = mirror_root
+        for source in project_sources:
+            try:
+                relative = source.relative_to(real_root)
+            except ValueError:
+                relative = Path(source.name)
+            target = mirror_root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
+    safe_cwd.mkdir(parents=True, exist_ok=True)
+    (mirror_root / ".git").mkdir(exist_ok=True)
+    return safe_env, safe_cwd
+
+
 def inspect_opencode_coexistence(ctx, profile=None, env=None, cwd=None, command=None, runner=None):
     """Inspect OpenCode's merged config without changing or persisting it."""
     launch_env = opencode_env(ctx, env)
@@ -125,15 +164,17 @@ def inspect_opencode_coexistence(ctx, profile=None, env=None, cwd=None, command=
 
     run = runner or subprocess.run
     try:
-        completed = run(
-            [command, "debug", "config", "--pure"],
-            env=launch_env,
-            cwd=str(Path(cwd or Path.cwd()).resolve()),
-            capture_output=True,
-            text=True,
-            timeout=OPENCODE_INSPECTION_TIMEOUT,
-            check=False,
-        )
+        with tempfile.TemporaryDirectory(prefix="lac-opencode-inspect-") as sandbox_root:
+            safe_env, safe_cwd = _sandboxed_inspection(sources, launch_env, cwd, sandbox_root)
+            completed = run(
+                [command, "debug", "config", "--pure"],
+                env=safe_env,
+                cwd=str(safe_cwd),
+                capture_output=True,
+                text=True,
+                timeout=OPENCODE_INSPECTION_TIMEOUT,
+                check=False,
+            )
     except subprocess.TimeoutExpired:
         return _inspection_failure(
             ctx,

@@ -26,9 +26,11 @@ lac doctor --json
 ```
 
 Review `opencode_coexistence`. `checked: true` means lac successfully asked the
-installed OpenCode to resolve its merged configuration. It does not mean every
-inherited setting is safe. The report lists detected config paths but never
-stores the raw merged config, credentials, or environment values.
+installed OpenCode to resolve a temporary mirror of its merged configuration.
+The mirror prevents OpenCode's schema migrations from rewriting the user's
+global or project config during inspection. It does not mean every inherited
+setting is safe. The report lists detected config paths but never stores the raw
+merged config, credentials, or environment values.
 
 Warnings are advisory and do not prevent `lac client open` from continuing:
 

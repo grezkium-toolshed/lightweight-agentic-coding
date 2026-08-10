@@ -42,12 +42,18 @@ class OpenCodeCoexistenceTests(unittest.TestCase):
             "default_model": "local-cluster/qwen3.5-4b-q4",
         }
 
-    def completed(self, payload, returncode=0):
+    def completed(self, payload, returncode=0, mutate=False):
         def run(*args, **kwargs):
+            if mutate:
+                global_copy = Path(kwargs["env"]["XDG_CONFIG_HOME"]) / "opencode" / "opencode.json"
+                project_copy = Path(kwargs["cwd"]) / "opencode.json"
+                for path in (global_copy, project_copy):
+                    if path.is_file():
+                        path.write_text('{"migrated":true}\n', encoding="utf-8")
             return subprocess.CompletedProcess(args[0], returncode, json.dumps(payload), "")
         return run
 
-    def inspect(self, payload, **kwargs):
+    def inspect(self, payload, mutate=False, **kwargs):
         with patch("lac.opencode.Path.home", return_value=self.home), \
              patch("lac.opencode.shutil.which", return_value=None):
             return inspect_opencode_coexistence(
@@ -55,7 +61,7 @@ class OpenCodeCoexistenceTests(unittest.TestCase):
                 profile=self.profile,
                 cwd=self.project,
                 command="/fake/opencode",
-                runner=self.completed(payload),
+                runner=self.completed(payload, mutate=mutate),
                 **kwargs,
             )
 
@@ -86,7 +92,7 @@ class OpenCodeCoexistenceTests(unittest.TestCase):
             "mcp": {"remote-example": {"type": "remote", "url": "https://example.invalid/mcp"}},
             "permission": {"edit": "allow"},
         }
-        report = self.inspect(effective)
+        report = self.inspect(effective, mutate=True)
         codes = {warning["code"] for warning in report["warnings"]}
         self.assertTrue(report["checked"])
         self.assertEqual(codes, {

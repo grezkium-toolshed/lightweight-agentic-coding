@@ -31,7 +31,8 @@ Released the hardware-fit public beta with an explicit Apple Silicon MacBook sup
   checkout-local mutable data requires an explicit environment override.
 - Generated OpenCode configuration disables sharing and automatic updates and asks before edits.
   `lac doctor` and client launch report inherited global/project configuration risks without
-  modifying user files or blocking launch.
+  modifying user files or blocking launch; inspection uses temporary config mirrors so upstream
+  schema migrations cannot rewrite the originals.
 - Bootstrap uses the installed pipx command for its first run when available, prints its resolved
   storage roots, and reports legacy checkout-local data instead of silently selecting it.
 - Recovery documentation now covers OpenCode merge behavior, exact uninstall paths, client process
