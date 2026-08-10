@@ -1,6 +1,9 @@
 # Generated State
 
-This directory is the generated-state root for lac.
+This directory is a legacy, opt-in generated-state root for repository development.
+Normal checkout and installed commands use the platform user-state directory so
+their behavior does not depend on the current working directory. Run
+`lac doctor --json` for the effective path.
 
 Generated files live here so users can distinguish source inputs from rendered runtime state:
 
@@ -13,6 +16,7 @@ Generated files live here so users can distinguish source inputs from rendered r
 ## Important notes
 
 - This directory is ignored by git (see `.gitignore`). Do not commit files here.
-- You can override the state root with the `LAC_STATE_ROOT` environment variable.
-- `state/clients/opencode/opencode.json` is the rendered OpenCode config that OpenCode reads at runtime.
+- Select this directory only deliberately, for example with
+  `LAC_STATE_ROOT="$PWD/state"` in a disposable development shell.
+- `<state-root>/clients/opencode/opencode.json` is the rendered OpenCode config that OpenCode reads at runtime.
 - Do not hand-edit files here. Regenerate them with `./bin/lac`.

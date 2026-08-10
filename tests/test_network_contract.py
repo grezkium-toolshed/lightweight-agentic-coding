@@ -183,6 +183,7 @@ class NetworkContractTests(unittest.TestCase):
                 return None
 
         with patch.object(clients, "resolve_command", return_value="/fake/openchamber"), \
+             patch.object(clients, "_inspect_before_open", return_value={"checked": True, "warnings": []}), \
              patch.object(clients, "allocate_service", side_effect=[chamber, opencode]), \
              patch.object(clients, "persist_started_service") as persist, \
              patch.object(clients.subprocess, "Popen", return_value=Process()) as popen, \
@@ -191,6 +192,7 @@ class NetworkContractTests(unittest.TestCase):
         env = popen.call_args.kwargs["env"]
         self.assertEqual(env["OPENCHAMBER_PORT"], "4123")
         self.assertEqual(env["OPENCODE_PORT"], "4199")
+        self.assertEqual(env["OPENCODE_DISABLE_AUTOUPDATE"], "1")
         self.assertEqual(popen.call_args.args[0], ["/fake/openchamber", "--port", "4123"])
         self.assertEqual([call.args[1] for call in persist.call_args_list], [chamber, opencode])
         self.assertIn("127.0.0.1:4123", result["message"])
@@ -223,6 +225,7 @@ class NetworkContractTests(unittest.TestCase):
 
         with patch.dict(os.environ, {}, clear=True), \
              patch.object(clients, "resolve_command", return_value="/fake/openchamber"), \
+             patch.object(clients, "_inspect_before_open", return_value={"checked": True, "warnings": []}), \
              patch.object(clients, "allocate_service", return_value=chamber) as allocate, \
              patch.object(clients, "persist_started_service"), \
              patch.object(clients.subprocess, "Popen", return_value=Process()) as popen, \
@@ -250,6 +253,7 @@ class NetworkContractTests(unittest.TestCase):
                 return None
 
         with patch.object(clients, "resolve_command", return_value="/fake/openchamber"), \
+             patch.object(clients, "_inspect_before_open", return_value={"checked": True, "warnings": []}), \
              patch.object(clients, "allocate_service", side_effect=[chamber, opencode]), \
              patch.object(clients.sys, "platform", "darwin"), \
              patch.object(clients.Path, "is_file", return_value=True), \

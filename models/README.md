@@ -1,6 +1,9 @@
 # Local Models Directory
 
-This directory is intentionally excluded from Git commits.
+This directory is a legacy, opt-in model root and is intentionally excluded from
+Git commits. Normal checkout and installed commands use the platform user-data
+directory; run `lac doctor --json` for the effective `models_root`. Set
+`AI_MODELS_DIR="$PWD/models"` only when deliberately reusing checkout-local weights.
 
 Expected subdirectories by profile:
 

@@ -11,6 +11,7 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 export LAC_STATE_ROOT="$TMP_DIR/state"
+export LAC_DATA_ROOT="$TMP_DIR/data"
 FAILED=0
 
 run() {
@@ -63,8 +64,24 @@ assert ports["services"]["runtime"]["port_source"] == "env"
 PY
 LAC_STATE_ROOT="$NETWORK_STATE" "$LAC" ports reset --json > "$TMP_DIR/ports-reset.json"
 
-# 3. Doctor runs without error
-run "$LAC" doctor --bootstrap-hint --json > "$TMP_DIR/doctor.json"
+# 3. Doctor runs without error and reports resolved mutable paths/coexistence.
+echo "[test] $LAC doctor --bootstrap-hint --json"
+if ! "$LAC" doctor --bootstrap-hint --json > "$TMP_DIR/doctor.json"; then
+  echo "[FAIL] doctor --json"
+  FAILED=1
+fi
+python3 - <<'PY' "$TMP_DIR/doctor.json" "$TMP_DIR/data" "$TMP_DIR/state"
+import json
+import sys
+from pathlib import Path
+
+report = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+assert report["paths"]["data_root"] == sys.argv[2]
+assert report["paths"]["state_root"] == sys.argv[3]
+assert report["paths"]["models_root"] == str(Path(sys.argv[2]) / "models")
+assert "checked" in report["opencode_coexistence"]
+assert "warnings" in report["opencode_coexistence"]
+PY
 if "$LAC" doctor --fix > /dev/null 2>&1; then
   echo "[FAIL] removed doctor --fix command was accepted"
   FAILED=1
@@ -114,6 +131,9 @@ micro_limit = template_config["provider"]["local-cluster"]["models"]["qwen3.5-4b
 
 assert "@tarquinen/opencode-dcp@3.1.9" in template
 assert "@dietrichgebert/ponytail@4.9.0" in template
+assert template_config["share"] == "disabled"
+assert template_config["autoupdate"] is False
+assert template_config["permission"]["edit"] == "ask"
 assert micro_limit["context"] >= MIN_OPENCODE_CONTEXT
 assert f"ctx-size = {MIN_OPENCODE_CONTEXT}" in micro_preset
 assert f"fit-ctx = {MIN_OPENCODE_CONTEXT}" in micro_preset
@@ -133,6 +153,8 @@ assert 'OPENCODE_VERSION="1.17.18"' in bootstrap_sh
 assert 'OPENCHAMBER_VERSION="1.16.3"' in bootstrap_sh
 assert 'npm install -g "opencode-ai@$OPENCODE_VERSION"' in bootstrap_sh
 assert 'pnpm add -g "@openchamber/web@$OPENCHAMBER_VERSION"' in bootstrap_sh
+assert 'LAC_COMMAND=(lac)' in bootstrap_sh
+assert '"${LAC_COMMAND[@]}" demo --local --yes' in bootstrap_sh
 assert "python3.14 python3.13 python3.12 python3.11 python3.10 python3" in bootstrap_sh
 assert '"commands"' in dcp_config and '"enabled": true' in dcp_config
 PY
@@ -164,18 +186,23 @@ with patch.object(clients.shutil, "which", return_value=None), patch.object(clie
     assert clients.resolve_command("openchamber") == str(pnpm_launcher)
 
 ctx = Context()
-with patch.object(clients, "command_exists", return_value=True), patch.object(clients.subprocess, "run") as run:
+coexistence = {"checked": True, "detected_config_sources": [], "warnings": []}
+with patch.object(clients, "command_exists", return_value=True), \
+     patch.object(clients, "_inspect_before_open", return_value=coexistence), \
+     patch.object(clients.subprocess, "run") as run:
     run.return_value.returncode = 0
     assert clients.client_open(ctx, "opencode")["ok"] is True
     env = run.call_args.kwargs["env"]
     assert env["OPENCODE_CONFIG"] == str(ctx.paths["opencode_config"])
     assert env["OPENCODE_CONFIG_DIR"] == str(ctx.paths["opencode_config_dir"])
+    assert env["OPENCODE_DISABLE_AUTOUPDATE"] == "1"
 
 process = type("Process", (), {"poll": lambda self: None})()
 with patch.object(clients, "resolve_command", return_value="/fake/openchamber"):
     chamber = {"service": "openchamber", "port": 3000, "bind_host": "127.0.0.1", "connect_host": "127.0.0.1", "automatic": True, "allocation_source": "automatic-default"}
     opencode = {"service": "opencode", "port": 4095, "bind_host": "127.0.0.1", "connect_host": "127.0.0.1", "automatic": True, "allocation_source": "automatic-default"}
-    with patch.object(clients, "allocate_service", side_effect=[chamber, opencode]), \
+    with patch.object(clients, "_inspect_before_open", return_value=coexistence), \
+         patch.object(clients, "allocate_service", side_effect=[chamber, opencode]), \
          patch.object(clients, "persist_started_service"), \
          patch.object(clients.subprocess, "Popen", return_value=process) as popen, \
          patch.object(clients.time, "sleep"):
@@ -183,11 +210,13 @@ with patch.object(clients, "resolve_command", return_value="/fake/openchamber"):
         env = popen.call_args.kwargs["env"]
         assert env["OPENCODE_CONFIG"] == str(ctx.paths["opencode_config"])
         assert env["OPENCODE_CONFIG_DIR"] == str(ctx.paths["opencode_config_dir"])
+        assert env["OPENCODE_DISABLE_AUTOUPDATE"] == "1"
 
 openchamber_env = ctx.state_root / "clients/openchamber/openchamber.env"
 env_text = openchamber_env.read_text(encoding="utf-8")
 assert f"OPENCODE_CONFIG={ctx.paths['opencode_config']}" in env_text
 assert f"OPENCODE_CONFIG_DIR={ctx.paths['opencode_config_dir']}" in env_text
+assert "OPENCODE_DISABLE_AUTOUPDATE=1" in env_text
 assert not (ctx.paths["opencode_config_dir"] / "agents").exists()
 assert not (ctx.paths["opencode_config_dir"] / "skills").exists()
 assert ctx.paths["opencode_agents_dir"].is_dir()

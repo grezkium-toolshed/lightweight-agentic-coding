@@ -38,7 +38,10 @@ lac runtime status --json
 lac provider verify --all --json
 ```
 
-Include your OS, hardware profile, selected runtime, relevant logs under `state/logs/`, and whether you installed from a checkout or wheel.
+Include your OS, hardware profile, selected runtime, the `paths` and sanitized
+`opencode_coexistence` sections from `lac doctor --json`, and whether you installed
+from a checkout or wheel. Do not post raw OpenCode effective configuration or credentials.
+See [OpenCode coexistence and privacy checks](docs/OPENCODE-COEXISTENCE.md).
 
 ## Response Expectations
 

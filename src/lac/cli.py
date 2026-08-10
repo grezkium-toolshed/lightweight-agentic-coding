@@ -48,6 +48,7 @@ from lac.packs import (
 )
 from lac.scenarios import scenario_list, scenario_show
 from lac.clients import render_client, client_open, resolve_command
+from lac.opencode import inspect_opencode_coexistence
 from lac.network import port_report, reset_ports
 from lac.models import models_sync
 from lac.catalog import sync_free
@@ -427,9 +428,35 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
     runtime_status_data = collect_runtime_status(ctx)
     asset_catalog = load_asset_catalog(ctx)
     workflow_catalog = load_workflow_catalog(ctx)
+    opencode_coexistence = inspect_opencode_coexistence(
+        ctx,
+        profile=active_profile,
+        command=resolve_command("opencode"),
+    )
+    legacy_repo_data = []
+    if ctx.legacy_repo_state_root and (ctx.legacy_repo_state_root / "active/profile.txt").is_file():
+        legacy_repo_data.append({
+            "kind": "state",
+            "path": str(ctx.legacy_repo_state_root),
+            "remediation": "Reapply the profile with `lac profile apply <profile>`; set LAC_STATE_ROOT explicitly only if you intend to reuse checkout-local state.",
+        })
+    if ctx.legacy_repo_models_root and any(ctx.legacy_repo_models_root.rglob("*.gguf")):
+        legacy_repo_data.append({
+            "kind": "models",
+            "path": str(ctx.legacy_repo_models_root),
+            "remediation": f"Set AI_MODELS_DIR={ctx.legacy_repo_models_root} to reuse these weights, or sync them into {ctx.models_root}.",
+        })
     report = {
         "generated_at": utc_now(),
         "state_root": str(ctx.state_root),
+        "paths": {
+            "data_root": str(ctx.data_root),
+            "state_root": str(ctx.state_root),
+            "models_root": str(ctx.models_root),
+            "log_root": str(ctx.state_root / "logs"),
+        },
+        "legacy_repo_data": legacy_repo_data,
+        "opencode_coexistence": opencode_coexistence,
         "checks": checks,
         "active_profile_id": active_profile_id,
         "active_profile": active_profile,

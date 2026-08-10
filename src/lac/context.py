@@ -61,10 +61,14 @@ def _user_state_dir() -> Path:
 _REPO_ROOT = _find_repo_root()
 _PACKAGE_DATA = _package_data_dir() if _REPO_ROOT is None else None
 ROOT = _REPO_ROOT or _PACKAGE_DATA
-DATA_ROOT = _REPO_ROOT or _user_data_dir()
+# Mutable data must not change location merely because lac was invoked from a
+# checkout. Repository mode selects immutable source assets only; users and
+# developers can still opt into checkout-local data with the documented env
+# overrides.
+DATA_ROOT = _user_data_dir()
 MODELS_ROOT = Path(os.environ.get("AI_MODELS_DIR", DATA_ROOT / "models")).expanduser()
-CATALOG_CACHE_ROOT = (_REPO_ROOT / "docs") if _REPO_ROOT else (DATA_ROOT / "catalog")
-_STATE_DEFAULT = _REPO_ROOT / "state" if _REPO_ROOT else _user_state_dir()
+CATALOG_CACHE_ROOT = DATA_ROOT / "catalog"
+_STATE_DEFAULT = _user_state_dir()
 STATE_ROOT = Path(_env_or_deprecated("LAC_STATE_ROOT", "AI_CLUSTER_STATE_ROOT", str(_STATE_DEFAULT))).expanduser()
 
 
@@ -76,6 +80,9 @@ class Context:
         self.catalog_cache_root = CATALOG_CACHE_ROOT
         self.state_root = STATE_ROOT
         self._is_repo = _REPO_ROOT is not None
+        self.repo_root = _REPO_ROOT
+        self.legacy_repo_state_root = (_REPO_ROOT / "state") if _REPO_ROOT else None
+        self.legacy_repo_models_root = (_REPO_ROOT / "models") if _REPO_ROOT else None
         self.paths = {
             "profile_manifest": self.root / "runtime-config/profiles.json",
             "opencode_template": self.root / ("opencode/opencode.template.jsonc" if not self._is_repo else "opencode.template.jsonc"),

@@ -131,7 +131,7 @@ When diagnosing model-load or runtime startup issues, run the server in the fore
 ./bin/lac runtime start --foreground
 ```
 
-This keeps runtime logs in the terminal instead of only writing them to `state/logs/`. llama.cpp remains the default local runtime. On macOS, `AI_LOCAL_RUNTIME=omlx` selects the oMLX OpenAI-compatible serving path when the active profile has compatible MLX mappings; `AI_LOCAL_RUNTIME=mlx` is accepted as an alias for oMLX. If a profile includes a model without a supported MLX mapping, the CLI falls back to llama.cpp.
+This keeps runtime logs in the terminal instead of only writing them to the effective state root's `logs/` directory (`lac doctor --json` reports its exact path). llama.cpp remains the default local runtime. On macOS, `AI_LOCAL_RUNTIME=omlx` selects the oMLX OpenAI-compatible serving path when the active profile has compatible MLX mappings; `AI_LOCAL_RUNTIME=mlx` is accepted as an alias for oMLX. If a profile includes a model without a supported MLX mapping, the CLI falls back to llama.cpp.
 
 ## Open Questions
 

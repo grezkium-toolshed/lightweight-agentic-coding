@@ -5,13 +5,16 @@
 - `opencode.template.jsonc`: source template for OpenCode config in this repo
 - `runtime-config/presets/<profile>.ini`: profile templates
 - `runtime-config/profiles.json`: source-of-truth profile manifest
-- `state/runtime/presets.active.ini`: generated active llama.cpp preset
-- `state/active/profile.txt`: generated selected profile marker
-- `state/clients/opencode/opencode.json`: generated OpenCode runtime config
-- `state/logs/`: generated runtime logs
-- `state/reports/`: generated doctor and smoke JSON reports
-- `state/network.v1.json`: persisted local port selections (in an installed copy,
-  the platform user-state directory rather than the package tree)
+- `<state-root>/runtime/presets.active.ini`: generated active llama.cpp preset
+- `<state-root>/active/profile.txt`: generated selected profile marker
+- `<state-root>/clients/opencode/opencode.json`: generated OpenCode runtime config
+- `<state-root>/logs/`: generated runtime logs
+- `<state-root>/reports/`: generated doctor and smoke JSON reports
+- `<state-root>/network.v1.json`: persisted local port selections
+
+Checkout and installed commands use the same platform user-data and user-state
+locations. Run `lac doctor --json` for the exact `paths`; repository-local mutable
+data requires an explicit environment override.
 
 ## OpenCode config choices
 
@@ -19,6 +22,8 @@
 - local llama.cpp provider config
 - free cloud fallback providers
 - explicit compaction settings
+- disabled conversation sharing and client auto-update defaults
+- confirmation-required workspace edits
 - watcher ignore rules for noisy paths
 - instruction globs for stable repo guidance
 - safer bash permissions
@@ -72,13 +77,12 @@ Maintainer index directories:
 ## Logging and monitoring
 
 Runtime launch logs go to:
-- `state/logs/llama-server.log`
-- `state/logs/omlx.log`
-- `state/logs/ds4.log`
+- `<state-root>/logs/llama-server.log`
+- `<state-root>/logs/omlx.log`
+- `<state-root>/logs/ds4.log`
 
-Monitor with:
-- Unix: `tail -f state/logs/llama-server.log`
-- Windows: `Get-Content state/logs/llama-server.log -Wait -Tail 50`
+Run `lac runtime start` for the platform-correct tail command, or read
+`paths.log_root` from `lac doctor --json`.
 
 The ds4/DwarfStar runtime also uses `state/runtime/ds4.pid`, `state/runtime/ds4.json`, and `state/runtime/ds4-kv/` for local process state and disk KV cache.
 

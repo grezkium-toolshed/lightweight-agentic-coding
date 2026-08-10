@@ -10,9 +10,9 @@ Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/
 
 - [~] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and
   `./scripts/verify-package-build.sh` passed locally on 2026-08-10 for the internal v0.3.0 release
-  candidate, including 60 active preset model sections, the `delivery-run.v1` positive/negative
-  contract checks, and installed-wheel version `0.3.0`. Repeat all three checks on the exact
-  sanitized release head.
+  candidate, including 33 unit/fixture checks (one Windows-only skip), 60 active preset model
+  sections, the `delivery-run.v1` positive/negative contract checks, and installed-wheel version
+  `0.3.0`. Repeat all three checks on the exact sanitized release head.
 - [ ] A fresh Dependabot read after the dependency graph rescan shows zero critical/high alerts;
   every medium/low alert has a recorded disposition.
 - [x] The 128 GB ds4/DwarfStar resource path has recorded M4 Max MacBook Pro measurements.
@@ -31,6 +31,14 @@ Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/
   and screenshots outside the repository.
 - [ ] Confirm version `0.3.0`, changelog, public-org links, `main` branch links, and clone-plus-
   bootstrap instructions. v0.3.0 does not publish a hosted pipe-to-shell installer.
+- [~] Local fixture coverage confirms checkout/unrelated-directory path parity and explicit root
+  overrides. On the exact sanitized head, also run from a sample user project and confirm `lac doctor
+  --json` resolves the same data/state/model roots. Repeat with explicit root overrides.
+- [~] Local synthetic global/project OpenCode fixtures remain byte-identical and cover every
+  advisory warning plus the clean-config case. Repeat with pinned OpenCode on the exact sanitized
+  head; confirm workspace edits ask by default and launch continues.
+- [ ] Run the first plugin-backed session online, then restart offline and confirm cached DCP and
+  Ponytail load without changing the selected local provider or sharing boundary.
 - [ ] Run the release boundary check over the full sanitized history and confirm a clean release
   worktree.
 

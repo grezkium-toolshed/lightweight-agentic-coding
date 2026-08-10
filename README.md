@@ -1,6 +1,6 @@
 # lac — hardware-fit private AI for your work machine
 
-**When your company won't let you put work into ChatGPT or Copilot, `lac` sets up a private AI assistant that runs on your own machine. With a local profile, your prompts and work content stay on the device unless you deliberately enable a cloud provider.** Useful for proofreading, drafting, editing documents, and small local automations, plus coding if that's your thing.
+**When your company won't let you put work into ChatGPT or Copilot, `lac` sets up a private AI assistant that runs on your own machine. With a local model active and no unresolved OpenCode coexistence warning, prompts and work content stay on the device.** Useful for proofreading, drafting, editing documents, and small local automations, plus coding if that's your thing.
 
 **Supported platform: Apple Silicon MacBooks.** Windows, Linux, Intel Macs, ordinary iGPUs,
 Snapdragon/Adreno, and other unverified hardware are experimental and **test at your own risk**.
@@ -20,7 +20,7 @@ cd lightweight-agentic-coding
 ./scripts/bootstrap.sh
 ```
 
-It's idempotent — re-running skips anything already installed. When it finishes, the [OpenChamber](https://github.com/openchamber/openchamber) chat UI opens on its local default or selected port, backed by a small local model. Run `lac ports show --json` for the effective URL. That's your private assistant.
+It is safe to rerun: valid prerequisites and model weights are reused, while lac and its validation may run again. When it finishes, the [OpenChamber](https://github.com/openchamber/openchamber) chat UI opens on its local default or selected port, backed by a small local model. Run `lac ports show --json` for the effective URL and `lac doctor --json` for the resolved storage paths and OpenCode coexistence warnings.
 
 Windows is experimental. Use **WSL2 for local models**; the guarded native PowerShell script is only
 for machines where Python, `llama-server.exe`, and OpenCode are already installed. OpenChamber
@@ -33,7 +33,9 @@ See the [Windows routes and requirements](docs/WINDOWS.md).
 Install [llama.cpp](https://github.com/ggml-org/llama.cpp), [OpenCode](https://opencode.ai), and [OpenChamber](https://github.com/openchamber/openchamber) yourself (see their docs), make sure Python 3.10+ is present, then:
 
 ```bash
-python3 -m pip install .          # installs the `lac` command
+python3 -m pip install --user pipx
+python3 -m pipx ensurepath
+pipx install .                    # installs `lac` in an isolated environment
 lac init                          # detects your RAM, recommends a profile
 lac models sync                   # downloads weights for the active profile
 lac runtime start                 # starts the local server (default port: 8080)
@@ -41,6 +43,8 @@ lac client open openchamber       # opens the chat UI  (or: lac client open open
 ```
 
 `lac demo --local` is the quick path: it downloads a tiny 2.5 GB model and opens the chat UI in one step.
+If pipx is unavailable, use a dedicated virtual environment rather than installing lac into a
+shared system or project Python environment.
 </details>
 
 ## Works with Grezkium Toolshed (optional)
@@ -54,10 +58,10 @@ runtime, client, model, and profile workflow unchanged.
 
 A local AI assistant running on **your** machine:
 
-- **Private by default** — the model runs on `localhost`; your documents and prompts never leave the device unless you deliberately add a cloud provider.
+- **Local model by default** — the model runs on `localhost`. Existing OpenCode configuration is merged, so resolve any `lac doctor` sharing/plugin/MCP/provider warning before treating a session as local-only.
 - **A chat window** (OpenChamber) for everyday work — proofreading, drafting, rewriting, summarizing, small edits — plus an agentic coding CLI (OpenCode) if you want it.
 - **Matched to your hardware** — `lac init` recommends the strongest validated model that fits the effective accelerator-memory budget with headroom for the OS, runtime, context, and KV cache.
-- **Reproducible behavior** — the runtime, exposed models, context limits, output headroom, and supplemental DCP thresholds are generated from one active profile.
+- **Reproducible configuration** — exposed models, context limits, output headroom, and supplemental DCP thresholds are generated from one active profile. External runtime and model-artifact validation limits are documented separately.
 
 ## Will this run on my work laptop?
 
@@ -137,6 +141,11 @@ and OpenChamber flow on a genuinely clean Apple Silicon MacBook environment rema
 
 Installed copies keep mutable data outside the Python package: models and refreshed catalogs use the platform user-data directory, while runtime state uses the platform user-state directory. Override them with `LAC_DATA_ROOT`, `LAC_STATE_ROOT`, or `AI_MODELS_DIR`.
 
+Repository and installed commands now use those same mutable locations. Existing OpenCode global
+and project configuration is preserved and merged; lac reports risky effective settings without
+blocking launch. Read the [OpenCode coexistence and privacy checks](docs/OPENCODE-COEXISTENCE.md)
+before using confidential material with an existing OpenCode installation.
+
 The complete standalone lifecycle—install, health, logs, update, rollback,
 uninstall, data retention/purge, privacy, network exposure, and optional sibling
 failure behavior—is in [`docs/STANDALONE-OPERATIONS.md`](docs/STANDALONE-OPERATIONS.md).
@@ -154,6 +163,9 @@ lac ports show --json              # Show effective local service ports
 ```
 
 All commands support `--json` for scripting.
+
+`lac runtime stop` stops the model server only. Fully quit OpenCode or OpenChamber separately,
+especially after changing profiles or generated environment settings.
 
 ## Local network ports
 
@@ -203,6 +215,7 @@ production-pilot control completes that entire loop with before/after evidence. 
 - **Design skills & brand systems (opt-in)** — lac does not bundle these; add the [Open Design](https://open-design.ai) catalog yourself: `curl -fsSL https://open-design.ai/install.sh | sh -s opencode`
 - **Ponytail (default-on)** — generated OpenCode configs include the [ponytail](https://github.com/DietrichGebert/ponytail) plugin (laziness ruleset + `/ponytail` commands). Disable per session with `PONYTAIL_DEFAULT_MODE=off`. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)
 - **Context safety** — OpenCode's built-in compaction is the hard overflow guard. DCP adds model-guided compression and cleanup with thresholds generated from the active runtime preset; it is supplemental rather than a guaranteed automatic compressor.
+- **Existing OpenCode installs** — merge precedence, advisory warnings, shared auth/session state, and safe workspace practice: [`docs/OPENCODE-COEXISTENCE.md`](docs/OPENCODE-COEXISTENCE.md)
 - **Qwen 3.8 candidate prep** — placeholder config slots exist, but no profile switches without official artifacts and hardware evidence: [`docs/models/QWEN38_READY.md`](docs/models/QWEN38_READY.md)
 - **Free cloud model catalog** — `lac catalog sync-free`, see [`docs/free-coding-models.json`](docs/free-coding-models.json)
 - **Model deep dive** — tuning rationale, profile details: [`docs/model-recommendations.md`](docs/model-recommendations.md)
@@ -212,10 +225,11 @@ production-pilot control completes that entire loop with before/after evidence. 
 
 | Symptom | Fix |
 |---|---|
-| `Connection refused` | Start runtime: `lac runtime start`. Follow logs with `tail -f state/logs/llama-server.log` on Unix or `Get-Content -Path 'state/logs/llama-server.log' -Wait -Tail 50` in PowerShell. |
+| `Connection refused` | Start runtime: `lac runtime start`. Run `lac doctor --json` for the exact `paths.log_root`, or use the `Tail logs` command printed by `lac runtime start`. |
 | `Cannot open file` | Run `lac models sync <profile>`. Check `AI_MODELS_DIR` and profile config |
 | Model sync fails | Re-run the same command. Install Hugging Face CLI for resume support |
 | OpenCode misses config | Re-run `lac init`. For Desktop, quit and relaunch after profile switch |
+| OpenCode coexistence warning | Review `lac doctor --json` and [`docs/OPENCODE-COEXISTENCE.md`](docs/OPENCODE-COEXISTENCE.md). Warnings do not block launch. |
 | Cloud provider skipped | Set the provider env var, then `lac provider verify <provider>` |
 | Config parse error | Re-render: `lac profile apply <profile>`. Run `lac doctor --strict` |
 

@@ -27,6 +27,8 @@ lac runtime status --json
 Until `v0.3.0` and its assets exist, install only from a reviewed checkout. A
 successful standalone workflow starts the runtime, renders the effective local
 provider URL, and opens OpenCode or OpenChamber without either sibling present.
+For a manual install, prefer `pipx install .`; alternatively create and activate
+a dedicated Python virtual environment before running `python -m pip install .`.
 
 ## Start, stop, status, health, and logs
 
@@ -38,6 +40,10 @@ lac provider verify local-cluster --json
 lac client open opencode
 lac runtime stop
 ```
+
+`lac runtime stop` stops only the selected model server. OpenCode and
+OpenChamber own their process lifecycles; fully quit them separately. A desktop
+process that was already running may not receive a newly generated environment.
 
 Runtime logs are under the effective state root's `logs/` directory. Installed
 macOS copies default to `~/Library/Application Support/lac/state`; Linux uses
@@ -68,17 +74,25 @@ Installed models and refreshed catalog data use the platform user-data root
 explicit locations. State contains generated client configuration, reports,
 PIDs, logs, and `network.v1.json`; it must not contain provider secrets.
 
-Back up only models or generated configuration you intentionally want to keep.
+Run `lac doctor --json` before maintenance and record its `paths` object. Back
+up only models or generated configuration you intentionally want to keep.
 Logs and diagnostic reports have no automatic retention policy in v0.3, so
 review and remove them according to your own local-data policy.
 
-- Update: fetch a reviewed release, reinstall the wheel or rerun the idempotent
-  bootstrap, then run `lac doctor`, `lac runtime start`, and provider checks.
-- Roll back: stop the runtime, reinstall the previously retained tag/wheel, and
-  reapply its profile. Back up state first if the older version may not read a
-  newer generated configuration.
-- Uninstall: stop the runtime, uninstall the Python package, and remove optional
-  OpenCode/OpenChamber components separately. User data and state are preserved.
+- Update: fetch a reviewed release and run `pipx install --force .`, or rerun the
+  bootstrap. Then run `lac doctor`, `lac runtime start`, and provider checks.
+- Roll back: stop the runtime, check out the retained tag, run
+  `pipx install --force .`, and reapply its profile. Back up state first if the
+  older version may not read a newer generated configuration.
+- Uninstall lac: run `lac runtime stop`, close OpenCode/OpenChamber, then run
+  `pipx uninstall lightweight-agentic-coding`. User data and state are preserved.
+- Remove lac-installed OpenChamber: run
+  `pnpm remove -g @openchamber/web`. Do this only if the global package is not
+  shared with another workflow.
+- Remove OpenCode only if it was installed solely for lac. Match its original
+  installer: `npm uninstall -g opencode-ai`, `brew uninstall opencode`, or remove
+  the single `~/.opencode/bin/opencode` binary installed by the curl installer.
+  Do not remove Homebrew, Node, pnpm, Python, or llama.cpp merely to uninstall lac.
 - Purge: lac has no implicit purge. After backing up what you need, explicitly
   confirm the exact resolved `LAC_DATA_ROOT`, `LAC_STATE_ROOT`, and
   `AI_MODELS_DIR` paths before removing them with platform file-management
@@ -95,8 +109,21 @@ installed or authorized by standalone startup. Model weights and optional
 clients retain their upstream licenses and trust boundaries.
 
 Local operation does not itself guarantee that workspace data stays local if
-you enable a cloud provider. Treat provider selection, workspace contents, and
-client tools as one privacy decision.
+you enable a cloud provider or inherit sharing, plugins, or MCPs from an existing
+OpenCode setup. Run `lac doctor --json` and follow
+[`OPENCODE-COEXISTENCE.md`](OPENCODE-COEXISTENCE.md). Warnings are advisory and
+do not block launch. Treat provider selection, workspace contents, and client
+tools as one privacy decision.
+
+Generated OpenCode configuration asks before workspace edits. Existing project
+configuration can override that behavior. Use Git or a disposable copy, read
+each confirmation, and review the resulting diff.
+
+DCP and Ponytail are fetched from npm on first use. Test the first launch online
+before relying on cached offline operation. The bootstrap micro model has a
+blocking SHA256 checksum; larger catalog downloads may have only size checks.
+The external Homebrew llama.cpp installation is not pinned by lac, so record its
+version when preserving reproducibility evidence.
 
 ## Optional Toolshed integration and failure behavior
 

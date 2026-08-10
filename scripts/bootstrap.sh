@@ -3,8 +3,8 @@ set -uo pipefail
 
 # lac bootstrap — a clean-checkout path to a running private, on-device AI assistant.
 #
-# macOS-first (Apple Silicon is the primary target). Idempotent: re-running is safe and skips
-# anything already installed. YOU run this yourself — it installs developer tools (Homebrew,
+# macOS-first (Apple Silicon is the primary target). Re-running is safe: valid prerequisites and
+# model weights are reused, while lac itself and validation may run again. YOU run this yourself — it installs developer tools (Homebrew,
 # llama.cpp, OpenCode, OpenChamber) and downloads a small model. With the generated local profile,
 # prompts and work content stay local; installation and first plugin use require network access.
 #
@@ -169,11 +169,47 @@ if ! have pipx; then
   fi
   have pipx && pipx ensurepath >/dev/null 2>&1 || true
 fi
+LAC_INSTALLED=0
 if have pipx; then
   info "Installing lac (global 'lac' command)..."
-  pipx install --force "$ROOT" >/dev/null 2>&1 || warn "pipx install of lac failed — using ./bin/lac instead."
+  if pipx install --force "$ROOT" >/dev/null 2>&1; then
+    LAC_INSTALLED=1
+    hash -r
+  else
+    warn "pipx install of lac failed — using ./bin/lac instead."
+  fi
 else
   warn "pipx unavailable — lac is still runnable from this checkout as ./bin/lac."
+fi
+
+if [[ "$LAC_INSTALLED" -eq 1 ]] && have lac; then
+  LAC_COMMAND=(lac)
+  info "Using the installed lac command for setup and first run."
+else
+  LAC_COMMAND=("$ROOT/bin/lac")
+  warn "Using the checkout wrapper for setup and first run."
+fi
+
+# Both command paths must resolve the same per-user mutable roots. Print them before
+# downloading or starting anything so recovery instructions have an exact location.
+LAC_BOOTSTRAP_DOCTOR_JSON="$("${LAC_COMMAND[@]}" doctor --json 2>/dev/null || true)"
+if [[ -n "$LAC_BOOTSTRAP_DOCTOR_JSON" && -n "$PYTHON_BIN" ]]; then
+  export LAC_BOOTSTRAP_DOCTOR_JSON
+  LAC_BOOTSTRAP_ROOTS="$("$PYTHON_BIN" -c 'import json, os; p=json.loads(os.environ["LAC_BOOTSTRAP_DOCTOR_JSON"])["paths"]; print(p["state_root"] + "\n" + p["models_root"])' 2>/dev/null || true)"
+  if [[ -n "$LAC_BOOTSTRAP_ROOTS" ]]; then
+    info "Resolved state root: $(printf '%s\n' "$LAC_BOOTSTRAP_ROOTS" | sed -n '1p')"
+    info "Resolved models root: $(printf '%s\n' "$LAC_BOOTSTRAP_ROOTS" | sed -n '2p')"
+  fi
+  unset LAC_BOOTSTRAP_DOCTOR_JSON
+fi
+
+if [[ -f "$ROOT/state/active/profile.txt" ]]; then
+  warn "Legacy checkout-local state exists at $ROOT/state; it is no longer selected automatically."
+  warn "Reapply the profile with 'lac profile apply <profile>', or set LAC_STATE_ROOT deliberately to reuse it."
+fi
+if find "$ROOT/models" -type f -name '*.gguf' -print -quit 2>/dev/null | grep -q .; then
+  warn "Legacy checkout-local model weights exist at $ROOT/models; they are not moved automatically."
+  warn "Set AI_MODELS_DIR='$ROOT/models' to reuse them, or sync into the resolved models root."
 fi
 
 # 7. Instant first run: small 4B model, local runtime, open the chat UI.
@@ -182,7 +218,7 @@ if [[ -n "${LAC_BOOTSTRAP_SKIP_DEMO:-}" ]]; then
   RUN_STATUS=0
 else
   info "Starting your private local assistant (downloads a ~2.5 GB model on first run)..."
-  "$ROOT/bin/lac" demo --local --yes
+  "${LAC_COMMAND[@]}" demo --local --yes
   RUN_STATUS=$?
 fi
 
@@ -193,7 +229,7 @@ if [[ "$RUN_STATUS" -eq 0 ]] && have openchamber; then
 elif [[ "$RUN_STATUS" -eq 0 ]] && have opencode; then
   info "Done. OpenCode was launched because OpenChamber is unavailable."
 else
-  warn "First run didn't complete cleanly. Diagnose with: ./bin/lac doctor"
+  warn "First run didn't complete cleanly. Diagnose with: ${LAC_COMMAND[*]} doctor"
 fi
 cat <<'NEXT'
 

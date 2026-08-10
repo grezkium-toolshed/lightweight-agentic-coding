@@ -1,5 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  // Safe lac defaults. Existing OpenCode configuration is still merged; `lac doctor`
+  // reports later-precedence overrides without modifying the user's files.
+  "share": "disabled",
+  "autoupdate": false,
   "model": "local-cluster/qwen3.6-27b-q4",
   "small_model": "local-cluster/qwen3.6-27b-q3",
   // Dynamic Context Pruning — supplemental model-guided compression and automatic cleanup.
@@ -356,7 +360,7 @@
     }
   },
   "permission": {
-    "edit": "allow",
+    "edit": "ask",
     "webfetch": "ask",
     "bash": {
       "*": "ask",

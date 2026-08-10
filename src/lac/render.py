@@ -112,7 +112,12 @@ def render_doctor_text(report):
     ok = "ok" if report["ok"] else "FAIL"
     profile_id = report["active_profile_id"] or "(none)"
     print(f"Doctor: {ok} | active profile: {profile_id}")
-    print(f"State root: {report['state_root']}")
+    paths = report.get("paths", {"state_root": report["state_root"]})
+    print(f"State root: {paths['state_root']}")
+    if paths.get("models_root"):
+        print(f"Models root: {paths['models_root']}")
+    if paths.get("log_root"):
+        print(f"Log root: {paths['log_root']}")
     failures = report.get("failures", [])
     if failures:
         print(f"Failures ({len(failures)}):")
@@ -138,6 +143,19 @@ def render_doctor_text(report):
     running = "yes" if runtime.get("running") else "no"
     health = "yes" if runtime.get("health_reachable") else "no"
     print(f"Runtime: {runtime['url']} | running={running} | health={health}")
+    coexistence = report.get("opencode_coexistence", {})
+    warnings = coexistence.get("warnings", [])
+    if warnings:
+        print(f"OpenCode coexistence warnings ({len(warnings)}):")
+        for warning in warnings:
+            print(f"  - {warning['code']}: {warning['message']}")
+            print(f"    next: {warning['remediation']}")
+    legacy = report.get("legacy_repo_data", [])
+    if legacy:
+        print(f"Legacy checkout-local data ({len(legacy)}):")
+        for item in legacy:
+            print(f"  - {item['kind']}: {item['path']}")
+            print(f"    next: {item['remediation']}")
     providers = report["provider_readiness"]
     configured = sum(1 for p in providers if p["configured"])
     print(f"Providers: {configured}/{len(providers)} configured")
