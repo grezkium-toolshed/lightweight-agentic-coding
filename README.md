@@ -63,7 +63,7 @@ and client configuration underneath it.
 
 ![OpenChamber showing a response from lac's local Qwen 4B profile](docs/assets/openchamber-local-session.png)
 
-<p align="center"><sub>Actual local Qwen 4B session with a synthetic prompt; no cloud provider was active.</sub></p>
+<p align="center"><sub>Anonymized local Qwen 4B session with a synthetic prompt, alongside the recorded v0.3 acceptance-run contract. No cloud provider was active.</sub></p>
 
 ## Works with Grezkium Toolshed (optional)
 
