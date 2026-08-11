@@ -1,6 +1,14 @@
-# lac — hardware-fit private AI for your work machine
+# lac — private local AI matched to your hardware
 
-**When your company won't let you put work into ChatGPT or Copilot, `lac` sets up a private AI assistant that runs on your own machine. With a local model active and no unresolved OpenCode coexistence warning, prompts and work content stay on the device.** Useful for proofreading, drafting, editing documents, and small local automations, plus coding if that's your thing.
+**lac turns a supported MacBook into a private local AI workbench with a model sized to its memory.** Use it for writing, research, coding, document work, and local automations without requiring an account or hosted inference.
+
+When a local model is active and `lac doctor` reports no unresolved OpenCode coexistence warning,
+prompts and work content stay on the device. Installation and first plugin use still download
+dependencies; cloud profiles have their own provider privacy terms.
+
+![Illustration of a private local AI model and runtime contained around a laptop](docs/assets/lac-local-ai-hero.png)
+
+<p align="center"><sub>Illustration — lac keeps the model, runtime, and client connection on one machine.</sub></p>
 
 **Supported platform: Apple Silicon MacBooks.** Windows, Linux, Intel Macs, ordinary iGPUs,
 Snapdragon/Adreno, and other unverified hardware are experimental and **test at your own risk**.
@@ -8,7 +16,8 @@ Parser and configuration checks on those platforms are not a physical-runtime su
 
 Built on [llama.cpp](https://github.com/ggml-org/llama.cpp), [Unsloth](https://unsloth.ai) model quantizations, [OpenCode](https://opencode.ai), and [OpenChamber](https://github.com/openchamber/openchamber). Optional [oMLX](https://github.com/danielzgtg/omlx) on Apple Silicon.
 
-> `lac` stands for "lightweight agentic coding" — it began as a local coding setup and still does that well. The engine is the same; this page just leads with the everyday-work use.
+> `lac` stands for "lightweight agentic coding." Coding remains a first-class use case, but the
+> same local engine also supports writing, research, document work, and other private workflows.
 
 ## Get started on a Mac
 
@@ -47,6 +56,15 @@ If pipx is unavailable, use a dedicated virtual environment rather than installi
 shared system or project Python environment.
 </details>
 
+## What it looks like
+
+OpenChamber provides the chat interface while lac manages the local model, runtime, context limits,
+and client configuration underneath it.
+
+![OpenChamber showing a response from lac's local Qwen 4B profile](docs/assets/openchamber-local-session.png)
+
+<p align="center"><sub>Actual local Qwen 4B session with a synthetic prompt; no cloud provider was active.</sub></p>
+
 ## Works with Grezkium Toolshed (optional)
 
 lac is independently useful as a private local assistant. M365 Threat Digest can optionally use
@@ -59,11 +77,11 @@ runtime, client, model, and profile workflow unchanged.
 A local AI assistant running on **your** machine:
 
 - **Local model by default** — the model runs on `localhost`. Existing OpenCode configuration is merged, so resolve any `lac doctor` sharing/plugin/MCP/provider warning before treating a session as local-only.
-- **A chat window** (OpenChamber) for everyday work — proofreading, drafting, rewriting, summarizing, small edits — plus an agentic coding CLI (OpenCode) if you want it.
+- **A chat window** (OpenChamber) for writing, research, summarizing, and document work — plus an agentic coding CLI (OpenCode) when you want it.
 - **Matched to your hardware** — `lac init` recommends the strongest validated model that fits the effective accelerator-memory budget with headroom for the OS, runtime, context, and KV cache.
 - **Reproducible configuration** — exposed models, context limits, output headroom, and supplemental DCP thresholds are generated from one active profile. External runtime and model-artifact validation limits are documented separately.
 
-## Will this run on my work laptop?
+## Will this run on my machine?
 
 Probably — but speed depends heavily on the accelerator and its usable memory. `lac init` treats dedicated VRAM, ordinary iGPU budgets, Apple unified memory, and Snapdragon shared memory separately. A 16 GB Windows/Linux laptop whose iGPU can use only 4–6 GB belongs in the 4–6 GB rows, not the 16 GB row. Any visible but unmeasured accelerator conservatively selects `4gb` and reports low confidence. WSL2 also selects `4gb` when it cannot measure an accelerator; native CPU-only machines may use system RAM.
 
