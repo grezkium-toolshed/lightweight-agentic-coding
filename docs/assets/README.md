@@ -6,5 +6,9 @@
   using lac's `qwen3.5-4b-q4` model with the sanitized v0.3 acceptance evidence recorded in
   `RELEASE_CHECKLIST.md`. The prompt and response are synthetic; no cloud provider or customer data
   was used.
+- `openchamber-ds4-run.png` combines an actual DeepSeek V4 Flash response in OpenChamber with data
+  from the same isolated ds4/Metal run: 256K context, 95.25 GiB planned memory, 18,764 prompt tokens,
+  approximately 250 tok/s prefill, 23.8 tok/s decode, and 1m52s end-to-end. The model ran through
+  the `128gb-ds4-flash` profile on a 128 GB M4 Max MacBook Pro with no cloud provider active.
 
-The operational visual omits account, username, project-sidebar, path, URL, and session identifiers.
+The operational visuals omit account, username, project-sidebar, path, URL, and session identifiers.

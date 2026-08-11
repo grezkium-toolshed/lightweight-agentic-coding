@@ -65,6 +65,15 @@ and client configuration underneath it.
 
 <p align="center"><sub>Anonymized local Qwen 4B session with a synthetic prompt, alongside the recorded v0.3 acceptance-run contract. No cloud provider was active.</sub></p>
 
+<details>
+<summary>See the 128 GB ds4 / DeepSeek V4 Flash run</summary>
+
+![DeepSeek V4 Flash running locally through ds4, with measured run data](docs/assets/openchamber-ds4-run.png)
+
+<p align="center"><sub>Fresh isolated M4 Max run using the same synthetic prompt. The 18,764-token agent pass completed locally in 1m52s; no cloud provider was active.</sub></p>
+
+</details>
+
 ## Works with Grezkium Toolshed (optional)
 
 lac is independently useful as a private local assistant. M365 Threat Digest can optionally use
