@@ -17,7 +17,7 @@ GitHub workflow can repeat those compatibility checks, but neither path proves G
 compatibility or performance on physical machines. Reports are
 welcome, but experimental results do not create a support guarantee.
 
-The isolated clean-install bootstrap and OpenChamber flow on Apple Silicon remains a release gate.
+The isolated clean-install bootstrap and OpenChamber flow passed the v0.3 release gate on Apple Silicon.
 
 ## Where to Ask
 

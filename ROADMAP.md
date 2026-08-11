@@ -19,7 +19,7 @@ separate; see [the evidence-to-proof stack](docs/STACK.md).
   automatic 48 GB selection only if its exact hardware contract passes.
 - Keep manifest, preset, model, and generated-client contracts consistent and reproducible.
 - Clear privacy boundaries between local work and optional cloud providers.
-- Complete the public v0.3 release gates before starting substantial v1.5 or v2.0 work.
+- Stabilize the public v0.3 beta before starting substantial v1.5 or v2.0 work.
 
 ## lac v1.5 — hardware-fit workbench
 

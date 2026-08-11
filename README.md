@@ -169,7 +169,7 @@ experimental and test-at-your-own-risk. WSL2 is the preferred Windows local-mode
 triggered GitHub workflow exercises Linux/macOS contracts plus Windows parsing, an installed wheel,
 wrappers, and client rendering; it never runs automatically and does not validate GPU drivers,
 model loading, performance, or deployment on physical hardware. The isolated clean-install
-bootstrap and OpenChamber flow on Apple Silicon remains a release gate.
+bootstrap and OpenChamber flow passed the v0.3 release gate on Apple Silicon.
 `lac doctor` reports what your platform is missing.
 
 Installed copies keep mutable data outside the Python package: models and refreshed catalogs use the platform user-data directory, while runtime state uses the platform user-state directory. Override them with `LAC_DATA_ROOT`, `LAC_STATE_ROOT`, or `AI_MODELS_DIR`.

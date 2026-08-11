@@ -68,16 +68,17 @@ authoritative.
 
 - [x] Created annotated tag `v0.3.0` on reviewed sanitized commit `5989506` and verified the tag
   resolved exactly to the accepted release head.
-- [x] Created and read back the private GitHub release notes. v0.3.0 is git-install-only; no PyPI artifact,
+- [x] Created and read back the GitHub release notes. v0.3.0 is git-install-only; no PyPI artifact,
   Trusted Publishing setup, or billing flow is part of this release.
 
-## Approval-gated public flip
+## Public launch
 
-- [ ] Obtain fresh explicit operator approval to make the repository public.
-- [ ] Change visibility, re-enable Private Vulnerability Reporting, and read both settings back.
-- [ ] From an anonymous/fresh environment, verify clone, issues/support/security links, release
-  notes, and the clone-plus-bootstrap path.
-- [ ] If any public read-back fails, return the repository to private, fix it internally, and repeat
-  the port and release gates.
+- [x] Obtained fresh explicit operator approval and made only
+  `grezkium-toolshed/lightweight-agentic-coding` public.
+- [x] Re-enabled Private Vulnerability Reporting and read back public visibility plus VPR enabled.
+- [x] With GitHub credentials disabled, cloned default `main` and annotated tag `v0.3.0`, verified
+  the repository, issues, security-reporting route, release, raw README, showcase GIF, and tagged
+  bootstrap URLs, and ran the tagged bootstrap in isolated install-only mode.
+- [x] All public read-backs passed; the rollback-to-private condition was not triggered.
 
 Never commit credentials, downloaded model files, customer data, or unsanitized evidence.
