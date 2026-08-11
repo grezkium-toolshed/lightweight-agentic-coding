@@ -1,9 +1,9 @@
 # Standalone operations
 
 lac is a local-first assistant and model-runtime orchestrator. It does not need
-M365 Threat Digest, Tenantsmith, Tracker, or a sibling checkout. Its local
-architecture is the `lac` CLI, one selected model server (llama.cpp, oMLX, or
-ds4), a generated OpenCode configuration, and an optional OpenChamber client.
+any sibling Toolshed product or checkout. Its local architecture is the `lac`
+CLI, one selected model server (llama.cpp, oMLX, or ds4), a generated OpenCode
+configuration, and an optional OpenChamber client.
 
 ## Prerequisites and limitations
 

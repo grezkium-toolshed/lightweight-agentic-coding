@@ -81,11 +81,11 @@ and client configuration underneath it.
 
 ## First out of the Grezkium Toolshed
 
-lac is the first public release in a planned four-tool Toolshed line-up. Three more products are
-being prepared: **M365 Threat Digest** for reviewed threat context, **M365 Maturity Tracker** for
-evidence-driven assessment and customer reporting, and **Tenantsmith** for deterministic,
-approval-gated Microsoft 365 changes. They are forthcoming products, not current lac integrations
-or dependencies. lac works independently today and will continue to do so.
+lac is the first public release in a growing Toolshed line-up. Two more products are being
+prepared: **M365 Threat Digest** for reviewed threat context and **Tenantsmith** for evidence-driven
+assessment, prioritization, customer reporting, and deterministic approval-gated Microsoft 365
+changes. They are forthcoming products, not current lac integrations or dependencies. lac works
+independently today and will continue to do so.
 
 ## What you get
 
@@ -228,10 +228,10 @@ analysis and drafting inside an evidence-driven security delivery loop:
 
 > assess → prioritize → approve → change → verify → explain → repeat
 
-M365 Threat Digest supplies external context, M365 Maturity Tracker assesses and communicates,
-lac assists locally, Tenantsmith performs deterministic operator-approved changes, and a future
-private Platform may preserve history and scheduling. lac never turns an AI draft into approval
-or deployment authority.
+M365 Threat Digest supplies external context, lac assists locally, Tenantsmith assesses,
+communicates, and performs deterministic operator-approved changes, and a future private Platform
+may preserve history and scheduling. lac never turns an AI draft into approval or deployment
+authority.
 
 The cross-product differentiator is still a candidate until one separately approved
 production-pilot control completes that entire loop with before/after evidence. See

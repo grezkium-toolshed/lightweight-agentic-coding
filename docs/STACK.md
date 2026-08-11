@@ -18,9 +18,8 @@ own, but a collection of tools is not yet proof of the outcome.
 | Component | Role in the loop | Boundary |
 |---|---|---|
 | Threat Digest | Supplies reviewed external threat context | Context may influence priority, but cannot create a tenant finding by itself |
-| Tracker (private) | Assesses, prioritizes, and prepares customer communication | Raw assessment evidence and customer identity stay inside the protected operator boundary |
 | lac | Runs private analysis and drafting on supported hardware | Produces drafts and evidence references; never approves or executes a tenant change |
-| Tenantsmith | Plans and performs deterministic, explicitly approved changes | Consent, applicability, impact, rollback, and read-back remain mandatory |
+| Tenantsmith | Assesses and prioritizes posture, prepares customer communication, and performs deterministic, explicitly approved changes | Raw evidence and customer identity stay protected; consent, applicability, impact, rollback, and read-back remain mandatory |
 | Platform (future, private) | Preserves delivery history, scheduling, exceptions, and portfolio state | Receives opaque references and approved projections, not unrestricted tenant data or deployment authority |
 
 lac stays free, accountless, and usable without any other component. Commercial
