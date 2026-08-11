@@ -79,12 +79,13 @@ and client configuration underneath it.
 
 <p align="center"><sub>Fresh isolated M4 Max run using the same synthetic prompt. The 18,764-token agent pass completed locally in 1m52s; no cloud provider was active.</sub></p>
 
-## Works with Grezkium Toolshed (optional)
+## First out of the Grezkium Toolshed
 
-lac is independently useful as a private local assistant. M365 Threat Digest can optionally use
-its OpenAI-compatible loopback endpoint for local enrichment, but lac never requires Digest or
-Tenantsmith and does not install either one. Failure or absence of either sibling leaves every lac
-runtime, client, model, and profile workflow unchanged.
+lac is the first public release in a planned four-tool Toolshed line-up. Three more products are
+being prepared: **M365 Threat Digest** for reviewed threat context, **M365 Maturity Tracker** for
+evidence-driven assessment and customer reporting, and **Tenantsmith** for deterministic,
+approval-gated Microsoft 365 changes. They are forthcoming products, not current lac integrations
+or dependencies. lac works independently today and will continue to do so.
 
 ## What you get
 
@@ -227,10 +228,10 @@ analysis and drafting inside an evidence-driven security delivery loop:
 
 > assess → prioritize → approve → change → verify → explain → repeat
 
-Threat Digest supplies external context, a private Tracker assesses and communicates,
-lac assists locally, Tenantsmith performs deterministic operator-approved changes, and a
-future private Platform may preserve history and scheduling. lac never turns an AI draft
-into approval or deployment authority.
+M365 Threat Digest supplies external context, M365 Maturity Tracker assesses and communicates,
+lac assists locally, Tenantsmith performs deterministic operator-approved changes, and a future
+private Platform may preserve history and scheduling. lac never turns an AI draft into approval
+or deployment authority.
 
 The cross-product differentiator is still a candidate until one separately approved
 production-pilot control completes that entire loop with before/after evidence. See
