@@ -107,10 +107,11 @@ GitHub workflow repeats Linux/macOS checks and an installed Windows wheel plus P
 it is not a release gate and never runs automatically. These are configuration-compatibility checks,
 not physical Windows/Linux support evidence. Apple Silicon MacBooks are the supported platform; the ds4 path
 has measured M4 Max 128 GB evidence, while the 48 GB profile remains manual pending its exact
-hardware contract. The v0.3.0 launch still requires a genuinely clean MacBook bootstrap,
-exact-head local checks, dependency-alert review, and approval-gated visibility/VPR steps. Versioning
-follows SemVer; `v0.3.0` is the intended public launch tag and must resolve to the reviewed
-sanitized release commit.
+hardware contract. The `v0.3.0` tag and private GitHub release were created from reviewed sanitized
+commit `5989506` after the clean MacBook bootstrap, exact-head local checks, and dependency-alert
+review passed. Documentation-only successors do not move that accepted tag. Public launch remains
+separately approval-gated and requires the visibility, VPR, and anonymous read-back steps in the
+release checklist. Versioning follows SemVer.
 
 Third-party integrations follow a strict posture: lac bundles only first-party agents and
 workflow skills. External catalogs (Open Design) are opt-in fetch, and external OpenCode

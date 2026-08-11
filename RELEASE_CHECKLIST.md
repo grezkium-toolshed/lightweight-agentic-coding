@@ -1,8 +1,8 @@
 # Public Release Checklist
 
-Do not publish a tag until every pre-tag item below is complete for the exact sanitized release
-commit. Changing repository visibility is a separate operator action that requires fresh explicit
-approval.
+The `v0.3.0` tag was created only after every pre-tag item below completed for the exact sanitized
+release commit. Changing repository visibility is a separate operator action that requires fresh
+explicit approval.
 
 Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/external gate pending · `[ ]` blocked or not yet run.
 
@@ -50,12 +50,15 @@ Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/
 
 - [ ] Restart a first-use plugin-backed session without network access and confirm cached DCP and
   Ponytail load without changing the selected local provider or sharing boundary.
-- [ ] Capture sanitized static screenshots for release/documentation use; do not add a v0.3 GIF.
+- [x] Captured sanitized Qwen and ds4 static visuals plus an accelerated Qwen showcase GIF. The
+  GIF displays the measured elapsed time and discloses its 3× presentation speed; all visuals use
+  synthetic prompts and omit account, path, URL, and session identifiers.
 - [ ] Record separate physical evidence for 16 GB, 24 GB, 48 GB, Windows/WSL, iGPU, and
   Snapdragon/Adreno paths before changing their current validation or support labels.
 
-Before tagging, rerun the automated gates and boundary check on the documentation-only successor
-to `50c4d00` and confirm its product/package content remains unchanged.
+The automated gates and boundary check were rerun on tagged head `5989506`. Later documentation-
+only successors through `main` rerun verification and the release boundary check without moving
+the accepted tag.
 
 The manually triggered GitHub compatibility workflow is optional evidence, not a tag gate. It may
 be run when a hosted OS reproduction is useful, but local checks and physical-hardware evidence stay
@@ -63,9 +66,9 @@ authoritative.
 
 ## Tag and GitHub release
 
-- [ ] Create annotated tag `v0.3.0` on the reviewed sanitized commit and verify the tag resolves
-  exactly to `origin/main`.
-- [ ] Create and read back the GitHub release notes. v0.3.0 is git-install-only; no PyPI artifact,
+- [x] Created annotated tag `v0.3.0` on reviewed sanitized commit `5989506` and verified the tag
+  resolved exactly to the accepted release head.
+- [x] Created and read back the private GitHub release notes. v0.3.0 is git-install-only; no PyPI artifact,
   Trusted Publishing setup, or billing flow is part of this release.
 
 ## Approval-gated public flip

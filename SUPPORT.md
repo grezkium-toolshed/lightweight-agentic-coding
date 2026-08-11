@@ -2,7 +2,7 @@
 
 lac is a free community product maintained on a best-effort basis. There is no support SLA.
 
-## Validation status (private pre-release)
+## Validation status (public beta)
 
 **Tested and supported platform: Apple Silicon MacBooks.** The 128 GB ds4/DwarfStar path has
 measured M4 Max MacBook Pro evidence. Profile validation remains separate from platform support:
