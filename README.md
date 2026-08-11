@@ -65,7 +65,7 @@ and client configuration underneath it.
 
 ![Qwen 4B responding locally in OpenChamber at recorded playback timing](docs/assets/qwen4b-realtime.gif)
 
-<p align="center"><sub>Fresh isolated local run using a synthetic prompt. The response completed in 25.2 seconds; the final frame pauses briefly for readability. No cloud provider was active.</sub></p>
+<p align="center"><sub>Fresh isolated local run using a synthetic prompt. The showcase plays at 3× speed; the measured response completed in 25.2 seconds and the final frame pauses briefly for readability. No cloud provider was active.</sub></p>
 
 ### Measured Qwen 4B run
 

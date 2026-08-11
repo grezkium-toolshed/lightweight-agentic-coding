@@ -7,9 +7,10 @@
   `RELEASE_CHECKLIST.md`. The prompt and response are synthetic; no cloud provider or customer data
   was used.
 - `qwen4b-realtime.gif` records a fresh isolated OpenChamber session using lac's
-  `qwen3.5-4b-q4` model. It samples the actual elapsed run once per second, preserves the recorded
-  25.2-second response time, and holds the completed response briefly for readability. The prompt
-  is synthetic and no cloud provider or customer data was used.
+  `qwen3.5-4b-q4` model. It samples the actual elapsed run once per second, displays the recorded
+  elapsed time, plays the showcase at 3× speed, and holds the completed response briefly for
+  readability. The measured response took 25.2 seconds. The prompt is synthetic and no cloud
+  provider or customer data was used.
 - `openchamber-ds4-run.png` combines an actual DeepSeek V4 Flash response in OpenChamber with data
   from the same isolated ds4/Metal run: 256K context, 95.25 GiB planned memory, 18,764 prompt tokens,
   approximately 250 tok/s prefill, 23.8 tok/s decode, and 1m52s end-to-end. The model ran through
