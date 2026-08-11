@@ -20,7 +20,7 @@ cd lightweight-agentic-coding
 ./scripts/bootstrap.sh
 ```
 
-It is safe to rerun: valid prerequisites and model weights are reused, while lac and its validation may run again. When it finishes, the [OpenChamber](https://github.com/openchamber/openchamber) chat UI opens on its local default or selected port, backed by a small local model. Run `lac ports show --json` for the effective URL and `lac doctor --json` for the resolved storage paths and OpenCode coexistence warnings.
+It is safe to rerun: valid prerequisites and model weights are reused, while lac and its validation may run again. A healthy lac-managed OpenChamber web session is reused instead of starting duplicate UI and OpenCode processes. When it finishes, the [OpenChamber](https://github.com/openchamber/openchamber) chat UI is available on its local default or selected port, backed by a small local model. Run `lac ports show --json` for the effective URL and `lac doctor --json` for the resolved storage paths and OpenCode coexistence warnings.
 
 Windows is experimental. Use **WSL2 for local models**; the guarded native PowerShell script is only
 for machines where Python, `llama-server.exe`, and OpenCode are already installed. OpenChamber

@@ -34,7 +34,8 @@ Released the hardware-fit public beta with an explicit Apple Silicon MacBook sup
   modifying user files or blocking launch; inspection uses temporary config mirrors so upstream
   schema migrations cannot rewrite the originals.
 - Bootstrap uses the installed pipx command for its first run when available, prints its resolved
-  storage roots, and reports legacy checkout-local data instead of silently selecting it.
+  storage roots, reports legacy checkout-local data instead of silently selecting it, and reuses a
+  healthy lac-managed OpenChamber/OpenCode web session rather than spawning duplicates on rerun.
 - Recovery documentation now covers OpenCode merge behavior, exact uninstall paths, client process
   ownership, first-use plugin networking, checksum scope, and safe workspace practice.
 - `lac init` now recommends from the largest single usable accelerator budget instead of broad

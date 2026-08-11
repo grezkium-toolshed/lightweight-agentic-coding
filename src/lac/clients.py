@@ -1,5 +1,6 @@
 """Client integrations: render adapters, open clients."""
 
+import hashlib
 import json
 import os
 import shutil
@@ -8,6 +9,8 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib import error as urlerror
+from urllib import request as urlrequest
 
 from lac.network import allocate_service, persist_started_service, url as network_url, validate_remote_host
 from lac.opencode import inspect_opencode_coexistence, opencode_env, print_opencode_warnings
@@ -170,6 +173,94 @@ def _inspect_before_open(ctx, env):
     return report
 
 
+def _openchamber_session_path(ctx):
+    return ctx.state_root / "clients/openchamber/session.json"
+
+
+def _openchamber_config_fingerprint(ctx):
+    digest = hashlib.sha256()
+    paths = [ctx.paths["opencode_config"]]
+    dcp_config = ctx.paths.get("dcp_config")
+    if dcp_config:
+        paths.append(dcp_config)
+    for path in paths:
+        path = Path(path)
+        if not path.is_file():
+            return ""
+        digest.update(str(path.name).encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def _http_probe(host, port, path="/", marker=None):
+    try:
+        with urlrequest.urlopen(network_url(host, port) + path, timeout=2) as response:
+            body = response.read(65536).decode("utf-8", errors="ignore")
+        return marker is None or marker.lower() in body.lower()
+    except urlerror.HTTPError as exc:
+        # OpenCode protects its HTTP surface and answers unauthenticated health
+        # requests with 401/403. OpenChamber may do the same when its optional
+        # UI password is enabled. Either response proves the endpoint exists.
+        return exc.code in {401, 403}
+    except (OSError, TypeError, ValueError, urlerror.URLError, TimeoutError):
+        return False
+
+
+def _reusable_openchamber_session(ctx, command, *, desktop, remote_host, port):
+    if desktop:
+        return None
+    path = _openchamber_session_path(ctx)
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if state.get("version") != 1 or state.get("executable") != str(command):
+        return None
+    if state.get("remote_host") != remote_host:
+        return None
+    chamber = state.get("openchamber", {})
+    if port is not None and chamber.get("port") != int(port):
+        return None
+    if state.get("config_fingerprint") != _openchamber_config_fingerprint(ctx):
+        return None
+    if not _http_probe(chamber.get("connect_host", "127.0.0.1"), chamber.get("port"), marker="OpenChamber"):
+        return None
+    opencode = state.get("opencode")
+    if remote_host is None:
+        if not isinstance(opencode, dict):
+            return None
+        if not _http_probe(opencode.get("connect_host", "127.0.0.1"), opencode.get("port"), path="/global/health"):
+            return None
+    return state
+
+
+def _write_openchamber_session(ctx, command, chamber, opencode=None, remote_host=None):
+    path = _openchamber_session_path(ctx)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "version": 1,
+        "started_at": utc_now(),
+        "executable": str(command),
+        "config_fingerprint": _openchamber_config_fingerprint(ctx),
+        "remote_host": remote_host,
+        "openchamber": {
+            "port": chamber["port"],
+            "bind_host": chamber.get("bind_host", "127.0.0.1"),
+            "connect_host": chamber.get("connect_host", "127.0.0.1"),
+        },
+        "opencode": None if opencode is None else {
+            "port": opencode["port"],
+            "bind_host": opencode.get("bind_host", "127.0.0.1"),
+            "connect_host": opencode.get("connect_host", "127.0.0.1"),
+        },
+    }
+    temporary = path.with_suffix(".json.tmp")
+    temporary.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(path)
+
+
 def client_open(ctx, target, desktop=False, remote_host=None, port=None):
     config_path = ctx.paths["opencode_config"]
 
@@ -188,14 +279,35 @@ def client_open(ctx, target, desktop=False, remote_host=None, port=None):
             )
         if not config_path.is_file():
             raise SystemExit(f"Missing generated OpenCode config: {config_path}\nRun ./bin/lac profile apply <profile> first.")
-        chamber = allocate_service(ctx, "openchamber", cli_port=port)
         env = opencode_env(ctx)
+        normalized_remote_host = validate_remote_host(remote_host) if remote_host else None
+        coexistence = _inspect_before_open(ctx, env)
+        existing = _reusable_openchamber_session(
+            ctx,
+            openchamber_command,
+            desktop=desktop,
+            remote_host=normalized_remote_host,
+            port=port,
+        )
+        if existing:
+            chamber = existing["openchamber"]
+            return {
+                "ok": True,
+                "target": target,
+                "desktop": False,
+                "reused": True,
+                "message": (
+                    "OpenChamber is already running at "
+                    f"{network_url(chamber['connect_host'], chamber['port'])}; reusing the managed session."
+                ),
+                "opencode_coexistence": coexistence,
+            }
+        chamber = allocate_service(ctx, "openchamber", cli_port=port)
         # OpenChamber and the OpenCode server own their process lifecycles. lac
         # supplies explicit ports but does not broaden their bind address.
         env["OPENCHAMBER_PORT"] = str(chamber["port"])
-        coexistence = _inspect_before_open(ctx, env)
-        if remote_host:
-            env["OPENCODE_HOST"] = validate_remote_host(remote_host)
+        if normalized_remote_host:
+            env["OPENCODE_HOST"] = normalized_remote_host
             env["OPENCODE_SKIP_START"] = "true"
         else:
             opencode = allocate_service(ctx, "opencode")
@@ -247,17 +359,24 @@ def client_open(ctx, target, desktop=False, remote_host=None, port=None):
         if process.poll() is not None:
             raise SystemExit(f"OpenChamber exited during startup with code {process.returncode}.")
         persist_started_service(ctx, chamber)
-        if not remote_host:
+        if not normalized_remote_host:
             persist_started_service(ctx, opencode)
-        mode = "remote" if remote_host else "local"
+        _write_openchamber_session(
+            ctx,
+            openchamber_command,
+            chamber,
+            opencode=None if normalized_remote_host else opencode,
+            remote_host=normalized_remote_host,
+        )
         hint = (
             f"OpenChamber web UI should be available at {network_url(chamber['connect_host'], chamber['port'])}"
-            if not remote_host else f"OpenChamber connecting to {env['OPENCODE_HOST']}"
+            if not normalized_remote_host else f"OpenChamber connecting to {env['OPENCODE_HOST']}"
         )
         return {
             "ok": True,
             "target": target,
             "desktop": False,
+            "reused": False,
             "message": hint,
             "opencode_coexistence": coexistence,
         }

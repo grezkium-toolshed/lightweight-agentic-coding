@@ -314,7 +314,9 @@ def _launch_demo_client(ctx):
     print(f"Rendering {target} client config...")
     render_client(ctx, target)
     print(f"Launching {target}...")
-    client_open(ctx, target)
+    launch = client_open(ctx, target)
+    if isinstance(launch, dict) and launch.get("message"):
+        print(launch["message"])
     return target
 
 

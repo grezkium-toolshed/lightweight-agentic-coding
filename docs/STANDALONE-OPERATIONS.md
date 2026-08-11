@@ -44,6 +44,9 @@ lac runtime stop
 `lac runtime stop` stops only the selected model server. OpenCode and
 OpenChamber own their process lifecycles; fully quit them separately. A desktop
 process that was already running may not receive a newly generated environment.
+Repeated web-client launches reuse a healthy lac-managed OpenChamber/OpenCode
+session when its managed record, endpoints, and generated configuration match.
+An explicit port or changed configuration starts a new session instead.
 
 Runtime logs are under the effective state root's `logs/` directory. Installed
 macOS copies default to `~/Library/Application Support/lac/state`; Linux uses

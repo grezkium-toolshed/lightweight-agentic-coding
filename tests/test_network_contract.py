@@ -196,6 +196,76 @@ class NetworkContractTests(unittest.TestCase):
         self.assertEqual(popen.call_args.args[0], ["/fake/openchamber", "--port", "4123"])
         self.assertEqual([call.args[1] for call in persist.call_args_list], [chamber, opencode])
         self.assertIn("127.0.0.1:4123", result["message"])
+        self.assertFalse(result["reused"])
+        session = json.loads((ctx.state_root / "clients/openchamber/session.json").read_text(encoding="utf-8"))
+        self.assertEqual(session["openchamber"]["port"], 4123)
+        self.assertEqual(session["opencode"]["port"], 4199)
+
+    def test_openchamber_reuses_matching_managed_session(self):
+        config = Path(self.temp.name) / "opencode.json"
+        config.write_text("{}", encoding="utf-8")
+        ctx = SimpleNamespace(
+            paths={"opencode_config": config, "opencode_config_dir": config.parent},
+            state_root=self.ctx.state_root,
+        )
+        session_path = ctx.state_root / "clients/openchamber/session.json"
+        session_path.parent.mkdir(parents=True)
+        session_path.write_text(json.dumps({
+            "version": 1,
+            "executable": "/fake/openchamber",
+            "config_fingerprint": clients._openchamber_config_fingerprint(ctx),
+            "remote_host": None,
+            "openchamber": {"port": 3001, "connect_host": "127.0.0.1"},
+            "opencode": {"port": 4096, "connect_host": "127.0.0.1"},
+        }), encoding="utf-8")
+
+        with patch.object(clients, "resolve_command", return_value="/fake/openchamber"), \
+             patch.object(clients, "_inspect_before_open", return_value={"checked": True, "warnings": []}), \
+             patch.object(clients, "_http_probe", return_value=True) as probe, \
+             patch.object(clients, "allocate_service") as allocate, \
+             patch.object(clients.subprocess, "Popen") as popen:
+            result = clients.client_open(ctx, "openchamber")
+
+        self.assertTrue(result["reused"])
+        self.assertIn("127.0.0.1:3001", result["message"])
+        self.assertEqual(probe.call_count, 2)
+        allocate.assert_not_called()
+        popen.assert_not_called()
+
+    def test_openchamber_does_not_reuse_changed_config(self):
+        config = Path(self.temp.name) / "opencode.json"
+        config.write_text("{}", encoding="utf-8")
+        ctx = SimpleNamespace(
+            paths={"opencode_config": config, "opencode_config_dir": config.parent},
+            state_root=self.ctx.state_root,
+        )
+        session_path = ctx.state_root / "clients/openchamber/session.json"
+        session_path.parent.mkdir(parents=True)
+        session_path.write_text(json.dumps({
+            "version": 1,
+            "executable": "/fake/openchamber",
+            "config_fingerprint": "stale",
+            "remote_host": None,
+            "openchamber": {"port": 3001, "connect_host": "127.0.0.1"},
+            "opencode": {"port": 4096, "connect_host": "127.0.0.1"},
+        }), encoding="utf-8")
+        chamber = {"service": "openchamber", "port": 3002, "connect_host": "127.0.0.1"}
+        opencode = {"service": "opencode", "port": 4097, "connect_host": "127.0.0.1"}
+
+        class Process:
+            def poll(self):
+                return None
+
+        with patch.object(clients, "resolve_command", return_value="/fake/openchamber"), \
+             patch.object(clients, "_inspect_before_open", return_value={"checked": True, "warnings": []}), \
+             patch.object(clients, "allocate_service", side_effect=[chamber, opencode]), \
+             patch.object(clients, "persist_started_service"), \
+             patch.object(clients.subprocess, "Popen", return_value=Process()) as popen, \
+             patch.object(clients.time, "sleep"):
+            result = clients.client_open(ctx, "openchamber")
+
+        self.assertFalse(result["reused"])
+        popen.assert_called_once()
 
     def test_automatic_range_is_capped_at_valid_tcp_port(self):
         state = self.ctx.state_root / "network.v1.json"

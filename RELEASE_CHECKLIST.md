@@ -9,10 +9,11 @@ Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/
 ## v0.3.0 pre-tag gates
 
 - [~] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and
-  `./scripts/verify-package-build.sh` passed locally on 2026-08-10 for the internal v0.3.0 release
-  candidate, including 33 unit/fixture checks (one Windows-only skip), 60 active preset model
+  `./scripts/verify-package-build.sh` passed locally on 2026-08-11 for the internal v0.3.0 release
+  candidate, including 35 unit/fixture checks (one Windows-only skip), 60 active preset model
   sections, the `delivery-run.v1` positive/negative contract checks, and installed-wheel version
-  `0.3.0`. Repeat all three checks on the exact sanitized release head.
+  `0.3.0`. A live rerun also reused the same healthy OpenChamber/OpenCode ports without duplicate
+  processes. Repeat all three checks on the exact sanitized release head.
 - [ ] A fresh Dependabot read after the dependency graph rescan shows zero critical/high alerts;
   every medium/low alert has a recorded disposition.
 - [x] The 128 GB ds4/DwarfStar resource path has recorded M4 Max MacBook Pro measurements.

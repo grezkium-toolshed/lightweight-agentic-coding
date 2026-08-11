@@ -225,7 +225,8 @@ fi
 # 8. What next.
 echo ""
 if [[ "$RUN_STATUS" -eq 0 ]] && have openchamber; then
-  info "Done. OpenChamber started. Run 'lac ports show --json' for the effective local URL."
+  info "Done. OpenChamber is available. Reruns reuse a healthy lac-managed web session."
+  info "Run 'lac ports show --json' for the effective local URL."
 elif [[ "$RUN_STATUS" -eq 0 ]] && have opencode; then
   info "Done. OpenCode was launched because OpenChamber is unavailable."
 else
