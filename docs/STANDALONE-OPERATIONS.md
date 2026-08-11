@@ -24,7 +24,7 @@ lac doctor --json
 lac runtime status --json
 ```
 
-Until `v0.3.0` and its assets exist, install only from a reviewed checkout. A
+Install from the `v0.3.0` tag or another explicitly reviewed checkout. A
 successful standalone workflow starts the runtime, renders the effective local
 provider URL, and opens OpenCode or OpenChamber without either sibling present.
 For a manual install, prefer `pipx install .`; alternatively create and activate

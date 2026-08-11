@@ -8,40 +8,54 @@ Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/
 
 ## v0.3.0 pre-tag gates
 
-- [~] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and
-  `./scripts/verify-package-build.sh` passed locally on 2026-08-11 for the internal v0.3.0 release
-  candidate, including 35 unit/fixture checks (one Windows-only skip), 60 active preset model
-  sections, the `delivery-run.v1` positive/negative contract checks, and installed-wheel version
-  `0.3.0`. A live rerun also reused the same healthy OpenChamber/OpenCode ports without duplicate
-  processes. Repeat all three checks on the exact sanitized release head.
-- [ ] A fresh Dependabot read after the dependency graph rescan shows zero critical/high alerts;
-  every medium/low alert has a recorded disposition.
+- [x] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and
+  `./scripts/verify-package-build.sh` passed on sanitized product commit `50c4d00` on 2026-08-11,
+  including 35 unit/fixture checks (one Windows-only skip), 60 active preset model sections, the
+  `delivery-run.v1` positive/negative contract checks, and installed-wheel version `0.3.0`. The
+  final tagged head may add only this release-evidence documentation and must rerun the same gates.
+- [x] A fresh Dependabot read on 2026-08-11 after the `50c4d00` push returned zero open alerts.
 - [x] The 128 GB ds4/DwarfStar resource path has recorded M4 Max MacBook Pro measurements.
   This does not validate unrelated platforms or the 48 GB profile.
 - [x] The `48gb` profile remains `auto_recommend: false` and is described as manual/unverified.
-- [ ] On a genuinely clean Apple Silicon MacBook environment, run the exact release head without
-  `LAC_BOOTSTRAP_SKIP_DEMO`: install the promised toolchain with OpenCode `1.17.18` and OpenChamber
-  `1.16.3`, verify the checksum-protected micro model, health and model listing, `lac smoke`, a real
-  response, and OpenChamber opening. Rerun bootstrap and confirm idempotency.
-- [~] A real internal-candidate 32K multi-turn session passed with DCP and Ponytail enabled: the
+- [x] On 2026-08-11, sanitized product commit `50c4d00` passed an isolated Apple Silicon MacBook
+  acceptance run without `LAC_BOOTSTRAP_SKIP_DEMO`: lac `0.3.0` and OpenChamber `1.16.3` used
+  temporary pipx/pnpm/data/state roots, OpenCode `1.17.18` remained aligned, and the
+  checksum-protected micro model matched `00fe7986...ef11a4`. Runtime `/health`, `/v1/models`,
+  OpenChamber HTTP 200, protected OpenCode HTTP 401, and two real `lac smoke` responses passed.
+  The final rerun preserved runtime/OpenChamber/OpenCode listener PIDs and the managed-session
+  timestamp instead of spawning duplicates.
+- [x] A real internal-candidate 32K multi-turn session passed with DCP and Ponytail enabled: the
   initial prompt used 10,860 tokens (below 75% of `context - output`), generated DCP loaded outside
   the repository and recorded context savings, tool use continued, and OpenCode automatically
-  compacted at about 30K tokens before a successful follow-up task. Repeat this evidence run on the
-  exact sanitized release head.
-- [ ] Record the tested commit, MacBook model/chip, macOS version, elapsed time, sanitized logs,
-  and screenshots outside the repository.
-- [ ] Confirm version `0.3.0`, changelog, public-org links, `main` branch links, and clone-plus-
+  compacted at about 30K tokens before a successful follow-up task. The eight ported source,
+  configuration, documentation, and test files were byte-identical between the tested internal
+  commit and sanitized `50c4d00`; the exact sanitized integration gate passed all 60 model sections.
+- [x] Acceptance evidence records sanitized product commit `50c4d00`, MacBook Pro / M4 Max / 128 GB,
+  macOS 26.6, llama.cpp build 10280, 9-second runtime readiness, and a final 68 ms smoke response.
+  Machine identifiers and unsanitized configuration are excluded. Screenshots are optional release
+  assets rather than tag evidence.
+- [x] Confirmed version `0.3.0`, changelog, public-org links, `main` branch links, and clone-plus-
   bootstrap instructions. v0.3.0 does not publish a hosted pipe-to-shell installer.
-- [~] Local fixture coverage confirms checkout/unrelated-directory path parity and explicit root
-  overrides. On the exact sanitized head, also run from a sample user project and confirm `lac doctor
-  --json` resolves the same data/state/model roots. Repeat with explicit root overrides.
-- [~] Local synthetic global/project OpenCode fixtures remain byte-identical and cover every
-  advisory warning plus the clean-config case. Repeat with pinned OpenCode on the exact sanitized
-  head; confirm workspace edits ask by default and launch continues.
-- [ ] Run the first plugin-backed session online, then restart offline and confirm cached DCP and
+- [x] Checkout/unrelated-directory path parity and explicit root overrides passed fixture coverage.
+  The installed wheel was also run from a temporary sample project and resolved the same isolated
+  data/state/model roots with no legacy checkout state.
+- [x] Synthetic global/project OpenCode fixtures remain byte-identical and cover every advisory
+  warning plus the clean-config case. The pinned OpenCode acceptance run inspected the real merged
+  configuration, continued after the expected inherited-plugin warning, kept sharing disabled and
+  edits confirmation-gated, and selected the loopback local provider.
+- [x] The release boundary check passed all 148 sanitized commits and the release worktree remained
+  clean after verification, integration, and package-build checks.
+
+## Post-launch evidence (not v0.3.0 tag blockers)
+
+- [ ] Restart a first-use plugin-backed session without network access and confirm cached DCP and
   Ponytail load without changing the selected local provider or sharing boundary.
-- [ ] Run the release boundary check over the full sanitized history and confirm a clean release
-  worktree.
+- [ ] Capture sanitized static screenshots for release/documentation use; do not add a v0.3 GIF.
+- [ ] Record separate physical evidence for 16 GB, 24 GB, 48 GB, Windows/WSL, iGPU, and
+  Snapdragon/Adreno paths before changing their current validation or support labels.
+
+Before tagging, rerun the automated gates and boundary check on the documentation-only successor
+to `50c4d00` and confirm its product/package content remains unchanged.
 
 The manually triggered GitHub compatibility workflow is optional evidence, not a tag gate. It may
 be run when a hosted OS reproduction is useful, but local checks and physical-hardware evidence stay
