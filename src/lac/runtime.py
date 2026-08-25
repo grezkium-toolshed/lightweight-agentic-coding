@@ -20,13 +20,15 @@ def command_exists(name):
     return shutil.which(name) is not None
 
 
+# Local slot id -> on-disk MLX repo directory under <models>/mlx/.
+# Values must match the repo suffix of the corresponding "mlx" entry in
+# lac.models.PROFILE_MODELS, since `hf download` names the directory after it.
 LOCAL_MLX_MODEL_IDS = {
-    "qwen3.6-27b-q3": "Qwen3.6-27B-UD-MLX-6bit",
-    "qwen3.6-27b-q4": "Qwen3.6-27B-UD-MLX-6bit",
-    "qwen3.6-35b-a3b-q8": "Qwen3.6-35B-A3B-MLX-8bit",
+    "qwen3.8-27b-q4": "Qwen3.8-27B-oQ4e-mtp",
+    "qwen3.8-27b-q8": "Qwen3.8-27B-oQ4e-mtp",
     "gemma-4-31b-q4": "gemma-4-31b-it-UD-MLX-4bit",
-    "gemma-4-31b-q8": "gemma-4-31b-it-UD-MLX-8bit",
-    "gemma-4-31b-bf16": "gemma-4-31b-it-UD-MLX-bf16",
+    "gemma-4-31b-q8": "gemma-4-31b-it-8bit",
+    "gemma-4-31b-bf16": "gemma-4-31b-it-bf16",
     "gemma-4-e4b-q8": "gemma-4-E4B-it-MLX-8bit",
     "gemma-4-26b-a4b-q4": "gemma-4-26b-a4b-it-UD-MLX-8bit",
 }
@@ -43,6 +45,13 @@ def _profile_supports_omlx(profile, verbose=False):
         if verbose:
             log_info(f"[omlx] Profile '{profile.get('id', '?')}' rejected: not a local runtime profile")
         return False
+    # Profiles can opt out even when their default slot has an MLX mapping
+    # (e.g. 24gb shares the qwen3.8-27b-q4 slot with 32gb but lacks headroom
+    # for the ~17 GB MLX repo next to other apps).
+    if profile.get("omlx") is False:
+        if verbose:
+            log_info(f"[omlx] Profile '{profile.get('id')}' rejected: profile opts out of oMLX")
+        return False
     # Only the default model gates oMLX eligibility: the small model is a
     # title/compaction helper and is substituted at render time when unmapped.
     default_id = _local_model_name(profile.get("default_model", ""))
@@ -51,6 +60,51 @@ def _profile_supports_omlx(profile, verbose=False):
             log_info(f"[omlx] Profile '{profile.get('id')}' rejected: no MLX model ID mapped for {default_id}")
         return False
     return bool(default_id)
+
+
+def _apply_omlx_settings(ctx, profile):
+    """Merge the profile's tuned oMLX recipe into oMLX's persisted settings.
+
+    oMLX reads ~/.omlx/settings.json (override with OMLX_SETTINGS_PATH); the
+    MTP/ANE/SpecPrefill keys only take effect at server startup, which matches
+    lac's start/stop lifecycle. Only recipe keys are touched — user settings
+    outside the recipe are preserved.
+    """
+    import json
+    import sys
+    recipe_rel = (profile or {}).get("omlx_settings")
+    if not recipe_rel:
+        return
+    recipe_path = ctx.root / recipe_rel
+    if not recipe_path.is_file():
+        log_info(f"[omlx] Tuned settings file missing, skipping: {recipe_path}")
+        return
+    try:
+        recipe = json.loads(recipe_path.read_text(encoding="utf-8"))
+    except ValueError as exc:
+        log_info(f"[omlx] Could not parse {recipe_path}: {exc}; skipping tuned settings")
+        return
+    settings_path = Path(os.environ.get("OMLX_SETTINGS_PATH", str(Path.home() / ".omlx" / "settings.json")))
+    settings = {}
+    if settings_path.is_file():
+        try:
+            settings = json.loads(settings_path.read_text(encoding="utf-8"))
+        except ValueError:
+            log_info(f"[omlx] Existing {settings_path} is not valid JSON; leaving it untouched")
+            return
+    if all(settings.get(key) == value for key, value in recipe.items()):
+        return
+    settings.update(recipe)
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+    settings_path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
+    log_info(f"[omlx] Applied tuned settings from {recipe_rel} to {settings_path}")
+    if recipe.get("qwen35_ane_prefill_enabled"):
+        print(
+            "[omlx] ANE prefill is enabled in the tuned settings. It requires the separately-installed "
+            "oMLX ANE kernel (not included in the brew bottle); without it, prefill falls back to GPU-only. "
+            "See docs/model-recommendations.md.",
+            file=sys.stderr,
+        )
 
 
 def _normalize_local_runtime(value):
@@ -330,6 +384,7 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False, port=N
     if runtime == "omlx":
         if not command_exists(os.environ.get("OMLX_BIN", "omlx")):
             raise SystemExit("oMLX runtime selected but `omlx` is not in PATH. Install with Homebrew or set AI_LOCAL_RUNTIME=llama.cpp.")
+        _apply_omlx_settings(ctx, profile)
         models_dir = ctx.models_root / "mlx"
         env["OMLX_MODEL_DIR"] = str(models_dir)
         env["OMLX_HOST"] = bind_host

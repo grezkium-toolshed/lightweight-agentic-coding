@@ -6,6 +6,21 @@ explicit approval.
 
 Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/external gate pending · `[ ]` blocked or not yet run.
 
+## Next release pre-tag gates (Qwen 3.8 oMLX recipes + Ornith 1.5)
+
+- [~] `./scripts/verify.sh` and `./scripts/integration-test.sh` pass on the merged change,
+  including the new oMLX assertions (24gb opt-out fallback; 32gb renders the oQ4e MLX slot)
+  and 58 preset model sections. Rerun `./scripts/verify-package-build.sh` before tag.
+- [ ] Bench the oMLX recipes on the maintainer testbed (`AI_LOCAL_RUNTIME=omlx lac runtime
+  start` + `lac bench`, ANE kernel installed for the 32–64 GB recipe): record decode and
+  prefill tok/s vs the 14.3 tok/s llama.cpp Q8 baseline. Until then the recipe numbers in
+  docs are the recipe authors' published measurements, not this repo's evidence.
+- [ ] Smoke the Ornith 1.5 9B default (`lac profile apply 8gb` → `runtime start` → `smoke`,
+  plus one vision request through the mmproj) and the 35B-A3B alternate slot before promoting
+  their `standard` validation labels.
+- [ ] Record SHA256 checksums for the Ornith GGUFs from the first validated testbed download
+  (they ship size-checked only until then).
+
 ## v0.4.0 pre-tag gates (Qwen 3.8 main family + `lac context`)
 
 - [~] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and

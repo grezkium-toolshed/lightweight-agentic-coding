@@ -6,18 +6,7 @@ import os
 
 from lac.lib.jsonc import load_jsonc
 from lac.network import url as network_url
-
-
-LOCAL_MLX_MODEL_IDS = {
-    "qwen3.6-27b-q3": "Qwen3.6-27B-UD-MLX-6bit",
-    "qwen3.6-27b-q4": "Qwen3.6-27B-UD-MLX-6bit",
-    "qwen3.6-35b-a3b-q8": "Qwen3.6-35B-A3B-MLX-8bit",
-    "gemma-4-31b-q4": "gemma-4-31b-it-UD-MLX-4bit",
-    "gemma-4-31b-q8": "gemma-4-31b-it-UD-MLX-8bit",
-    "gemma-4-31b-bf16": "gemma-4-31b-it-UD-MLX-bf16",
-    "gemma-4-e4b-q8": "gemma-4-E4B-it-MLX-8bit",
-    "gemma-4-26b-a4b-q4": "gemma-4-26b-a4b-it-UD-MLX-8bit",
-}
+from lac.runtime import LOCAL_MLX_MODEL_IDS
 
 MIN_OPENCODE_CONTEXT = 32_768
 MIN_OPENCODE_INPUT_BUDGET = 24_576

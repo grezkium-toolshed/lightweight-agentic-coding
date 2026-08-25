@@ -15,7 +15,7 @@ lac bench --model qwen3.8-27b-q4
 lac bench --model qwen3.6-27b-mtp-q4 --draft-n 6
 
 # Custom prompt
-lac bench --model qwen3.6-35b-a3b-q8 --prompt "Explain quantum computing in 3 sentences"
+lac bench --model ornith1.5-35b-q8 --prompt "Explain quantum computing in 3 sentences"
 
 # JSON output for scripting
 lac bench --json

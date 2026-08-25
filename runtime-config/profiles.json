@@ -54,7 +54,7 @@
     "macos-16gb": {
       "id": "macos-16gb",
       "label": "macOS 16 GB Apple Silicon",
-      "description": "Apple Silicon profile for 16 GB machines. Gemma 4 12B QAT default (Google-official, near-lossless, 6.4 GB) + Qwen 3.5 fallback.",
+      "description": "Apple Silicon profile for 16 GB machines. Gemma 4 12B QAT default (Google-official, near-lossless, 6.4 GB) + Ornith 1.5 9B fallback.",
       "preset": "runtime-config/presets/macos-16gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -83,6 +83,7 @@
       "description": "Balanced local-first workstation profile for coding, research, and office workflows. Qwen 3.8 27B UD-Q4_K_XL (16.7 GB, 96.1% BF16 agreement) default.",
       "preset": "runtime-config/presets/24gb.ini",
       "runtime_mode": "local",
+      "omlx": false,
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
@@ -107,9 +108,10 @@
     "32gb": {
       "id": "32gb",
       "label": "32 GB local stronger",
-      "description": "Stronger local profile that keeps Qwen 3.8 dense 27B as the default and avoids low-bit 35B-A3B.",
+      "description": "Stronger local profile that keeps Qwen 3.8 dense 27B as the default and avoids low-bit 35B-A3B. On Apple Silicon with oMLX installed, serves the tuned oQ4e MLX quant with MTP + ANE prefill.",
       "preset": "runtime-config/presets/32gb.ini",
       "runtime_mode": "local",
+      "omlx_settings": "runtime-config/omlx/qwen3.8-ane-mtp.json",
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
@@ -133,9 +135,10 @@
     "48gb": {
       "id": "48gb",
       "label": "48 GB local candidate",
-      "description": "Explicit 48 GB profile for Qwen 3.8 27B UD-Q8_K_XL (29.3 GB, 99.0% BF16 agreement) with Qwen 3.6 35B-A3B Q8 as alternate. Automatic recommendation waits for a real 48 GB hardware smoke test.",
+      "description": "Explicit 48 GB profile for Qwen 3.8 27B UD-Q8_K_XL (29.3 GB, 99.0% BF16 agreement) with Ornith 1.5 35B-A3B Q8 as alternate. On Apple Silicon with oMLX installed, serves the tuned oQ4e MLX quant with MTP + ANE prefill. Automatic recommendation waits for a real 48 GB hardware smoke test.",
       "preset": "runtime-config/presets/48gb.ini",
       "runtime_mode": "local",
+      "omlx_settings": "runtime-config/omlx/qwen3.8-ane-mtp.json",
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "standard",
@@ -161,9 +164,10 @@
     "64gb": {
       "id": "64gb",
       "label": "64 GB local multi-model",
-      "description": "High-headroom local workstation profile for heavier coding and mixed workloads. Qwen 3.8 27B Q8 default with Qwen 3.6 35B-A3B and MTP alternates.",
+      "description": "High-headroom local workstation profile for heavier coding and mixed workloads. Qwen 3.8 27B Q8 default with Ornith 1.5 35B-A3B and Qwen 3.6 MTP alternates. On Apple Silicon with oMLX installed, serves the tuned oQ4e MLX quant with MTP + ANE prefill.",
       "preset": "runtime-config/presets/64gb.ini",
       "runtime_mode": "local",
+      "omlx_settings": "runtime-config/omlx/qwen3.8-ane-mtp.json",
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "extended",
@@ -188,9 +192,10 @@
     "128gb-multi": {
       "id": "128gb-multi",
       "label": "128 GB multi-model local",
-      "description": "Large-memory workstation profile for users who want broad local model coverage. Qwen 3.8 27B Q8 default with Qwen 3.6 35B-A3B and MTP slots.",
+      "description": "Large-memory workstation profile for users who want broad local model coverage. Qwen 3.8 27B Q8 default with Ornith 1.5 35B-A3B and Qwen 3.6 MTP slots. On Apple Silicon with oMLX installed, serves the tuned MLX quant with SpecPrefill + TurboQuant KV (measured 1467 PP tok/s @195k ctx on M5 Max).",
       "preset": "runtime-config/presets/128gb-multi.ini",
       "runtime_mode": "local",
+      "omlx_settings": "runtime-config/omlx/qwen3.8-specprefill.json",
       "local_runtime_required": true,
       "downloads_required": true,
       "verification_tier": "extended",
@@ -472,7 +477,7 @@
     "6gb": {
       "id": "6gb",
       "label": "6 GB — small agentic",
-      "description": "6 GB devices. Qwen3.5-9B Q4 (~5.5 GB) with partial GPU offload and 32K context — the smallest practical agentic tier.",
+      "description": "6 GB devices. Ornith 1.5 9B Q4 (~5.8 GB, MIT agentic-coding finetune) with partial GPU offload and 32K context — the smallest practical agentic tier.",
       "preset": "runtime-config/presets/6gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -480,7 +485,7 @@
       "verification_tier": "standard",
       "memory_target_gb": 6,
       "recommendation_floor_gb": 5,
-      "estimated_default_weight_gb": 5.5,
+      "estimated_default_weight_gb": 5.8,
       "auto_recommend": true,
       "primary_workload": "small-agentic",
       "recommended_for": [
@@ -492,13 +497,13 @@
         "claude-code",
         "codex-reference"
       ],
-      "default_model": "local-cluster/qwen3.5-9b-q4",
+      "default_model": "local-cluster/ornith1.5-9b-q4",
       "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "8gb": {
       "id": "8gb",
       "label": "8 GB — agentic floor",
-      "description": "8 GB devices. Qwen3.5-9B Q4 (comfy) or Q6 (tight) — reliable tool-calling at 32K context.",
+      "description": "8 GB devices. Ornith 1.5 9B Q4 (comfy) or Q6 (tight) — MIT agentic-coding finetune with vision, reliable tool-calling at 32K context.",
       "preset": "runtime-config/presets/8gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -506,7 +511,7 @@
       "verification_tier": "standard",
       "memory_target_gb": 8,
       "recommendation_floor_gb": 7,
-      "estimated_default_weight_gb": 5.5,
+      "estimated_default_weight_gb": 5.8,
       "auto_recommend": true,
       "primary_workload": "agentic-floor",
       "recommended_for": [
@@ -518,13 +523,13 @@
         "claude-code",
         "codex-reference"
       ],
-      "default_model": "local-cluster/qwen3.5-9b-q4",
+      "default_model": "local-cluster/ornith1.5-9b-q4",
       "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "12gb": {
       "id": "12gb",
       "label": "12 GB — mid agentic",
-      "description": "12 GB devices. Qwen3.5-9B Q8 (~9.7 GB) default with 64K context; hybrid attention keeps KV affordable.",
+      "description": "12 GB devices. Ornith 1.5 9B Q8 (~9.8 GB, MIT agentic-coding finetune with vision) default with 64K context.",
       "preset": "runtime-config/presets/12gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -532,7 +537,7 @@
       "verification_tier": "standard",
       "memory_target_gb": 12,
       "recommendation_floor_gb": 10,
-      "estimated_default_weight_gb": 9.7,
+      "estimated_default_weight_gb": 9.8,
       "auto_recommend": true,
       "primary_workload": "mid-agentic",
       "recommended_for": [
@@ -545,7 +550,7 @@
         "claude-code",
         "codex-reference"
       ],
-      "default_model": "local-cluster/qwen3.5-9b-q8",
+      "default_model": "local-cluster/ornith1.5-9b-q8",
       "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "gemma-6gb": {

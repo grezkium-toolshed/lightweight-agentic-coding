@@ -94,10 +94,15 @@ def bench(ctx, model=None, draft_n=None, prompt=None, timeout=120, json_output=F
     runtime = selected_local_runtime(profile)
     base_url = local_runtime_base_url(ctx, runtime)
 
+    # oMLX and ds4 serve /v1/models but not /health (same distinction smoke makes).
     health_ok = False
     try:
-        health, _ = request_json(f"{base_url}/health", timeout=5)
-        health_ok = health.get("status") == "ok"
+        if runtime in {"omlx", "ds4"}:
+            request_json(f"{base_url}/v1/models", timeout=5)
+            health_ok = True
+        else:
+            health, _ = request_json(f"{base_url}/health", timeout=5)
+            health_ok = health.get("status") == "ok"
     except Exception:
         pass
 

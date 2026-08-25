@@ -103,9 +103,9 @@ Probably — but speed depends heavily on the accelerator and its usable memory.
 | Memory target | Typical hardware / memory type | Default profile and model weights | Validation | Realistic workload |
 |---:|---|---|---|---|
 | 4 GB | 16 GB Windows/Linux laptop with an unmeasured or ~4 GB iGPU budget | `4gb`: Qwen3.5 4B Q4, ~2.6 GB | standard | Chat, proofreading, single-shot edits at 32K |
-| 6 GB | 16 GB Windows/Linux laptop with a measured ~6 GB iGPU budget | `6gb`: Qwen3.5 9B Q4, ~5.5 GB | standard | Constrained short agentic tasks at 32K |
-| 8 GB | True 8 GB accelerator budget | `8gb`: Qwen3.5 9B Q4, ~5.5 GB | standard | Small-model tool use and short 32K sessions |
-| 12 GB | True 12 GB accelerator budget | `12gb`: Qwen3.5 9B Q8, ~9.7 GB | standard | Constrained multi-step work at 64K |
+| 6 GB | 16 GB Windows/Linux laptop with a measured ~6 GB iGPU budget | `6gb`: Ornith 1.5 9B Q4, ~5.8 GB | standard | Constrained short agentic tasks at 32K |
+| 8 GB | True 8 GB accelerator budget | `8gb`: Ornith 1.5 9B Q4, ~5.8 GB | standard | Small-model tool use and short 32K sessions |
+| 12 GB | True 12 GB accelerator budget | `12gb`: Ornith 1.5 9B Q8, ~9.8 GB | standard | Constrained multi-step work at 64K |
 | 16 GB | Apple Silicon unified memory | `macos-16gb`: Gemma 4 12B QAT, ~6.4 GB | standard | Everyday work with macOS headroom |
 | 16 GB | Dedicated VRAM or CPU-only system RAM | `16gb`: Qwen 3.8 27B Q3, ~12.5 GB | standard | Constrained larger-model work |
 | 24 GB | Dedicated VRAM or unified memory | `24gb`: Qwen 3.8 27B Q4, ~16.7 GB | standard | General daily driver |
@@ -122,6 +122,8 @@ await their own hardware evidence before their validation labels can be restored
 
 The 48 GB tier corresponds to current [MacBook Pro configurations](https://support.apple.com/en-euro/126319), but availability alone is not validation; lac keeps it manual until the recorded smoke-test contract passes.
 
+On Apple Silicon with [oMLX](https://github.com/danielzgtg/omlx) installed, the 32–128 GB Qwen profiles also stage a tuned Qwen 3.8 27B MLX quant (oQ4e) and apply measured throughput recipes at runtime start — MTP + ANE prefill on 32–64 GB (~53–72 tok/s decode measured on M4 Max), SpecPrefill + TurboQuant KV on 128 GB (1,467 prefill tok/s at 195K context measured on M5 Max). Details and sources: [`docs/model-recommendations.md`](docs/model-recommendations.md).
+
 The target is a safe fit, not maximum memory consumption. For multiple discrete GPUs lac uses the largest single reported budget; multi-GPU selection remains manual. Windows' authoritative target is the OS-provided [DXGI video-memory budget](https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_4/ns-dxgi1_4-dxgi_query_video_memory_info); until that budget is exposed by an available runtime probe, shared GPUs stay conservative. Qualcomm/Adreno is detected separately and reported as experimental acceleration; llama.cpp documents [OpenCL support for Windows 11 ARM64](https://github.com/ggml-org/llama.cpp/blob/master/docs/backend/OPENCL.md), but lac does not promise an NPU path.
 
 ## Which profile / model?
@@ -132,14 +134,14 @@ The target is a safe fit, not maximum memory consumption. For multiple discrete 
 |---|---|---|
 | Any machine, lightweight demo | `micro` | Tiny 4B model (~2.5 GB), automatic GPU offload with CPU fallback |
 | 4 GB device | `4gb` | Qwen3.5-4B Q4 — chat + light automation |
-| 6 GB device | `6gb` | Qwen3.5-9B Q4 with partial offload — smallest practical agentic tier |
-| 8 GB device | `8gb` | Qwen3.5-9B Q4/Q6 or Gemma 4 12B QAT (`gemma-8gb`) — the agentic floor |
-| 12 GB device | `12gb` | Qwen3.5-9B Q8, 64K context |
+| 6 GB device | `6gb` | Ornith 1.5 9B Q4 with partial offload — smallest practical agentic tier |
+| 8 GB device | `8gb` | Ornith 1.5 9B Q4/Q6 or Gemma 4 12B QAT (`gemma-8gb`) — the agentic floor |
+| 12 GB device | `12gb` | Ornith 1.5 9B Q8 with vision, 64K context |
 | 16 GB dedicated VRAM or CPU-only RAM | `16gb` | Qwen 3.8 27B UD-Q3_K_XL (12.5 GB) |
 | 16 GB Apple Silicon Mac | `macos-16gb` | Balanced Apple Silicon default (Gemma 4 12B QAT) |
 | 24 GB Mac / workstation | `24gb` | The sweet spot — recommended daily driver |
-| 32 GB workstation | `32gb` | Stronger, with MTP speculative decoding |
-| 48 GB workstation | `48gb` | Qwen 3.8 27B Q8 default (+ Qwen 3.6 35B-A3B Q8 alternate); explicit selection only pending hardware validation |
+| 32 GB workstation | `32gb` | Stronger, with MTP speculative decoding; tuned oMLX quant on Apple Silicon |
+| 48 GB workstation | `48gb` | Qwen 3.8 27B Q8 default (+ Ornith 1.5 35B-A3B Q8 alternate); explicit selection only pending hardware validation |
 | Cloud-only, free | `openrouter` | Zero downloads, free-tier hosted models |
 
 <details>
@@ -149,8 +151,8 @@ For 64 GB+ machines, the Gemma family, and specialist runtimes. These are power-
 
 | Profile | What you get |
 |---|---|
-| `64gb` | Qwen 3.8 27B Q8 + Qwen 3.6 35B-A3B Q8 / MTP |
-| `128gb-multi` | Multi-model Qwen workstation: Qwen 3.8 27B Q8 default (llama.cpp) |
+| `64gb` | Qwen 3.8 27B Q8 + Ornith 1.5 35B-A3B Q8 / Qwen 3.6 MTP |
+| `128gb-multi` | Multi-model workstation: Qwen 3.8 27B Q8 default (llama.cpp); tuned oMLX SpecPrefill recipe on Apple Silicon |
 | `128gb-qwen122b` | Large-model Qwen-focused (llama.cpp) |
 | `128gb-minimax` | MiniMax M2.7 (IQ4_XS) |
 | `128gb-ds4-flash` | DeepSeek V4 Flash via [antirez's ds4/DwarfStar](https://github.com/antirez/ds4). Needs a separately-built `ds4-server` (`git clone https://github.com/antirez/ds4 && make`; set `DS4_BIN`). The ceiling of what a top-spec 128 GB MacBook Pro runs locally; the CUDA build (`make cuda-generic`) is community-validated. |

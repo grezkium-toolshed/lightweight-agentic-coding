@@ -2,9 +2,9 @@
 
 ## Local-first baseline
 
-Use Qwen 3.8 27B as the default local family for general agentic work, with Qwen 3.6 35B-A3B
-and MTP variants as alternates on larger tiers and Qwen 3.6 / Qwen 3.5 / Gemma 4 covering the
-low-end tiers.
+Use Qwen 3.8 27B as the default local family for general agentic work, with Ornith 1.5 35B-A3B
+and Qwen 3.6 MTP variants as alternates on larger tiers and Ornith 1.5 9B / Qwen 3.5 4B / Gemma 4
+covering the low-end tiers.
 
 Recommendations target the strongest validated model that fits the **effective accelerator-memory budget** while retaining headroom for the OS, runtime, context, and KV cache. Dedicated VRAM is a hard budget; ordinary iGPUs use their reported usable graphics budget rather than total system RAM; Apple Silicon uses unified memory; and Snapdragon/Adreno uses a measured shared-memory budget or a conservative 4 GB fallback. CPU-only machines may use system RAM.
 
@@ -16,7 +16,8 @@ Default quant guidance:
 - prefer Unsloth's `UD-Q8_K_XL` (29.3 GB, 99.0% BF16 token agreement) for Qwen 3.8 27B where hardware allows; `Q8_0` (27.0 GB, 98.8%) is the memory-pressure fallback
 - use `UD-Q4_K_XL` (16.7 GB, 96.1%) for the 24–32 GB tiers and `UD-Q3_K_XL` (12.5 GB, 92.4%) for 16 GB
 - avoid the IQ2 tier (82–86% agreement) as a default; it exists only for constrained low-end slots
-- keep Qwen 3.6 35B-A3B Q8 and MTP variants as alternates where they were the previous default; a Qwen 3.8 MTP/MLX path does not exist yet
+- Ornith 1.5 35B-A3B `Q8_0` replaces the Qwen 3.6 35B-A3B alternates on 48 GB+ (MIT agentic-coding finetune; DeepSWE 22 where Qwen 3.6 35B scores 0); Qwen 3.6 MTP slots stay for llama.cpp speculative decoding
+- the Qwen 3.8 MLX path now exists: `Jundot/Qwen3.8-27B-oQ4e-mtp` (~17 GB) serves the 32 GB+ profiles under oMLX with tuned recipes (see "oMLX tuned throughput recipes" below)
 
 ### Qwen 3.8 27B quant selection
 
@@ -35,15 +36,15 @@ Top-1% token agreement vs BF16 (Unsloth quantization analysis, estimated from th
 
 Recommended profile mapping:
 - `4gb` / `6gb`: the expected tiers for many 16 GB Windows/Linux iGPU laptops, based on measured graphics budget
-- `8gb` / `12gb`: true accelerator-budget tiers, not system-RAM labels (Qwen 3.5 9B / Gemma 4 QAT remain the defaults; the Qwen 3.8 IQ2 tier is a quality cliff, not a default)
+- `6gb` / `8gb` / `12gb`: true accelerator-budget tiers, not system-RAM labels (Ornith 1.5 9B / Gemma 4 QAT are the defaults; the Qwen 3.8 IQ2 tier is a quality cliff, not a default)
 - `16gb`: Qwen 3.8 27B `UD-Q3_K_XL`
-- `macos-16gb`: Gemma 4 12B `UD-Q4_K_XL` + Qwen3.5 9B `Q4_K_M` + Gemma 4 E4B `Q8_0` for Apple Silicon
+- `macos-16gb`: Gemma 4 12B `UD-Q4_K_XL` + Ornith 1.5 9B `Q4_K_M` + Gemma 4 E4B `Q8_0` for Apple Silicon
 - `24gb`: Qwen 3.8 27B `UD-Q4_K_XL`
 - `32gb`: Qwen 3.8 27B `UD-Q4_K_XL` + Qwen 3.6 27B MTP `UD-Q4_K_XL`
-- `48gb`: Qwen 3.8 27B `UD-Q8_K_XL`, Qwen 3.6 35B-A3B `UD-Q8_K_XL` alternate, and 4B small model; manual-only until its real-hardware gate passes
-- `64gb`: Qwen 3.8 27B `UD-Q8_K_XL` + Qwen 3.6 35B-A3B `UD-Q8_K_XL` + 35B-A3B MTP `UD-Q6_K_XL`
+- `48gb`: Qwen 3.8 27B `UD-Q8_K_XL`, Ornith 1.5 35B-A3B `Q8_0` alternate, and 4B small model; manual-only until its real-hardware gate passes
+- `64gb`: Qwen 3.8 27B `UD-Q8_K_XL` + Ornith 1.5 35B-A3B `Q8_0` + Qwen 3.6 35B-A3B MTP `UD-Q6_K_XL`
 - `128gb-ds4-flash`: DeepSeek V4 Flash q2-q4-imatrix through DwarfStar ds4
-- `128gb-multi`: Qwen 3.8 27B `UD-Q8_K_XL` default plus Qwen 3.6 35B-A3B and MTP slots
+- `128gb-multi`: Qwen 3.8 27B `UD-Q8_K_XL` default plus Ornith 1.5 35B-A3B and Qwen 3.6 MTP slots
 - `128gb-qwen122b`: Qwen 122B-focused
 - `128gb-minimax`: MiniMax M2.7 `UD-IQ4_XS` alternative
 
@@ -74,8 +75,7 @@ guarantee that a local model will choose to compress.
 Qwen 3.8 and Qwen 3.6 are treated as the default local coding/general families. For Qwen 3.8
 27B, Unsloth's instruct (non-thinking) baseline is `temp=0.7`, `top_p=0.8`, `top_k=20`,
 `min_p=0.0`, `presence_penalty=1.5`, `repeat_penalty=1.0`, with `reasoning = off` as the
-default start. Qwen3.5 and Qwen 3.6 small non-thinking mode follows the same general shape;
-the `macos-16gb` Qwen3.5 9B preset follows it directly.
+default start. Qwen3.5 and Qwen 3.6 small non-thinking mode follows the same general shape.
 
 The Qwen 3.6 profiles use the same family guidance but are tuned more conservatively for
 repeatable coding and agent loops: 27B Q3/Q4 profiles use `top-p=0.9`, `top-k=40`, modest
@@ -92,15 +92,15 @@ Gemma 4 profiles keep the Unsloth-style Gemma defaults: `temperature=1.0`, `top_
 | Profile / model | Artifact family | Context | temp / top-p / top-k | Penalties | Source / rationale |
 |---|---:|---|---|---|
 | `macos-16gb` / Gemma 4 12B Q4 | `UD-Q4_K_XL` | 256K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Unsloth Gemma defaults; encoder-free text+image+audio default for 16GB Apple Silicon. |
-| `macos-16gb` / Qwen3.5 9B Q4 fallback | `Q4_K_M` | 32K | `0.7 / 0.8 / 20` | presence `1.5`, repeat `1.0` | Unsloth Qwen small non-thinking baseline; 32K keeps 16GB macOS headroom. |
+| `macos-16gb` / Ornith 1.5 9B Q4 fallback | `Q4_K_M` | 32K | `0.6 / 0.95 / 20` | presence `0.0`, repeat `1.0` | Ornith model-card coding settings; 32K keeps 16GB macOS headroom. |
 | `macos-16gb` / Gemma 4 E4B Q8 fallback | `Q8_0` | 32K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Unsloth Gemma defaults; lightest alternate for multilingual and office work. |
 | `16gb` / Qwen 3.8 27B Q3 | `UD-Q3_K_XL` | 128K | `0.7 / 0.8 / 20` | presence `1.5`, repeat `1.0` | Unsloth Qwen 3.8 instruct baseline; hybrid attention keeps 128K affordable at 12.5 GB. |
 | `24gb` / Qwen 3.8 27B Q4 | `UD-Q4_K_XL` | 128K | `0.7 / 0.8 / 20` | presence `1.5`, repeat `1.0` | Balanced Qwen 3.8 default at 96.1% BF16 agreement. |
 | `32gb` / Qwen 3.8 27B Q4 | `UD-Q4_K_XL` | 128K | `0.7 / 0.8 / 20` | presence `1.5`, repeat `1.0` | Qwen 3.8 coding default, paired with Qwen 3.6 MTP specialist. |
 | `48gb` / Qwen 3.8 27B Q8 | `UD-Q8_K_XL` | 256K | `0.7 / 0.8 / 20` | presence `1.5`, repeat `1.0` | Near-lossless 99.0% agreement; standard validation and explicit selection only. |
-| `48gb` / Qwen 3.6 35B-A3B Q8 alternate | `UD-Q8_K_XL` | 256K | `0.7 / 0.92 / 40` | presence `0.5`, repeat `1.05` | MoE alternate retained from the previous 48 GB default. |
+| `48gb` / Ornith 1.5 35B-A3B Q8 alternate | `Q8_0` | 256K | `0.6 / 0.95 / 20` | presence `0.0`, repeat `1.0` | Ornith model-card coding settings; MoE alternate (~3B active) for terminal-agent work. |
 | `64gb` / Qwen 3.8 27B Q8 | `UD-Q8_K_XL` | 256K | `0.7 / 0.8 / 20` | presence `1.5`, repeat `1.0` | Higher-headroom Qwen 3.8 default. |
-| `64gb` / Qwen 3.6 35B-A3B Q8 alternate | `UD-Q8_K_XL` | 256K | `0.7 / 0.92 / 40` | presence `0.5`, repeat `1.05` | Stable MoE alternate for mixed workloads. |
+| `64gb` / Ornith 1.5 35B-A3B Q8 alternate | `Q8_0` | 256K | `0.6 / 0.95 / 20` | presence `0.0`, repeat `1.0` | Ornith model-card coding settings; stable MoE alternate for mixed workloads. |
 | `gemma-16gb` / Gemma 4 12B Q8 | `UD-Q8_K_XL` | 256K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Unsloth Gemma defaults; encoder-free text+image+audio default for 16GB VRAM. |
 | `gemma-16gb` / Gemma 4 12B Q4 fallback | `UD-Q4_K_XL` | 256K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Lighter 12B slot; same multimodal capability at lower RAM. |
 | `gemma-16gb` / Gemma 4 E4B Q8 fallback | `Q8_0` | 128K | `1.0 / 0.95 / 64` | presence `0.0`, repeat `1.0` | Smallest Gemma fallback for lightweight multilingual work. |
@@ -187,6 +187,67 @@ Use Qwen 3.6 MTP variants as the fast coding and architect replacement. The 27B 
 
 Qwen Coder Next was removed from local presets in favor of MTP models, as the newer Qwen 3.6 family has better tool-call reliability and MTP provides sufficient generation speed. Cloud provider entries for coder models remain available as fallbacks.
 
+## Ornith 1.5 (small default + large alternate)
+
+Ornith 1.5 is Deep Recurse's MIT-licensed agentic-coding family, finetuned on Qwen 3.5 / Gemma 4
+bases with extended pretraining and RL. On the DeepSWE benchmark it scores 22 where Qwen 3.6 35B
+and Gemma 4 31B score 0; SWE-bench Verified 79. Sampling per the model card: `temp=0.6`,
+`top_p=0.95`, `top_k=20` for coding. The GGUFs ship their own chat template (`jinja = true`, no
+`chat-template-file` override) and vision via a shared BF16 mmproj.
+
+- **9B dense VLM** (`ornith-ai/Ornith-1.5-9B-GGUF`) — default on `6gb` (Q4, no mmproj to preserve
+  headroom), `8gb` (Q4/Q6 + mmproj), `12gb` (Q8/Q6 + mmproj), and the `macos-16gb` fallback slot.
+  Ships as `standard` validation until benched on real hardware.
+- **35B-A3B MoE, ~3B active** (`ornith-ai/Ornith-1.5-35B-A3B-GGUF`, Q8_0 37.8 GB) — alternate slot
+  on `48gb`/`64gb`/`128gb-multi`, replacing the Qwen 3.6 35B-A3B Q8 alternates. Decode speed scales
+  with active parameters, so it is the fast always-on option next to the dense Qwen 3.8 default.
+
+## oMLX tuned throughput recipes (Apple Silicon)
+
+The Qwen 3.8 MLX path is live: `Jundot/Qwen3.8-27B-oQ4e-mtp` (~17 GB oQ4e — 4-bit affine,
+groups of 64, 166 sensitive tensors at 5-bit). `lac models sync` stages it on the 32 GB+ Qwen
+profiles; when oMLX (>= 0.6.3) is installed, `lac runtime start` merges the profile's recipe from
+`runtime-config/omlx/` into `~/.omlx/settings.json` (override path with `OMLX_SETTINGS_PATH`)
+before launching the server. Settings apply at server startup only.
+
+| Tier | Recipe | Measured |
+|---|---|---|
+| `32gb`/`48gb`/`64gb` | `qwen3.8-ane-mtp.json` — native MTP k=3 + ANE prefill | 53–72 tok/s decode, ~274 tok/s prefill @4K (M4 Max 128 GB) |
+| `128gb-multi` | `qwen3.8-specprefill.json` — SpecPrefill (0.5B draft, keep 0.2, threshold 8K) + TurboQuant KV 6-bit + MTP | 1,467 PP tok/s @195K ctx (peak ~2,496; 1,727 @128K), 30.4 TG tok/s, ~33 GB peak (M5 Max 40c 128 GB) |
+
+For comparison, the recorded llama.cpp baseline for Qwen 3.8 Q8 at 256K on the same M4 Max class
+is 14.3 tok/s. Sources: [Weschera's measured MTP/ANE recipe](https://github.com/Weschera/Qwen3.8-27B-oMLX-MTP-Mac)
+and the [oMLX benchmark 10p6ed74](https://omlx.ai/benchmarks/performance/10p6ed74). The SpecPrefill
+draft model (`mlx-community/Qwen2.5-0.5B-Instruct-4bit`) is staged automatically on `128gb-multi`;
+the benchmark ran an AWQ-gs64-mm quant with no public repo, so lac applies the same settings to
+oQ4e — re-bench locally with `lac bench` before quoting numbers.
+
+Caveats:
+- The ANE prefill kernel is **not** in the brew bottle; it installs as a separate tarball. Without
+  it, prefill silently runs GPU-only. `lac doctor` prints a reminder when a tuned recipe is active.
+- The 24 GB profile deliberately opts out of oMLX (`"omlx": false`): the ~17 GB MLX repo leaves too
+  little headroom next to other apps on that tier.
+- MTP k=3 is the sweet spot: k=4 gains ~1 tok/s on code but loses ~5 tok/s on prose.
+
+### Draft-model speculative decoding on smaller tiers
+
+The 128 GB SpecPrefill result shows the draft model is the biggest single lever, and the same idea
+applies to llama.cpp: `llama-server` accepts a separate small draft model per slot
+(`model-draft = <path>` plus `spec-type = draft-model`, with `spec-draft-n-max` as on the MTP
+slots). It is not enabled on the 6–16 GB presets by default because a resident draft costs memory
+those tiers do not have, and no measured run exists yet for the Ornith 9B targets. To experiment on
+a tier with headroom, add to the model's preset section, re-apply the profile, and `lac bench` the
+before/after:
+
+```ini
+spec-type = draft-model
+model-draft = __MODELS_DIR__/qwen3.5/Qwen3.5-4B-Q4_K_M.gguf
+spec-draft-n-max = 6
+```
+
+Draft and target must share a vocabulary (Qwen-family drafts for Qwen/Ornith targets). Promote a
+measured win into the committed preset rather than leaving it machine-local.
+
 ## When to use free cloud fallbacks
 
 Use free or trial-backed cloud providers when:
@@ -208,7 +269,7 @@ For office automation, the model matters less than workflow quality and tool sup
 
 Use `macos-16gb` for MacBook Air M4 16GB-class machines. It prioritizes OS headroom, context room, and interactive responsiveness over maximum parameter count:
 - Gemma 4 12B `UD-Q4_K_XL` is the default local general model at the preset's larger context.
-- Qwen3.5 9B `Q4_K_M` and Gemma 4 E4B `Q8_0` are 32K fallback slots for constrained short sessions.
+- Ornith 1.5 9B `Q4_K_M` and Gemma 4 E4B `Q8_0` are 32K fallback slots for constrained short sessions.
 - Validate memory pressure before increasing any fallback slot's context.
 - Use OpenCode Go or OpenRouter overlays for heavier repository-wide coding tasks.
 
@@ -273,7 +334,7 @@ The 4-16 GB market is served by six profiles (`4gb`, `6gb`, `8gb`, `12gb`, `gemm
 
 Design rules that make these tiers feasible:
 
-- **Qwen hybrid attention** (Qwen3.5-9B, Qwen3.6-27B, Qwen3.8-27B): only a quarter of layers use full attention, so the KV cache is near-constant in context size. 32K-64K contexts stay affordable even at 6 GB. This is architecture, not tuning.
+- **Qwen hybrid attention** (Qwen3.5-9B and the Qwen3.5-based Ornith 1.5 9B, Qwen3.6-27B, Qwen3.8-27B): only a quarter of layers use full attention, so the KV cache is near-constant in context size. 32K-64K contexts stay affordable even at 6 GB. This is architecture, not tuning.
 - **Dense beats MoE at 12-16 GB for agentic work**: the dense 27B out-scores the 35B-A3B MoE on agentic benchmarks, and its honest 16 GB quant (Qwen 3.8 UD-Q3_K_XL, 12.5 GB) is smaller than the MoE's. The only MoE worth a low-end slot is gemma-4-26b-a4b UD-Q3_K_XL (12.9 GB) on 16 GB, for decode speed over agentic reliability.
 - **Gemma 4 12B QAT** (`gemma-4-12b-qat`, 6.4 GB, Google-official, near-lossless) is the strongest model that fits 8 GB — it replaces the plain Q4 as the default for `macos-16gb` and `gemma-8gb`.
 - **KV quantization**: `cache-type-k/v = q4_0` on the 4/6 GB tiers halves KV memory; `q8_0` everywhere else.

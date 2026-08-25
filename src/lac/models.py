@@ -24,23 +24,25 @@ PROFILE_MODELS = {
     },
     "6gb": {
         "gguf": [
-            ('qwen3.5', 'Qwen3.5-9B-Q4_K_M.gguf', 'unsloth/Qwen3.5-9B-GGUF', 5000),
+            ('ornith1.5', 'Ornith-1.5-9B-Q4_K_M.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 5500),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": [],
     },
     "8gb": {
         "gguf": [
-            ('qwen3.5', 'Qwen3.5-9B-Q4_K_M.gguf', 'unsloth/Qwen3.5-9B-GGUF', 5000),
-            ('qwen3.5', 'Qwen3.5-9B-Q6_K.gguf', 'unsloth/Qwen3.5-9B-GGUF', 7500),
+            ('ornith1.5', 'Ornith-1.5-9B-Q4_K_M.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 5500),
+            ('ornith1.5', 'Ornith-1.5-9B-Q6_K.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 7200),
+            ('ornith1.5', 'mmproj-Ornith-1.5-9B-BF16.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 850),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": [],
     },
     "12gb": {
         "gguf": [
-            ('qwen3.5', 'Qwen3.5-9B-Q8_0.gguf', 'unsloth/Qwen3.5-9B-GGUF', 9000),
-            ('qwen3.5', 'Qwen3.5-9B-Q6_K.gguf', 'unsloth/Qwen3.5-9B-GGUF', 7500),
+            ('ornith1.5', 'Ornith-1.5-9B-Q8_0.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 9300),
+            ('ornith1.5', 'Ornith-1.5-9B-Q6_K.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 7200),
+            ('ornith1.5', 'mmproj-Ornith-1.5-9B-BF16.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 850),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": [],
@@ -57,7 +59,7 @@ PROFILE_MODELS = {
         "gguf": [
             ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
         ],
-        "mlx": [],
+        "mlx": ['unsloth/gemma-4-E4B-it-MLX-8bit'],
     },
     "gemma-8gb": {
         "gguf": [
@@ -70,10 +72,11 @@ PROFILE_MODELS = {
         "gguf": [
             ('gemma4', 'gemma-4-12B-it-qat-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-12B-it-qat-GGUF', 6000),
             ('gemma4', 'gemma-4-12b-it-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-12b-it-GGUF', 7500),
-            ('qwen3.5', 'Qwen3.5-9B-Q4_K_M.gguf', 'unsloth/Qwen3.5-9B-GGUF', 5000),
+            ('ornith1.5', 'Ornith-1.5-9B-Q4_K_M.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 5500),
+            ('ornith1.5', 'mmproj-Ornith-1.5-9B-BF16.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 850),
             ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
         ],
-        "mlx": ['unsloth/gemma-4-E4B-it-MLX-8bit'],
+        "mlx": [],
     },
     "24gb": {
         "gguf": [
@@ -90,26 +93,28 @@ PROFILE_MODELS = {
             ('qwen3.6-mtp', 'Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-MTP-GGUF', 19000),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
-        "mlx": [],
+        "mlx": ['Jundot/Qwen3.8-27B-oQ4e-mtp'],
     },
     "48gb": {
         "gguf": [
             ('qwen3.8', 'Qwen3.8-27B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.8-27B-GGUF', 29000),
             ('qwen3.8', 'mmproj-F16.gguf', 'unsloth/Qwen3.8-27B-GGUF', 800),
-            ('qwen3.6', 'Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-GGUF', 36000),
+            ('ornith1.5', 'Ornith-1.5-35B-Q8_0.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 36000),
+            ('ornith1.5', 'mmproj-Ornith-1.5-35B-BF16.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 850),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
-        "mlx": ['unsloth/Qwen3.6-35B-A3B-MLX-8bit'],
+        "mlx": ['Jundot/Qwen3.8-27B-oQ4e-mtp'],
     },
     "64gb": {
         "gguf": [
             ('qwen3.8', 'Qwen3.8-27B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.8-27B-GGUF', 29000),
             ('qwen3.8', 'mmproj-F16.gguf', 'unsloth/Qwen3.8-27B-GGUF', 800),
-            ('qwen3.6', 'Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-GGUF', 36000),
+            ('ornith1.5', 'Ornith-1.5-35B-Q8_0.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 36000),
+            ('ornith1.5', 'mmproj-Ornith-1.5-35B-BF16.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 850),
             ('qwen3.6-mtp', 'Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-MTP-GGUF', 31000),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
-        "mlx": ['unsloth/Qwen3.6-35B-A3B-MLX-8bit'],
+        "mlx": ['Jundot/Qwen3.8-27B-oQ4e-mtp'],
     },
     "128gb-qwen122b": {
         "gguf": [
@@ -126,12 +131,14 @@ PROFILE_MODELS = {
         "gguf": [
             ('qwen3.8', 'Qwen3.8-27B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.8-27B-GGUF', 29000),
             ('qwen3.8', 'mmproj-F16.gguf', 'unsloth/Qwen3.8-27B-GGUF', 800),
-            ('qwen3.6', 'Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-GGUF', 36000),
+            ('ornith1.5', 'Ornith-1.5-35B-Q8_0.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 36000),
+            ('ornith1.5', 'mmproj-Ornith-1.5-35B-BF16.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 850),
             ('qwen3.6-mtp', 'Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-MTP-GGUF', 19000),
             ('qwen3.6-mtp', 'Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-MTP-GGUF', 31000),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
-        "mlx": ['unsloth/Qwen3.6-35B-A3B-MLX-8bit'],
+        # SpecPrefill draft model rides along for the 128 GB oMLX recipe.
+        "mlx": ['Jundot/Qwen3.8-27B-oQ4e-mtp', 'mlx-community/Qwen2.5-0.5B-Instruct-4bit'],
     },
     "128gb-minimax": {
         "gguf": [
@@ -158,7 +165,7 @@ PROFILE_MODELS = {
             ('gemma4', 'gemma-4-12b-it-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-12b-it-GGUF', 7500),
             ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
         ],
-        "mlx": ['unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit', 'unsloth/gemma-4-E4B-it-MLX-8bit'],
+        "mlx": [],
     },
     "gemma-24gb": {
         "gguf": [
@@ -174,7 +181,7 @@ PROFILE_MODELS = {
             ('gemma4', 'gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-26B-A4B-IT-GGUF', 15000),
             ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
         ],
-        "mlx": ['unsloth/gemma-4-31b-it-UD-MLX-4bit', 'unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit'],
+        "mlx": ['mlx-community/gemma-4-31b-it-8bit', 'unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit'],
     },
     "gemma-64gb": {
         "gguf": [
@@ -183,7 +190,7 @@ PROFILE_MODELS = {
             ('gemma4', 'gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-26B-A4B-IT-GGUF', 15000),
             ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
         ],
-        "mlx": ['unsloth/gemma-4-31b-it-UD-MLX-4bit', 'unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit'],
+        "mlx": ['mlx-community/gemma-4-31b-it-bf16', 'unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit'],
     },
 }
 

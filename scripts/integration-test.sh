@@ -323,14 +323,32 @@ import sys
 from pathlib import Path
 
 config = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-# Qwen 3.8 has no MLX mapping yet, so a requested oMLX runtime falls back to
+# 24gb shares the qwen3.8-27b-q4 slot with 32gb but opts out of oMLX
+# ("omlx": false in profiles.json), so a requested oMLX runtime falls back to
 # llama.cpp and the qwen3.8 default advertises its preset context.
 assert config["model"] == "local-cluster/qwen3.8-27b-q4"
 parser = configparser.ConfigParser(interpolation=None, strict=False)
 parser.read_string("[global]\n" + Path(sys.argv[2]).read_text(encoding="utf-8"))
 expected = parser.getint("qwen3.8-27b-q4", "ctx-size")
 assert config["provider"]["local-cluster"]["models"]["qwen3.8-27b-q4"]["limit"]["context"] == expected
-print("[ok] qwen3.8 default falls back from oMLX to llama.cpp with preset context")
+print("[ok] 24gb opts out of oMLX and falls back to llama.cpp with preset context")
+PY
+
+  OMLX_ELIGIBLE_STATE="$TMP_DIR/omlx-eligible"
+  AI_LOCAL_RUNTIME=omlx LAC_STATE_ROOT="$OMLX_ELIGIBLE_STATE" run "$LAC" profile apply 32gb --json > "$TMP_DIR/profile-omlx-32gb.json"
+  python3 - <<'PY' "$OMLX_ELIGIBLE_STATE/clients/opencode/opencode.json"
+import json
+import sys
+from pathlib import Path
+
+config = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+# 32gb is oMLX-eligible: the qwen3.8 default renders as the tuned oQ4e MLX id
+# and the unmapped small model falls back to the default's MLX id.
+assert config["model"] == "local-cluster/Qwen3.8-27B-oQ4e-mtp", config["model"]
+assert config["small_model"] == "local-cluster/Qwen3.8-27B-oQ4e-mtp", config["small_model"]
+assert "Qwen3.8-27B-oQ4e-mtp" in config["provider"]["local-cluster"]["models"]
+assert config["provider"]["local-cluster"]["name"] == "Local oMLX Cluster"
+print("[ok] 32gb renders the tuned Qwen 3.8 oQ4e MLX slot for a requested oMLX runtime")
 PY
 fi
 

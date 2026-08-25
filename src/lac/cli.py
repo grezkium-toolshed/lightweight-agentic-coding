@@ -428,6 +428,36 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
         if name in required_command_names and not exists
     }
     runtime_status_data = collect_runtime_status(ctx)
+    omlx_tuning = None
+    if active_profile and active_profile.get("omlx_settings") and runtime_status_data.get("runtime") == "omlx":
+        omlx_version = None
+        if commands["omlx"]:
+            import re
+            import subprocess
+            try:
+                proc = subprocess.run(
+                    [os.environ.get("OMLX_BIN", "omlx"), "--version"],
+                    capture_output=True, text=True, timeout=10, check=False,
+                )
+                match = re.search(r"(\d+\.\d+\.\d+)", proc.stdout + proc.stderr)
+                omlx_version = match.group(1) if match else None
+            except (OSError, subprocess.TimeoutExpired):
+                pass
+        omlx_tuning = {
+            "settings_file": active_profile["omlx_settings"],
+            "omlx_version": omlx_version,
+            "warnings": [],
+        }
+        if omlx_version and tuple(int(p) for p in omlx_version.split(".")) < (0, 6, 3):
+            omlx_tuning["warnings"].append(
+                f"oMLX {omlx_version} is older than 0.6.3; the tuned MTP/ANE settings require 0.6.3+. Upgrade with `brew upgrade omlx`."
+            )
+        # The ANE prefill kernel installs as a separate tarball with no stable
+        # detection path, so this stays an unconditional heads-up.
+        omlx_tuning["warnings"].append(
+            "ANE prefill needs the separately-installed oMLX ANE kernel (not in the brew bottle); "
+            "without it prefill runs GPU-only. See docs/model-recommendations.md."
+        )
     asset_catalog = load_asset_catalog(ctx)
     workflow_catalog = load_workflow_catalog(ctx)
     opencode_coexistence = inspect_opencode_coexistence(
@@ -466,6 +496,7 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
         "command_install_hints": command_install_hints,
         "provider_readiness": collect_provider_readiness(ctx),
         "runtime": runtime_status_data,
+        "omlx_tuning": omlx_tuning,
         "assets": {
             "catalog_asset_count": len(asset_catalog["assets"]),
             "pack_count": len(workflow_catalog["packs"]),

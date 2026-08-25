@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 for tagged releases (public beta and beyond).
 
+## [Unreleased]
+
+### Added
+
+- **Qwen 3.8 oMLX path** (Apple Silicon, 32 GB+ Qwen profiles): stages the tuned
+  `Jundot/Qwen3.8-27B-oQ4e-mtp` MLX quant (~17 GB) and applies committed throughput recipes
+  from `runtime-config/omlx/` at `lac runtime start` by merging them into
+  `~/.omlx/settings.json` (override with `OMLX_SETTINGS_PATH`). 32–64 GB use native MTP k=3 +
+  ANE prefill (author-measured 53–72 tok/s decode, ~274 tok/s prefill @4K on M4 Max);
+  `128gb-multi` uses SpecPrefill (staged `Qwen2.5-0.5B-Instruct-4bit` draft) + TurboQuant KV
+  6-bit + MTP (published 1,467 PP tok/s @195K ctx on M5 Max). `lac doctor` reports the active
+  recipe, the oMLX version (0.6.3+ required), and the separately-installed ANE kernel caveat.
+- **Ornith 1.5** (MIT agentic-coding finetunes): 9B dense VLM is the new default on
+  `6gb`/`8gb`/`12gb` and the `macos-16gb` fallback slot (Q4/Q6/Q8 ladder + shared mmproj,
+  `standard` validation until benched); 35B-A3B Q8 replaces the Qwen 3.6 35B-A3B Q8
+  alternates on `48gb`/`64gb`/`128gb-multi`. Qwen 3.6 MTP slots are unchanged.
+
+### Changed
+
+- `24gb` explicitly opts out of oMLX (`"omlx": false`) — it shares the `qwen3.8-27b-q4` slot
+  with `32gb` but lacks headroom for the MLX repo alongside other apps.
+- `lac bench` works against oMLX/ds4 runtimes (it used to hard-require llama.cpp's `/health`).
+- `LOCAL_MLX_MODEL_IDS` now has a single copy in `src/lac/runtime.py`; `src/lac/config.py`
+  imports it (the two hand-synced copies could silently drift).
+
+### Fixed
+
+- Removed dead MLX staging: `48gb`/`64gb`/`128gb-multi` no longer download the ~30 GB
+  Qwen 3.6 35B-A3B MLX repo they could never serve; `macos-16gb`/`gemma-16gb` no longer stage
+  MLX repos while ineligible for oMLX.
+- `gemma-6gb` (eligible but staged nothing), `gemma-32gb` (staged 4-bit against a q8 default),
+  and `gemma-64gb` (no bf16 repo) now stage MLX repos matching their default slots.
+- `lac init` family description no longer says "Qwen 3.6"; refreshed the stale
+  `templates/opencode/opencode.example.jsonc` and dropped stale `qwen3.5-9b-*` /
+  `qwen3.6-27b-*` / `qwen3.6-35b-a3b-q8` client slots and the retired Qwen 3.6 35B checksum.
+
 ## [0.4.0] — 2026-08-15
 
 ### Added

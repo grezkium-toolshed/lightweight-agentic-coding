@@ -9,7 +9,7 @@
       "risk_level": "low",
       "models": [
         {
-          "id": "local-cluster/qwen3.6-27b-q4",
+          "id": "local-cluster/qwen3.8-27b-q4",
           "risk_level": "low"
         },
         {

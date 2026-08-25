@@ -4,7 +4,6 @@
   "checksums": {
     "qwen3.5/Qwen3.5-4B-Q4_K_M.gguf": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
     "qwen3.8/Qwen3.8-27B-UD-Q8_K_XL.gguf": "af36ecb6b5db1407953345b746c14ac93f0657dda413910b4348683a2d990377",
-    "qwen3.8/mmproj-F16.gguf": "cbb841a9ee0636b2ec172f5bb8df2ea8dfeb01e90fe7c6126581d662a0b4e43e",
-    "qwen3.6/Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf": "b762215c5f507f4865df4ac3d1afa803828afa41e05ecac3fac431a67bbd88e8"
+    "qwen3.8/mmproj-F16.gguf": "cbb841a9ee0636b2ec172f5bb8df2ea8dfeb01e90fe7c6126581d662a0b4e43e"
   }
 }

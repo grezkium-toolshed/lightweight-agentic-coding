@@ -1,0 +1,12 @@
+{
+  "_comment": "Tuned oMLX recipe for Qwen 3.8 27B oQ4e on 32-64 GB Apple Silicon: native MTP (k=3) + ANE prefill. Measured 53-72 tok/s decode, ~274 tok/s prefill @4K on M4 Max (oMLX >= 0.6.3, ANE kernel installed separately). Source: github.com/Weschera/Qwen3.8-27B-oMLX-MTP-Mac. Merged into ~/.omlx/settings.json by `lac runtime start`; applies at server startup only.",
+  "qwen35_ane_prefill_enabled": true,
+  "qwen35_ane_prefill_sequence_length": 2048,
+  "qwen35_ane_prefill_fraction": 0.5,
+  "qwen35_ane_prefill_max_layers": 64,
+  "qwen35_ane_prefill_dual_ane": true,
+  "qwen35_ane_prefill_gdn": false,
+  "mtp_enabled": true,
+  "mtp_num_draft_tokens": 3,
+  "context_window": 262144
+}

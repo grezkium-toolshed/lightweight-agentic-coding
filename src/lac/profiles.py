@@ -88,7 +88,7 @@ RAM_BUCKETS = [
 ]
 
 FAMILY_DESCRIPTIONS = {
-    "qwen": "Qwen 3.6 — default. Stronger coding and agentic tool-use. Best for most workflows.",
+    "qwen": "Qwen 3.8 / Ornith 1.5 — default. Stronger coding and agentic tool-use. Best for most workflows.",
     "gemma": "Gemma 4 — multilingual leader. Stronger EU-language handling, competitive reasoning.",
 }
 

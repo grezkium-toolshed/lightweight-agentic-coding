@@ -143,6 +143,12 @@ def render_doctor_text(report):
     running = "yes" if runtime.get("running") else "no"
     health = "yes" if runtime.get("health_reachable") else "no"
     print(f"Runtime: {runtime['url']} | running={running} | health={health}")
+    omlx_tuning = report.get("omlx_tuning")
+    if omlx_tuning:
+        version = omlx_tuning.get("omlx_version") or "unknown"
+        print(f"oMLX tuning: {omlx_tuning['settings_file']} | omlx version: {version}")
+        for warning in omlx_tuning.get("warnings", []):
+            print(f"  - {warning}")
     coexistence = report.get("opencode_coexistence", {})
     warnings = coexistence.get("warnings", [])
     if warnings:

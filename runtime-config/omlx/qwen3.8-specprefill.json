@@ -1,0 +1,17 @@
+{
+  "_comment": "Tuned oMLX recipe for Qwen 3.8 27B on 128 GB Apple Silicon: SpecPrefill (0.5B draft) + TurboQuant KV 6-bit + MTP. Measured 1467 PP tok/s @195k ctx, 30.4 TG tok/s, ~33 GB peak on M5 Max 40c 128GB (omlx.ai/benchmarks/performance/10p6ed74; that run used an AWQ-gs64-mm quant with no public repo, so lac stages oQ4e-mtp -- the settings are quant-independent). Merged into ~/.omlx/settings.json by `lac runtime start`; applies at server startup only.",
+  "max_context_window": 256000,
+  "turboquant_kv_enabled": true,
+  "turboquant_kv_bits": 6,
+  "turboquant_skip_last": true,
+  "specprefill_enabled": true,
+  "specprefill_draft_model": "Qwen2.5-0.5B-Instruct-4bit",
+  "specprefill_keep_pct": 0.2,
+  "specprefill_threshold": 8192,
+  "dflash_enabled": false,
+  "dflash_in_memory_cache": true,
+  "dflash_in_memory_cache_max_entries": 4,
+  "dflash_ssd_cache": false,
+  "mtp_enabled": true,
+  "vlm_mtp_enabled": false
+}

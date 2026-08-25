@@ -2,7 +2,10 @@
 
 Status: **shipped as the main local model family** (Qwen 3.8 27B). GGUFs from
 `unsloth/Qwen3.8-27B-GGUF` are wired into the 16/24/32/48/64/128gb-multi profiles as the
-default, with mmproj vision attached. Remaining gaps: no official MTP repo and no MLX repo yet.
+default, with mmproj vision attached. The MLX/oMLX gap is closed: the 32 GB+ profiles stage
+`Jundot/Qwen3.8-27B-oQ4e-mtp` and apply tuned oMLX recipes at runtime start (see
+`docs/model-recommendations.md`, "oMLX tuned throughput recipes"). Remaining gap: no official
+Qwen 3.8 MTP GGUF for the llama.cpp path.
 
 ## Quant selection (top-1% agreement vs BF16, estimated from Unsloth's published quantization chart)
 
@@ -29,12 +32,16 @@ default, with mmproj vision attached. Remaining gaps: no official MTP repo and n
 
 ## Known gaps and gates
 
-- **MTP**: no Qwen 3.8 MTP repo yet; the 32/64/128gb-multi profiles keep Qwen 3.6 MTP slots.
-- **MLX / oMLX**: no Qwen 3.8 MLX repo yet. `_profile_supports_omlx` rejects qwen3.8-default
-  profiles, so macOS auto-selection falls back to llama.cpp for them; Gemma profiles keep the
-  oMLX path. When Unsloth ships Qwen3.8 MLX, add `LOCAL_MLX_MODEL_IDS` entries in
-  `src/lac/config.py` and re-enable oMLX tests.
-- **Low-end tiers**: `4gb`–`12gb` and `macos-16gb` keep Qwen3.5-9B / Gemma 4 QAT defaults.
+- **MTP (llama.cpp)**: no Qwen 3.8 MTP GGUF yet; the 32/64/128gb-multi profiles keep Qwen 3.6
+  MTP slots. (The oMLX path has native MTP via the oQ4e-mtp checkpoint.)
+- **MLX / oMLX**: closed. `LOCAL_MLX_MODEL_IDS` (single copy in `src/lac/runtime.py`, imported
+  by `src/lac/config.py`) maps `qwen3.8-27b-q4/q8` to `Qwen3.8-27B-oQ4e-mtp`; 32 GB+ profiles
+  are eligible, `24gb` opts out (`"omlx": false` — no headroom for the ~17 GB MLX repo), and
+  tuned recipes live in `runtime-config/omlx/`. Throughput numbers there are the recipe
+  authors' published measurements — re-bench locally (`lac bench` now works against oMLX)
+  before quoting them for this repo's own validation labels.
+- **Low-end tiers**: `4gb` keeps Qwen3.5-4B; `6gb`–`12gb` and the `macos-16gb` fallback moved
+  to Ornith 1.5 9B (MIT agentic-coding finetune on a Qwen 3.5 base) as `standard` validation.
   The Qwen 3.8 IQ2 tier (82–86% agreement) is a quality cliff, not a default.
 - **48 GB fit**: 29.3 GiB weights + ~8.5 GiB KV at 256K/q8_0 + compute sits against the
   40 GiB post-headroom budget; `lac context --profile 48gb` shows the per-cache-type math,
