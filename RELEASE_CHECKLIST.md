@@ -23,12 +23,20 @@ Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/
 
 ## v0.4.0 pre-tag gates (Qwen 3.8 main family + `lac context`)
 
-- [~] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and
+Tagged 2026-08-25: annotated `v0.4.0` on public sanitized commit `0bb1e56` (the
+release-readiness head; the oMLX/Ornith work remains unreleased on `main` pending its own
+gates). All three check suites reran green on the exact public commit, a fresh Dependabot
+read returned zero alerts, and the GitHub release was created and read back
+(non-draft, tag resolves to `0bb1e56`). The port's release boundary check passed all 164
+public commits.
+
+- [x] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and
   `./scripts/verify-package-build.sh` passed on the merged Qwen 3.8 change (internal
-  `799bc56` + release-readiness follow-ups), including 35 unit/fixture checks (one
-  Windows-only skip), 58 active preset model sections (floor lowered from 60 when the Qwen 3.8
-  swap slimmed duplicate Qwen 3.6 slots), the qwen3.8 oMLX-fallback assertion, the
-  `delivery-run.v1` contract checks, and installed-wheel version `0.4.0`.
+  `799bc56` + release-readiness follow-ups) and reran green on public `0bb1e56` on
+  2026-08-25, including 35 unit/fixture checks (one Windows-only skip), 58 active preset
+  model sections (floor lowered from 60 when the Qwen 3.8 swap slimmed duplicate Qwen 3.6
+  slots), the qwen3.8 oMLX-fallback assertion, the `delivery-run.v1` contract checks, and
+  installed-wheel version `0.4.0`.
 - [~] The Qwen 3.8 Q8 path (`48gb`/`64gb`/`128gb-multi` config) was validated on the
   maintainer's M4 Max 128 GB testbed: llama.cpp b10360 load at 256K context, mmproj vision
   completion, 14.3 tok/s bench, checksums recorded for Q8/mmproj/35B-A3B Q8.
@@ -38,7 +46,8 @@ Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/
 - [ ] Record separate physical evidence for the Qwen 3.8 Q3/Q4 16–32 GB defaults and for 48 GB
   before changing their current validation labels (16/24 GB were lowered to `standard` with the
   Qwen 3.8 swap until that evidence exists).
-- [ ] Fresh Dependabot read and release boundary check on the exact sanitized commit before tag.
+- [x] Fresh Dependabot read (zero alerts, 2026-08-25) and release boundary check (164
+  public commits, clean) on the exact sanitized commit before tag.
 
 ## v0.3.0 pre-tag gates
 
