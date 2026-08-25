@@ -28,16 +28,39 @@ LOCAL_MLX_MODEL_IDS = {
     "qwen3.8-27b-q8": "Qwen3.8-27B-oQ4e-mtp",
     "gemma-4-31b-q4": "gemma-4-31b-it-UD-MLX-4bit",
     "gemma-4-31b-q8": "gemma-4-31b-it-8bit",
-    "gemma-4-31b-bf16": "gemma-4-31b-it-bf16",
+    # bf16 MLX (~57 GB) leaves no KV headroom on 64 GB unified memory; the
+    # bf16 slot serves the 8-bit MLX quant under oMLX instead.
+    "gemma-4-31b-bf16": "gemma-4-31b-it-8bit",
     "gemma-4-e4b-q8": "gemma-4-E4B-it-MLX-8bit",
     "gemma-4-26b-a4b-q4": "gemma-4-26b-a4b-it-UD-MLX-8bit",
 }
+
+
+ANE_KERNEL_HINT = (
+    "ANE prefill requires the separately-installed oMLX ANE kernel (not in the brew bottle); "
+    "without it, prefill falls back to GPU-only. See docs/model-recommendations.md."
+)
+
+
+def health_path(runtime):
+    """oMLX and ds4 serve /v1/models but not /health."""
+    return "/v1/models" if runtime in {"omlx", "ds4"} else "/health"
+
+
+def omlx_settings_path():
+    return Path(os.environ.get("OMLX_SETTINGS_PATH", str(Path.home() / ".omlx" / "settings.json")))
 
 
 def _local_model_name(selector):
     if not selector.startswith("local-cluster/"):
         return ""
     return selector.split("/", 1)[1]
+
+
+def _mlx_dir_for_profile(profile):
+    """On-disk MLX directory name for the profile's default slot, or ''."""
+    default_id = _local_model_name((profile or {}).get("default_model", ""))
+    return LOCAL_MLX_MODEL_IDS.get(default_id, "")
 
 
 def _profile_supports_omlx(profile, verbose=False):
@@ -62,29 +85,47 @@ def _profile_supports_omlx(profile, verbose=False):
     return bool(default_id)
 
 
+def load_omlx_recipe(path):
+    """Parse a runtime-config/omlx/ recipe, dropping doc keys (leading _)."""
+    from lac.lib.jsonc import load_jsonc
+    return {key: value for key, value in load_jsonc(path).items() if not key.startswith("_")}
+
+
 def _apply_omlx_settings(ctx, profile):
-    """Merge the profile's tuned oMLX recipe into oMLX's persisted settings.
+    """Sync oMLX's persisted settings with the profile's tuned recipe.
 
     oMLX reads ~/.omlx/settings.json (override with OMLX_SETTINGS_PATH); the
-    MTP/ANE/SpecPrefill keys only take effect at server startup, which matches
-    lac's start/stop lifecycle. Only recipe keys are touched — user settings
-    outside the recipe are preserved.
+    tuning keys only take effect at server startup, which matches lac's
+    start/stop lifecycle. Every key appearing in any runtime-config/omlx/
+    recipe is treated as lac-managed: stale ones left by a previously applied
+    profile are removed before the current recipe (if any) is merged, so
+    switching profiles never leaves a foreign recipe active. Keys outside the
+    lac-managed set are never touched.
     """
     import json
     import sys
+    recipe_dir = ctx.root / "runtime-config" / "omlx"
+    managed_keys = set()
+    if recipe_dir.is_dir():
+        for path in sorted(recipe_dir.glob("*.json")):
+            try:
+                managed_keys.update(load_omlx_recipe(path))
+            except ValueError:
+                continue
+    recipe = {}
     recipe_rel = (profile or {}).get("omlx_settings")
-    if not recipe_rel:
+    if recipe_rel:
+        recipe_path = ctx.root / recipe_rel
+        if not recipe_path.is_file():
+            log_info(f"[omlx] Tuned settings file missing, skipping: {recipe_path}")
+        else:
+            try:
+                recipe = load_omlx_recipe(recipe_path)
+            except ValueError as exc:
+                log_info(f"[omlx] Could not parse {recipe_path}: {exc}; skipping tuned settings")
+    if not managed_keys and not recipe:
         return
-    recipe_path = ctx.root / recipe_rel
-    if not recipe_path.is_file():
-        log_info(f"[omlx] Tuned settings file missing, skipping: {recipe_path}")
-        return
-    try:
-        recipe = json.loads(recipe_path.read_text(encoding="utf-8"))
-    except ValueError as exc:
-        log_info(f"[omlx] Could not parse {recipe_path}: {exc}; skipping tuned settings")
-        return
-    settings_path = Path(os.environ.get("OMLX_SETTINGS_PATH", str(Path.home() / ".omlx" / "settings.json")))
+    settings_path = omlx_settings_path()
     settings = {}
     if settings_path.is_file():
         try:
@@ -92,19 +133,18 @@ def _apply_omlx_settings(ctx, profile):
         except ValueError:
             log_info(f"[omlx] Existing {settings_path} is not valid JSON; leaving it untouched")
             return
-    if all(settings.get(key) == value for key, value in recipe.items()):
-        return
-    settings.update(recipe)
-    settings_path.parent.mkdir(parents=True, exist_ok=True)
-    settings_path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
-    log_info(f"[omlx] Applied tuned settings from {recipe_rel} to {settings_path}")
+    merged = {key: value for key, value in settings.items() if key not in managed_keys}
+    merged.update(recipe)
     if recipe.get("qwen35_ane_prefill_enabled"):
-        print(
-            "[omlx] ANE prefill is enabled in the tuned settings. It requires the separately-installed "
-            "oMLX ANE kernel (not included in the brew bottle); without it, prefill falls back to GPU-only. "
-            "See docs/model-recommendations.md.",
-            file=sys.stderr,
-        )
+        print(f"[omlx] {ANE_KERNEL_HINT}", file=sys.stderr)
+    if merged == settings:
+        return
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+    settings_path.write_text(json.dumps(merged, indent=2) + "\n", encoding="utf-8")
+    if recipe:
+        log_info(f"[omlx] Applied tuned settings from {recipe_rel} to {settings_path}")
+    else:
+        log_info(f"[omlx] Removed stale lac tuning keys from {settings_path}")
 
 
 def _normalize_local_runtime(value):
@@ -147,9 +187,18 @@ def selected_local_runtime(profile=None, verbose=False):
             if verbose:
                 log_info(f"[runtime] oMLX auto-selection skipped: `{omlx_bin}` is not in PATH")
         else:
-            if verbose:
-                log_info(f"[runtime] Auto-selected oMLX runtime (macOS + MLX models detected)")
-            return "omlx"
+            # Auto-select only when the MLX weights are actually staged, so an
+            # existing llama.cpp setup never silently flips to a missing model
+            # after an upgrade adds an MLX mapping for its slot.
+            from lac.context import MODELS_ROOT
+            mlx_dir = MODELS_ROOT / "mlx" / _mlx_dir_for_profile(profile)
+            if not mlx_dir.is_dir():
+                if verbose:
+                    log_info(f"[runtime] oMLX auto-selection skipped: MLX weights not staged at {mlx_dir} (run `lac models sync`)")
+            else:
+                if verbose:
+                    log_info(f"[runtime] Auto-selected oMLX runtime (macOS + MLX models detected)")
+                return "omlx"
     elif verbose and sys.platform == "darwin":
         log_info("[runtime] oMLX auto-selection skipped: profile is not eligible")
     if verbose:
@@ -293,7 +342,7 @@ def collect_runtime_status(ctx, endpoint=None):
         }
     endpoint = endpoint or local_runtime_endpoint(ctx, runtime)
     port = endpoint["port"]
-    health_path = "/v1/models" if runtime in {"omlx", "ds4"} else "/health"
+    probe_path = health_path(runtime)
     runtime_info = {
         "runtime": runtime,
         "bind_host": endpoint["bind_host"],
@@ -310,7 +359,7 @@ def collect_runtime_status(ctx, endpoint=None):
     if launch is not None:
         runtime_info["launch"] = launch
     try:
-        health, _ = request_json(url(endpoint["connect_host"], port, health_path), timeout=2)
+        health, _ = request_json(url(endpoint["connect_host"], port, probe_path), timeout=2)
         runtime_info["health_reachable"] = True
         runtime_info["health"] = health
     except Exception:
@@ -384,8 +433,14 @@ def runtime_start(ctx, show_logs=False, tail_hint=True, foreground=False, port=N
     if runtime == "omlx":
         if not command_exists(os.environ.get("OMLX_BIN", "omlx")):
             raise SystemExit("oMLX runtime selected but `omlx` is not in PATH. Install with Homebrew or set AI_LOCAL_RUNTIME=llama.cpp.")
-        _apply_omlx_settings(ctx, profile)
         models_dir = ctx.models_root / "mlx"
+        mlx_dir_name = _mlx_dir_for_profile(profile)
+        if mlx_dir_name and not (models_dir / mlx_dir_name).is_dir():
+            raise SystemExit(
+                f"Missing oMLX model directory: {models_dir / mlx_dir_name}\n"
+                f"Run ./bin/lac models sync {profile_id} first, or set AI_LOCAL_RUNTIME=llama.cpp."
+            )
+        _apply_omlx_settings(ctx, profile)
         env["OMLX_MODEL_DIR"] = str(models_dir)
         env["OMLX_HOST"] = bind_host
         env["OMLX_PORT"] = str(port)

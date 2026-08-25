@@ -33,6 +33,7 @@ from lac.runtime import (
     local_runtime_base_url, is_pid_running, request_json,
     collect_runtime_status, write_runtime_state,
     runtime_start, runtime_stop, runtime_status,
+    health_path, load_omlx_recipe, omlx_settings_path, ANE_KERNEL_HINT,
 )
 from lac.providers import (
     PROVIDER_VERIFICATION, _get_provider_entry, _verify_provider_record,
@@ -390,6 +391,64 @@ def run_demo(ctx, mode="cloud", yes=False):
     return _demo_local(ctx, yes=yes)
 
 
+def collect_omlx_tuning(ctx, active_profile, runtime):
+    """Doctor datum for the active profile's tuned oMLX recipe, or None."""
+    if not active_profile or not active_profile.get("omlx_settings") or runtime != "omlx":
+        return None
+    import re
+    omlx_bin = os.environ.get("OMLX_BIN", "omlx")
+    omlx_version = None
+    if command_exists(omlx_bin):
+        try:
+            proc = subprocess.run(
+                [omlx_bin, "--version"],
+                capture_output=True, text=True, timeout=3, check=False,
+            )
+            output = proc.stdout + proc.stderr
+            # Prefer the version adjacent to "omlx" so banners naming other
+            # components (mlx, python) don't win; fall back to stdout only.
+            match = re.search(r"omlx\D{0,20}(\d+\.\d+\.\d+)", output, re.IGNORECASE)
+            if not match:
+                match = re.search(r"(\d+\.\d+\.\d+)", proc.stdout)
+            omlx_version = match.group(1) if match else None
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    recipe = {}
+    recipe_path = ctx.root / active_profile["omlx_settings"]
+    if recipe_path.is_file():
+        try:
+            recipe = load_omlx_recipe(recipe_path)
+        except ValueError:
+            pass
+    applied = None
+    settings_path = omlx_settings_path()
+    if recipe and settings_path.is_file():
+        try:
+            settings = json.loads(settings_path.read_text(encoding="utf-8"))
+            applied = all(settings.get(key) == value for key, value in recipe.items())
+        except (ValueError, OSError):
+            applied = None
+    tuning = {
+        "settings_file": active_profile["omlx_settings"],
+        "omlx_version": omlx_version,
+        "applied": applied,
+        "warnings": [],
+    }
+    if omlx_version and tuple(int(p) for p in omlx_version.split(".")) < (0, 6, 3):
+        tuning["warnings"].append(
+            f"oMLX {omlx_version} is older than 0.6.3; the tuned recipe settings require 0.6.3+. Upgrade with `brew upgrade omlx`."
+        )
+    if recipe.get("qwen35_ane_prefill_enabled"):
+        # The kernel itself has no stable detection path, so this stays a
+        # heads-up whenever the active recipe enables ANE prefill.
+        tuning["warnings"].append(ANE_KERNEL_HINT)
+    if applied is False:
+        tuning["warnings"].append(
+            "Tuned settings are not applied yet; run `lac runtime start` (settings take effect at server startup)."
+        )
+    return tuning
+
+
 def doctor(ctx, strict=False, bootstrap_hint=False):
     checks = []
     def add_check(kind, path, exists, generated=False, hint=None):
@@ -411,7 +470,7 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
     commands = {
         "opencode": command_exists("opencode"),
         "llama-server": command_exists("llama-server"),
-        "omlx": command_exists("omlx"),
+        "omlx": command_exists(os.environ.get("OMLX_BIN", "omlx")),
         "ds4": command_exists(os.environ.get("DS4_BIN", "ds4-server")),
         "python3": command_exists("python3") or command_exists("python"),
         "openchamber": command_exists("openchamber"),
@@ -428,36 +487,7 @@ def doctor(ctx, strict=False, bootstrap_hint=False):
         if name in required_command_names and not exists
     }
     runtime_status_data = collect_runtime_status(ctx)
-    omlx_tuning = None
-    if active_profile and active_profile.get("omlx_settings") and runtime_status_data.get("runtime") == "omlx":
-        omlx_version = None
-        if commands["omlx"]:
-            import re
-            import subprocess
-            try:
-                proc = subprocess.run(
-                    [os.environ.get("OMLX_BIN", "omlx"), "--version"],
-                    capture_output=True, text=True, timeout=10, check=False,
-                )
-                match = re.search(r"(\d+\.\d+\.\d+)", proc.stdout + proc.stderr)
-                omlx_version = match.group(1) if match else None
-            except (OSError, subprocess.TimeoutExpired):
-                pass
-        omlx_tuning = {
-            "settings_file": active_profile["omlx_settings"],
-            "omlx_version": omlx_version,
-            "warnings": [],
-        }
-        if omlx_version and tuple(int(p) for p in omlx_version.split(".")) < (0, 6, 3):
-            omlx_tuning["warnings"].append(
-                f"oMLX {omlx_version} is older than 0.6.3; the tuned MTP/ANE settings require 0.6.3+. Upgrade with `brew upgrade omlx`."
-            )
-        # The ANE prefill kernel installs as a separate tarball with no stable
-        # detection path, so this stays an unconditional heads-up.
-        omlx_tuning["warnings"].append(
-            "ANE prefill needs the separately-installed oMLX ANE kernel (not in the brew bottle); "
-            "without it prefill runs GPU-only. See docs/model-recommendations.md."
-        )
+    omlx_tuning = collect_omlx_tuning(ctx, active_profile, runtime_status_data.get("runtime"))
     asset_catalog = load_asset_catalog(ctx)
     workflow_catalog = load_workflow_catalog(ctx)
     opencode_coexistence = inspect_opencode_coexistence(
@@ -547,7 +577,7 @@ def smoke(ctx, timeout):
         return report
     started = time.time()
     health = {}
-    if runtime not in {"omlx", "ds4"}:
+    if health_path(runtime) == "/health":
         try:
             health, _ = request_json(f"{base_url}/health", timeout=timeout)
         except Exception as exc:

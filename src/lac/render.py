@@ -146,7 +146,9 @@ def render_doctor_text(report):
     omlx_tuning = report.get("omlx_tuning")
     if omlx_tuning:
         version = omlx_tuning.get("omlx_version") or "unknown"
-        print(f"oMLX tuning: {omlx_tuning['settings_file']} | omlx version: {version}")
+        applied = omlx_tuning.get("applied")
+        applied_text = "yes" if applied else ("no" if applied is False else "unknown")
+        print(f"oMLX tuning: {omlx_tuning['settings_file']} | omlx version: {version} | applied: {applied_text}")
         for warning in omlx_tuning.get("warnings", []):
             print(f"  - {warning}")
     coexistence = report.get("opencode_coexistence", {})

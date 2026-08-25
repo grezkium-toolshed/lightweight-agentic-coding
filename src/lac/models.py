@@ -33,7 +33,7 @@ PROFILE_MODELS = {
         "gguf": [
             ('ornith1.5', 'Ornith-1.5-9B-Q4_K_M.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 5500),
             ('ornith1.5', 'Ornith-1.5-9B-Q6_K.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 7200),
-            ('ornith1.5', 'mmproj-Ornith-1.5-9B-BF16.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 850),
+            ('ornith1.5', 'mmproj-Ornith-1.5-9B-BF16.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 800),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": [],
@@ -42,7 +42,7 @@ PROFILE_MODELS = {
         "gguf": [
             ('ornith1.5', 'Ornith-1.5-9B-Q8_0.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 9300),
             ('ornith1.5', 'Ornith-1.5-9B-Q6_K.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 7200),
-            ('ornith1.5', 'mmproj-Ornith-1.5-9B-BF16.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 850),
+            ('ornith1.5', 'mmproj-Ornith-1.5-9B-BF16.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 800),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": [],
@@ -73,7 +73,7 @@ PROFILE_MODELS = {
             ('gemma4', 'gemma-4-12B-it-qat-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-12B-it-qat-GGUF', 6000),
             ('gemma4', 'gemma-4-12b-it-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-12b-it-GGUF', 7500),
             ('ornith1.5', 'Ornith-1.5-9B-Q4_K_M.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 5500),
-            ('ornith1.5', 'mmproj-Ornith-1.5-9B-BF16.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 850),
+            ('ornith1.5', 'mmproj-Ornith-1.5-9B-BF16.gguf', 'ornith-ai/Ornith-1.5-9B-GGUF', 800),
             ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
         ],
         "mlx": [],
@@ -100,7 +100,7 @@ PROFILE_MODELS = {
             ('qwen3.8', 'Qwen3.8-27B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.8-27B-GGUF', 29000),
             ('qwen3.8', 'mmproj-F16.gguf', 'unsloth/Qwen3.8-27B-GGUF', 800),
             ('ornith1.5', 'Ornith-1.5-35B-Q8_0.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 36000),
-            ('ornith1.5', 'mmproj-Ornith-1.5-35B-BF16.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 850),
+            ('ornith1.5', 'mmproj-Ornith-1.5-35B-BF16.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 800),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": ['Jundot/Qwen3.8-27B-oQ4e-mtp'],
@@ -110,7 +110,7 @@ PROFILE_MODELS = {
             ('qwen3.8', 'Qwen3.8-27B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.8-27B-GGUF', 29000),
             ('qwen3.8', 'mmproj-F16.gguf', 'unsloth/Qwen3.8-27B-GGUF', 800),
             ('ornith1.5', 'Ornith-1.5-35B-Q8_0.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 36000),
-            ('ornith1.5', 'mmproj-Ornith-1.5-35B-BF16.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 850),
+            ('ornith1.5', 'mmproj-Ornith-1.5-35B-BF16.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 800),
             ('qwen3.6-mtp', 'Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-MTP-GGUF', 31000),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
@@ -132,7 +132,7 @@ PROFILE_MODELS = {
             ('qwen3.8', 'Qwen3.8-27B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.8-27B-GGUF', 29000),
             ('qwen3.8', 'mmproj-F16.gguf', 'unsloth/Qwen3.8-27B-GGUF', 800),
             ('ornith1.5', 'Ornith-1.5-35B-Q8_0.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 36000),
-            ('ornith1.5', 'mmproj-Ornith-1.5-35B-BF16.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 850),
+            ('ornith1.5', 'mmproj-Ornith-1.5-35B-BF16.gguf', 'ornith-ai/Ornith-1.5-35B-A3B-GGUF', 800),
             ('qwen3.6-mtp', 'Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-MTP-GGUF', 19000),
             ('qwen3.6-mtp', 'Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-MTP-GGUF', 31000),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
@@ -190,7 +190,8 @@ PROFILE_MODELS = {
             ('gemma4', 'gemma-4-26B-A4B-IT-UD-Q4_K_XL.gguf', 'unsloth/gemma-4-26B-A4B-IT-GGUF', 15000),
             ('gemma4', 'gemma-4-E4B-IT-Q8_0.gguf', 'unsloth/gemma-4-E4B-IT-GGUF', 4000),
         ],
-        "mlx": ['mlx-community/gemma-4-31b-it-bf16', 'unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit'],
+        # bf16 MLX (~57 GB) leaves no KV headroom on 64 GB; serve the 8-bit MLX quant instead.
+        "mlx": ['mlx-community/gemma-4-31b-it-8bit', 'unsloth/gemma-4-26b-a4b-it-UD-MLX-8bit'],
     },
 }
 

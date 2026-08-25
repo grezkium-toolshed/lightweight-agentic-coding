@@ -30,14 +30,20 @@ for tagged releases (public beta and beyond).
 - `lac bench` works against oMLX/ds4 runtimes (it used to hard-require llama.cpp's `/health`).
 - `LOCAL_MLX_MODEL_IDS` now has a single copy in `src/lac/runtime.py`; `src/lac/config.py`
   imports it (the two hand-synced copies could silently drift).
+- oMLX safety rails: the settings merge treats every key in any `runtime-config/omlx/`
+  recipe as lac-managed and purges stale ones on profile switch (never touching user keys or
+  writing recipe doc keys); auto-selection additionally requires the staged MLX weights on
+  disk, and `lac runtime start` fails with a `models sync` hint when they are missing;
+  doctor reports whether the tuned settings are currently applied.
 
 ### Fixed
 
 - Removed dead MLX staging: `48gb`/`64gb`/`128gb-multi` no longer download the ~30 GB
   Qwen 3.6 35B-A3B MLX repo they could never serve; `macos-16gb`/`gemma-16gb` no longer stage
   MLX repos while ineligible for oMLX.
-- `gemma-6gb` (eligible but staged nothing), `gemma-32gb` (staged 4-bit against a q8 default),
-  and `gemma-64gb` (no bf16 repo) now stage MLX repos matching their default slots.
+- `gemma-6gb` (eligible but staged nothing) and `gemma-32gb` (staged 4-bit against a q8
+  default) now stage MLX repos matching their default slots; `gemma-64gb` serves the 8-bit
+  MLX quant under oMLX (bf16 MLX at ~57 GB leaves no KV headroom on 64 GB).
 - `lac init` family description no longer says "Qwen 3.6"; refreshed the stale
   `templates/opencode/opencode.example.jsonc` and dropped stale `qwen3.5-9b-*` /
   `qwen3.6-27b-*` / `qwen3.6-35b-a3b-q8` client slots and the retired Qwen 3.6 35B checksum.

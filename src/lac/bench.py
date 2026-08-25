@@ -6,19 +6,14 @@ Supports slot-specific runs and MTP draft-n sweeps.
 
 import time
 
-from lac.runtime import request_json, local_runtime_base_url, selected_local_runtime
+from lac.runtime import health_path, request_json, local_runtime_base_url, selected_local_runtime
 
 
 BENCH_PROMPT = "Write a short poem about artificial intelligence. Keep it under 100 words."
 BENCH_OUT_TOKENS = 512
 
 
-def _models(ctx):
-    profile = ctx.active_profile()
-    if not profile:
-        return []
-    runtime = selected_local_runtime(profile)
-    base_url = local_runtime_base_url(ctx, runtime)
+def _models(base_url):
     try:
         data, raw = request_json(f"{base_url}/v1/models", timeout=10)
     except Exception:
@@ -94,22 +89,18 @@ def bench(ctx, model=None, draft_n=None, prompt=None, timeout=120, json_output=F
     runtime = selected_local_runtime(profile)
     base_url = local_runtime_base_url(ctx, runtime)
 
-    # oMLX and ds4 serve /v1/models but not /health (same distinction smoke makes).
-    health_ok = False
-    try:
-        if runtime in {"omlx", "ds4"}:
-            request_json(f"{base_url}/v1/models", timeout=5)
-            health_ok = True
-        else:
+    if health_path(runtime) == "/health":
+        health_ok = False
+        try:
             health, _ = request_json(f"{base_url}/health", timeout=5)
             health_ok = health.get("status") == "ok"
-    except Exception:
-        pass
+        except Exception:
+            pass
+        if not health_ok:
+            return {"ok": False, "error": f"Runtime at {base_url} is not responding. Run 'lac runtime start' first."}
 
-    if not health_ok:
-        return {"ok": False, "error": f"Runtime at {base_url} is not responding. Run 'lac runtime start' first."}
-
-    available = _models(ctx)
+    # For oMLX/ds4 (no /health) a non-empty model list doubles as the health check.
+    available = _models(base_url)
     if not available:
         return {"ok": False, "error": "No model slots available via /v1/models. Is the runtime fully loaded?"}
 

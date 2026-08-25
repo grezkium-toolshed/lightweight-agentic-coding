@@ -350,6 +350,21 @@ assert "Qwen3.8-27B-oQ4e-mtp" in config["provider"]["local-cluster"]["models"]
 assert config["provider"]["local-cluster"]["name"] == "Local oMLX Cluster"
 print("[ok] 32gb renders the tuned Qwen 3.8 oQ4e MLX slot for a requested oMLX runtime")
 PY
+
+  OMLX_UNMAPPED_STATE="$TMP_DIR/omlx-unmapped"
+  AI_LOCAL_RUNTIME=omlx LAC_STATE_ROOT="$OMLX_UNMAPPED_STATE" run "$LAC" profile apply 16gb --json > "$TMP_DIR/profile-omlx-16gb.json"
+  python3 - <<'PY' "$OMLX_UNMAPPED_STATE/clients/opencode/opencode.json"
+import json
+import sys
+from pathlib import Path
+
+config = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+# 16gb's default slot (qwen3.8-27b-q3) has no LOCAL_MLX_MODEL_IDS mapping, so a
+# requested oMLX runtime falls back to llama.cpp and keeps the slot id.
+assert config["model"] == "local-cluster/qwen3.8-27b-q3", config["model"]
+assert config["provider"]["local-cluster"]["name"] == "Local llama.cpp Cluster"
+print("[ok] unmapped default (16gb) falls back from oMLX to llama.cpp")
+PY
 fi
 
 # 11. Known checksum mismatches are blocking and quarantined.

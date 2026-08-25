@@ -279,8 +279,9 @@ def render_opencode_config(ctx, profile_id, profile, verbose_runtime=True, runti
             default_model = f"local-cluster/{LOCAL_MLX_MODEL_IDS.get(_local_model_name(default_model), _local_model_name(default_model))}"
         if small_model.startswith("local-cluster/"):
             small_id = _local_model_name(small_model)
-            default_id = _local_model_name(default_model)
-            small_model = f"local-cluster/{LOCAL_MLX_MODEL_IDS.get(small_id, LOCAL_MLX_MODEL_IDS.get(default_id, default_id))}"
+            # default_local_id is the pre-rewrite slot id; default_model itself
+            # was already remapped to an MLX id two lines up.
+            small_model = f"local-cluster/{LOCAL_MLX_MODEL_IDS.get(small_id, LOCAL_MLX_MODEL_IDS.get(default_local_id, default_local_id))}"
     elif runtime == "ds4":
         log_info(f"[config] Rendering OpenCode config for ds4 runtime ({runtime_url})")
         ds4_provider["options"]["baseURL"] = f"{runtime_url}/v1"

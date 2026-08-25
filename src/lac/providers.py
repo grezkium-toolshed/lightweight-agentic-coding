@@ -8,7 +8,7 @@ import urllib.request
 from datetime import datetime, timezone
 
 from lac.network import url as network_url
-from lac.runtime import selected_local_runtime, local_runtime_endpoint
+from lac.runtime import health_path, selected_local_runtime, local_runtime_endpoint
 
 
 def utc_now():
@@ -49,7 +49,7 @@ def _resolve_verify_endpoint(ctx, provider_id, rule):
     if provider_id == "local-cluster":
         runtime = selected_local_runtime(ctx.active_profile())
         endpoint = local_runtime_endpoint(ctx, runtime)
-        path = "/v1/models" if runtime in {"omlx", "ds4"} else "/health"
+        path = health_path(runtime)
         return network_url(endpoint["connect_host"], endpoint["port"], path)
     if "endpoint" in rule:
         return rule["endpoint"]
