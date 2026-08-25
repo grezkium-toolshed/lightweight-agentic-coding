@@ -9,7 +9,7 @@ Benchmark per-model performance with `lac bench`.
 lac bench
 
 # Benchmark a specific model slot
-lac bench --model qwen3.6-27b-q4
+lac bench --model qwen3.8-27b-q4
 
 # Sweep MTP draft token counts
 lac bench --model qwen3.6-27b-mtp-q4 --draft-n 6

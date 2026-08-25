@@ -294,7 +294,9 @@ for profile_id, profile in profiles.items():
     assert dcp["compress"]["modelMinLimits"][ds4_selector] == 131072
     assert dcp["compress"]["modelMaxLimits"][ds4_selector] == 196608
 
-assert checked >= 60, checked
+# Floor guards against accidental preset-section loss; the Qwen 3.8 swap slimmed
+# duplicate 3.6 slots, so the floor is below the previous 60-section count.
+assert checked >= 55, checked
 print(f"[ok] profile-aware OpenCode context/output/DCP limits: {checked} preset model sections")
 PY
 
@@ -312,7 +314,7 @@ print("[ok] custom llama.cpp port reaches OpenCode")
 PY
 
 if [[ "$(uname -s)" == "Darwin" ]]; then
-  OMLX_STATE="$TMP_DIR/omlx-context"
+  OMLX_STATE="$TMP_DIR/omlx-fallback"
   AI_LOCAL_RUNTIME=omlx LAC_STATE_ROOT="$OMLX_STATE" run "$LAC" profile apply 24gb --json > "$TMP_DIR/profile-omlx.json"
   python3 - <<'PY' "$OMLX_STATE/clients/opencode/opencode.json" "$ROOT/runtime-config/presets/24gb.ini"
 import configparser
@@ -321,16 +323,14 @@ import sys
 from pathlib import Path
 
 config = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-assert config["model"] == config["small_model"] == "local-cluster/Qwen3.6-27B-UD-MLX-6bit"
-model_id = config["model"].split("/", 1)[1]
-# The unmapped 4B small model is substituted with the mapped default, so the
-# shared MLX alias advertises the default model's preset context.
+# Qwen 3.8 has no MLX mapping yet, so a requested oMLX runtime falls back to
+# llama.cpp and the qwen3.8 default advertises its preset context.
+assert config["model"] == "local-cluster/qwen3.8-27b-q4"
 parser = configparser.ConfigParser(interpolation=None, strict=False)
 parser.read_string("[global]\n" + Path(sys.argv[2]).read_text(encoding="utf-8"))
-expected = parser.getint("qwen3.6-27b-q4", "ctx-size")
-assert config["provider"]["local-cluster"]["models"][model_id]["limit"]["context"] == expected
-print("[ok] oMLX shared alias advertises the default model's preset context")
-print("[ok] oMLX shared alias uses the smallest selected profile context")
+expected = parser.getint("qwen3.8-27b-q4", "ctx-size")
+assert config["provider"]["local-cluster"]["models"]["qwen3.8-27b-q4"]["limit"]["context"] == expected
+print("[ok] qwen3.8 default falls back from oMLX to llama.cpp with preset context")
 PY
 fi
 

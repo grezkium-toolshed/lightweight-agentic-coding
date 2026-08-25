@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 for tagged releases (public beta and beyond).
 
+## [Unreleased]
+
+### Added
+
+- Qwen 3.8 27B as the main local model family: `qwen3.8-27b-q3/q4/q6/q8` slots, UD-quant
+  downloads (Q3 12.5 GiB / Q4 16.7 GiB / Q8 29.3 GiB) plus `mmproj-F16` vision, and default
+  swaps across the 16/24/32/48/64/128gb-multi profiles (48 GB keeps Qwen 3.6 35B-A3B Q8 as
+  an alternate). Presets use Unsloth's instruct-mode baseline and the embedded qwen3_5
+  chat template.
+- `lac context` — KV-cache/context calculator: reads each model's GGUF header (hybrid
+  attention aware), reports max context per cache type (`f16` / `q8_0` / `q4_0`) inside the
+  measured memory budget minus the 8 GiB macOS headroom rule, and estimates decode speed
+  from chip memory bandwidth.
+- `catalog/checksums.json` SHA256 entries for the Qwen 3.8 artifacts (recorded from the
+  validation testbed downloads).
+
+### Changed
+
+- qwen3.8-default profiles no longer auto-select oMLX on macOS (no Qwen 3.8 MLX repo yet);
+  they fall back to llama.cpp. Gemma profiles keep the oMLX path.
+- `lac bench` now sends POST to `/v1/chat/completions` (GET-with-body was rejected with
+  404 by current llama-server versions).
+
 ## [0.3.0] — 2026-08-09
 
 Released the hardware-fit public beta with an explicit Apple Silicon MacBook support boundary.

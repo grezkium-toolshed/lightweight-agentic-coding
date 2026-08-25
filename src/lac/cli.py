@@ -719,7 +719,15 @@ def build_parser():
     scenario_list_parser = scenario_sub.add_parser("list")
     scenario_list_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
     scenario_show_parser = scenario_sub.add_parser("show")
+    scenario_show_parser.add_argument("scenario_id")
     scenario_show_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+
+    context_parser = subparsers.add_parser(
+        "context",
+        help="Show how much context each KV cache type buys per model within the memory budget",
+    )
+    context_parser.add_argument("--profile", help="Profile id (default: active profile)")
+    context_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
     scenario_show_parser.add_argument("scenario_id")
 
     provider_parser = subparsers.add_parser("provider")
@@ -908,6 +916,10 @@ def main():
     if args.command == "catalog":
         if args.catalog_command == "sync-free":
             raise SystemExit(sync_free(source_url=getattr(args, "source_url", None)))
+
+    if args.command == "context":
+        from lac.fit import context_cmd
+        return context_cmd(ctx, profile_id=args.profile, json_output=args.json)
 
     if args.command == "init":
         result = init_wizard(

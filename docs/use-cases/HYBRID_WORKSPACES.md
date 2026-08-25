@@ -79,7 +79,7 @@ Use overlays when local execution remains the baseline:
 ./bin/lac client open opencode
 ```
 
-In OpenCode, use `/models` to switch between local IDs such as `local-cluster/qwen3.6-27b-q4`, subscription IDs such as `opencode-go/glm-5.1`, and OpenRouter IDs such as `openrouter/google/gemma-4-26b-a4b-it:free`.
+In OpenCode, use `/models` to switch between local IDs such as `local-cluster/qwen3.8-27b-q4`, subscription IDs such as `opencode-go/glm-5.1`, and OpenRouter IDs such as `openrouter/google/gemma-4-26b-a4b-it:free`.
 
 For OpenCode Desktop on macOS, use the same generated config:
 

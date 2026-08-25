@@ -28,7 +28,7 @@
     "16gb": {
       "id": "16gb",
       "label": "16 GB local starter",
-      "description": "16 GB RAM/VRAM. Qwen 3.6 27B at UD-IQ3_XXS (12.2 GB) — the only honest 16 GB 27B-dense quant, hybrid attention keeps 128K context affordable.",
+      "description": "16 GB RAM/VRAM. Qwen 3.8 27B at UD-Q3_K_XL (12.5 GB) — dense 27B with hybrid attention keeps 128K context affordable.",
       "preset": "runtime-config/presets/16gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -36,7 +36,7 @@
       "verification_tier": "verified",
       "memory_target_gb": 16,
       "recommendation_floor_gb": 14,
-      "estimated_default_weight_gb": 12.2,
+      "estimated_default_weight_gb": 12.5,
       "auto_recommend": true,
       "primary_workload": "starter",
       "recommended_for": [
@@ -48,7 +48,7 @@
         "claude-code",
         "codex-reference"
       ],
-      "default_model": "local-cluster/qwen3.6-27b-iq3xxs",
+      "default_model": "local-cluster/qwen3.8-27b-q3",
       "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "macos-16gb": {
@@ -80,7 +80,7 @@
     "24gb": {
       "id": "24gb",
       "label": "24 GB local balanced",
-      "description": "Balanced local-first workstation profile for coding, research, and office workflows.",
+      "description": "Balanced local-first workstation profile for coding, research, and office workflows. Qwen 3.8 27B UD-Q4_K_XL (16.7 GB, 96.1% BF16 agreement) default.",
       "preset": "runtime-config/presets/24gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -88,7 +88,7 @@
       "verification_tier": "verified",
       "memory_target_gb": 24,
       "recommendation_floor_gb": 22,
-      "estimated_default_weight_gb": 17,
+      "estimated_default_weight_gb": 16.7,
       "auto_recommend": true,
       "primary_workload": "generalist",
       "recommended_for": [
@@ -101,13 +101,13 @@
         "claude-code",
         "codex-reference"
       ],
-      "default_model": "local-cluster/qwen3.6-27b-q4",
+      "default_model": "local-cluster/qwen3.8-27b-q4",
       "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "32gb": {
       "id": "32gb",
       "label": "32 GB local stronger",
-      "description": "Stronger local profile that keeps Qwen 3.6 dense 27B as the default and avoids low-bit 35B-A3B.",
+      "description": "Stronger local profile that keeps Qwen 3.8 dense 27B as the default and avoids low-bit 35B-A3B.",
       "preset": "runtime-config/presets/32gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -115,7 +115,7 @@
       "verification_tier": "standard",
       "memory_target_gb": 32,
       "recommendation_floor_gb": 30,
-      "estimated_default_weight_gb": 17,
+      "estimated_default_weight_gb": 16.7,
       "auto_recommend": true,
       "primary_workload": "coding",
       "recommended_for": [
@@ -127,13 +127,13 @@
         "claude-code",
         "codex-reference"
       ],
-      "default_model": "local-cluster/qwen3.6-27b-q4",
+      "default_model": "local-cluster/qwen3.8-27b-q4",
       "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "48gb": {
       "id": "48gb",
       "label": "48 GB local candidate",
-      "description": "Explicit 48 GB profile for Qwen 3.6 35B-A3B Q8 with conservative runtime settings. Automatic recommendation waits for a real 48 GB hardware smoke test.",
+      "description": "Explicit 48 GB profile for Qwen 3.8 27B UD-Q8_K_XL (29.3 GB, 99.0% BF16 agreement) with Qwen 3.6 35B-A3B Q8 as alternate. Automatic recommendation waits for a real 48 GB hardware smoke test.",
       "preset": "runtime-config/presets/48gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -141,7 +141,7 @@
       "verification_tier": "standard",
       "memory_target_gb": 48,
       "recommendation_floor_gb": 46,
-      "estimated_default_weight_gb": 36,
+      "estimated_default_weight_gb": 29.3,
       "auto_recommend": false,
       "primary_workload": "local-heavy",
       "recommended_for": [
@@ -155,13 +155,13 @@
         "codex-reference",
         "openchamber"
       ],
-      "default_model": "local-cluster/qwen3.6-35b-a3b-q8",
+      "default_model": "local-cluster/qwen3.8-27b-q8",
       "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "64gb": {
       "id": "64gb",
       "label": "64 GB local multi-model",
-      "description": "High-headroom local workstation profile for heavier coding and mixed workloads.",
+      "description": "High-headroom local workstation profile for heavier coding and mixed workloads. Qwen 3.8 27B Q8 default with Qwen 3.6 35B-A3B and MTP alternates.",
       "preset": "runtime-config/presets/64gb.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -169,7 +169,7 @@
       "verification_tier": "extended",
       "memory_target_gb": 64,
       "recommendation_floor_gb": 60,
-      "estimated_default_weight_gb": 36,
+      "estimated_default_weight_gb": 29.3,
       "auto_recommend": true,
       "primary_workload": "multi-model",
       "recommended_for": [
@@ -182,13 +182,13 @@
         "codex-reference",
         "openchamber"
       ],
-      "default_model": "local-cluster/qwen3.6-35b-a3b-q8",
+      "default_model": "local-cluster/qwen3.8-27b-q8",
       "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "128gb-multi": {
       "id": "128gb-multi",
       "label": "128 GB multi-model local",
-      "description": "Large-memory workstation profile for users who want broad local model coverage.",
+      "description": "Large-memory workstation profile for users who want broad local model coverage. Qwen 3.8 27B Q8 default with Qwen 3.6 35B-A3B and MTP slots.",
       "preset": "runtime-config/presets/128gb-multi.ini",
       "runtime_mode": "local",
       "local_runtime_required": true,
@@ -196,7 +196,7 @@
       "verification_tier": "extended",
       "memory_target_gb": 128,
       "recommendation_floor_gb": 120,
-      "estimated_default_weight_gb": 36,
+      "estimated_default_weight_gb": 29.3,
       "auto_recommend": true,
       "primary_workload": "multi-model",
       "recommended_for": [
@@ -208,7 +208,7 @@
         "codex-reference",
         "openchamber"
       ],
-      "default_model": "local-cluster/qwen3.6-35b-a3b-q8",
+      "default_model": "local-cluster/qwen3.8-27b-q8",
       "small_model": "local-cluster/qwen3.5-4b-q4"
     },
     "128gb-qwen122b": {

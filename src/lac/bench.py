@@ -57,7 +57,7 @@ def _bench_one_model(model_id, base_url, timeout, prompt, max_tokens, draft_n=No
 
     start = time.time()
     try:
-        data, raw = request_json(f"{base_url}/v1/chat/completions", timeout=timeout, payload=payload)
+        data, raw = request_json(f"{base_url}/v1/chat/completions", method="POST", timeout=timeout, payload=payload)
     except Exception as e:
         return {"model": model_id, "error": str(e), "ok": False}
     elapsed = time.time() - start

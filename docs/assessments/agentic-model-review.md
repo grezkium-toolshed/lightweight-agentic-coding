@@ -72,7 +72,7 @@ aggregations. Mostly short-to-medium sessions, single workspace, operator review
 | Tier | Models (profile) | Footprint | Verdict for assessment analysis |
 |---|---|---|---|
 | Small | Qwen3.5 9B Q4 (`macos-16gb`), Gemma 4 12B Q4/QAT (`gemma-8gb`+) | 6-8 GB | Fine for **single-file summarization and short sessions**; expect manual steering in loops. Gemma 4 12B preferred (Tau2 69.0). Avoid E4B/2B for anything agentic. |
-| Mid | Qwen 3.6 27B Q4 (`24gb`/`32gb`), Gemma 4 31B Q4 (`gemma-32gb`) | 17-20 GB | **Recommended default for the 32 GB workstation.** Reliable multi-step tool calling, enough context for full-run analysis. |
+| Mid | Qwen 3.8 27B Q4 (`24gb`/`32gb`), Gemma 4 31B Q4 (`gemma-32gb`) | 17-20 GB | **Recommended default for the 32 GB workstation.** Reliable multi-step tool calling, enough context for full-run analysis. |
 | High | Qwen 3.6 35B-A3B Q8 (`64gb`+), DeepSeek V4 Flash q2 (`128gb-ds4-flash`) | 38-100 GB | Headroom for very long exports and heavier aggregation; the 128 GB M4 Max slot. |
 
 Rule of thumb: **small models for assisted analysis, mid/high models for autonomous
@@ -116,7 +116,7 @@ Trade-offs to know:
 
 ## Recommendation
 
-1. Use **Gemma 4 12B (small)** and **Qwen 3.6 27B (mid)** as the two reference models:
+1. Use **Gemma 4 12B (small)** and **Qwen 3.8 27B (mid)** as the two reference models:
    one for portable/16 GB machines, one for 32 GB workstations. Validate both with one
    smoke run on a real export before fleet rollout.
 2. Adopt the **privacy-locked permission block** above for all assessment workspaces.

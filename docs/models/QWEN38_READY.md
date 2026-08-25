@@ -1,34 +1,47 @@
 # Qwen 3.8 Readiness
 
-Status: **candidate only — no local profile defaults change without release and hardware evidence.**
+Status: **shipped as the main local model family** (Qwen 3.8 27B). GGUFs from
+`unsloth/Qwen3.8-27B-GGUF` are wired into the 16/24/32/48/64/128gb-multi profiles as the
+default, with mmproj vision attached. Remaining gaps: no official MTP repo and no MLX repo yet.
 
-## Small-model status
+## Quant selection (top-1% agreement vs BF16)
 
-Do not add or switch low-end Qwen 3.8 slots based on announcements, projections, or community distills. The low-end tiers keep Qwen3.5-9B / Gemma 4 12B QAT until official weights, llama.cpp compatibility, exact artifact sizes, checksums, and target-hardware results exist.
+| Quant | Size (GiB) | Agreement | Shipped as |
+|---|---:|---:|---|
+| UD-Q3_K_XL | 12.5 | 92.4% | `16gb` default |
+| UD-Q4_K_XL | 16.7 | 96.1% | `24gb` / `32gb` default |
+| Q8_0 | 27.0 | 98.8% | 48 GB memory-pressure fallback (documented, not shipped) |
+| UD-Q8_K_XL | 29.3 | 99.0% | `48gb` / `64gb` / `128gb-multi` default |
 
-## Timeline
+## What is wired
 
-- **2026-08-03 announcement** — retained as planning context only. Announced dates, benchmark claims, context ceilings, and projected quant sizes are not shipped resource contracts.
-- **Local decision gate** — official weights and license, supported GGUFs, llama.cpp compatibility, measured memory/context behavior, and representative agentic results must all be recorded before a default changes.
+- `opencode.template.jsonc` carries `qwen3.8-27b-q3/q4/q6/q8` client slots (262144 context,
+  16384 output) and the top-level `model` / `small_model` fallbacks point at qwen3.8 q4/q3.
+- `src/lac/models.py` `PROFILE_MODELS` downloads the qwen3.8 GGUFs + `mmproj-F16.gguf`
+  (0.86 GiB) for the six profiles; `catalog/checksums.json` holds SHA256 integrity data.
+- Presets set the Unsloth instruct-mode baseline (`temp 0.7 / top-p 0.8 / top-k 20 /
+  presence-penalty 1.5 / repeat-penalty 1.0`), `reasoning = off` as the default start,
+  `cache-type-k/v = q8_0`, and the embedded qwen3_5 chat template (no `chat-template-file`
+  override) with `mmproj = __MODELS_DIR__/qwen3.8/mmproj-F16.gguf`.
+- Contexts: 128K for 16/24/32gb, 256K for 48/64/128gb-multi. See `docs/model-recommendations.md`.
 
-## What is already wired (pre-drop)
+## Known gaps and gates
 
-- `opencode.template.jsonc` carries placeholder `qwen3.8-27b-q3`, `qwen3.8-27b-q4`, and `qwen3.8-27b-q6` client slots. They are compatibility placeholders, not download mappings or recommendations.
-- No profile defaults have been switched yet — the swaps below are the pending items.
-
-## Drop-day checklist (when GGUFs land)
-
-1. **Source GGUFs** — prefer official/unsloth quantizations matching the slot naming (`qwen3.8-27b-q3/q4/q6`).
-2. **Add integrity data** — fill `catalog/checksums.json` SHA256 entries for the three files (or at minimum exact sizes); update `catalog/assets.json` pending slots.
-3. **Verify llama.cpp support** — Qwen 3.8 uses a hybrid-attention MoE architecture; run `brew upgrade llama.cpp` and validate with `./bin/lac doctor` and `lac smoke` before promising anything.
-4. **Consider profile defaults only after the evidence gate**:
-   - `24gb` → `local-cluster/qwen3.8-27b-q4` (was qwen3.6-27b-q4)
-   - `32gb` → `local-cluster/qwen3.8-27b-q4` (was qwen3.6-27b-q4)
-   - `16gb` → `local-cluster/qwen3.8-27b-q3` (was qwen3.6-27b-q3)
-   - `small_model` entries follow the same swap.
-5. **Re-run the context matrix** — `./scripts/integration-test.sh` asserts generated OpenCode context == preset `ctx-size` for every profile; then `lac profile apply 24gb`, `lac runtime start`, and an OpenCode smoke session.
-6. **Update docs** — `docs/model-recommendations.md` tables and README profile table once the 27B is validated.
-7. **Cloud overlay** — verify the live provider catalog and endpoint behavior before documenting availability; hosted presence does not validate local weights.
+- **MTP**: no Qwen 3.8 MTP repo yet; the 32/64/128gb-multi profiles keep Qwen 3.6 MTP slots.
+- **MLX / oMLX**: no Qwen 3.8 MLX repo yet. `_profile_supports_omlx` rejects qwen3.8-default
+  profiles, so macOS auto-selection falls back to llama.cpp for them; Gemma profiles keep the
+  oMLX path. When Unsloth ships Qwen3.8 MLX, add `LOCAL_MLX_MODEL_IDS` entries in
+  `src/lac/config.py` and re-enable oMLX tests.
+- **Low-end tiers**: `4gb`–`12gb` and `macos-16gb` keep Qwen3.5-9B / Gemma 4 QAT defaults.
+  The Qwen 3.8 IQ2 tier (82–86% agreement) is a quality cliff, not a default.
+- **48 GB fit**: 29.3 GiB weights + ~8.5 GiB KV at 256K/q8_0 + compute sits against the
+  40 GiB post-headroom budget; `lac context --profile 48gb` shows the per-cache-type math,
+  and `Q8_0` (27.0 GiB) is the documented pressure fallback.
+- **Validation**: llama.cpp load, KV/tok/s behavior, and checksums were validated on the
+  maintainer's M4 Max 128 GB testbed; 48 GB exact-hardware fit remains the manual-gate item
+  before the profile's `auto_recommend` flips.
+- **Vision**: mmproj is attached at the runtime level; OpenCode image passthrough over the
+  openai-compatible provider is best-effort.
 
 ## Hosted-model caveat
 

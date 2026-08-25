@@ -4,8 +4,8 @@
   // reports later-precedence overrides without modifying the user's files.
   "share": "disabled",
   "autoupdate": false,
-  "model": "local-cluster/qwen3.6-27b-q4",
-  "small_model": "local-cluster/qwen3.6-27b-q3",
+  "model": "local-cluster/qwen3.8-27b-q4",
+  "small_model": "local-cluster/qwen3.8-27b-q3",
   // Dynamic Context Pruning — supplemental model-guided compression and automatic cleanup.
   // Project config: .opencode/dcp.jsonc
   // Upstream: https://github.com/Opencode-DCP/opencode-dynamic-context-pruning
@@ -65,9 +65,8 @@
             "output": 16384
           }
         },
-        // Qwen 3.8-27B — open weights expected ~2026-08-10 (alongside Qwen3.8-Max 2.4T).
-        // Slots are live so configs render before the drop; keep in sync with docs/models/QWEN38_READY.md.
-        // Until GGUFs land, `lac models sync` has no catalog entry for these and will skip them.
+        // Qwen 3.8-27B — main local model family (dense 27B, hybrid attention,
+        // 256K max context, vision via mmproj). Keep in sync with docs/models/QWEN38_READY.md.
         "qwen3.8-27b-q3": {
           "limit": {
             "context": 262144,
@@ -81,6 +80,12 @@
           }
         },
         "qwen3.8-27b-q6": {
+          "limit": {
+            "context": 262144,
+            "output": 16384
+          }
+        },
+        "qwen3.8-27b-q8": {
           "limit": {
             "context": 262144,
             "output": 16384

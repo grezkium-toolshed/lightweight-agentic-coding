@@ -47,8 +47,8 @@ PROFILE_MODELS = {
     },
     "16gb": {
         "gguf": [
-            ('qwen3.6', 'Qwen3.6-27B-UD-IQ3_XXS.gguf', 'unsloth/Qwen3.6-27B-GGUF', 12000),
-            ('qwen3.6', 'Qwen3.6-27B-UD-Q3_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 14000),
+            ('qwen3.8', 'Qwen3.8-27B-UD-Q3_K_XL.gguf', 'unsloth/Qwen3.8-27B-GGUF', 13500),
+            ('qwen3.8', 'mmproj-F16.gguf', 'unsloth/Qwen3.8-27B-GGUF', 900),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": ['unsloth/Qwen3.6-27B-UD-MLX-6bit'],
@@ -77,15 +77,16 @@ PROFILE_MODELS = {
     },
     "24gb": {
         "gguf": [
-            ('qwen3.6', 'Qwen3.6-27B-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 17000),
-            ('qwen3.6', 'Qwen3.6-27B-UD-Q3_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 14000),
+            ('qwen3.8', 'Qwen3.8-27B-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.8-27B-GGUF', 18000),
+            ('qwen3.8', 'mmproj-F16.gguf', 'unsloth/Qwen3.8-27B-GGUF', 900),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": ['unsloth/Qwen3.6-27B-UD-MLX-6bit'],
     },
     "32gb": {
         "gguf": [
-            ('qwen3.6', 'Qwen3.6-27B-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 17000),
+            ('qwen3.8', 'Qwen3.8-27B-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.8-27B-GGUF', 18000),
+            ('qwen3.8', 'mmproj-F16.gguf', 'unsloth/Qwen3.8-27B-GGUF', 900),
             ('qwen3.6-mtp', 'Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-MTP-GGUF', 19000),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
@@ -93,16 +94,18 @@ PROFILE_MODELS = {
     },
     "48gb": {
         "gguf": [
+            ('qwen3.8', 'Qwen3.8-27B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.8-27B-GGUF', 31500),
+            ('qwen3.8', 'mmproj-F16.gguf', 'unsloth/Qwen3.8-27B-GGUF', 900),
             ('qwen3.6', 'Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-GGUF', 36000),
-            ('qwen3.6', 'Qwen3.6-27B-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 17000),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
         "mlx": ['unsloth/Qwen3.6-35B-A3B-MLX-8bit', 'unsloth/Qwen3.6-27B-UD-MLX-6bit'],
     },
     "64gb": {
         "gguf": [
+            ('qwen3.8', 'Qwen3.8-27B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.8-27B-GGUF', 31500),
+            ('qwen3.8', 'mmproj-F16.gguf', 'unsloth/Qwen3.8-27B-GGUF', 900),
             ('qwen3.6', 'Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-GGUF', 36000),
-            ('qwen3.6', 'Qwen3.6-27B-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 17000),
             ('qwen3.6-mtp', 'Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-MTP-GGUF', 31000),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),
         ],
@@ -121,8 +124,9 @@ PROFILE_MODELS = {
     },
     "128gb-multi": {
         "gguf": [
+            ('qwen3.8', 'Qwen3.8-27B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.8-27B-GGUF', 31500),
+            ('qwen3.8', 'mmproj-F16.gguf', 'unsloth/Qwen3.8-27B-GGUF', 900),
             ('qwen3.6', 'Qwen3.6-35B-A3B-UD-Q8_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-GGUF', 36000),
-            ('qwen3.6', 'Qwen3.6-27B-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-GGUF', 17000),
             ('qwen3.6-mtp', 'Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf', 'unsloth/Qwen3.6-27B-MTP-GGUF', 19000),
             ('qwen3.6-mtp', 'Qwen3.6-35B-A3B-MTP-UD-Q6_K_XL.gguf', 'unsloth/Qwen3.6-35B-A3B-MTP-GGUF', 31000),
             ('qwen3.5', 'Qwen3.5-4B-Q4_K_M.gguf', 'unsloth/Qwen3.5-4B-GGUF', 2500),

@@ -107,12 +107,12 @@ Probably — but speed depends heavily on the accelerator and its usable memory.
 | 8 GB | True 8 GB accelerator budget | `8gb`: Qwen3.5 9B Q4, ~5.5 GB | standard | Small-model tool use and short 32K sessions |
 | 12 GB | True 12 GB accelerator budget | `12gb`: Qwen3.5 9B Q8, ~9.7 GB | standard | Constrained multi-step work at 64K |
 | 16 GB | Apple Silicon unified memory | `macos-16gb`: Gemma 4 12B QAT, ~6.4 GB | standard | Everyday work with macOS headroom |
-| 16 GB | Dedicated VRAM or CPU-only system RAM | `16gb`: Qwen 3.6 27B IQ3, ~12.2 GB | verified | Constrained larger-model work |
-| 24 GB | Dedicated VRAM or unified memory | `24gb`: Qwen 3.6 27B Q4, ~17 GB | verified | General daily driver |
-| 32 GB | Dedicated VRAM or unified memory | `32gb`: Qwen 3.6 27B Q4, ~17 GB | standard | Coding, research, and multi-step work |
-| 48 GB | Dedicated or Apple unified memory | `48gb`: Qwen 3.6 35B-A3B Q8, ~36 GB | standard, manual only | Candidate local-heavy tier; hardware gate pending |
-| 64 GB | Dedicated VRAM or unified memory | `64gb`: Qwen 3.6 35B-A3B Q8, ~36 GB | extended | High-headroom and MTP specialist work |
-| 128 GB+ | High-memory unified workstation | `128gb-*`: 36–108 GB defaults | extended | Specialist large-model workflows |
+| 16 GB | Dedicated VRAM or CPU-only system RAM | `16gb`: Qwen 3.8 27B Q3, ~12.5 GB | verified | Constrained larger-model work |
+| 24 GB | Dedicated VRAM or unified memory | `24gb`: Qwen 3.8 27B Q4, ~16.7 GB | verified | General daily driver |
+| 32 GB | Dedicated VRAM or unified memory | `32gb`: Qwen 3.8 27B Q4, ~16.7 GB | standard | Coding, research, and multi-step work |
+| 48 GB | Dedicated or Apple unified memory | `48gb`: Qwen 3.8 27B Q8, ~29.3 GB | standard, manual only | Candidate local-heavy tier; hardware gate pending |
+| 64 GB | Dedicated VRAM or unified memory | `64gb`: Qwen 3.8 27B Q8, ~29.3 GB | extended | High-headroom and MTP specialist work |
+| 128 GB+ | High-memory unified workstation | `128gb-*`: 29–108 GB defaults | extended | Specialist large-model workflows |
 
 The validation column describes the profile evidence, not platform support. Apple Silicon
 MacBooks are the supported platform; every other platform remains experimental until physical
@@ -133,11 +133,11 @@ The target is a safe fit, not maximum memory consumption. For multiple discrete 
 | 6 GB device | `6gb` | Qwen3.5-9B Q4 with partial offload — smallest practical agentic tier |
 | 8 GB device | `8gb` | Qwen3.5-9B Q4/Q6 or Gemma 4 12B QAT (`gemma-8gb`) — the agentic floor |
 | 12 GB device | `12gb` | Qwen3.5-9B Q8, 64K context |
-| 16 GB dedicated VRAM or CPU-only RAM | `16gb` | Qwen 3.6 27B UD-IQ3_XXS (12.2 GB) |
+| 16 GB dedicated VRAM or CPU-only RAM | `16gb` | Qwen 3.8 27B UD-Q3_K_XL (12.5 GB) |
 | 16 GB Apple Silicon Mac | `macos-16gb` | Balanced Apple Silicon default (Gemma 4 12B QAT) |
 | 24 GB Mac / workstation | `24gb` | The sweet spot — recommended daily driver |
 | 32 GB workstation | `32gb` | Stronger, with MTP speculative decoding |
-| 48 GB workstation | `48gb` | 35B-A3B Q8 candidate; explicit selection only pending hardware validation |
+| 48 GB workstation | `48gb` | Qwen 3.8 27B Q8 default (+ Qwen 3.6 35B-A3B Q8 alternate); explicit selection only pending hardware validation |
 | Cloud-only, free | `openrouter` | Zero downloads, free-tier hosted models |
 
 <details>
@@ -147,8 +147,8 @@ For 64 GB+ machines, the Gemma family, and specialist runtimes. These are power-
 
 | Profile | What you get |
 |---|---|
-| `64gb` | Qwen 3.6 35B-A3B Q8 + MTP |
-| `128gb-multi` | Multi-model Qwen workstation (llama.cpp) |
+| `64gb` | Qwen 3.8 27B Q8 + Qwen 3.6 35B-A3B Q8 / MTP |
+| `128gb-multi` | Multi-model Qwen workstation: Qwen 3.8 27B Q8 default (llama.cpp) |
 | `128gb-qwen122b` | Large-model Qwen-focused (llama.cpp) |
 | `128gb-minimax` | MiniMax M2.7 (IQ4_XS) |
 | `128gb-ds4-flash` | DeepSeek V4 Flash via [antirez's ds4/DwarfStar](https://github.com/antirez/ds4). Needs a separately-built `ds4-server` (`git clone https://github.com/antirez/ds4 && make`; set `DS4_BIN`). The ceiling of what a top-spec 128 GB MacBook Pro runs locally; the CUDA build (`make cuda-generic`) is community-validated. |
@@ -249,7 +249,7 @@ production-pilot control completes that entire loop with before/after evidence. 
 - **Ponytail (default-on)** — generated OpenCode configs include the [ponytail](https://github.com/DietrichGebert/ponytail) plugin (laziness ruleset + `/ponytail` commands). Disable per session with `PONYTAIL_DEFAULT_MODE=off`. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)
 - **Context safety** — OpenCode's built-in compaction is the hard overflow guard. DCP adds model-guided compression and cleanup with thresholds generated from the active runtime preset; it is supplemental rather than a guaranteed automatic compressor.
 - **Existing OpenCode installs** — merge precedence, advisory warnings, shared auth/session state, and safe workspace practice: [`docs/OPENCODE-COEXISTENCE.md`](docs/OPENCODE-COEXISTENCE.md)
-- **Qwen 3.8 candidate prep** — placeholder config slots exist, but no profile switches without official artifacts and hardware evidence: [`docs/models/QWEN38_READY.md`](docs/models/QWEN38_READY.md)
+- **Qwen 3.8 27B** — main model family status, quant selection, and MTP/MLX gaps: [`docs/models/QWEN38_READY.md`](docs/models/QWEN38_READY.md)
 - **Free cloud model catalog** — `lac catalog sync-free`, see [`docs/free-coding-models.json`](docs/free-coding-models.json)
 - **Model deep dive** — tuning rationale, profile details: [`docs/model-recommendations.md`](docs/model-recommendations.md)
 - **Agentic analysis of assessment exports** — model capability review, harness assessment, and the agentic-only-folder workflow (staging script + skill implemented): [`docs/assessments/`](docs/assessments/)
