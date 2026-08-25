@@ -11,7 +11,7 @@ Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/
 - [~] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and
   `./scripts/verify-package-build.sh` passed on the merged Qwen 3.8 change (internal
   `799bc56` + release-readiness follow-ups), including 35 unit/fixture checks (one
-  Windows-only skip), 55 active preset model sections (floor lowered from 60 when the Qwen 3.8
+  Windows-only skip), 58 active preset model sections (floor lowered from 60 when the Qwen 3.8
   swap slimmed duplicate Qwen 3.6 slots), the qwen3.8 oMLX-fallback assertion, the
   `delivery-run.v1` contract checks, and installed-wheel version `0.4.0`.
 - [~] The Qwen 3.8 Q8 path (`48gb`/`64gb`/`128gb-multi` config) was validated on the

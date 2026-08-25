@@ -118,8 +118,7 @@ The validation column describes the profile evidence, not platform support. Appl
 MacBooks are the supported platform; every other platform remains experimental until physical
 runtime evidence justifies promotion. The Qwen 3.8 Q8 configuration (48/64/128 GB rows) was
 validated on the maintainer's M4 Max 128 GB testbed; the Q3/Q4 defaults for the 16–32 GB rows
-are template-reviewed only until their own hardware evidence is recorded (as was the case for
-their Qwen 3.6 predecessors).
+await their own hardware evidence before their validation labels can be restored.
 
 The 48 GB tier corresponds to current [MacBook Pro configurations](https://support.apple.com/en-euro/126319), but availability alone is not validation; lac keeps it manual until the recorded smoke-test contract passes.
 
