@@ -107,8 +107,8 @@ Probably — but speed depends heavily on the accelerator and its usable memory.
 | 8 GB | True 8 GB accelerator budget | `8gb`: Qwen3.5 9B Q4, ~5.5 GB | standard | Small-model tool use and short 32K sessions |
 | 12 GB | True 12 GB accelerator budget | `12gb`: Qwen3.5 9B Q8, ~9.7 GB | standard | Constrained multi-step work at 64K |
 | 16 GB | Apple Silicon unified memory | `macos-16gb`: Gemma 4 12B QAT, ~6.4 GB | standard | Everyday work with macOS headroom |
-| 16 GB | Dedicated VRAM or CPU-only system RAM | `16gb`: Qwen 3.8 27B Q3, ~12.5 GB | verified | Constrained larger-model work |
-| 24 GB | Dedicated VRAM or unified memory | `24gb`: Qwen 3.8 27B Q4, ~16.7 GB | verified | General daily driver |
+| 16 GB | Dedicated VRAM or CPU-only system RAM | `16gb`: Qwen 3.8 27B Q3, ~12.5 GB | standard | Constrained larger-model work |
+| 24 GB | Dedicated VRAM or unified memory | `24gb`: Qwen 3.8 27B Q4, ~16.7 GB | standard | General daily driver |
 | 32 GB | Dedicated VRAM or unified memory | `32gb`: Qwen 3.8 27B Q4, ~16.7 GB | standard | Coding, research, and multi-step work |
 | 48 GB | Dedicated or Apple unified memory | `48gb`: Qwen 3.8 27B Q8, ~29.3 GB | standard, manual only | Candidate local-heavy tier; hardware gate pending |
 | 64 GB | Dedicated VRAM or unified memory | `64gb`: Qwen 3.8 27B Q8, ~29.3 GB | extended | High-headroom and MTP specialist work |
@@ -116,7 +116,10 @@ Probably — but speed depends heavily on the accelerator and its usable memory.
 
 The validation column describes the profile evidence, not platform support. Apple Silicon
 MacBooks are the supported platform; every other platform remains experimental until physical
-runtime evidence justifies promotion.
+runtime evidence justifies promotion. The Qwen 3.8 Q8 configuration (48/64/128 GB rows) was
+validated on the maintainer's M4 Max 128 GB testbed; the Q3/Q4 defaults for the 16–32 GB rows
+are template-reviewed only until their own hardware evidence is recorded (as was the case for
+their Qwen 3.6 predecessors).
 
 The 48 GB tier corresponds to current [MacBook Pro configurations](https://support.apple.com/en-euro/126319), but availability alone is not validation; lac keeps it manual until the recorded smoke-test contract passes.
 
@@ -192,6 +195,7 @@ lac client open opencode           # Or the coding agent CLI
 lac runtime status                 # Check runtime state
 lac runtime stop                   # Stop local server
 lac doctor                         # Validate setup
+lac context                        # Show what each KV cache type buys per model (context fit math)
 lac ports show --json              # Show effective local service ports
 ```
 

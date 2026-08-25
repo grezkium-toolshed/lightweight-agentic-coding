@@ -6,6 +6,25 @@ explicit approval.
 
 Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/external gate pending · `[ ]` blocked or not yet run.
 
+## v0.4.0 pre-tag gates (Qwen 3.8 main family + `lac context`)
+
+- [~] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and
+  `./scripts/verify-package-build.sh` passed on the merged Qwen 3.8 change (internal
+  `799bc56` + release-readiness follow-ups), including 35 unit/fixture checks (one
+  Windows-only skip), 55 active preset model sections (floor lowered from 60 when the Qwen 3.8
+  swap slimmed duplicate Qwen 3.6 slots), the qwen3.8 oMLX-fallback assertion, the
+  `delivery-run.v1` contract checks, and installed-wheel version `0.4.0`.
+- [~] The Qwen 3.8 Q8 path (`48gb`/`64gb`/`128gb-multi` config) was validated on the
+  maintainer's M4 Max 128 GB testbed: llama.cpp b10360 load at 256K context, mmproj vision
+  completion, 14.3 tok/s bench, checksums recorded for Q8/mmproj/35B-A3B Q8.
+- [x] The `48gb` profile remains `auto_recommend: false` and is described as manual/unverified;
+  its 256K/Q8 memory fit is documented as tight (29.3 + ~8.5 GiB KV + compute vs the 40 GiB
+  post-headroom budget) with `Q8_0` as the manual pressure fallback.
+- [ ] Record separate physical evidence for the Qwen 3.8 Q3/Q4 16–32 GB defaults and for 48 GB
+  before changing their current validation labels (16/24 GB were lowered to `standard` with the
+  Qwen 3.8 swap until that evidence exists).
+- [ ] Fresh Dependabot read and release boundary check on the exact sanitized commit before tag.
+
 ## v0.3.0 pre-tag gates
 
 - [x] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and

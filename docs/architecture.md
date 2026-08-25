@@ -19,7 +19,7 @@ The runtime stays llama.cpp-first, with explicit specialist runtimes:
 - oMLX remains an optional macOS MLX serving path for compatible Qwen/Gemma profiles
 - profile presets live under `runtime-config/presets/`
 - `state/runtime/presets.active.ini` is generated from the chosen hardware profile
-- Qwen 3.6 MoE is the target baseline model family for general work
+- Qwen 3.8 27B dense is the target baseline model family for general work; Qwen 3.6 MoE/MTP remain alternates
 - Qwen 3.6 MTP (27B Q4, 35B-A3B Q6) replaces coder-next as the fast coding and architect model
 
 ## CLI orchestration

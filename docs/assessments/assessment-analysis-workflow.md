@@ -80,7 +80,7 @@ From `agentic-model-review.md` and `agentic-harness-review.md`:
 - Harness: OpenCode (keep; OpenChamber only if a browser UI is needed).
 - 32 GB workstation: Qwen 3.8 27B Q4 (mid tier — recommended default).
 - 16 GB portable: Gemma 4 12B (small tier — assisted analysis, expect steering).
-- 128 GB M4 Max: Qwen 3.6 35B-A3B Q8 (high tier — headroom for long exports).
+- 128 GB M4 Max: Qwen 3.8 27B Q8 (high tier — headroom for long exports; Qwen 3.6 35B-A3B Q8 remains an alternate).
 - E4B/2B and sub-Q4 quants are non-agentic; do not use them for this workflow.
 
 ## Permissions (privacy-locked workspace config)

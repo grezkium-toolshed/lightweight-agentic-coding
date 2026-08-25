@@ -4,21 +4,23 @@ Status: **shipped as the main local model family** (Qwen 3.8 27B). GGUFs from
 `unsloth/Qwen3.8-27B-GGUF` are wired into the 16/24/32/48/64/128gb-multi profiles as the
 default, with mmproj vision attached. Remaining gaps: no official MTP repo and no MLX repo yet.
 
-## Quant selection (top-1% agreement vs BF16)
+## Quant selection (top-1% agreement vs BF16, estimated from Unsloth's published quantization chart)
 
 | Quant | Size (GiB) | Agreement | Shipped as |
 |---|---:|---:|---|
 | UD-Q3_K_XL | 12.5 | 92.4% | `16gb` default |
 | UD-Q4_K_XL | 16.7 | 96.1% | `24gb` / `32gb` default |
-| Q8_0 | 27.0 | 98.8% | 48 GB memory-pressure fallback (documented, not shipped) |
+| Q8_0 | 27.0 | 98.8% | 48 GB memory-pressure fallback (manual download, not in the shipped sync set) |
 | UD-Q8_K_XL | 29.3 | 99.0% | `48gb` / `64gb` / `128gb-multi` default |
 
 ## What is wired
 
-- `opencode.template.jsonc` carries `qwen3.8-27b-q3/q4/q6/q8` client slots (262144 context,
+- `opencode.template.jsonc` carries `qwen3.8-27b-q3/q4/q8` client slots (262144 context,
   16384 output) and the top-level `model` / `small_model` fallbacks point at qwen3.8 q4/q3.
 - `src/lac/models.py` `PROFILE_MODELS` downloads the qwen3.8 GGUFs + `mmproj-F16.gguf`
-  (0.86 GiB) for the six profiles; `catalog/checksums.json` holds SHA256 integrity data.
+  (0.86 GiB) for the six profiles; `catalog/checksums.json` holds SHA256 integrity data for
+  the validated Q8 path (other quant files remain size-checked only until their own
+  downloads are recorded).
 - Presets set the Unsloth instruct-mode baseline (`temp 0.7 / top-p 0.8 / top-k 20 /
   presence-penalty 1.5 / repeat-penalty 1.0`), `reasoning = off` as the default start,
   `cache-type-k/v = q8_0`, and the embedded qwen3_5 chat template (no `chat-template-file`

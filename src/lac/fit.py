@@ -139,6 +139,7 @@ def model_geometry(meta):
         "head_dim": head_dim,
         "full_layers": full_layers,
         "context_length": _find(meta, ".context_length"),
+        "expert_count": _find(meta, ".expert_count"),
     }
 
 
@@ -299,6 +300,11 @@ def render_report(report):
             lines.append(
                 f"  decode estimate ~{entry['decode_toks_per_sec']:.0f} t/s "
                 f"(bandwidth ÷ weights)"
+            )
+        if geo.get("expert_count") and geo["expert_count"] > 1:
+            lines.append(
+                "  MoE model: decode estimate is conservative — only active experts are "
+                "read per token, so real decode is several times faster"
             )
         lines.append("  cache | KV/token | max ctx in budget | KV at preset ctx")
         for row in entry["kv_rows"]:

@@ -6,11 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 for tagged releases (public beta and beyond).
 
-## [Unreleased]
+## [0.4.0] — 2026-08-15
 
 ### Added
 
-- Qwen 3.8 27B as the main local model family: `qwen3.8-27b-q3/q4/q6/q8` slots, UD-quant
+- Qwen 3.8 27B as the main local model family: `qwen3.8-27b-q3/q4/q8` slots, UD-quant
   downloads (Q3 12.5 GiB / Q4 16.7 GiB / Q8 29.3 GiB) plus `mmproj-F16` vision, and default
   swaps across the 16/24/32/48/64/128gb-multi profiles (48 GB keeps Qwen 3.6 35B-A3B Q8 as
   an alternate). Presets use Unsloth's instruct-mode baseline and the embedded qwen3_5

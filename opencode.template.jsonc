@@ -79,12 +79,6 @@
             "output": 16384
           }
         },
-        "qwen3.8-27b-q6": {
-          "limit": {
-            "context": 262144,
-            "output": 16384
-          }
-        },
         "qwen3.8-27b-q8": {
           "limit": {
             "context": 262144,
