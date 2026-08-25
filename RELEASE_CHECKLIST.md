@@ -6,11 +6,24 @@ explicit approval.
 
 Status legend: `[x]` done · `[~]` local or earlier evidence exists, exact-head/external gate pending · `[ ]` blocked or not yet run.
 
-## Next release pre-tag gates (Qwen 3.8 oMLX recipes + Ornith 1.5)
+## v0.5.0 pre-tag gates (Qwen 3.8 oMLX recipes + Ornith 1.5)
 
-- [~] `./scripts/verify.sh` and `./scripts/integration-test.sh` pass on the merged change,
-  including the new oMLX assertions (24gb opt-out fallback; 32gb renders the oQ4e MLX slot)
-  and 58 preset model sections. Rerun `./scripts/verify-package-build.sh` before tag.
+Released 2026-08-25 by explicit operator decision ahead of local hardware benching: every
+throughput number in the docs and release notes is attributed to the recipe authors'
+published measurements, the new Ornith defaults ship as `standard` validation, and the
+hardware runs below are tracked as post-release evidence in the same way v0.3.0 tracked its
+non-blocking items.
+
+- [x] `./scripts/verify.sh`, `./scripts/integration-test.sh`, and
+  `./scripts/verify-package-build.sh` pass on the merged change, including the three oMLX
+  assertions (24gb opt-out fallback; 32gb renders the oQ4e MLX slot; 16gb unmapped-default
+  fallback) and 58 preset model sections.
+- [x] Self-review completed (8-angle, 10 findings, 9 fixed pre-merge — oMLX settings
+  hygiene, staged-weights gating, probe dedup); the one deferred finding is the Ornith
+  checksum item below.
+
+### v0.5.0 post-release evidence (not tag blockers, by operator decision)
+
 - [ ] Bench the oMLX recipes on the maintainer testbed (`AI_LOCAL_RUNTIME=omlx lac runtime
   start` + `lac bench`, ANE kernel installed for the 32–64 GB recipe): record decode and
   prefill tok/s vs the 14.3 tok/s llama.cpp Q8 baseline. Until then the recipe numbers in
