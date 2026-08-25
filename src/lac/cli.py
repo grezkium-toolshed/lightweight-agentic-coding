@@ -719,8 +719,8 @@ def build_parser():
     scenario_list_parser = scenario_sub.add_parser("list")
     scenario_list_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
     scenario_show_parser = scenario_sub.add_parser("show")
-    scenario_show_parser.add_argument("scenario_id")
     scenario_show_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+    scenario_show_parser.add_argument("scenario_id")
 
     context_parser = subparsers.add_parser(
         "context",
@@ -728,7 +728,6 @@ def build_parser():
     )
     context_parser.add_argument("--profile", help="Profile id (default: active profile)")
     context_parser.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
-    scenario_show_parser.add_argument("scenario_id")
 
     provider_parser = subparsers.add_parser("provider")
     provider_sub = provider_parser.add_subparsers(dest="provider_command", required=True)
