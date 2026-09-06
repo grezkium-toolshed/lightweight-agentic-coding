@@ -3,6 +3,7 @@ import copy
 import json
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -12,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from lac.hardware import (  # noqa: E402
-    _record, _run, detect_accelerators, detect_execution_environment, normalize_hardware,
+    _linux_drm_records, _record, _run, detect_accelerators, detect_execution_environment, normalize_hardware,
     parse_llama_devices, parse_nvidia_smi,
     parse_rocm_smi, parse_windows_adapters, parse_xpu_smi,
 )
@@ -121,6 +122,25 @@ class HardwareProfileTests(unittest.TestCase):
             records = detect_accelerators("wsl2")
         self.assertIn("nvidia-smi", {record["source"] for record in records})
         self.assertIn("windows-cim", {record["source"] for record in records})
+
+    def test_linux_apu_carve_out_beats_oversized_vulkan_heap(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for card, vendor, vram in (("card0", "0x1002", 1 << 30), ("card1", "0x1002", 24 << 30)):
+                device = Path(tmp) / card / "device"
+                device.mkdir(parents=True)
+                (device / "vendor").write_text(vendor + "\n", encoding="utf-8")
+                (device / "mem_info_vram_total").write_text(f"{vram}\n", encoding="utf-8")
+            apu, discrete = sorted(_linux_drm_records(tmp), key=lambda item: item["budget_gb"] or 0)
+        self.assertEqual((apu["kind"], apu["budget_gb"], apu["confidence"]), ("shared", None, "high"))
+        self.assertEqual((discrete["kind"], discrete["budget_gb"]), ("dedicated", 24))
+
+        vulkan = parse_llama_devices("Vulkan0: AMD Radeon Graphics (RADV RENOIR) (15360 MiB, 14000 MiB free)")
+        laptop = normalize_hardware(16, "linux", "x86_64", vulkan + [apu])
+        self.assertEqual(laptop["probe_source"], "linux-drm")
+        self.assertEqual((laptop["memory_kind"], laptop["effective_budget_gb"], laptop["confidence"]), ("shared", 4, "low"))
+        self.assertEqual(self.profile_for(laptop), "4gb")
+        # The APU record must not eclipse a real dedicated card in the same box.
+        self.assertEqual(normalize_hardware(64, "linux", "x86_64", [apu, discrete] + vulkan)["effective_budget_gb"], 24)
 
     def test_48gb_gate_and_boundaries(self):
         hardware = normalize_hardware(48, "darwin", "arm64", [])

@@ -67,6 +67,9 @@ def _vendor(name):
     return "unknown"
 
 
+_CONFIDENCE_RANK = {"low": 0, "medium": 1, "high": 2}
+
+
 def _memory_kind(name, vendor=None):
     lowered = name.lower()
     vendor = vendor or _vendor(name)
@@ -168,15 +171,21 @@ def parse_windows_adapters(text):
     return records
 
 
-def _linux_drm_records():
+def _linux_drm_records(drm_root="/sys/class/drm"):
     records = []
-    for path in Path("/sys/class/drm").glob("card[0-9]*/device/mem_info_vram_total"):
+    for path in Path(drm_root).glob("card[0-9]*/device/mem_info_vram_total"):
         try:
             budget = int(path.read_text(encoding="utf-8").strip()) / (1024 ** 3)
             name = (path.parent / "vendor").read_text(encoding="utf-8").strip()
         except (OSError, ValueError):
             continue
         vendor = {"0x1002": "AMD", "0x8086": "Intel"}.get(name.lower(), name)
+        if budget < 4:
+            # ponytail: sysfs has no APU flag; a sub-4 GB vram_total is the BIOS UMA carve-out of an
+            # iGPU, whose real limit (carve-out + GTT) is unmeasured. Report it as shared/unmeasured so
+            # the conservative 4gb path applies instead of the carve-out or an oversized Vulkan heap.
+            records.append(_record(f"{vendor} DRM iGPU", None, "linux-drm", "shared", "high"))
+            continue
         records.append(_record(f"{vendor} DRM GPU", budget, "linux-drm", confidence="high"))
     return records
 
@@ -203,10 +212,13 @@ def normalize_hardware(ram_gb, os_name, arch, accelerators, execution_environmen
             "Apple Silicon", ram_gb, "system-memory", "unified", "high" if ram_gb is not None else "low",
         )
     else:
-        measured = [item for item in accelerators if (item.get("budget_gb") or 0) > 0]
-        selected = max(measured, key=lambda item: item["budget_gb"]) if measured else None
-        if selected is None and accelerators:
-            selected = accelerators[0]
+        # Highest-confidence probe wins, then the largest budget: a high-confidence shared iGPU
+        # record must beat the same iGPU's oversized medium-confidence Vulkan heap.
+        selected = max(
+            accelerators,
+            key=lambda item: (_CONFIDENCE_RANK.get(item["confidence"], 0), item.get("budget_gb") or 0),
+            default=None,
+        )
         if selected is None and execution_environment == "wsl2":
             selected = _record(
                 "Unmeasured WSL accelerator", None, "wsl-conservative", "shared", "low",
