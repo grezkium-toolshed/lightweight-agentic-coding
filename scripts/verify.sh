@@ -93,10 +93,9 @@ PY
 step "Provider catalog"
 ./scripts/verify-provider-catalog.sh || fail "provider catalog"
 
-step "Hardware/profile contracts"
-python3 -m unittest discover -s tests -p 'test_*.py' || fail "hardware/profile contracts"
-
 step "Package data staging + completeness"
+# Stage before the unittest step: tests run lac outside the checkout, where it falls back
+# to the bundled src/lac/data/ (absent on a fresh checkout or worktree).
 python3 scripts/stage_data.py
 REQUIRED=(
   "THIRD_PARTY_NOTICES.md"
@@ -111,6 +110,9 @@ REQUIRED=(
 for rel in "${REQUIRED[@]}"; do
   [ -e "src/lac/data/$rel" ] || fail "missing staged data: $rel"
 done
+
+step "Hardware/profile contracts"
+python3 -m unittest discover -s tests -p 'test_*.py' || fail "hardware/profile contracts"
 
 step "Licensing guard (no un-shippable third-party skills bundled)"
 # These are removed as vendored/third-party (open-design, Anthropic, vercel-labs). They
