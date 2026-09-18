@@ -1,17 +1,21 @@
 import configparser
 import copy
+import io
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from lac.bench import bench  # noqa: E402
 from lac.hardware import (  # noqa: E402
     _linux_drm_records, _record, _run, detect_accelerators, detect_execution_environment, normalize_hardware,
     parse_llama_devices, parse_nvidia_smi,
@@ -19,6 +23,7 @@ from lac.hardware import (  # noqa: E402
 )
 from lac.models import PROFILE_MODELS  # noqa: E402
 from lac.profiles import recommend_profile  # noqa: E402
+from lac.runtime import LOCAL_MLX_MODEL_IDS  # noqa: E402
 from lac.lib.jsonc import load_jsonc  # noqa: E402
 
 
@@ -171,6 +176,32 @@ class HardwareProfileTests(unittest.TestCase):
             for selector in (profile["default_model"], profile["small_model"]):
                 if selector.startswith("local-cluster/"):
                     self.assertIn(selector.split("/", 1)[1], parser.sections(), profile_id)
+
+    def test_omlx_bench_defaults_to_profile_slots(self):
+        # oMLX lists every <models>/mlx/ directory; each benched id gets loaded.
+        slot_dir = LOCAL_MLX_MODEL_IDS["qwen3.8-27b-q8"]
+        served = [
+            "Qwen3.8-27B-retired-quant", slot_dir, "Qwen2.5-0.5B-Instruct-4bit",
+            "mlx-community--Qwen2.5-0.5B-Instruct-4bit", LOCAL_MLX_MODEL_IDS["gemma-4-31b-q8"],
+        ]
+        requested = []
+
+        def fake_request(url, method="GET", payload=None, timeout=5, headers=None):
+            if url.endswith("/v1/models"):
+                return {"data": [{"id": model} for model in served]}, ""
+            requested.append(payload["model"])
+            return {"usage": {"completion_tokens": 8}}, ""
+
+        ctx = SimpleNamespace(root=ROOT, active_profile=lambda: self.profiles["64gb"])
+        with (
+            patch("lac.bench.selected_local_runtime", return_value="omlx"),
+            patch("lac.bench.local_runtime_base_url", return_value="http://127.0.0.1:8080"),
+            patch("lac.bench.request_json", side_effect=fake_request),
+            redirect_stdout(io.StringIO()),
+        ):
+            report = bench(ctx)
+        self.assertTrue(report["ok"], report)
+        self.assertEqual(requested, [slot_dir])
 
 
 if __name__ == "__main__":

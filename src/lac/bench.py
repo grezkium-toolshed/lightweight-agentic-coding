@@ -4,9 +4,12 @@ Measures tokens/second, time-to-first-token, and peak memory per model.
 Supports slot-specific runs and MTP draft-n sweeps.
 """
 
+import configparser
 import time
 
-from lac.runtime import health_path, request_json, local_runtime_base_url, selected_local_runtime
+from lac.runtime import (
+    LOCAL_MLX_MODEL_IDS, health_path, request_json, local_runtime_base_url, selected_local_runtime,
+)
 
 
 BENCH_PROMPT = "Write a short poem about artificial intelligence. Keep it under 100 words."
@@ -24,6 +27,13 @@ def _models(base_url):
         if mid:
             models.append(mid)
     return models
+
+
+def _profile_omlx_ids(ctx, profile):
+    """oMLX ids of the profile's preset slots (the set OpenCode is given), in preset order."""
+    parser = configparser.ConfigParser(interpolation=None, strict=False)
+    parser.read_string("[global]\n" + (ctx.root / profile["preset"]).read_text(encoding="utf-8"))
+    return list(dict.fromkeys(LOCAL_MLX_MODEL_IDS[s] for s in parser.sections() if s in LOCAL_MLX_MODEL_IDS))
 
 
 def _resolve_model_id(model_arg, available_models):
@@ -110,6 +120,18 @@ def bench(ctx, model=None, draft_n=None, prompt=None, timeout=120, json_output=F
         if not resolved:
             return {"ok": False, "error": f"Model '{model}' not found. Available: {', '.join(available)}"}
         models_to_bench = [resolved]
+    elif runtime == "omlx":
+        # oMLX serves every directory under <models>/mlx/ and keeps each
+        # requested model resident, so sweeping them all benches (and loads)
+        # retired quants and draft models alongside the profile's slots.
+        wanted = _profile_omlx_ids(ctx, profile)
+        models_to_bench = [m for m in wanted if m in available]
+        if not models_to_bench:
+            return {
+                "ok": False,
+                "error": f"oMLX serves none of the slots for profile '{profile['id']}' ({', '.join(wanted) or 'no MLX mapping'}). "
+                         f"Available: {', '.join(available)}. Pass --model to bench one of them.",
+            }
     else:
         models_to_bench = list(available)
 

@@ -21,6 +21,10 @@ lac bench --model ornith1.5-35b-q8 --prompt "Explain quantum computing in 3 sent
 lac bench --json
 ```
 
+On oMLX, the default run covers only the MLX models mapped from the active preset's slots. oMLX
+serves every directory under `<models>/mlx/` and keeps each requested model loaded, so other
+models (retired quants, the SpecPrefill draft) are skipped unless you name one with `--model`.
+
 ## Metrics
 
 | Metric | Description |
